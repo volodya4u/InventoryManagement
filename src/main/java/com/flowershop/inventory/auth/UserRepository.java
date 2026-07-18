@@ -37,4 +37,12 @@ public class UserRepository {
                 username,
                 passwordHash);
     }
+
+    public boolean updatePassword(long userId, String passwordHash) {
+        return jdbcTemplate.update(
+                        "UPDATE app_user SET password_hash = ? WHERE id = ? AND enabled = 1",
+                        passwordHash,
+                        userId)
+                == 1;
+    }
 }

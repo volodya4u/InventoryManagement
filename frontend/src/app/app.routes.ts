@@ -5,6 +5,7 @@ import { ShellComponent } from './layout/shell.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { RawMaterialsComponent } from './raw-materials/raw-materials.component';
 import { ProductsComponent } from './products/products.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -16,6 +17,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'raw-materials', component: RawMaterialsComponent },
       { path: 'products', component: ProductsComponent },
+      { path: 'change-password', component: ChangePasswordComponent },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
     ]
   },

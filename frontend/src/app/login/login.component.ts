@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
 import { AuthService } from '../core/auth.service';
@@ -14,6 +14,7 @@ import { AuthService } from '../core/auth.service';
 export class LoginComponent {
   readonly submitting = signal(false);
   readonly error = signal('');
+  readonly notice = signal('');
   readonly showPassword = signal(false);
 
   readonly form = new FormGroup({
@@ -29,8 +30,13 @@ export class LoginComponent {
 
   constructor(
     private readonly auth: AuthService,
-    private readonly router: Router
-  ) {}
+    private readonly router: Router,
+    route: ActivatedRoute
+  ) {
+    if (route.snapshot.queryParamMap.get('passwordChanged') === 'true') {
+      this.notice.set('Password changed successfully. Sign in with your new password.');
+    }
+  }
 
   submit(): void {
     if (this.form.invalid || this.submitting()) {
@@ -48,4 +54,3 @@ export class LoginComponent {
       });
   }
 }
-

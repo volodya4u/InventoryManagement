@@ -29,5 +29,18 @@ export class AuthService {
       tap(() => this.user.set(null))
     );
   }
-}
 
+  changePassword(
+    currentPassword: string,
+    newPassword: string,
+    newPasswordConfirmation: string
+  ): Observable<void> {
+    return this.http.post<void>('/api/auth/change-password', {
+      currentPassword,
+      newPassword,
+      newPasswordConfirmation
+    }).pipe(
+      tap(() => this.user.set(null))
+    );
+  }
+}
