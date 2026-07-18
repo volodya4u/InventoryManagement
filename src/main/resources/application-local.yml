@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./flower-shop-local.db
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 1
+      connection-init-sql: PRAGMA foreign_keys = ON
+
+server:
+  port: 8081
+
+app:
+  bootstrap:
+    admin-username: ${APP_ADMIN_INITIAL_USERNAME:admin}
+    admin-password: ${APP_ADMIN_INITIAL_PASSWORD:}

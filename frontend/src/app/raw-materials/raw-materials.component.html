@@ -1,0 +1,124 @@
+<section class="page-heading">
+  <div>
+    <h1>Raw Materials</h1>
+    <p>Flowers, greenery, decorative materials, and packaging.</p>
+  </div>
+  <button type="button" class="btn btn-success" (click)="openCreate()">+ Add Raw Material</button>
+</section>
+
+@if (error()) {
+  <div class="alert alert-danger" role="alert">{{ error() }}</div>
+}
+
+<section class="surface-card overflow-hidden">
+  @if (loading()) {
+    <div class="empty-state">Loading raw materials…</div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">
+      <strong>No raw materials yet</strong>
+      <p class="mb-3">Add roses or decorative greenery, for example.</p>
+      <button type="button" class="btn btn-outline-success btn-sm" (click)="openCreate()">Create First Record</button>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Unit</th>
+            <th class="text-end">Stock</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>
+                @if (item.hasImage) {
+                  <img class="item-image" [src]="imageUrl(item)" [alt]="item.name" loading="lazy" />
+                } @else {
+                  <span class="item-image-placeholder" aria-label="No image">{{ item.name.charAt(0) }}</span>
+                }
+              </td>
+              <td>
+                <strong>{{ item.name }}</strong>
+                @if (item.description) {
+                  <div class="description">{{ item.description }}</div>
+                }
+              </td>
+              <td>{{ unitLabel(item.unit) }}</td>
+              <td class="text-end fw-semibold">{{ item.quantity }}</td>
+              <td class="text-end text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-secondary me-2" (click)="openEdit(item)">Edit</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (dialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeDialog()">
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="raw-material-dialog" (click)="$event.stopPropagation()">
+      <header class="dialog-header">
+        <h2 id="raw-material-dialog">{{ editing() ? 'Edit Raw Material' : 'New Raw Material' }}</h2>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeDialog()"></button>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="dialog-body">
+          <div class="mb-3">
+            <label class="form-label" for="raw-name">Name *</label>
+            <input id="raw-name" class="form-control" type="text" formControlName="name" maxlength="120" />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <div class="invalid-feedback d-block">Enter a name of up to 120 characters.</div>
+            }
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label" for="raw-unit">Unit of Measurement *</label>
+              <select id="raw-unit" class="form-select" formControlName="unit">
+                @for (unit of units; track unit.value) {
+                  <option [value]="unit.value">{{ unit.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="raw-quantity">Initial Stock *</label>
+              <input id="raw-quantity" class="form-control" type="number" min="0" step="0.01" formControlName="quantity" />
+              @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+                <div class="invalid-feedback d-block">Stock cannot be negative.</div>
+              }
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="raw-description">Description</label>
+            <textarea id="raw-description" class="form-control" rows="3" formControlName="description" maxlength="1000"></textarea>
+          </div>
+
+          <div>
+            <label class="form-label" for="raw-image">Image</label>
+            <input id="raw-image" class="form-control" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" (change)="selectFile($event)" />
+            <div class="file-hint mt-1">JPG, JPEG, or PNG · up to 2 MB@if (editing()?.hasImage) { · the current image will be kept unless you select a new file }</div>
+            @if (fileError()) {
+              <div class="invalid-feedback d-block">{{ fileError() }}</div>
+            }
+          </div>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">Cancel</button>
+          <button type="submit" class="btn btn-success" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : 'Save' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}

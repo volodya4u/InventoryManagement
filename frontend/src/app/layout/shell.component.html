@@ -1,0 +1,41 @@
+<div class="app-shell">
+  <header class="app-header">
+    <div class="app-header__inner">
+      <a class="brand" routerLink="/dashboard" (click)="closeMenu()">
+        <span class="brand__mark" aria-hidden="true">P</span>
+        <span>
+          <strong>Flower Shop</strong>
+          <small>Inventory &amp; Production</small>
+        </span>
+      </a>
+
+      <button
+        type="button"
+        class="menu-toggle"
+        (click)="menuOpen.set(!menuOpen())"
+        [attr.aria-expanded]="menuOpen()"
+        aria-label="Open menu"
+      >Menu</button>
+
+      <nav [class.open]="menuOpen()" aria-label="Main navigation">
+        <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Overview</a>
+        <a routerLink="/raw-materials" routerLinkActive="active" (click)="closeMenu()">Raw Materials</a>
+        <a routerLink="/products" routerLinkActive="active" (click)="closeMenu()">Products</a>
+      </nav>
+
+      <div class="account">
+        <div class="account__text">
+          <strong>{{ auth.user()?.username }}</strong>
+          <span>Administrator</span>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-light" (click)="logout()" [disabled]="loggingOut()">
+          {{ loggingOut() ? 'Signing out…' : 'Sign Out' }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <router-outlet />
+  </main>
+</div>

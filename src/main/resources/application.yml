@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: flower-shop-inventory
+  profiles:
+    default: local
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        http-only: true
+        same-site: strict
+  error:
+    include-message: never
+    include-stacktrace: never
+
+app:
+  image:
+    max-size-bytes: 2097152

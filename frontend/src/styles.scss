@@ -1,0 +1,177 @@
+@use 'bootstrap/scss/bootstrap';
+
+:root {
+  --pf-ink: #25332d;
+  --pf-muted: #66746e;
+  --pf-forest: #315c49;
+  --pf-forest-dark: #244437;
+  --pf-sage: #a9bcae;
+  --pf-cream: #f7f4ed;
+  --pf-paper: #fffdf9;
+  --pf-rose: #a65c63;
+  --pf-rose-soft: #ead8d8;
+  --pf-border: #dfe5e1;
+  --pf-shadow: 0 18px 45px rgba(31, 54, 44, 0.1);
+  color-scheme: light;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--pf-cream);
+  color: var(--pf-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.btn-success {
+  --bs-btn-bg: var(--pf-forest);
+  --bs-btn-border-color: var(--pf-forest);
+  --bs-btn-hover-bg: var(--pf-forest-dark);
+  --bs-btn-hover-border-color: var(--pf-forest-dark);
+  --bs-btn-active-bg: var(--pf-forest-dark);
+  --bs-btn-active-border-color: var(--pf-forest-dark);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--pf-sage);
+  box-shadow: 0 0 0 0.2rem rgba(74, 115, 93, 0.15);
+}
+
+.page-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-heading h1 {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.65rem, 3vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.page-heading p {
+  margin: 0;
+  color: var(--pf-muted);
+}
+
+.surface-card {
+  background: var(--pf-paper);
+  border: 1px solid var(--pf-border);
+  border-radius: 1rem;
+  box-shadow: 0 8px 28px rgba(31, 54, 44, 0.06);
+}
+
+.empty-state {
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+  color: var(--pf-muted);
+}
+
+.item-image,
+.item-image-placeholder {
+  width: 54px;
+  height: 54px;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  border: 1px solid var(--pf-border);
+}
+
+.item-image-placeholder {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #eef2ee, #e3e9e5);
+  color: #708078;
+  font-weight: 700;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 1050;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(20, 35, 29, 0.56);
+  backdrop-filter: blur(4px);
+}
+
+.dialog-card {
+  width: min(640px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  background: var(--pf-paper);
+  border-radius: 1rem;
+  box-shadow: 0 25px 80px rgba(15, 29, 23, 0.28);
+}
+
+.dialog-header,
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.35rem;
+  border-bottom: 1px solid var(--pf-border);
+}
+
+.dialog-footer {
+  justify-content: flex-end;
+  border-top: 1px solid var(--pf-border);
+  border-bottom: 0;
+}
+
+.dialog-body {
+  padding: 1.35rem;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.file-hint {
+  color: var(--pf-muted);
+  font-size: 0.82rem;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.85rem 1rem;
+  vertical-align: middle;
+}
+
+.table thead th {
+  color: var(--pf-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  .page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-heading .btn {
+    width: 100%;
+  }
+}
+

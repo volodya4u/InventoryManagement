@@ -1,0 +1,30 @@
+.description {
+  max-width: 360px;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  color: var(--pf-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sku {
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.35rem;
+  color: #43564d;
+  background: #edf1ee;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.empty-state strong,
+.empty-state p {
+  display: block;
+}
+
+.empty-state strong {
+  margin-bottom: 0.35rem;
+  color: var(--pf-ink);
+  font-size: 1.05rem;
+}
+

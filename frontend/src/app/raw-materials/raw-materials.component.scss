@@ -1,0 +1,21 @@
+.description {
+  max-width: 430px;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  color: var(--pf-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-state strong,
+.empty-state p {
+  display: block;
+}
+
+.empty-state strong {
+  margin-bottom: 0.35rem;
+  color: var(--pf-ink);
+  font-size: 1.05rem;
+}
+

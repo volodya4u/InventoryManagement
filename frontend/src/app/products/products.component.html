@@ -1,0 +1,134 @@
+<section class="page-heading">
+  <div>
+    <h1>Finished Products</h1>
+    <p>Floral arrangements, bouquets, and decorative items.</p>
+  </div>
+  <button type="button" class="btn btn-success" (click)="openCreate()">+ Add Product</button>
+</section>
+
+@if (error()) {
+  <div class="alert alert-danger" role="alert">{{ error() }}</div>
+}
+
+<section class="surface-card overflow-hidden">
+  @if (loading()) {
+    <div class="empty-state">Loading products…</div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">
+      <strong>No finished products yet</strong>
+      <p class="mb-3">Add your first floral arrangement.</p>
+      <button type="button" class="btn btn-outline-success btn-sm" (click)="openCreate()">Create First Product</button>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Product</th>
+            <th>SKU</th>
+            <th class="text-end">Stock</th>
+            <th class="text-end">Price, ₴</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>
+                @if (item.hasImage) {
+                  <img class="item-image" [src]="imageUrl(item)" [alt]="item.name" loading="lazy" />
+                } @else {
+                  <span class="item-image-placeholder" aria-label="No image">{{ item.name.charAt(0) }}</span>
+                }
+              </td>
+              <td>
+                <strong>{{ item.name }}</strong>
+                @if (item.description) {
+                  <div class="description">{{ item.description }}</div>
+                }
+              </td>
+              <td><span class="sku">{{ item.sku }}</span></td>
+              <td class="text-end fw-semibold">{{ item.quantity }}</td>
+              <td class="text-end fw-semibold">{{ item.price }}</td>
+              <td class="text-end text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-secondary me-2" (click)="openEdit(item)">Edit</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (dialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeDialog()">
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="product-dialog" (click)="$event.stopPropagation()">
+      <header class="dialog-header">
+        <h2 id="product-dialog">{{ editing() ? 'Edit Product' : 'New Product' }}</h2>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeDialog()"></button>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="dialog-body">
+          <div class="row g-3 mb-3">
+            <div class="col-sm-5">
+              <label class="form-label" for="product-sku">SKU *</label>
+              <input id="product-sku" class="form-control" type="text" formControlName="sku" maxlength="60" placeholder="ROSE-BOX-001" />
+              @if (form.controls.sku.touched && form.controls.sku.invalid) {
+                <div class="invalid-feedback d-block">Enter a unique SKU.</div>
+              }
+            </div>
+            <div class="col-sm-7">
+              <label class="form-label" for="product-name">Name *</label>
+              <input id="product-name" class="form-control" type="text" formControlName="name" maxlength="120" />
+              @if (form.controls.name.touched && form.controls.name.invalid) {
+                <div class="invalid-feedback d-block">Enter a name of up to 120 characters.</div>
+              }
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label" for="product-quantity">Initial Stock *</label>
+              <input id="product-quantity" class="form-control" type="number" min="0" step="1" formControlName="quantity" />
+              @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+                <div class="invalid-feedback d-block">Stock cannot be negative.</div>
+              }
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="product-price">Price, ₴ *</label>
+              <input id="product-price" class="form-control" type="number" min="0" step="0.01" formControlName="price" />
+              @if (form.controls.price.touched && form.controls.price.invalid) {
+                <div class="invalid-feedback d-block">Price cannot be negative.</div>
+              }
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="product-description">Description</label>
+            <textarea id="product-description" class="form-control" rows="3" formControlName="description" maxlength="1000"></textarea>
+          </div>
+
+          <div>
+            <label class="form-label" for="product-image">Image</label>
+            <input id="product-image" class="form-control" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" (change)="selectFile($event)" />
+            <div class="file-hint mt-1">JPG, JPEG, or PNG · up to 2 MB@if (editing()?.hasImage) { · the current image will be kept unless you select a new file }</div>
+            @if (fileError()) {
+              <div class="invalid-feedback d-block">{{ fileError() }}</div>
+            }
+          </div>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">Cancel</button>
+          <button type="submit" class="btn btn-success" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : 'Save' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}

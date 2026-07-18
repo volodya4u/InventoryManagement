@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:file:inventory-test?mode=memory&cache=shared
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 1
+      connection-init-sql: PRAGMA foreign_keys = ON
+  sql:
+    init:
+      mode: always
+

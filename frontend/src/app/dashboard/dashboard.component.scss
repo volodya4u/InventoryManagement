@@ -1,0 +1,122 @@
+.eyebrow {
+  margin: 0 0 0.4rem;
+  color: var(--pf-forest);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.local-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #d2ddd6;
+  border-radius: 999px;
+  color: var(--pf-forest);
+  background: #edf3ef;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stats-grid.loading {
+  opacity: 0.62;
+}
+
+.stat-card {
+  min-height: 178px;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(31, 54, 44, 0.06);
+}
+
+.stat-card--sage {
+  background: linear-gradient(145deg, #edf4ef, #dce8df);
+}
+
+.stat-card--rose {
+  background: linear-gradient(145deg, #f7eeee, #ead9da);
+}
+
+.stat-card--cream {
+  background: linear-gradient(145deg, #fffdf8, #f3eadb);
+}
+
+.stat-card--quiet {
+  background: linear-gradient(145deg, #f7f8f6, #e7ebe8);
+}
+
+.stat-card__label {
+  color: #52635b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.stat-card strong {
+  margin: 0.55rem 0 0.75rem;
+  font-size: 2.45rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.stat-card a,
+.stat-card__note {
+  margin-top: auto;
+  color: var(--pf-forest);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.getting-started {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.getting-started h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1.3rem;
+}
+
+.getting-started p:not(.eyebrow) {
+  margin: 0;
+  color: var(--pf-muted);
+}
+
+.quick-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.65rem;
+}
+
+@media (max-width: 980px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .getting-started,
+  .quick-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
