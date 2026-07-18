@@ -27,7 +27,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     ProblemDetail imageTooLarge() {
         return problem(
-                HttpStatus.PAYLOAD_TOO_LARGE,
+                HttpStatus.CONTENT_TOO_LARGE,
                 "File too large",
                 "The maximum image size is 2 MB");
     }
