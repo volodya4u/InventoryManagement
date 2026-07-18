@@ -27,8 +27,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private static final int MIN_PASSWORD_LENGTH = 12;
-    private static final int MAX_PASSWORD_LENGTH = 128;
+    private static final int MIN_PASSWORD_LENGTH = 10;
+    private static final int MAX_PASSWORD_LENGTH = 64;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

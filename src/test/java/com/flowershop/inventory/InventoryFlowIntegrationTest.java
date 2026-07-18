@@ -129,6 +129,37 @@ class InventoryFlowIntegrationTest {
                         .content("""
                                 {
                                   "currentPassword":"%s",
+                                  "newPassword":"123456789",
+                                  "newPasswordConfirmation":"123456789"
+                                }
+                                """.formatted(testPassword)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("New password must be between 10 and 64 characters"));
+
+        var tooLongPassword = "x".repeat(65);
+        mockMvc.perform(post("/api/auth/change-password")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword":"%s",
+                                  "newPassword":"%s",
+                                  "newPasswordConfirmation":"%s"
+                                }
+                                """.formatted(testPassword, tooLongPassword, tooLongPassword)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("New password must be between 10 and 64 characters"));
+
+        mockMvc.perform(post("/api/auth/change-password")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword":"%s",
                                   "newPassword":"%s",
                                   "newPasswordConfirmation":"%s"
                                 }
