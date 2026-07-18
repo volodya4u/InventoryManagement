@@ -27,6 +27,9 @@ function matchingPasswords(control: AbstractControl): ValidationErrors | null {
 export class ChangePasswordComponent {
   readonly submitting = signal(false);
   readonly error = signal('');
+  readonly showCurrentPassword = signal(false);
+  readonly showNewPassword = signal(false);
+  readonly showNewPasswordConfirmation = signal(false);
 
   readonly form = new FormGroup({
     currentPassword: new FormControl('', {
