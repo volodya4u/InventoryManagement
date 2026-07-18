@@ -55,8 +55,15 @@ class InventoryFlowIntegrationTest {
         mockMvc.perform(get("/api/raw-materials"))
                 .andExpect(status().isUnauthorized());
 
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf"))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
         var login = mockMvc.perform(post("/api/auth/login")
-                        .with(csrf())
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"username":"admin","password":"%s"}
