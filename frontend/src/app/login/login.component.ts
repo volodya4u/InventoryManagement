@@ -1,9 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
 import { AuthService } from '../core/auth.service';
+import { TimedPasswordVisibility } from '../core/timed-password-visibility';
 
 @Component({
   selector: 'app-login',
@@ -11,11 +12,13 @@ import { AuthService } from '../core/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
+  private readonly passwordVisibility = new TimedPasswordVisibility();
+
   readonly submitting = signal(false);
   readonly error = signal('');
   readonly notice = signal('');
-  readonly showPassword = signal(false);
+  readonly showPassword = this.passwordVisibility.visible;
 
   readonly form = new FormGroup({
     username: new FormControl('admin', {
@@ -36,6 +39,14 @@ export class LoginComponent {
     if (route.snapshot.queryParamMap.get('passwordChanged') === 'true') {
       this.notice.set('Password changed successfully. Sign in with your new password.');
     }
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisibility.toggle();
+  }
+
+  ngOnDestroy(): void {
+    this.passwordVisibility.destroy();
   }
 
   submit(): void {

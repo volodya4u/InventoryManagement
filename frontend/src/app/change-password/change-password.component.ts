@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
 import { AuthService } from '../core/auth.service';
+import { TimedPasswordVisibility } from '../core/timed-password-visibility';
 
 function matchingPasswords(control: AbstractControl): ValidationErrors | null {
   const newPassword = control.get('newPassword')?.value;
@@ -24,12 +25,16 @@ function matchingPasswords(control: AbstractControl): ValidationErrors | null {
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss'
 })
-export class ChangePasswordComponent {
+export class ChangePasswordComponent implements OnDestroy {
+  private readonly currentPasswordVisibility = new TimedPasswordVisibility();
+  private readonly newPasswordVisibility = new TimedPasswordVisibility();
+  private readonly newPasswordConfirmationVisibility = new TimedPasswordVisibility();
+
   readonly submitting = signal(false);
   readonly error = signal('');
-  readonly showCurrentPassword = signal(false);
-  readonly showNewPassword = signal(false);
-  readonly showNewPasswordConfirmation = signal(false);
+  readonly showCurrentPassword = this.currentPasswordVisibility.visible;
+  readonly showNewPassword = this.newPasswordVisibility.visible;
+  readonly showNewPasswordConfirmation = this.newPasswordConfirmationVisibility.visible;
 
   readonly form = new FormGroup({
     currentPassword: new FormControl('', {
@@ -50,6 +55,24 @@ export class ChangePasswordComponent {
     private readonly auth: AuthService,
     private readonly router: Router
   ) {}
+
+  toggleCurrentPasswordVisibility(): void {
+    this.currentPasswordVisibility.toggle();
+  }
+
+  toggleNewPasswordVisibility(): void {
+    this.newPasswordVisibility.toggle();
+  }
+
+  toggleNewPasswordConfirmationVisibility(): void {
+    this.newPasswordConfirmationVisibility.toggle();
+  }
+
+  ngOnDestroy(): void {
+    this.currentPasswordVisibility.destroy();
+    this.newPasswordVisibility.destroy();
+    this.newPasswordConfirmationVisibility.destroy();
+  }
 
   submit(): void {
     if (this.form.invalid || this.submitting()) {

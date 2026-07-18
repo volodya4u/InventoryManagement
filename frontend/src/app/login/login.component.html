@@ -54,8 +54,9 @@
               <button
                 type="button"
                 class="password-toggle"
-                (click)="showPassword.set(!showPassword())"
+                (click)="togglePasswordVisibility()"
                 [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                [attr.aria-pressed]="showPassword()"
               >
                 {{ showPassword() ? 'Hide' : 'Show' }}
               </button>
