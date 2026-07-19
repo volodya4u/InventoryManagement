@@ -8,6 +8,8 @@ public record RawMaterialDto(
         String description,
         String unit,
         BigDecimal quantity,
+        BigDecimal averageUnitCost,
+        BigDecimal stockValue,
         boolean hasImage,
         String createdAt,
         String updatedAt) {

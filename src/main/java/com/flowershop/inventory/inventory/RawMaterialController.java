@@ -1,9 +1,12 @@
 package com.flowershop.inventory.inventory;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,8 +48,9 @@ public class RawMaterialController {
             @RequestParam(defaultValue = "") @Size(max = 1000) String description,
             @RequestParam @NotBlank String unit,
             @RequestParam @DecimalMin("0.0") BigDecimal quantity,
+            @RequestParam(required = false) @DecimalMin("0.0") BigDecimal initialUnitCost,
             @RequestParam(required = false) MultipartFile image) {
-        return service.create(name, description, unit, quantity, image);
+        return service.create(name, description, unit, quantity, initialUnitCost, image);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -54,9 +59,20 @@ public class RawMaterialController {
             @RequestParam @NotBlank @Size(max = 120) String name,
             @RequestParam(defaultValue = "") @Size(max = 1000) String description,
             @RequestParam @NotBlank String unit,
-            @RequestParam @DecimalMin("0.0") BigDecimal quantity,
             @RequestParam(required = false) MultipartFile image) {
-        return service.update(id, name, description, unit, quantity, image);
+        return service.update(id, name, description, unit, image);
+    }
+
+    @PostMapping("/{id}/receipts")
+    public RawMaterialDto receiveStock(
+            @PathVariable long id,
+            @Valid @RequestBody StockReceiptRequest request) {
+        return service.receiveStock(
+                id,
+                request.receivedQuantity(),
+                request.unitPurchaseCost(),
+                request.receiptDate(),
+                request.notes());
     }
 
     @GetMapping("/{id}/image")
@@ -72,5 +88,12 @@ public class RawMaterialController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable long id) {
         service.delete(id);
+    }
+
+    public record StockReceiptRequest(
+            @NotNull @DecimalMin(value = "0.0", inclusive = false) BigDecimal receivedQuantity,
+            @NotNull @DecimalMin("0.0") BigDecimal unitPurchaseCost,
+            @NotNull LocalDate receiptDate,
+            @Size(max = 1000) String notes) {
     }
 }

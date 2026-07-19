@@ -19,3 +19,38 @@
   font-size: 1.05rem;
 }
 
+.value-preview,
+.stock-summary {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  min-height: 74px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 0.5rem;
+  background: #f5f8f5;
+}
+
+.value-preview span,
+.stock-summary span,
+.stock-summary small,
+.dialog-subtitle {
+  color: var(--pf-muted);
+}
+
+.value-preview span,
+.stock-summary span,
+.stock-summary small {
+  font-size: 0.8rem;
+}
+
+.value-preview strong,
+.stock-summary strong {
+  color: var(--pf-forest-dark);
+  font-size: 1.05rem;
+}
+
+.dialog-subtitle {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+}

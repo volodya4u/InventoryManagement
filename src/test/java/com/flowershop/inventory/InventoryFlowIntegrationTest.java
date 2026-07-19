@@ -77,11 +77,14 @@ class InventoryFlowIntegrationTest {
                         .param("description", "Rose")
                         .param("unit", "STEM")
                         .param("quantity", "12")
+                        .param("initialUnitCost", "12.50")
                         .session(session)
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Rose"))
+                .andExpect(jsonPath("$.averageUnitCost").value(12.5))
+                .andExpect(jsonPath("$.stockValue").value(150.0))
                 .andExpect(jsonPath("$.hasImage").value(true));
 
         var imageResponse = mockMvc.perform(get("/api/raw-materials/1/image").session(session))
@@ -91,6 +94,29 @@ class InventoryFlowIntegrationTest {
 
         assertThat(imageResponse.getContentType()).isEqualTo("image/png");
         assertThat(imageResponse.getContentAsByteArray()).isEqualTo(png);
+
+        mockMvc.perform(post("/api/raw-materials/1/receipts")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "receivedQuantity": 8,
+                                  "unitPurchaseCost": 20,
+                                  "receiptDate": "2026-07-19",
+                                  "notes": "Second delivery"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(20))
+                .andExpect(jsonPath("$.averageUnitCost").value(15.5))
+                .andExpect(jsonPath("$.stockValue").value(310.0));
+
+        Integer movements = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM raw_material_stock_movement WHERE raw_material_id = 1",
+                Integer.class);
+        assertThat(movements).isEqualTo(2);
     }
 
     @Test

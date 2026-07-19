@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
+import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
 import { imageFileError } from '../core/image-file';
@@ -11,9 +12,17 @@ interface UnitOption {
   label: string;
 }
 
+function initialUnitCostValidator(control: AbstractControl): ValidationErrors | null {
+  const quantity = Number(control.get('quantity')?.value ?? 0);
+  const initialUnitCost = control.get('initialUnitCost')?.value;
+  return quantity > 0 && (initialUnitCost === null || initialUnitCost === '')
+    ? { initialUnitCostRequired: true }
+    : null;
+}
+
 @Component({
   selector: 'app-raw-materials',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CurrencyPipe],
   templateUrl: './raw-materials.component.html',
   styleUrl: './raw-materials.component.scss'
 })
@@ -26,6 +35,9 @@ export class RawMaterialsComponent implements OnInit {
   readonly editing = signal<RawMaterial | null>(null);
   readonly selectedFile = signal<File | null>(null);
   readonly fileError = signal('');
+  readonly receiptDialogOpen = signal(false);
+  readonly receiving = signal(false);
+  readonly receivingMaterial = signal<RawMaterial | null>(null);
 
   readonly units: UnitOption[] = [
     { value: 'STEM', label: 'Stem' },
@@ -41,7 +53,15 @@ export class RawMaterialsComponent implements OnInit {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
     unit: new FormControl('STEM', { nonNullable: true, validators: [Validators.required] }),
-    quantity: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] })
+    quantity: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+    initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)])
+  }, { validators: initialUnitCostValidator });
+
+  readonly receiptForm = new FormGroup({
+    receivedQuantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    unitPurchaseCost: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    receiptDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
   });
 
   constructor(private readonly http: HttpClient) {}
@@ -63,7 +83,7 @@ export class RawMaterialsComponent implements OnInit {
 
   openCreate(): void {
     this.editing.set(null);
-    this.form.reset({ name: '', description: '', unit: 'STEM', quantity: 0 });
+    this.form.reset({ name: '', description: '', unit: 'STEM', quantity: 0, initialUnitCost: null });
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');
@@ -76,7 +96,8 @@ export class RawMaterialsComponent implements OnInit {
       name: item.name,
       description: item.description,
       unit: item.unit,
-      quantity: item.quantity
+      quantity: item.quantity,
+      initialUnitCost: item.averageUnitCost
     });
     this.selectedFile.set(null);
     this.fileError.set('');
@@ -105,7 +126,12 @@ export class RawMaterialsComponent implements OnInit {
     data.append('name', value.name.trim());
     data.append('description', value.description.trim());
     data.append('unit', value.unit);
-    data.append('quantity', String(value.quantity));
+    if (!this.editing()) {
+      data.append('quantity', String(value.quantity));
+      if (value.initialUnitCost !== null) {
+        data.append('initialUnitCost', String(value.initialUnitCost));
+      }
+    }
     if (this.selectedFile()) data.append('image', this.selectedFile()!);
 
     this.saving.set(true);
@@ -133,11 +159,64 @@ export class RawMaterialsComponent implements OnInit {
     });
   }
 
+  openReceipt(item: RawMaterial): void {
+    this.receivingMaterial.set(item);
+    this.receiptForm.reset({
+      receivedQuantity: null,
+      unitPurchaseCost: null,
+      receiptDate: this.today(),
+      notes: ''
+    });
+    this.error.set('');
+    this.receiptDialogOpen.set(true);
+  }
+
+  closeReceiptDialog(): void {
+    if (!this.receiving()) this.receiptDialogOpen.set(false);
+  }
+
+  submitReceipt(): void {
+    const material = this.receivingMaterial();
+    if (!material || this.receiptForm.invalid || this.receiving()) {
+      this.receiptForm.markAllAsTouched();
+      return;
+    }
+
+    this.receiving.set(true);
+    this.error.set('');
+    this.http.post<RawMaterial>(`/api/raw-materials/${material.id}/receipts`, this.receiptForm.getRawValue())
+      .pipe(finalize(() => this.receiving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.items.update((items) => items.map((item) => item.id === updated.id ? updated : item));
+          this.receiptDialogOpen.set(false);
+        },
+        error: (error) => this.error.set(apiErrorMessage(error))
+      });
+  }
+
+  initialStockValue(): number {
+    const { quantity, initialUnitCost } = this.form.getRawValue();
+    return quantity * (initialUnitCost ?? 0);
+  }
+
+  receiptValue(): number {
+    const { receivedQuantity, unitPurchaseCost } = this.receiptForm.getRawValue();
+    return (receivedQuantity ?? 0) * (unitPurchaseCost ?? 0);
+  }
+
   imageUrl(item: RawMaterial): string {
     return `/api/raw-materials/${item.id}/image?v=${encodeURIComponent(item.updatedAt)}`;
   }
 
   unitLabel(value: string): string {
     return this.units.find((unit) => unit.value === value)?.label ?? value;
+  }
+
+  private today(): string {
+    const date = new Date();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
   }
 }

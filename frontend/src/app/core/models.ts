@@ -22,6 +22,8 @@ export interface RawMaterial {
   description: string;
   unit: string;
   quantity: number;
+  averageUnitCost: number;
+  stockValue: number;
   hasImage: boolean;
   createdAt: string;
   updatedAt: string;
@@ -38,4 +40,3 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
 }
-
