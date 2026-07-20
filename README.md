@@ -31,15 +31,14 @@ The selected unit defines what the raw-material quantity and unit cost represent
 
 | Unit | Meaning | Example |
 | --- | --- | --- |
-| **Stem** | One individual flower or greenery stem | 25 rose stems |
-| **Piece** | One separate item | 10 vases or decorative elements |
+| **Piece** | One individual flower or another separate item | 25 roses or 10 decorative elements |
 | **Bunch** | One prepared bunch of material | 4 bunches of eucalyptus |
 | **Gram** | Weight measured in grams | 150 g of moss or decorative filler |
 | **Kilogram** | Weight measured in kilograms | 2.5 kg of sand or decorative stones |
 | **Meter** | Length measured in meters | 12.5 m of ribbon or wrapping material |
 | **Package** | One unopened package | 3 packages of floral wire |
 
-Choose the smallest practical unit in which the material is consumed. For example, if roses are purchased in bunches but used one by one, select **Stem** and convert the delivery quantity into stems. If ribbon is purchased in rolls but consumed by length, select **Meter**.
+Choose the smallest practical unit in which the material is consumed. For example, if roses are purchased in bunches but used one by one, select **Piece** and convert the delivery quantity into individual flowers. If ribbon is purchased in rolls but consumed by length, select **Meter**.
 
 ### Weighted-Average Cost
 

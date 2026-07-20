@@ -40,7 +40,6 @@ export class RawMaterialsComponent implements OnInit {
   readonly receivingMaterial = signal<RawMaterial | null>(null);
 
   readonly units: UnitOption[] = [
-    { value: 'STEM', label: 'Stem' },
     { value: 'PIECE', label: 'Piece' },
     { value: 'BUNCH', label: 'Bunch' },
     { value: 'GRAM', label: 'Gram' },
@@ -52,7 +51,7 @@ export class RawMaterialsComponent implements OnInit {
   readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
-    unit: new FormControl('STEM', { nonNullable: true, validators: [Validators.required] }),
+    unit: new FormControl('PIECE', { nonNullable: true, validators: [Validators.required] }),
     quantity: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
     initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)])
   }, { validators: initialUnitCostValidator });
@@ -83,7 +82,7 @@ export class RawMaterialsComponent implements OnInit {
 
   openCreate(): void {
     this.editing.set(null);
-    this.form.reset({ name: '', description: '', unit: 'STEM', quantity: 0, initialUnitCost: null });
+    this.form.reset({ name: '', description: '', unit: 'PIECE', quantity: 0, initialUnitCost: null });
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');

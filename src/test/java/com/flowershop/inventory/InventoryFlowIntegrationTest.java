@@ -75,7 +75,7 @@ class InventoryFlowIntegrationTest {
                         .file(image)
                         .param("name", "Rose")
                         .param("description", "Rose")
-                        .param("unit", "STEM")
+                        .param("unit", "PIECE")
                         .param("quantity", "12")
                         .param("initialUnitCost", "12.50")
                         .session(session)

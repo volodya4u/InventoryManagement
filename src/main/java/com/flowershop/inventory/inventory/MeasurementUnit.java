@@ -3,7 +3,6 @@ package com.flowershop.inventory.inventory;
 import java.util.Locale;
 
 public enum MeasurementUnit {
-    STEM,
     PIECE,
     BUNCH,
     GRAM,
