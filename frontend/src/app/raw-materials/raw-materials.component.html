@@ -61,6 +61,13 @@
             </tr>
           }
         </tbody>
+        <tfoot>
+          <tr class="stock-value-total">
+            <td colspan="5" class="text-end">Total Raw Materials Stock Value</td>
+            <td class="text-end">{{ totalStockValue() | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   }

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
@@ -28,6 +28,9 @@ function initialUnitCostValidator(control: AbstractControl): ValidationErrors | 
 })
 export class RawMaterialsComponent implements OnInit {
   readonly items = signal<RawMaterial[]>([]);
+  readonly totalStockValue = computed(() =>
+    this.items().reduce((total, item) => total + item.stockValue, 0)
+  );
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly error = signal('');

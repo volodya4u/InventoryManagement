@@ -38,6 +38,13 @@
   color: var(--pf-muted);
 }
 
+.stock-value-total td {
+  border-top: 2px solid var(--pf-sage);
+  background: #f1f6f2;
+  color: var(--pf-forest-dark);
+  font-weight: 700;
+}
+
 .value-preview span,
 .stock-summary span,
 .stock-summary small {
