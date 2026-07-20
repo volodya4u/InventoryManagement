@@ -1,6 +1,7 @@
 target/
 frontend/node_modules/
 frontend/dist/
+/files/
 *.db
 *.db-shm
 *.db-wal
@@ -8,4 +9,3 @@ frontend/dist/
 .vscode/
 *.iml
 *.log
-
