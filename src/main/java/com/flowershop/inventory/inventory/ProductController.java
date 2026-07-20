@@ -1,9 +1,13 @@
 package com.flowershop.inventory.inventory;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,10 +49,12 @@ public class ProductController {
             @RequestParam @NotBlank @Size(max = 60) String sku,
             @RequestParam @NotBlank @Size(max = 120) String name,
             @RequestParam(defaultValue = "") @Size(max = 1000) String description,
-            @RequestParam @DecimalMin("0.0") BigDecimal quantity,
+            @RequestParam @DecimalMin("0.0") @Digits(integer = 12, fraction = 0) BigDecimal quantity,
             @RequestParam @DecimalMin("0.0") BigDecimal price,
+            @RequestParam(required = false) @DecimalMin("0.0") BigDecimal initialUnitCost,
+            @RequestPart("recipe") @Size(min = 1) List<@Valid ProductRecipeItemInput> recipe,
             @RequestParam(required = false) MultipartFile image) {
-        return service.create(sku, name, description, quantity, price, image);
+        return service.create(sku, name, description, quantity, price, initialUnitCost, recipe, image);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -55,10 +63,17 @@ public class ProductController {
             @RequestParam @NotBlank @Size(max = 60) String sku,
             @RequestParam @NotBlank @Size(max = 120) String name,
             @RequestParam(defaultValue = "") @Size(max = 1000) String description,
-            @RequestParam @DecimalMin("0.0") BigDecimal quantity,
             @RequestParam @DecimalMin("0.0") BigDecimal price,
+            @RequestPart("recipe") @Size(min = 1) List<@Valid ProductRecipeItemInput> recipe,
             @RequestParam(required = false) MultipartFile image) {
-        return service.update(id, sku, name, description, quantity, price, image);
+        return service.update(id, sku, name, description, price, recipe, image);
+    }
+
+    @PostMapping("/{id}/production")
+    public ProductDto produce(
+            @PathVariable long id,
+            @Valid @RequestBody ProductionRequest request) {
+        return service.produce(id, request.quantity(), request.productionDate(), request.notes());
     }
 
     @GetMapping("/{id}/image")
@@ -74,5 +89,12 @@ public class ProductController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable long id) {
         service.delete(id);
+    }
+
+    public record ProductionRequest(
+            @NotNull @DecimalMin(value = "0.0", inclusive = false)
+            @Digits(integer = 12, fraction = 0) BigDecimal quantity,
+            @NotNull LocalDate productionDate,
+            @Size(max = 1000) String notes) {
     }
 }

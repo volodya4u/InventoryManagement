@@ -53,6 +53,20 @@ New average unit cost = (UAH 200 + UAH 130) / 15 = UAH 22
 
 All monetary values in the current local profile are displayed in Ukrainian hryvnia (UAH).
 
+### Product Recipes and Production
+
+Every finished product has a recipe that defines the raw materials required for one product unit. A recipe item contains a raw material and its required quantity, such as `5 Piece Rose` or `0.8 Meter Ribbon`.
+
+- **Initial Product Stock** represents finished products that existed before inventory tracking started. It does not consume raw materials.
+- **Initial Unit Cost** values the initial finished-product stock and is required when the initial stock is greater than zero.
+- **Produce** is the only operation that adds subsequent product units. Direct stock editing is not allowed.
+- Before production, the application multiplies every recipe quantity by the requested production quantity and checks all raw-material balances.
+- If any material is insufficient, the entire operation is rejected and no stock is changed.
+- Successful production deducts every required raw material, adds the finished products, and records the production batch and all stock movements in one database transaction.
+- Production cost is calculated from the current weighted-average costs of the consumed raw materials. The product's weighted-average unit cost is then recalculated. This cost is separate from the product's selling price.
+
+Editing a recipe affects only future production. Previous production batches keep the quantities and costs that were recorded when they were completed.
+
 ## Local Profile
 
 - URL: `http://localhost:8081`

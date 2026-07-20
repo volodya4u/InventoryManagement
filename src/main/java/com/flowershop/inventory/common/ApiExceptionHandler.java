@@ -50,6 +50,13 @@ public class ApiExceptionHandler {
                 "A record with the same unique data already exists");
     }
 
+    @ExceptionHandler(InsufficientStockException.class)
+    ProblemDetail insufficientStock(InsufficientStockException exception) {
+        var problem = problem(HttpStatus.CONFLICT, "Insufficient raw material stock", exception.getMessage());
+        problem.setProperty("shortages", exception.shortages());
+        return problem;
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     ProblemDetail responseStatus(ResponseStatusException exception) {
         return problem(

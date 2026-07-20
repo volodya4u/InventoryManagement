@@ -36,7 +36,19 @@ export interface Product {
   description: string;
   quantity: number;
   price: number;
+  averageUnitCost: number;
+  stockValue: number;
+  recipe: ProductRecipeItem[];
   hasImage: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProductRecipeItem {
+  rawMaterialId: number;
+  rawMaterialName: string;
+  unit: string;
+  quantityPerUnit: number;
+  availableQuantity: number;
+  averageUnitCost: number;
 }

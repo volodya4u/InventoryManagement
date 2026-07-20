@@ -116,6 +116,18 @@ public class RawMaterialRepository {
                 id);
     }
 
+    public int consumeStock(long id, BigDecimal quantity) {
+        return jdbcTemplate.update(
+                """
+                UPDATE raw_material
+                SET quantity = quantity - ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND quantity >= ?
+                """,
+                quantity,
+                id,
+                quantity);
+    }
+
     public void insertStockMovement(
             long rawMaterialId,
             String movementType,

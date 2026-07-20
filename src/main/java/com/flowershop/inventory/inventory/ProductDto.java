@@ -1,6 +1,7 @@
 package com.flowershop.inventory.inventory;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record ProductDto(
         long id,
@@ -9,6 +10,9 @@ public record ProductDto(
         String description,
         BigDecimal quantity,
         BigDecimal price,
+        BigDecimal averageUnitCost,
+        BigDecimal stockValue,
+        List<ProductRecipeItemDto> recipe,
         boolean hasImage,
         String createdAt,
         String updatedAt) {

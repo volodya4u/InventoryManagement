@@ -3,7 +3,9 @@ package com.flowershop.inventory.inventory;
 import com.flowershop.inventory.image.ImagePayload;
 import com.flowershop.inventory.image.StoredImage;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public class ProductRepository {
 
     private static final String SUMMARY_COLUMNS = """
-            id, sku, name, description, quantity, price,
+            id, sku, name, description, quantity, price, average_unit_cost,
             image IS NOT NULL AS has_image, created_at, updated_at
             """;
 
@@ -25,18 +27,20 @@ public class ProductRepository {
     }
 
     public List<ProductDto> findAll() {
-        return jdbcTemplate.query(
+        var products = jdbcTemplate.query(
                 "SELECT " + SUMMARY_COLUMNS + " FROM product ORDER BY name COLLATE NOCASE",
-                (rs, rowNum) -> map(rs));
+                (rs, rowNum) -> map(rs, List.of()));
+        return products.stream().map(this::withRecipe).toList();
     }
 
     public Optional<ProductDto> findById(long id) {
         return jdbcTemplate.query(
                         "SELECT " + SUMMARY_COLUMNS + " FROM product WHERE id = ?",
-                        (rs, rowNum) -> map(rs),
+                        (rs, rowNum) -> map(rs, List.of()),
                         id)
                 .stream()
-                .findFirst();
+                .findFirst()
+                .map(this::withRecipe);
     }
 
     public long insert(
@@ -45,14 +49,15 @@ public class ProductRepository {
             String description,
             BigDecimal quantity,
             BigDecimal price,
+            BigDecimal averageUnitCost,
             ImagePayload image) {
         var keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             var statement = connection.prepareStatement(
                     """
                     INSERT INTO product
-                        (sku, name, description, quantity, price, image, image_content_type)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                        (sku, name, description, quantity, price, average_unit_cost, image, image_content_type)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, sku);
@@ -60,8 +65,9 @@ public class ProductRepository {
             statement.setString(3, description);
             statement.setBigDecimal(4, quantity);
             statement.setBigDecimal(5, price);
-            statement.setBytes(6, image == null ? null : image.bytes());
-            statement.setString(7, image == null ? null : image.contentType());
+            statement.setBigDecimal(6, averageUnitCost);
+            statement.setBytes(7, image == null ? null : image.bytes());
+            statement.setString(8, image == null ? null : image.contentType());
             return statement;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -72,39 +78,133 @@ public class ProductRepository {
             String sku,
             String name,
             String description,
-            BigDecimal quantity,
             BigDecimal price,
             ImagePayload image) {
         if (image == null) {
             return jdbcTemplate.update(
                     """
                     UPDATE product
-                    SET sku = ?, name = ?, description = ?, quantity = ?, price = ?,
-                        updated_at = CURRENT_TIMESTAMP
+                    SET sku = ?, name = ?, description = ?, price = ?, updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                     """,
                     sku,
                     name,
                     description,
-                    quantity,
                     price,
                     id);
         }
         return jdbcTemplate.update(
                 """
                 UPDATE product
-                SET sku = ?, name = ?, description = ?, quantity = ?, price = ?,
+                SET sku = ?, name = ?, description = ?, price = ?,
                     image = ?, image_content_type = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """,
                 sku,
                 name,
                 description,
-                quantity,
                 price,
                 image.bytes(),
                 image.contentType(),
                 id);
+    }
+
+    public void replaceRecipe(long productId, List<ProductRecipeItemInput> recipe) {
+        jdbcTemplate.update("DELETE FROM product_recipe_item WHERE product_id = ?", productId);
+        for (var item : recipe) {
+            jdbcTemplate.update(
+                    """
+                    INSERT INTO product_recipe_item (product_id, raw_material_id, quantity_per_unit)
+                    VALUES (?, ?, ?)
+                    """,
+                    productId,
+                    item.rawMaterialId(),
+                    item.quantityPerUnit());
+        }
+    }
+
+    public int updateStock(long id, BigDecimal quantity, BigDecimal averageUnitCost) {
+        return jdbcTemplate.update(
+                """
+                UPDATE product
+                SET quantity = ?, average_unit_cost = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                quantity,
+                averageUnitCost,
+                id);
+    }
+
+    public long insertProductionBatch(
+            long productId,
+            BigDecimal quantity,
+            BigDecimal unitCost,
+            BigDecimal totalCost,
+            LocalDate producedAt,
+            String notes) {
+        var keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            var statement = connection.prepareStatement(
+                    """
+                    INSERT INTO production_batch
+                        (product_id, quantity, unit_cost, total_cost, produced_at, notes)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    Statement.RETURN_GENERATED_KEYS);
+            statement.setLong(1, productId);
+            statement.setBigDecimal(2, quantity);
+            statement.setBigDecimal(3, unitCost);
+            statement.setBigDecimal(4, totalCost.setScale(2, RoundingMode.HALF_UP));
+            statement.setString(5, producedAt.toString());
+            statement.setString(6, notes);
+            return statement;
+        }, keyHolder);
+        return keyHolder.getKey().longValue();
+    }
+
+    public void insertProductionConsumption(
+            long productionBatchId,
+            long rawMaterialId,
+            BigDecimal quantity,
+            BigDecimal unitCost,
+            BigDecimal totalCost) {
+        jdbcTemplate.update(
+                """
+                INSERT INTO production_consumption
+                    (production_batch_id, raw_material_id, quantity, unit_cost, total_cost)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                productionBatchId,
+                rawMaterialId,
+                quantity,
+                unitCost,
+                totalCost.setScale(2, RoundingMode.HALF_UP));
+    }
+
+    public void insertStockMovement(
+            long productId,
+            Long productionBatchId,
+            String movementType,
+            BigDecimal quantity,
+            BigDecimal unitCost,
+            BigDecimal totalCost,
+            LocalDate occurredAt,
+            String notes) {
+        jdbcTemplate.update(
+                """
+                INSERT INTO product_stock_movement
+                    (product_id, production_batch_id, movement_type, quantity,
+                     unit_cost, total_cost, occurred_at, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                productId,
+                productionBatchId,
+                movementType,
+                quantity,
+                unitCost,
+                totalCost.setScale(2, RoundingMode.HALF_UP),
+                occurredAt.toString(),
+                notes);
     }
 
     public Optional<StoredImage> findImage(long id) {
@@ -134,14 +234,56 @@ public class ProductRepository {
         return value == null ? BigDecimal.ZERO : value;
     }
 
-    private ProductDto map(java.sql.ResultSet rs) throws java.sql.SQLException {
+    private ProductDto withRecipe(ProductDto product) {
+        return new ProductDto(
+                product.id(),
+                product.sku(),
+                product.name(),
+                product.description(),
+                product.quantity(),
+                product.price(),
+                product.averageUnitCost(),
+                product.stockValue(),
+                findRecipe(product.id()),
+                product.hasImage(),
+                product.createdAt(),
+                product.updatedAt());
+    }
+
+    private List<ProductRecipeItemDto> findRecipe(long productId) {
+        return jdbcTemplate.query(
+                """
+                SELECT recipe.raw_material_id, material.name, material.unit,
+                       recipe.quantity_per_unit, material.quantity, material.average_unit_cost
+                FROM product_recipe_item recipe
+                JOIN raw_material material ON material.id = recipe.raw_material_id
+                WHERE recipe.product_id = ?
+                ORDER BY material.name COLLATE NOCASE
+                """,
+                (rs, rowNum) -> new ProductRecipeItemDto(
+                        rs.getLong("raw_material_id"),
+                        rs.getString("name"),
+                        rs.getString("unit"),
+                        rs.getBigDecimal("quantity_per_unit"),
+                        rs.getBigDecimal("quantity"),
+                        rs.getBigDecimal("average_unit_cost")),
+                productId);
+    }
+
+    private ProductDto map(java.sql.ResultSet rs, List<ProductRecipeItemDto> recipe)
+            throws java.sql.SQLException {
+        var quantity = rs.getBigDecimal("quantity");
+        var averageUnitCost = rs.getBigDecimal("average_unit_cost");
         return new ProductDto(
                 rs.getLong("id"),
                 rs.getString("sku"),
                 rs.getString("name"),
                 rs.getString("description"),
-                rs.getBigDecimal("quantity"),
+                quantity,
                 rs.getBigDecimal("price"),
+                averageUnitCost,
+                quantity.multiply(averageUnitCost).setScale(2, RoundingMode.HALF_UP),
+                recipe,
                 rs.getBoolean("has_image"),
                 rs.getString("created_at"),
                 rs.getString("updated_at"));

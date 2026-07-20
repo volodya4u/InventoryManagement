@@ -1,13 +1,21 @@
 <section class="page-heading">
   <div>
     <h1>Finished Products</h1>
-    <p>Floral arrangements, bouquets, and decorative items.</p>
+    <p>Product recipes, production, finished stock, and selling prices.</p>
   </div>
-  <button type="button" class="btn btn-success" (click)="openCreate()">+ Add Product</button>
+  <button type="button" class="btn btn-success" (click)="openCreate()" [disabled]="rawMaterials().length === 0">
+    + Add Product
+  </button>
 </section>
 
 @if (error()) {
   <div class="alert alert-danger" role="alert">{{ error() }}</div>
+}
+
+@if (!loading() && rawMaterials().length === 0) {
+  <div class="alert alert-warning" role="alert">
+    Add at least one raw material before creating a product recipe.
+  </div>
 }
 
 <section class="surface-card overflow-hidden">
@@ -16,8 +24,14 @@
   } @else if (items().length === 0) {
     <div class="empty-state">
       <strong>No finished products yet</strong>
-      <p class="mb-3">Add your first floral arrangement.</p>
-      <button type="button" class="btn btn-outline-success btn-sm" (click)="openCreate()">Create First Product</button>
+      <p class="mb-3">Create a product and define the raw materials required for one unit.</p>
+      <button
+        type="button"
+        class="btn btn-outline-success btn-sm"
+        (click)="openCreate()"
+        [disabled]="rawMaterials().length === 0">
+        Create First Product
+      </button>
     </div>
   } @else {
     <div class="table-responsive">
@@ -25,10 +39,12 @@
         <thead>
           <tr>
             <th>Photo</th>
-            <th>Product</th>
+            <th>Product and Recipe</th>
             <th>SKU</th>
             <th class="text-end">Stock</th>
-            <th class="text-end">Price, ₴</th>
+            <th class="text-end">Average Unit Cost</th>
+            <th class="text-end">Stock Value</th>
+            <th class="text-end">Selling Price</th>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
@@ -47,11 +63,17 @@
                 @if (item.description) {
                   <div class="description">{{ item.description }}</div>
                 }
+                <div class="recipe-summary">{{ recipeSummary(item) }}</div>
               </td>
               <td><span class="sku">{{ item.sku }}</span></td>
               <td class="text-end fw-semibold">{{ item.quantity }}</td>
-              <td class="text-end fw-semibold">{{ item.price }}</td>
+              <td class="text-end">{{ item.averageUnitCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+              <td class="text-end fw-semibold">{{ item.stockValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+              <td class="text-end fw-semibold">{{ item.price | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
               <td class="text-end text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-success me-2" (click)="openProduction(item)">
+                  Produce
+                </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary me-2" (click)="openEdit(item)">Edit</button>
                 <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
               </td>
@@ -65,7 +87,7 @@
 
 @if (dialogOpen()) {
   <div class="dialog-backdrop" (click)="closeDialog()">
-    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="product-dialog" (click)="$event.stopPropagation()">
+    <section class="dialog-card product-dialog" role="dialog" aria-modal="true" aria-labelledby="product-dialog" (click)="$event.stopPropagation()">
       <header class="dialog-header">
         <h2 id="product-dialog">{{ editing() ? 'Edit Product' : 'New Product' }}</h2>
         <button type="button" class="btn-close" aria-label="Close" (click)="closeDialog()"></button>
@@ -92,25 +114,98 @@
 
           <div class="row g-3 mb-3">
             <div class="col-sm-6">
-              <label class="form-label" for="product-quantity">Initial Stock *</label>
-              <input id="product-quantity" class="form-control" type="number" min="0" step="1" formControlName="quantity" />
-              @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
-                <div class="invalid-feedback d-block">Stock cannot be negative.</div>
-              }
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" for="product-price">Price, ₴ *</label>
+              <label class="form-label" for="product-price">Selling Price, ₴ *</label>
               <input id="product-price" class="form-control" type="number" min="0" step="0.01" formControlName="price" />
               @if (form.controls.price.touched && form.controls.price.invalid) {
-                <div class="invalid-feedback d-block">Price cannot be negative.</div>
+                <div class="invalid-feedback d-block">Selling price cannot be negative.</div>
               }
             </div>
+            @if (editing()) {
+              <div class="col-sm-6">
+                <div class="value-preview h-100">
+                  <span>Current Product Stock</span>
+                  <strong>{{ editing()!.quantity }} units</strong>
+                  <small>{{ editing()!.averageUnitCost | currency:'UAH':'symbol-narrow':'1.2-2' }} average unit cost</small>
+                </div>
+              </div>
+            } @else {
+              <div class="col-sm-6">
+                <label class="form-label" for="product-quantity">Initial Stock *</label>
+                <input id="product-quantity" class="form-control" type="number" min="0" step="1" formControlName="quantity" />
+                @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+                  <div class="invalid-feedback d-block">Enter a non-negative whole number.</div>
+                }
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="product-initial-unit-cost">Initial Unit Cost, ₴</label>
+                <input id="product-initial-unit-cost" class="form-control" type="number" min="0" step="0.01" formControlName="initialUnitCost" />
+                @if (form.hasError('initialUnitCostRequired') && (form.controls.quantity.touched || form.controls.initialUnitCost.touched)) {
+                  <div class="invalid-feedback d-block">Enter the initial unit cost when initial stock is greater than zero.</div>
+                } @else if (form.controls.initialUnitCost.touched && form.controls.initialUnitCost.invalid) {
+                  <div class="invalid-feedback d-block">Initial unit cost cannot be negative.</div>
+                }
+              </div>
+              <div class="col-sm-6">
+                <div class="value-preview h-100">
+                  <span>Initial Product Stock Value</span>
+                  <strong>{{ initialStockValue() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+                  <small>Opening stock does not consume raw materials.</small>
+                </div>
+              </div>
+            }
           </div>
+
+          @if (editing()) {
+            <div class="alert alert-light border small">Use <strong>Produce</strong> to add physical product units. Editing the recipe affects only future production.</div>
+          }
 
           <div class="mb-3">
             <label class="form-label" for="product-description">Description</label>
             <textarea id="product-description" class="form-control" rows="3" formControlName="description" maxlength="1000"></textarea>
           </div>
+
+          <section class="recipe-section mb-3">
+            <div class="recipe-heading">
+              <div>
+                <h3>Product Recipe *</h3>
+                <p>Raw materials required to produce one product unit.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-success" (click)="addRecipeItem()">+ Add Material</button>
+            </div>
+
+            <div formArrayName="recipe" class="recipe-list">
+              @for (row of recipeControls; track row; let index = $index) {
+                <div class="recipe-row" [formGroupName]="index">
+                  <div>
+                    <label class="form-label" [for]="'recipe-material-' + index">Raw Material *</label>
+                    <select [id]="'recipe-material-' + index" class="form-select" formControlName="rawMaterialId">
+                      <option [ngValue]="null">Select a material</option>
+                      @for (material of rawMaterials(); track material.id) {
+                        <option [ngValue]="material.id" [disabled]="materialSelectedElsewhere(material.id, index)">
+                          {{ material.name }} — {{ material.quantity }} {{ unitLabel(material.unit) }} available
+                        </option>
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" [for]="'recipe-quantity-' + index">Quantity per Product *</label>
+                    <input [id]="'recipe-quantity-' + index" class="form-control" type="number" min="0.0001" step="0.01" formControlName="quantityPerUnit" />
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-danger recipe-remove" (click)="removeRecipeItem(index)" aria-label="Remove recipe material">Remove</button>
+                </div>
+                @if (row.touched && row.invalid) {
+                  <div class="invalid-feedback d-block">Select a material and enter a quantity greater than zero.</div>
+                }
+              }
+            </div>
+            @if (form.hasError('recipeRequired') && form.touched) {
+              <div class="invalid-feedback d-block">Add at least one raw material to the recipe.</div>
+            }
+            <div class="recipe-cost">
+              Estimated recipe unit cost at current material prices:
+              <strong>{{ estimatedRecipeUnitCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+            </div>
+          </section>
 
           <div>
             <label class="form-label" for="product-image">Image</label>
@@ -126,6 +221,93 @@
           <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">Cancel</button>
           <button type="submit" class="btn btn-success" [disabled]="saving()">
             {{ saving() ? 'Saving…' : 'Save' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}
+
+@if (productionDialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeProductionDialog()">
+    <section class="dialog-card production-dialog" role="dialog" aria-modal="true" aria-labelledby="production-dialog" (click)="$event.stopPropagation()">
+      <header class="dialog-header">
+        <div>
+          <h2 id="production-dialog">Produce Product</h2>
+          <div class="dialog-subtitle">{{ productionProduct()?.name }} · maximum currently producible: {{ maximumProducible() }}</div>
+        </div>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeProductionDialog()"></button>
+      </header>
+
+      <form [formGroup]="productionForm" (ngSubmit)="submitProduction()" novalidate>
+        <div class="dialog-body">
+          @if (productionError()) {
+            <div class="alert alert-danger" role="alert">{{ productionError() }}</div>
+          }
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label" for="production-quantity">Quantity to Produce *</label>
+              <input id="production-quantity" class="form-control" type="number" min="1" step="1" formControlName="quantity" />
+              @if (productionForm.controls.quantity.touched && productionForm.controls.quantity.invalid) {
+                <div class="invalid-feedback d-block">Enter a positive whole number.</div>
+              }
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="production-date">Production Date *</label>
+              <input id="production-date" class="form-control" type="date" formControlName="productionDate" />
+            </div>
+          </div>
+
+          @if (productionRequirements().length > 0) {
+            <div class="table-responsive requirement-table mb-3">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Raw Material</th>
+                    <th class="text-end">Required</th>
+                    <th class="text-end">Available</th>
+                    <th class="text-end">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (requirement of productionRequirements(); track requirement.rawMaterialId) {
+                    <tr [class.table-danger]="requirement.missing > 0">
+                      <td>{{ requirement.name }}</td>
+                      <td class="text-end">{{ requirement.required }} {{ unitLabel(requirement.unit) }}</td>
+                      <td class="text-end">{{ requirement.available }} {{ unitLabel(requirement.unit) }}</td>
+                      <td class="text-end">
+                        @if (requirement.missing > 0) {
+                          <span class="text-danger fw-semibold">Missing {{ requirement.missing }}</span>
+                        } @else {
+                          <span class="text-success fw-semibold">Available</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="production-cost mb-3">
+              Estimated Production Cost:
+              <strong>{{ estimatedProductionCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+            </div>
+          }
+
+          <div>
+            <label class="form-label" for="production-notes">Notes</label>
+            <textarea id="production-notes" class="form-control" rows="3" maxlength="1000" formControlName="notes"></textarea>
+          </div>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeProductionDialog()">Cancel</button>
+          <button
+            type="submit"
+            class="btn btn-success"
+            [disabled]="producing() || productionForm.invalid || hasProductionShortage()">
+            {{ producing() ? 'Producing…' : 'Produce Product' }}
           </button>
         </footer>
       </form>
