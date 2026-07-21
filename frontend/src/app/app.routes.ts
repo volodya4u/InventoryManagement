@@ -2,10 +2,6 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 import { LoginComponent } from './login/login.component';
 import { ShellComponent } from './layout/shell.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { RawMaterialsComponent } from './raw-materials/raw-materials.component';
-import { ProductsComponent } from './products/products.component';
-import { ChangePasswordComponent } from './change-password/change-password.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -14,10 +10,26 @@ export const routes: Routes = [
     component: ShellComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'raw-materials', component: RawMaterialsComponent },
-      { path: 'products', component: ProductsComponent },
-      { path: 'change-password', component: ChangePasswordComponent },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./dashboard/dashboard.component').then((module) => module.DashboardComponent)
+      },
+      {
+        path: 'raw-materials',
+        loadComponent: () => import('./raw-materials/raw-materials.component').then((module) => module.RawMaterialsComponent)
+      },
+      {
+        path: 'products',
+        loadComponent: () => import('./products/products.component').then((module) => module.ProductsComponent)
+      },
+      {
+        path: 'sales',
+        loadComponent: () => import('./sales/sales.component').then((module) => module.SalesComponent)
+      },
+      {
+        path: 'change-password',
+        loadComponent: () => import('./change-password/change-password.component').then((module) => module.ChangePasswordComponent)
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
     ]
   },

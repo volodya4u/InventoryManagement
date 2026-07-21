@@ -53,3 +53,31 @@ export interface ProductRecipeItem {
   availableQuantity: number;
   averageUnitCost: number;
 }
+
+export type PaymentMethod = 'CASH' | 'CARD' | 'BANK_TRANSFER';
+
+export interface Sale {
+  id: number;
+  saleNumber: string;
+  saleDate: string;
+  paymentMethod: PaymentMethod;
+  notes: string;
+  totalRevenue: number;
+  totalCost: number;
+  grossProfit: number;
+  items: SaleItem[];
+  createdAt: string;
+}
+
+export interface SaleItem {
+  productId: number;
+  productSku: string;
+  productName: string;
+  quantity: number;
+  recommendedUnitPrice: number;
+  unitPrice: number;
+  unitCost: number;
+  lineRevenue: number;
+  lineCost: number;
+  lineProfit: number;
+}

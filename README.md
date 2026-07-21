@@ -9,6 +9,8 @@ A local inventory system for tracking raw materials and finished products for a 
 - Raw material and finished product catalogs.
 - Create, edit, and delete operations.
 - Raw-material receipts and weighted-average inventory valuation.
+- Product recipes, atomic production, and raw-material consumption.
+- Sales with automatic Product stock deduction and immutable financial snapshots.
 - JPG, JPEG, and PNG images stored as BLOBs.
 - Image validation in both the browser and the server.
 - Maximum image size of 2 MB.
@@ -68,6 +70,22 @@ Every finished product has a recipe that defines the raw materials required for 
 - Production cost is calculated from the current weighted-average costs of the consumed raw materials. The product's weighted-average unit cost is then recalculated. This cost is separate from the product's selling price.
 
 Editing a recipe affects only future production. Previous production batches keep the quantities and costs that were recorded when they were completed.
+
+### Sales
+
+A sale can contain one or more finished Products. The current recommended selling price is filled in automatically, but the administrator can enter the actual price charged to the customer.
+
+- Every sale receives a unique number such as `SALE-20260721-0001`.
+- Supported payment methods are **Cash**, **Card**, and **Bank Transfer**.
+- Only positive whole Product quantities can be sold.
+- Before saving, the application checks every Product balance. If any Product is insufficient, the entire sale is rejected and no stock is changed.
+- A successful sale deducts Product stock and records a `SALE` stock movement in one database transaction.
+- Every sale item stores snapshots of the Product SKU, name, recommended price, actual price, and weighted-average unit cost.
+- **Revenue** is the actual unit price multiplied by quantity.
+- **Cost** is the Product's weighted-average unit cost at the time of sale multiplied by quantity.
+- **Gross Profit** is revenue minus cost and can be negative when the actual price is below cost.
+
+Changing or deleting catalog data later does not rewrite completed sale values. Sales are currently immutable; cancellation and returns are planned as separate stock operations.
 
 ## Local Profile
 

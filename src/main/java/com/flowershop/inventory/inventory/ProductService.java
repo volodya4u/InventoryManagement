@@ -68,6 +68,7 @@ public class ProductService {
             repository.insertStockMovement(
                     id,
                     null,
+                    null,
                     "OPENING_BALANCE",
                     initialQuantity,
                     normalizedInitialCost,
@@ -184,6 +185,7 @@ public class ProductService {
         repository.insertStockMovement(
                 id,
                 batchId,
+                null,
                 "PRODUCTION",
                 producedQuantity,
                 productionUnitCost,

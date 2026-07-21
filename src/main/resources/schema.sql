@@ -96,11 +96,46 @@ CREATE TABLE IF NOT EXISTS production_consumption (
 CREATE INDEX IF NOT EXISTS idx_production_consumption_batch
     ON production_consumption(production_batch_id);
 
+CREATE TABLE IF NOT EXISTS sale (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_number TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    sale_date TEXT NOT NULL,
+    payment_method TEXT NOT NULL CHECK (payment_method IN ('CASH', 'CARD', 'BANK_TRANSFER')),
+    notes TEXT NOT NULL DEFAULT '',
+    total_revenue NUMERIC NOT NULL CHECK (total_revenue >= 0),
+    total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
+    gross_profit NUMERIC NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_sale_date ON sale(sale_date, id);
+
+CREATE TABLE IF NOT EXISTS sale_item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    product_sku TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    quantity NUMERIC NOT NULL CHECK (quantity > 0),
+    recommended_unit_price NUMERIC NOT NULL CHECK (recommended_unit_price >= 0),
+    unit_price NUMERIC NOT NULL CHECK (unit_price >= 0),
+    unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
+    line_revenue NUMERIC NOT NULL CHECK (line_revenue >= 0),
+    line_cost NUMERIC NOT NULL CHECK (line_cost >= 0),
+    line_profit NUMERIC NOT NULL,
+    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_sale_item_sale ON sale_item(sale_id);
+CREATE INDEX IF NOT EXISTS idx_sale_item_product ON sale_item(product_id);
+
 CREATE TABLE IF NOT EXISTS product_stock_movement (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id INTEGER NOT NULL,
     production_batch_id INTEGER,
-    movement_type TEXT NOT NULL CHECK (movement_type IN ('OPENING_BALANCE', 'PRODUCTION')),
+    sale_id INTEGER,
+    movement_type TEXT NOT NULL CHECK (movement_type IN ('OPENING_BALANCE', 'PRODUCTION', 'SALE')),
     quantity NUMERIC NOT NULL CHECK (quantity > 0),
     unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
     total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
@@ -108,7 +143,8 @@ CREATE TABLE IF NOT EXISTS product_stock_movement (
     notes TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
-    FOREIGN KEY (production_batch_id) REFERENCES production_batch(id) ON DELETE CASCADE
+    FOREIGN KEY (production_batch_id) REFERENCES production_batch(id) ON DELETE CASCADE,
+    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT
 );
 
 CREATE INDEX IF NOT EXISTS idx_product_stock_movement_product

@@ -47,6 +47,8 @@ class InventoryFlowIntegrationTest {
 
     @BeforeEach
     void resetDatabase() {
+        jdbcTemplate.update("DELETE FROM product_stock_movement");
+        jdbcTemplate.update("DELETE FROM sale");
         jdbcTemplate.update("DELETE FROM product");
         jdbcTemplate.update("DELETE FROM raw_material");
         jdbcTemplate.update("DELETE FROM app_user");
@@ -54,10 +56,89 @@ class InventoryFlowIntegrationTest {
                 DELETE FROM sqlite_sequence
                 WHERE name IN (
                     'raw_material', 'raw_material_stock_movement', 'product',
-                    'production_batch', 'production_consumption', 'product_stock_movement'
+                    'production_batch', 'production_consumption', 'product_stock_movement',
+                    'sale', 'sale_item'
                 )
                 """);
         userRepository.insertAdmin("admin", passwordEncoder.encode(testPassword));
+    }
+
+    @Test
+    void sellsProductsAtomicallyAndKeepsFinancialSnapshots() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (sku, name, description, quantity, price, markup_percentage, average_unit_cost)
+                VALUES ('ROSE-BOX-001', 'Rose Box', '', 5, 250, 50, 150)
+                """);
+
+        mockMvc.perform(post("/api/sales")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "saleDate": "2026-07-21",
+                                  "paymentMethod": "CASH",
+                                  "notes": "Insufficient attempt",
+                                  "items": [{"productId": 1, "quantity": 6, "unitPrice": 240}]
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Insufficient product stock"))
+                .andExpect(jsonPath("$.shortages[0].productSku").value("ROSE-BOX-001"))
+                .andExpect(jsonPath("$.shortages[0].missingQuantity").value(1));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sale", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("5");
+
+        mockMvc.perform(post("/api/sales")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "saleDate": "2026-07-21",
+                                  "paymentMethod": "CARD",
+                                  "notes": "Customer price",
+                                  "items": [{"productId": 1, "quantity": 2, "unitPrice": 240}]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.saleNumber").value("SALE-20260721-0001"))
+                .andExpect(jsonPath("$.paymentMethod").value("CARD"))
+                .andExpect(jsonPath("$.totalRevenue").value(480))
+                .andExpect(jsonPath("$.totalCost").value(300))
+                .andExpect(jsonPath("$.grossProfit").value(180))
+                .andExpect(jsonPath("$.items[0].recommendedUnitPrice").value(250))
+                .andExpect(jsonPath("$.items[0].unitPrice").value(240))
+                .andExpect(jsonPath("$.items[0].unitCost").value(150));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("3");
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sale_item", Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM product_stock_movement WHERE movement_type = 'SALE'",
+                Integer.class)).isEqualTo(1);
+
+        mockMvc.perform(get("/api/sales").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].items[0].productName").value("Rose Box"));
+        mockMvc.perform(get("/api/dashboard").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.salesCount").value(1));
     }
 
     @Test

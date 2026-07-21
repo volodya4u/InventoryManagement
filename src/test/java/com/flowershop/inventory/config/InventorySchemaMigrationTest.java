@@ -42,6 +42,11 @@ class InventorySchemaMigrationTest {
                     )
                     """);
             jdbcTemplate.execute("""
+                    CREATE TABLE sale (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT
+                    )
+                    """);
+            jdbcTemplate.execute("""
                     CREATE TABLE product_stock_movement (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         product_id INTEGER NOT NULL,
@@ -83,6 +88,13 @@ class InventorySchemaMigrationTest {
             assertThat(jdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM product_stock_movement WHERE product_id = 1",
                     Integer.class)).isEqualTo(1);
+            var productMovementColumns = jdbcTemplate.queryForList("PRAGMA table_info(product_stock_movement)");
+            assertThat(productMovementColumns)
+                    .extracting(column -> column.get("name"))
+                    .contains("sale_id");
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'product_stock_movement'",
+                    String.class)).contains("'SALE'");
         } finally {
             dataSource.destroy();
         }

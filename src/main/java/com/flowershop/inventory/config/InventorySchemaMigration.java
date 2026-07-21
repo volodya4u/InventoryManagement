@@ -49,6 +49,11 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     """);
         }
 
+        if (!hasColumn("product_stock_movement", "sale_id")
+                || !tableDefinitionContains("product_stock_movement", "'SALE'")) {
+            migrateProductStockMovement();
+        }
+
         jdbcTemplate.update("""
                 INSERT INTO raw_material_stock_movement
                     (raw_material_id, movement_type, quantity, unit_cost, total_cost, occurred_at, notes)
@@ -107,6 +112,42 @@ public class InventorySchemaMigration implements ApplicationRunner {
         jdbcTemplate.execute("""
                 CREATE INDEX idx_raw_material_stock_movement_material
                 ON raw_material_stock_movement(raw_material_id, occurred_at)
+                """);
+    }
+
+    private void migrateProductStockMovement() {
+        jdbcTemplate.execute("ALTER TABLE product_stock_movement RENAME TO product_stock_movement_old");
+        jdbcTemplate.execute("""
+                CREATE TABLE product_stock_movement (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    product_id INTEGER NOT NULL,
+                    production_batch_id INTEGER,
+                    sale_id INTEGER,
+                    movement_type TEXT NOT NULL CHECK (
+                        movement_type IN ('OPENING_BALANCE', 'PRODUCTION', 'SALE')),
+                    quantity NUMERIC NOT NULL CHECK (quantity > 0),
+                    unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
+                    total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
+                    occurred_at TEXT NOT NULL,
+                    notes TEXT NOT NULL DEFAULT '',
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
+                    FOREIGN KEY (production_batch_id) REFERENCES production_batch(id) ON DELETE CASCADE,
+                    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT
+                )
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product_stock_movement
+                    (id, product_id, production_batch_id, movement_type, quantity,
+                     unit_cost, total_cost, occurred_at, notes, created_at)
+                SELECT id, product_id, production_batch_id, movement_type, quantity,
+                       unit_cost, total_cost, occurred_at, notes, created_at
+                FROM product_stock_movement_old
+                """);
+        jdbcTemplate.execute("DROP TABLE product_stock_movement_old");
+        jdbcTemplate.execute("""
+                CREATE INDEX idx_product_stock_movement_product
+                ON product_stock_movement(product_id, occurred_at)
                 """);
     }
 

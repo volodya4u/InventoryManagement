@@ -1,5 +1,6 @@
 package com.flowershop.inventory.inventory;
 
+import com.flowershop.inventory.sales.SaleRepository;
 import java.math.BigDecimal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,12 +12,15 @@ public class DashboardController {
 
     private final RawMaterialRepository rawMaterialRepository;
     private final ProductRepository productRepository;
+    private final SaleRepository saleRepository;
 
     public DashboardController(
             RawMaterialRepository rawMaterialRepository,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            SaleRepository saleRepository) {
         this.rawMaterialRepository = rawMaterialRepository;
         this.productRepository = productRepository;
+        this.saleRepository = saleRepository;
     }
 
     @GetMapping
@@ -25,7 +29,7 @@ public class DashboardController {
                 rawMaterialRepository.count(),
                 productRepository.count(),
                 productRepository.totalQuantity(),
-                0L);
+                saleRepository.count());
     }
 
     public record DashboardSummary(

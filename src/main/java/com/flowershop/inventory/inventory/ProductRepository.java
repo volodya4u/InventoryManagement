@@ -142,6 +142,18 @@ public class ProductRepository {
                 id);
     }
 
+    public int consumeStock(long id, BigDecimal quantity) {
+        return jdbcTemplate.update(
+                """
+                UPDATE product
+                SET quantity = quantity - ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND quantity >= ?
+                """,
+                quantity,
+                id,
+                quantity);
+    }
+
     public long insertProductionBatch(
             long productId,
             BigDecimal quantity,
@@ -191,6 +203,7 @@ public class ProductRepository {
     public void insertStockMovement(
             long productId,
             Long productionBatchId,
+            Long saleId,
             String movementType,
             BigDecimal quantity,
             BigDecimal unitCost,
@@ -200,12 +213,13 @@ public class ProductRepository {
         jdbcTemplate.update(
                 """
                 INSERT INTO product_stock_movement
-                    (product_id, production_batch_id, movement_type, quantity,
+                    (product_id, production_batch_id, sale_id, movement_type, quantity,
                      unit_cost, total_cost, occurred_at, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 productId,
                 productionBatchId,
+                saleId,
                 movementType,
                 quantity,
                 unitCost,
