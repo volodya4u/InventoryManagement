@@ -9,12 +9,30 @@
 }
 
 .sku {
+  display: inline-block;
   padding: 0.2rem 0.45rem;
   border-radius: 0.35rem;
   color: #43564d;
   background: #edf1ee;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.sku-column {
+  width: 145px;
+  min-width: 145px;
+}
+
+.actions-column {
+  width: 96px;
+  min-width: 96px;
+}
+
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .empty-state strong,

@@ -40,13 +40,13 @@
           <tr>
             <th>Photo</th>
             <th>Product and Recipe</th>
-            <th>SKU</th>
+            <th class="sku-column">SKU</th>
             <th class="text-end">Stock</th>
             <th class="text-end">Average Unit Cost</th>
             <th class="text-end">Stock Value</th>
             <th class="text-end">Markup</th>
             <th class="text-end">Recommended Selling Price</th>
-            <th class="text-end">Actions</th>
+            <th class="text-end actions-column">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -66,18 +66,20 @@
                 }
                 <div class="recipe-summary">{{ recipeSummary(item) }}</div>
               </td>
-              <td><span class="sku">{{ item.sku }}</span></td>
+              <td class="sku-column"><span class="sku">{{ item.sku }}</span></td>
               <td class="text-end fw-semibold">{{ item.quantity }}</td>
               <td class="text-end">{{ item.averageUnitCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
               <td class="text-end fw-semibold">{{ item.stockValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
               <td class="text-end">{{ item.markupPercentage }}%</td>
               <td class="text-end fw-semibold">{{ item.sellingPrice | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
-              <td class="text-end text-nowrap">
-                <button type="button" class="btn btn-sm btn-outline-success me-2" (click)="openProduction(item)">
-                  Produce
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary me-2" (click)="openEdit(item)">Edit</button>
-                <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
+              <td class="actions-column">
+                <div class="product-actions">
+                  <button type="button" class="btn btn-sm btn-outline-success" (click)="openProduction(item)">
+                    Produce
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openEdit(item)">Edit</button>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
+                </div>
               </td>
             </tr>
           }
