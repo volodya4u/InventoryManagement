@@ -39,20 +39,20 @@
         <thead>
           <tr>
             <th>Photo</th>
-            <th>Product and Recipe</th>
+            <th class="product-name-column">Product and Recipe</th>
             <th class="sku-column">SKU</th>
             <th class="text-end">Stock</th>
             <th class="text-end">Average Unit Cost</th>
             <th class="text-end">Stock Value</th>
             <th class="text-end">Markup</th>
-            <th class="text-end">Recommended Selling Price</th>
+            <th class="text-end">Selling Price</th>
             <th class="text-end actions-column">Actions</th>
           </tr>
         </thead>
         <tbody>
           @for (item of items(); track item.id) {
             <tr>
-              <td>
+              <td class="product-name-column">
                 @if (item.hasImage) {
                   <img class="item-image" [src]="imageUrl(item)" [alt]="item.name" loading="lazy" />
                 } @else {
@@ -229,7 +229,7 @@
               </div>
               <div class="col-sm-6">
                 <div class="value-preview h-100">
-                  <span>Recommended Selling Price</span>
+                  <span>Selling Price</span>
                   <strong>{{ calculatedSellingPrice() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
                   <small>Recipe cost plus {{ form.controls.markupPercentage.value }}% markup.</small>
                 </div>

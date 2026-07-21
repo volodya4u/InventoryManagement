@@ -1,5 +1,5 @@
 .description {
-  max-width: 430px;
+  max-width: 240px;
   margin-top: 0.2rem;
   overflow: hidden;
   color: var(--pf-muted);
@@ -8,15 +8,25 @@
   white-space: nowrap;
 }
 
+.name-column {
+  width: 240px;
+  max-width: 240px;
+}
+
 .actions-column {
-  width: 116px;
-  min-width: 116px;
+  width: 150px;
+  min-width: 150px;
 }
 
 .material-actions {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.material-actions .btn {
+  width: 100%;
+  white-space: nowrap;
 }
 
 .empty-state strong,

@@ -1,11 +1,16 @@
 .description {
-  max-width: 360px;
+  max-width: 240px;
   margin-top: 0.2rem;
   overflow: hidden;
   color: var(--pf-muted);
   font-size: 0.8rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.product-name-column {
+  width: 240px;
+  max-width: 240px;
 }
 
 .sku {
@@ -25,14 +30,19 @@
 }
 
 .actions-column {
-  width: 96px;
-  min-width: 96px;
+  width: 150px;
+  min-width: 150px;
 }
 
 .product-actions {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.product-actions .btn {
+  width: 100%;
+  white-space: nowrap;
 }
 
 .empty-state strong,
@@ -53,7 +63,7 @@
 }
 
 .recipe-summary {
-  max-width: 430px;
+  max-width: 240px;
   margin-top: 0.3rem;
   color: var(--pf-forest);
   font-size: 0.76rem;

@@ -25,12 +25,12 @@
         <thead>
           <tr>
             <th>Photo</th>
-            <th>Name</th>
+            <th class="name-column">Name</th>
             <th>Unit</th>
             <th class="text-end">Stock</th>
             <th class="text-end">Average Unit Cost</th>
             <th class="text-end">Stock Value</th>
-            <th class="text-end">Actions</th>
+            <th class="text-end actions-column">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -43,7 +43,7 @@
                   <span class="item-image-placeholder" aria-label="No image">{{ item.name.charAt(0) }}</span>
                 }
               </td>
-              <td>
+              <td class="name-column">
                 <strong>{{ item.name }}</strong>
                 @if (item.description) {
                   <div class="description">{{ item.description }}</div>
