@@ -7,7 +7,9 @@ import { apiErrorMessage } from '../../core/api-error';
 import {
   MonthlySaleSummary,
   MonthlySalesReport,
-  PaymentMethod
+  PaymentMethod,
+  SaleReturnType,
+  SaleStatus
 } from '../../core/models';
 
 @Component({
@@ -59,17 +61,46 @@ export class MonthlySalesReportComponent implements OnInit {
     return labels[value];
   }
 
+  saleStatusLabel(value: SaleStatus): string {
+    const labels: Record<SaleStatus, string> = {
+      COMPLETED: 'Completed',
+      PARTIALLY_RETURNED: 'Partially Returned',
+      RETURNED: 'Returned',
+      CANCELLED: 'Cancelled'
+    };
+    return labels[value];
+  }
+
+  returnTypeLabel(value: SaleReturnType): string {
+    return value === 'CANCELLATION' ? 'Cancellation' : 'Return';
+  }
+
   exportCsv(): void {
     const report = this.report();
-    if (!report || report.sales.length === 0) return;
+    if (!report || (report.sales.length === 0 && report.returns.length === 0)) return;
 
     const rows: Array<Array<string | number>> = [
       ['Monthly Sales Report', report.month],
       [],
-      ['Sale Number', 'Date', 'Payment Method', 'Product Lines', 'Units Sold', 'Revenue (UAH)', 'Cost (UAH)', 'Gross Profit (UAH)'],
+      ['Sales'],
+      ['Sale Number', 'Date', 'Status', 'Payment Method', 'Product Lines', 'Units Sold', 'Gross Revenue (UAH)', 'Refunded (UAH)', 'Net Revenue (UAH)', 'Net Cost (UAH)', 'Net Gross Profit (UAH)'],
       ...report.sales.map((sale) => this.saleCsvRow(sale)),
       [],
-      ['Totals', '', '', '', report.unitsSold, report.revenue, report.totalCost, report.grossProfit]
+      ['Returns and Cancellations'],
+      ['Document', 'Date', 'Type', 'Original Sale', 'Payment Method', 'Units Returned', 'Refund (UAH)', 'Returned Cost (UAH)', 'Profit Reversal (UAH)'],
+      ...report.returns.map((saleReturn) => [
+        saleReturn.returnNumber,
+        saleReturn.returnDate,
+        saleReturn.operationType,
+        saleReturn.saleNumber,
+        this.paymentMethodLabel(saleReturn.paymentMethod),
+        saleReturn.unitsReturned,
+        saleReturn.refund,
+        saleReturn.returnedCost,
+        saleReturn.grossProfitReversal
+      ]),
+      [],
+      ['Monthly Net Totals', '', '', '', '', report.unitsSold, report.grossRevenue, report.refunds, report.revenue, report.totalCost, report.grossProfit]
     ];
     const csv = '\uFEFF' + rows
       .map((row) => row.map((value) => this.csvCell(value)).join(','))
@@ -86,10 +117,13 @@ export class MonthlySalesReportComponent implements OnInit {
     return [
       sale.saleNumber,
       sale.saleDate,
+      sale.status,
       this.paymentMethodLabel(sale.paymentMethod),
       sale.productLines,
       sale.unitsSold,
       sale.revenue,
+      sale.refunds,
+      sale.netRevenue,
       sale.totalCost,
       sale.grossProfit
     ];

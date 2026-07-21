@@ -20,6 +20,45 @@
   white-space: nowrap;
 }
 
+.sale-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  color: #2d5a45;
+  background: #e5f1e9;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sale-status--partial {
+  color: #73560c;
+  background: #fff0c2;
+}
+
+.sale-status--returned {
+  color: #42536a;
+  background: #e6ebf2;
+}
+
+.sale-status--cancelled {
+  color: #853b43;
+  background: #f6dfe1;
+}
+
+.sale-row-muted > td {
+  color: #78827e;
+  background: #fafafa;
+}
+
+.refund-note {
+  display: block;
+  color: var(--pf-rose);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
 .sale-products {
   max-width: 310px;
   overflow: hidden;
@@ -37,8 +76,13 @@
 }
 
 .sale-dialog,
-.sale-detail-dialog {
+.sale-detail-dialog,
+.return-dialog {
   width: min(980px, 100%);
+}
+
+.cancellation-dialog {
+  width: min(620px, 100%);
 }
 
 .dialog-subtitle {
@@ -115,6 +159,10 @@
   gap: 0.75rem;
 }
 
+.sale-totals--detail {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .sale-totals > div {
   display: flex;
   flex-direction: column;
@@ -156,9 +204,50 @@
   white-space: pre-wrap;
 }
 
+.return-items-table {
+  border: 1px solid var(--pf-border);
+  border-radius: 0.6rem;
+}
+
+.return-items-table td small {
+  display: block;
+  color: var(--pf-muted);
+  font-size: 0.7rem;
+}
+
+.return-quantity-column {
+  min-width: 145px;
+}
+
+.cancellation-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.cancellation-summary > div {
+  display: flex;
+  flex-direction: column;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 0.55rem;
+  background: #f6f8f6;
+}
+
+.cancellation-summary span {
+  color: var(--pf-muted);
+  font-size: 0.75rem;
+}
+
+.cancellation-summary strong {
+  color: var(--pf-forest-dark);
+}
+
 @media (max-width: 767.98px) {
   .sale-item-grid,
-  .sale-totals {
+  .sale-totals,
+  .sale-totals--detail,
+  .cancellation-summary {
     grid-template-columns: 1fr;
   }
 

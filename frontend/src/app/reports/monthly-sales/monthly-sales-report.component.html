@@ -19,7 +19,7 @@
       type="button"
       class="btn btn-outline-success"
       (click)="exportCsv()"
-      [disabled]="loading() || !report()?.sales?.length"
+      [disabled]="loading() || ((report()?.sales?.length ?? 0) + (report()?.returns?.length ?? 0) === 0)"
     >Export CSV</button>
   </div>
 </section>
@@ -35,7 +35,7 @@
   <section class="surface-card empty-state">Loading monthly sales report...</section>
 } @else if (report(); as report) {
   <section class="report-period" aria-label="Report period">
-    {{ report.periodStart | date:'longDate':'UTC' }} – {{ report.periodEnd | date:'longDate':'UTC' }}
+    {{ report.periodStart | date:'longDate':'UTC' }} - {{ report.periodEnd | date:'longDate':'UTC' }}
   </section>
 
   <section class="summary-grid" aria-label="Monthly totals">
@@ -45,22 +45,37 @@
       <small>completed documents</small>
     </article>
     <article class="summary-card">
-      <span>Units Sold</span>
-      <strong>{{ report.unitsSold | number:'1.0-2' }}</strong>
-      <small>finished Products</small>
-    </article>
-    <article class="summary-card summary-card--revenue">
-      <span>Revenue</span>
-      <strong>{{ report.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
-      <small>actual sales prices</small>
+      <span>Returns / Cancellations</span>
+      <strong>{{ report.returnCount | number:'1.0-0' }}</strong>
+      <small>reversal documents</small>
     </article>
     <article class="summary-card">
-      <span>Cost</span>
+      <span>Net Units</span>
+      <strong>{{ report.unitsSold | number:'1.0-2' }}</strong>
+      <small>{{ report.unitsReturned | number:'1.0-2' }} returned</small>
+    </article>
+    <article class="summary-card summary-card--revenue">
+      <span>Gross Revenue</span>
+      <strong>{{ report.grossRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <small>before refunds</small>
+    </article>
+    <article class="summary-card summary-card--refund">
+      <span>Refunds</span>
+      <strong>{{ report.refunds | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <small>returns and cancellations</small>
+    </article>
+    <article class="summary-card summary-card--revenue">
+      <span>Net Revenue</span>
+      <strong>{{ report.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <small>gross revenue minus refunds</small>
+    </article>
+    <article class="summary-card">
+      <span>Net Cost</span>
       <strong>{{ report.totalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
-      <small>cost at sale time</small>
+      <small>{{ report.returnedCost | currency:'UAH':'symbol-narrow':'1.2-2' }} restored</small>
     </article>
     <article class="summary-card summary-card--profit">
-      <span>Gross Profit</span>
+      <span>Net Gross Profit</span>
       <strong [class.text-danger]="report.grossProfit < 0">
         {{ report.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}
       </strong>
@@ -69,11 +84,11 @@
     <article class="summary-card">
       <span>Average Sale</span>
       <strong>{{ report.averageSaleValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
-      <small>revenue per document</small>
+      <small>gross revenue per sale</small>
     </article>
   </section>
 
-  @if (report.salesCount === 0) {
+  @if (report.salesCount === 0 && report.returnCount === 0) {
     <section class="surface-card empty-state">
       <strong>No sales in this month</strong>
       <p>Choose another month or create a sale from the Sales page.</p>
@@ -84,7 +99,7 @@
       <div class="section-heading">
         <div>
           <h2>Payment Methods</h2>
-          <p>Monthly revenue and profit grouped by how customers paid.</p>
+          <p>Gross sales, refunds, and net results grouped by the original payment method.</p>
         </div>
       </div>
       <div class="payment-grid">
@@ -92,10 +107,12 @@
           <article class="payment-card">
             <div class="payment-card__heading">
               <strong>{{ paymentMethodLabel(payment.paymentMethod) }}</strong>
-              <span>{{ payment.salesCount }} sale{{ payment.salesCount === 1 ? '' : 's' }}</span>
+              <span>{{ payment.salesCount }} sales / {{ payment.returnCount }} reversals</span>
             </div>
             <dl>
-              <div><dt>Revenue</dt><dd>{{ payment.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</dd></div>
+              <div><dt>Gross Revenue</dt><dd>{{ payment.grossRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</dd></div>
+              <div><dt>Refunds</dt><dd>{{ payment.refunds | currency:'UAH':'symbol-narrow':'1.2-2' }}</dd></div>
+              <div><dt>Net Revenue</dt><dd>{{ payment.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</dd></div>
               <div><dt>Gross Profit</dt><dd [class.text-danger]="payment.grossProfit < 0">{{ payment.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}</dd></div>
             </dl>
           </article>
@@ -116,10 +133,14 @@
             <tr>
               <th>SKU</th>
               <th>Product</th>
-              <th class="text-end">Units</th>
-              <th class="text-end">Revenue</th>
-              <th class="text-end">Cost</th>
-              <th class="text-end">Gross Profit</th>
+              <th class="text-end">Sold</th>
+              <th class="text-end">Returned</th>
+              <th class="text-end">Net Units</th>
+              <th class="text-end">Gross Revenue</th>
+              <th class="text-end">Refunds</th>
+              <th class="text-end">Net Revenue</th>
+              <th class="text-end">Net Cost</th>
+              <th class="text-end">Net Profit</th>
             </tr>
           </thead>
           <tbody>
@@ -128,6 +149,10 @@
                 <td><span class="code-label">{{ product.productSku }}</span></td>
                 <td class="fw-semibold">{{ product.productName }}</td>
                 <td class="text-end">{{ product.quantitySold | number:'1.0-2' }}</td>
+                <td class="text-end">{{ product.quantityReturned | number:'1.0-2' }}</td>
+                <td class="text-end fw-semibold">{{ product.netQuantity | number:'1.0-2' }}</td>
+                <td class="text-end">{{ product.grossRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                <td class="text-end">{{ product.refunds | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
                 <td class="text-end">{{ product.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
                 <td class="text-end">{{ product.totalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
                 <td class="text-end fw-semibold" [class.text-danger]="product.grossProfit < 0">
@@ -145,7 +170,7 @@
         <div class="section-heading section-heading--padded">
           <div>
             <h2>Sales by Day</h2>
-            <p>Daily totals within the selected month.</p>
+            <p>Sales and reversals are recorded on their actual document dates.</p>
           </div>
         </div>
         <div class="table-responsive">
@@ -154,8 +179,10 @@
               <tr>
                 <th>Date</th>
                 <th class="text-end">Sales</th>
-                <th class="text-end">Revenue</th>
-                <th class="text-end">Profit</th>
+                <th class="text-end">Reversals</th>
+                <th class="text-end">Net Units</th>
+                <th class="text-end">Net Revenue</th>
+                <th class="text-end">Net Profit</th>
               </tr>
             </thead>
             <tbody>
@@ -163,6 +190,8 @@
                 <tr>
                   <td>{{ day.saleDate | date:'MMM d, y':'UTC' }}</td>
                   <td class="text-end">{{ day.salesCount }}</td>
+                  <td class="text-end">{{ day.returnCount }}</td>
+                  <td class="text-end">{{ day.unitsSold | number:'1.0-2' }}</td>
                   <td class="text-end">{{ day.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
                   <td class="text-end" [class.text-danger]="day.grossProfit < 0">
                     {{ day.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}
@@ -178,7 +207,7 @@
         <div class="section-heading section-heading--padded">
           <div>
             <h2>Sales Documents</h2>
-            <p>Open any sale to review its Product lines.</p>
+            <p>Gross values and current lifetime return totals for each sale created this month.</p>
           </div>
         </div>
         <div class="table-responsive">
@@ -187,8 +216,11 @@
               <tr>
                 <th>Sale</th>
                 <th>Date</th>
+                <th>Status</th>
                 <th>Payment</th>
-                <th class="text-end">Revenue</th>
+                <th class="text-end">Gross Revenue</th>
+                <th class="text-end">Refunds</th>
+                <th class="text-end">Current Net</th>
               </tr>
             </thead>
             <tbody>
@@ -200,8 +232,11 @@
                     </a>
                   </td>
                   <td>{{ sale.saleDate | date:'MMM d':'UTC' }}</td>
+                  <td>{{ saleStatusLabel(sale.status) }}</td>
                   <td>{{ paymentMethodLabel(sale.paymentMethod) }}</td>
                   <td class="text-end">{{ sale.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                  <td class="text-end">{{ sale.refunds | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                  <td class="text-end fw-semibold">{{ sale.netRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
                 </tr>
               }
             </tbody>
@@ -209,5 +244,52 @@
         </div>
       </section>
     </div>
+
+    @if (report.returns.length > 0) {
+      <section class="surface-card report-table-card">
+        <div class="section-heading section-heading--padded">
+          <div>
+            <h2>Returns &amp; Cancellations</h2>
+            <p>Reversal documents recorded in the selected month.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Type</th>
+                <th>Original Sale</th>
+                <th>Date</th>
+                <th>Payment</th>
+                <th class="text-end">Units</th>
+                <th class="text-end">Refund</th>
+                <th class="text-end">Returned Cost</th>
+                <th class="text-end">Profit Reversal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (saleReturn of report.returns; track saleReturn.id) {
+                <tr>
+                  <td><span class="code-label">{{ saleReturn.returnNumber }}</span></td>
+                  <td>{{ returnTypeLabel(saleReturn.operationType) }}</td>
+                  <td>
+                    <a class="sale-link" routerLink="/sales" [queryParams]="{ saleId: saleReturn.saleId }">
+                      {{ saleReturn.saleNumber }}
+                    </a>
+                  </td>
+                  <td>{{ saleReturn.returnDate | date:'MMM d, y':'UTC' }}</td>
+                  <td>{{ paymentMethodLabel(saleReturn.paymentMethod) }}</td>
+                  <td class="text-end">{{ saleReturn.unitsReturned | number:'1.0-2' }}</td>
+                  <td class="text-end">{{ saleReturn.refund | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                  <td class="text-end">{{ saleReturn.returnedCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                  <td class="text-end">{{ saleReturn.grossProfitReversal | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
   }
 }

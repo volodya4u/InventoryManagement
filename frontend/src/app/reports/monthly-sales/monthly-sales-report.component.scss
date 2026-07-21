@@ -87,6 +87,10 @@
   border-top: 3px solid var(--pf-forest);
 }
 
+.summary-card--refund {
+  border-top: 3px solid #b66a6a;
+}
+
 .summary-card--profit {
   border-top: 3px solid var(--pf-rose);
 }
@@ -179,7 +183,7 @@
 
 .report-columns {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: 1fr;
   align-items: start;
   gap: 1rem;
 }

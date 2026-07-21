@@ -28,35 +28,53 @@ public class MonthlySalesReportService {
         var month = parseMonth(monthValue);
         var start = month.atDay(1);
         var endExclusive = month.plusMonths(1).atDay(1);
-        var totals = repository.findOverallTotals(start, endExclusive);
+        var salesTotals = repository.findSalesTotals(start, endExclusive);
+        var returnTotals = repository.findReturnTotals(start, endExclusive);
         var paymentsByMethod = repository.findPaymentSummaries(start, endExclusive).stream()
                 .collect(Collectors.toMap(PaymentSummary::paymentMethod, Function.identity()));
         var paymentSummaries = Arrays.stream(PaymentMethod.values())
                 .map(method -> paymentsByMethod.getOrDefault(
                         method,
-                        new PaymentSummary(method, 0, ZERO_MONEY, ZERO_MONEY, ZERO_MONEY)))
+                        new PaymentSummary(
+                                method,
+                                0,
+                                0,
+                                ZERO_MONEY,
+                                ZERO_MONEY,
+                                ZERO_MONEY,
+                                ZERO_MONEY,
+                                ZERO_MONEY)))
                 .toList();
-        var averageSaleValue = totals.salesCount() == 0
+        var averageSaleValue = salesTotals.salesCount() == 0
                 ? ZERO_MONEY
-                : totals.revenue().divide(
-                        BigDecimal.valueOf(totals.salesCount()),
+                : salesTotals.grossRevenue().divide(
+                        BigDecimal.valueOf(salesTotals.salesCount()),
                         2,
                         RoundingMode.HALF_UP);
+        var netRevenue = salesTotals.grossRevenue().subtract(returnTotals.refunds());
+        var netCost = salesTotals.grossCost().subtract(returnTotals.returnedCost());
 
         return new MonthlySalesReportDto(
                 month.toString(),
                 start,
                 endExclusive.minusDays(1),
-                totals.salesCount(),
-                repository.findUnitsSold(start, endExclusive),
-                totals.revenue(),
-                totals.totalCost(),
-                totals.grossProfit(),
+                salesTotals.salesCount(),
+                returnTotals.returnCount(),
+                salesTotals.unitsSold().subtract(returnTotals.unitsReturned()),
+                returnTotals.unitsReturned(),
+                salesTotals.grossRevenue(),
+                returnTotals.refunds(),
+                netRevenue,
+                salesTotals.grossCost(),
+                returnTotals.returnedCost(),
+                netCost,
+                netRevenue.subtract(netCost),
                 averageSaleValue,
                 paymentSummaries,
                 repository.findDailySummaries(start, endExclusive),
                 repository.findProductSummaries(start, endExclusive),
-                repository.findSales(start, endExclusive));
+                repository.findSales(start, endExclusive),
+                repository.findReturns(start, endExclusive));
     }
 
     private YearMonth parseMonth(String monthValue) {

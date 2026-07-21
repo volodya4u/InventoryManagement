@@ -1,5 +1,59 @@
 @use 'bootstrap/scss/bootstrap';
 
+// Return history is shared audit-panel styling and is kept outside the Sales
+// component so its Angular component stylesheet stays within the style budget.
+.return-history {
+  padding: 0.9rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 0.65rem;
+  background: #fafbf9;
+}
+
+.return-history h3 {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+}
+
+.return-history__item {
+  padding: 0.75rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 0.5rem;
+  background: var(--pf-paper);
+}
+
+.return-history__item + .return-history__item {
+  margin-top: 0.55rem;
+}
+
+.return-history__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.return-history__heading span {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--pf-muted);
+  font-size: 0.74rem;
+}
+
+.return-history ul,
+.return-history p {
+  margin: 0.45rem 0 0;
+  color: var(--pf-muted);
+  font-size: 0.78rem;
+}
+
+.return-history ul {
+  padding-left: 1.1rem;
+}
+
+.return-history p {
+  white-space: pre-wrap;
+}
+
 :root {
   --pf-ink: #25332d;
   --pf-muted: #66746e;
@@ -174,4 +228,3 @@ textarea {
     width: 100%;
   }
 }
-

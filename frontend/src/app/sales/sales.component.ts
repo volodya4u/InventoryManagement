@@ -5,7 +5,7 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { ActivatedRoute } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
-import { PaymentMethod, Product, Sale } from '../core/models';
+import { PaymentMethod, Product, Sale, SaleItem, SaleStatus } from '../core/models';
 
 type SaleItemFormGroup = FormGroup<{
   productId: FormControl<number | null>;
@@ -13,8 +13,18 @@ type SaleItemFormGroup = FormGroup<{
   unitPrice: FormControl<number | null>;
 }>;
 
+type ReturnItemFormGroup = FormGroup<{
+  saleItemId: FormControl<number>;
+  quantity: FormControl<number | null>;
+}>;
+
 interface PaymentMethodOption {
   value: PaymentMethod;
+  label: string;
+}
+
+interface ReasonOption {
+  value: string;
   label: string;
 }
 
@@ -33,21 +43,45 @@ export class SalesComponent implements OnInit {
   readonly saleError = signal('');
   readonly dialogOpen = signal(false);
   readonly detailSale = signal<Sale | null>(null);
+  readonly returnDialogOpen = signal(false);
+  readonly returning = signal(false);
+  readonly returnError = signal('');
+  readonly returnSale = signal<Sale | null>(null);
+  readonly cancellationDialogOpen = signal(false);
+  readonly cancelling = signal(false);
+  readonly cancellationError = signal('');
+  readonly cancellationSale = signal<Sale | null>(null);
 
   readonly totalRevenue = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.totalRevenue, 0)
+    this.sales().reduce((total, sale) => total + sale.netRevenue, 0)
   );
   readonly totalCost = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.totalCost, 0)
+    this.sales().reduce((total, sale) => total + sale.netCost, 0)
   );
   readonly totalGrossProfit = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.grossProfit, 0)
+    this.sales().reduce((total, sale) => total + sale.netGrossProfit, 0)
   );
 
   readonly paymentMethods: PaymentMethodOption[] = [
     { value: 'CASH', label: 'Cash' },
     { value: 'CARD', label: 'Card' },
     { value: 'BANK_TRANSFER', label: 'Bank Transfer' }
+  ];
+
+  readonly returnReasons: ReasonOption[] = [
+    { value: 'Customer Return', label: 'Customer Return' },
+    { value: 'Product Defect', label: 'Product Defect' },
+    { value: 'Incorrect Product', label: 'Incorrect Product' },
+    { value: 'Order Error', label: 'Order Error' },
+    { value: 'Other', label: 'Other' }
+  ];
+
+  readonly cancellationReasons: ReasonOption[] = [
+    { value: 'Entry Error', label: 'Entry Error' },
+    { value: 'Duplicate Sale', label: 'Duplicate Sale' },
+    { value: 'Customer Cancelled', label: 'Customer Cancelled' },
+    { value: 'Payment Failed', label: 'Payment Failed' },
+    { value: 'Other', label: 'Other' }
   ];
 
   readonly form = new FormGroup({
@@ -58,6 +92,25 @@ export class SalesComponent implements OnInit {
     }),
     notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
     items: new FormArray<SaleItemFormGroup>([])
+  });
+
+  readonly returnForm = new FormGroup({
+    returnDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    reason: new FormControl(this.returnReasons[0].value, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(200)]
+    }),
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
+    items: new FormArray<ReturnItemFormGroup>([])
+  });
+
+  readonly cancellationForm = new FormGroup({
+    cancellationDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    reason: new FormControl(this.cancellationReasons[0].value, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(200)]
+    }),
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
   });
 
   constructor(
@@ -71,6 +124,10 @@ export class SalesComponent implements OnInit {
 
   get itemControls(): SaleItemFormGroup[] {
     return this.form.controls.items.controls;
+  }
+
+  get returnItemControls(): ReturnItemFormGroup[] {
+    return this.returnForm.controls.items.controls;
   }
 
   load(): void {
@@ -212,6 +269,161 @@ export class SalesComponent implements OnInit {
 
   closeDetails(): void {
     this.detailSale.set(null);
+  }
+
+  openReturn(sale: Sale): void {
+    if (!this.canReturn(sale)) return;
+    this.returnSale.set(sale);
+    this.returnForm.reset({
+      returnDate: this.today(),
+      reason: this.returnReasons[0].value,
+      notes: ''
+    });
+    this.returnForm.controls.items.clear();
+    for (const item of sale.items.filter((candidate) => this.remainingReturnable(candidate) > 0)) {
+      this.returnForm.controls.items.push(new FormGroup({
+        saleItemId: new FormControl(item.id, { nonNullable: true }),
+        quantity: new FormControl<number | null>(null, [
+          Validators.min(0),
+          Validators.pattern(/^\d+$/)
+        ])
+      }));
+    }
+    this.returnError.set('');
+    this.returnDialogOpen.set(true);
+  }
+
+  closeReturnDialog(): void {
+    if (!this.returning()) this.returnDialogOpen.set(false);
+  }
+
+  returnItem(row: ReturnItemFormGroup): SaleItem | undefined {
+    return this.returnSale()?.items.find((item) => item.id === row.controls.saleItemId.value);
+  }
+
+  remainingReturnable(item: SaleItem): number {
+    return item.quantity - item.returnedQuantity;
+  }
+
+  returnQuantityExceedsAvailable(row: ReturnItemFormGroup): boolean {
+    const item = this.returnItem(row);
+    return !!item && (row.controls.quantity.value ?? 0) > this.remainingReturnable(item);
+  }
+
+  selectedReturnItems(): Array<{ saleItemId: number; quantity: number }> {
+    return this.returnItemControls
+      .map((row) => ({
+        saleItemId: row.controls.saleItemId.value,
+        quantity: row.controls.quantity.value ?? 0
+      }))
+      .filter((item) => item.quantity > 0);
+  }
+
+  returnRefund(): number {
+    return this.returnItemControls.reduce((total, row) => {
+      const item = this.returnItem(row);
+      return total + (row.controls.quantity.value ?? 0) * (item?.unitPrice ?? 0);
+    }, 0);
+  }
+
+  returnCost(): number {
+    return this.returnItemControls.reduce((total, row) => {
+      const item = this.returnItem(row);
+      return total + (row.controls.quantity.value ?? 0) * (item?.unitCost ?? 0);
+    }, 0);
+  }
+
+  hasReturnQuantityError(): boolean {
+    return this.returnItemControls.some((row) => this.returnQuantityExceedsAvailable(row));
+  }
+
+  submitReturn(): void {
+    const sale = this.returnSale();
+    const items = this.selectedReturnItems();
+    if (!sale || this.returnForm.invalid || items.length === 0
+        || this.hasReturnQuantityError() || this.returning()) {
+      this.returnForm.markAllAsTouched();
+      if (items.length === 0) this.returnError.set('Enter a return quantity for at least one Product.');
+      return;
+    }
+    const value = this.returnForm.getRawValue();
+    const request = {
+      returnDate: value.returnDate,
+      reason: value.reason,
+      notes: value.notes.trim(),
+      items
+    };
+    this.returning.set(true);
+    this.returnError.set('');
+    this.http.post<Sale>(`/api/sales/${sale.id}/returns`, request)
+      .pipe(finalize(() => this.returning.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.returnDialogOpen.set(false);
+          this.detailSale.set(updated);
+          this.load();
+        },
+        error: (error) => this.returnError.set(apiErrorMessage(error))
+      });
+  }
+
+  openCancellation(sale: Sale): void {
+    if (!this.canCancel(sale)) return;
+    this.cancellationSale.set(sale);
+    this.cancellationForm.reset({
+      cancellationDate: this.today(),
+      reason: this.cancellationReasons[0].value,
+      notes: ''
+    });
+    this.cancellationError.set('');
+    this.cancellationDialogOpen.set(true);
+  }
+
+  closeCancellationDialog(): void {
+    if (!this.cancelling()) this.cancellationDialogOpen.set(false);
+  }
+
+  submitCancellation(): void {
+    const sale = this.cancellationSale();
+    if (!sale || this.cancellationForm.invalid || this.cancelling()) {
+      this.cancellationForm.markAllAsTouched();
+      return;
+    }
+    this.cancelling.set(true);
+    this.cancellationError.set('');
+    const value = this.cancellationForm.getRawValue();
+    this.http.post<Sale>(`/api/sales/${sale.id}/cancellation`, {
+      cancellationDate: value.cancellationDate,
+      reason: value.reason,
+      notes: value.notes.trim()
+    })
+      .pipe(finalize(() => this.cancelling.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.cancellationDialogOpen.set(false);
+          this.detailSale.set(updated);
+          this.load();
+        },
+        error: (error) => this.cancellationError.set(apiErrorMessage(error))
+      });
+  }
+
+  canReturn(sale: Sale): boolean {
+    return sale.status === 'COMPLETED' || sale.status === 'PARTIALLY_RETURNED';
+  }
+
+  canCancel(sale: Sale): boolean {
+    return sale.status === 'COMPLETED';
+  }
+
+  saleStatusLabel(status: SaleStatus): string {
+    const labels: Record<SaleStatus, string> = {
+      COMPLETED: 'Completed',
+      PARTIALLY_RETURNED: 'Partially Returned',
+      RETURNED: 'Returned',
+      CANCELLED: 'Cancelled'
+    };
+    return labels[status];
   }
 
   paymentMethodLabel(value: PaymentMethod): string {

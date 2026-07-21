@@ -10,7 +10,7 @@ A local inventory system for tracking raw materials and finished products for a 
 - Create, edit, and delete operations.
 - Raw-material receipts and weighted-average inventory valuation.
 - Product recipes, atomic production, and raw-material consumption.
-- Sales with automatic Product stock deduction and immutable financial snapshots.
+- Sales with automatic Product stock deduction, returns, cancellations, and immutable financial snapshots.
 - Raw Material and Product write-offs and physical-count stock adjustments with audited movements.
 - Monthly Sales report with revenue, cost, gross profit, payment, daily, and Product breakdowns.
 - JPG, JPEG, and PNG images stored as BLOBs.
@@ -98,20 +98,28 @@ A sale can contain one or more finished Products. The current recommended sellin
 - **Cost** is the Product's weighted-average unit cost at the time of sale multiplied by quantity.
 - **Gross Profit** is revenue minus cost and can be negative when the actual price is below cost.
 
-Changing or deleting catalog data later does not rewrite completed sale values. Sales are currently immutable; cancellation and returns are planned as separate stock operations.
+Changing or deleting catalog data later does not rewrite completed sale values. A completed sale is retained permanently and can be reversed through a separate audited document:
+
+- **Return Products** accepts a partial or full quantity from a completed or partially returned sale. A quantity can never exceed the remaining unreturned quantity.
+- **Cancel Sale** reverses every item in a completed sale. It is available only before any Product has already been returned.
+- Every reversal receives a unique number such as `RET-20260721-0001` and stores its date, reason, notes, items, refund, returned cost, and reversed gross profit.
+- The refund uses the actual unit price recorded in the original sale. Restored inventory uses the weighted-average Product cost recorded at the time of that sale.
+- Returned Products are added back to Product stock and recorded as `SALE_RETURN` or `SALE_CANCELLATION` stock movements.
+- Sale status changes from **Completed** to **Partially Returned**, **Returned**, or **Cancelled**. Original sale values and reversal history remain available for audit.
 
 ### Monthly Sales Report
 
-Open **Reports → Monthly Sales** and select a report month. The report includes completed sales whose sale date belongs to that calendar month.
+Open **Reports -> Monthly Sales** and select a report month. Sales are included by their sale date, while returns and cancellations are included by their own reversal date.
 
-- **Sales** is the number of completed sale documents.
-- **Units Sold** is the total number of finished Product units in those sales.
-- **Revenue**, **Cost**, and **Gross Profit** use the immutable financial snapshots stored when each sale was completed.
-- **Average Sale** is monthly revenue divided by the number of sale documents.
+- **Sales** is the number of sale documents created during the month; **Returns / Cancellations** is the number of reversal documents created during the month.
+- **Net Units** is sold quantity minus returned quantity for the selected month.
+- **Gross Revenue** is recorded sales before refunds. **Net Revenue** is Gross Revenue minus refunds.
+- **Net Cost** and **Net Gross Profit** subtract the cost and profit reversed by returns or cancellations.
+- **Average Sale** is monthly Gross Revenue divided by the number of sale documents.
 - Payment totals are grouped into **Cash**, **Card**, and **Bank Transfer**.
-- Product and daily tables show which Products generated the result and on which days.
+- Product and daily tables combine sales and reversals on the dates when those documents were recorded.
 - A sale number opens the full document on the Sales page.
-- **Export CSV** downloads the selected month's sale documents and financial totals.
+- **Export CSV** downloads the selected month's sales, reversal documents, and financial totals.
 
 ## Local Profile
 

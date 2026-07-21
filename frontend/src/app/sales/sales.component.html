@@ -36,25 +36,39 @@
           <tr>
             <th>Sale Number</th>
             <th>Date</th>
+            <th>Status</th>
             <th>Products</th>
             <th>Payment</th>
-            <th class="text-end">Revenue</th>
-            <th class="text-end">Cost</th>
-            <th class="text-end">Gross Profit</th>
+            <th class="text-end">Net Revenue</th>
+            <th class="text-end">Net Cost</th>
+            <th class="text-end">Net Gross Profit</th>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
         <tbody>
           @for (sale of sales(); track sale.id) {
-            <tr>
+            <tr [class.sale-row-muted]="sale.status === 'CANCELLED' || sale.status === 'RETURNED'">
               <td><span class="sale-number">{{ sale.saleNumber }}</span></td>
               <td>{{ sale.saleDate | date:'mediumDate':'UTC' }}</td>
+              <td>
+                <span
+                  class="sale-status"
+                  [class.sale-status--partial]="sale.status === 'PARTIALLY_RETURNED'"
+                  [class.sale-status--returned]="sale.status === 'RETURNED'"
+                  [class.sale-status--cancelled]="sale.status === 'CANCELLED'"
+                >{{ saleStatusLabel(sale.status) }}</span>
+              </td>
               <td><div class="sale-products">{{ saleItemsSummary(sale) }}</div></td>
               <td>{{ paymentMethodLabel(sale.paymentMethod) }}</td>
-              <td class="text-end fw-semibold">{{ sale.totalRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
-              <td class="text-end">{{ sale.totalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
-              <td class="text-end fw-semibold" [class.text-danger]="sale.grossProfit < 0">
-                {{ sale.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}
+              <td class="text-end fw-semibold">
+                {{ sale.netRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                @if (sale.refundedRevenue > 0) {
+                  <small class="refund-note">{{ sale.refundedRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }} refunded</small>
+                }
+              </td>
+              <td class="text-end">{{ sale.netCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+              <td class="text-end fw-semibold" [class.text-danger]="sale.netGrossProfit < 0">
+                {{ sale.netGrossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}
               </td>
               <td class="text-end">
                 <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openDetails(sale)">View</button>
@@ -64,7 +78,7 @@
         </tbody>
         <tfoot>
           <tr class="sales-total">
-            <td colspan="4" class="text-end">Sales Totals</td>
+            <td colspan="5" class="text-end">Net Sales Totals</td>
             <td class="text-end">{{ totalRevenue() | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
             <td class="text-end">{{ totalCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
             <td class="text-end" [class.text-danger]="totalGrossProfit() < 0">
@@ -215,7 +229,15 @@
       <header class="dialog-header">
         <div>
           <h2 id="sale-detail-title">{{ sale.saleNumber }}</h2>
-          <div class="dialog-subtitle">{{ sale.saleDate | date:'mediumDate':'UTC' }} · {{ paymentMethodLabel(sale.paymentMethod) }}</div>
+          <div class="dialog-subtitle">
+            {{ sale.saleDate | date:'mediumDate':'UTC' }} · {{ paymentMethodLabel(sale.paymentMethod) }} ·
+            <span
+              class="sale-status"
+              [class.sale-status--partial]="sale.status === 'PARTIALLY_RETURNED'"
+              [class.sale-status--returned]="sale.status === 'RETURNED'"
+              [class.sale-status--cancelled]="sale.status === 'CANCELLED'"
+            >{{ saleStatusLabel(sale.status) }}</span>
+          </div>
         </div>
         <button type="button" class="btn-close" aria-label="Close" (click)="closeDetails()"></button>
       </header>
@@ -226,7 +248,9 @@
             <thead>
               <tr>
                 <th>Product</th>
-                <th class="text-end">Qty</th>
+                <th class="text-end">Sold</th>
+                <th class="text-end">Returned</th>
+                <th class="text-end">Returnable</th>
                 <th class="text-end">Actual Price</th>
                 <th class="text-end">Revenue</th>
                 <th class="text-end">Cost</th>
@@ -241,6 +265,8 @@
                     <small>{{ item.productSku }} · recommended {{ item.recommendedUnitPrice | currency:'UAH':'symbol-narrow':'1.2-2' }}</small>
                   </td>
                   <td class="text-end">{{ item.quantity }}</td>
+                  <td class="text-end">{{ item.returnedQuantity }}</td>
+                  <td class="text-end fw-semibold">{{ remainingReturnable(item) }}</td>
                   <td class="text-end">{{ item.unitPrice | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
                   <td class="text-end">{{ item.lineRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
                   <td class="text-end">{{ item.lineCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
@@ -251,11 +277,41 @@
           </table>
         </div>
 
-        <div class="sale-totals mt-3">
-          <div><span>Revenue</span><strong>{{ sale.totalRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
-          <div><span>Cost</span><strong>{{ sale.totalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
-          <div><span>Gross Profit</span><strong [class.text-danger]="sale.grossProfit < 0">{{ sale.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+        <div class="sale-totals sale-totals--detail mt-3">
+          <div><span>Gross Revenue</span><strong>{{ sale.totalRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+          <div><span>Refunded</span><strong>{{ sale.refundedRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+          <div><span>Net Revenue</span><strong>{{ sale.netRevenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+          <div><span>Net Cost</span><strong>{{ sale.netCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+          <div><span>Net Gross Profit</span><strong [class.text-danger]="sale.netGrossProfit < 0">{{ sale.netGrossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
         </div>
+
+        @if (sale.returns.length > 0) {
+          <section class="return-history mt-3">
+            <h3>Returns and Cancellations</h3>
+            @for (saleReturn of sale.returns; track saleReturn.id) {
+              <article class="return-history__item">
+                <div class="return-history__heading">
+                  <div>
+                    <strong>{{ saleReturn.returnNumber }}</strong>
+                    <span>
+                      {{ saleReturn.operationType === 'CANCELLATION' ? 'Cancellation' : 'Product Return' }} ·
+                      {{ saleReturn.returnDate | date:'mediumDate':'UTC' }} · {{ saleReturn.reason }}
+                    </span>
+                  </div>
+                  <strong class="text-danger">−{{ saleReturn.totalRefund | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+                </div>
+                <ul>
+                  @for (returnItem of saleReturn.items; track returnItem.saleItemId) {
+                    <li>{{ returnItem.quantity }} × {{ returnItem.productName }}</li>
+                  }
+                </ul>
+                @if (saleReturn.notes) {
+                  <p>{{ saleReturn.notes }}</p>
+                }
+              </article>
+            }
+          </section>
+        }
 
         @if (sale.notes) {
           <div class="sale-notes mt-3"><strong>Notes</strong><p>{{ sale.notes }}</p></div>
@@ -263,8 +319,196 @@
       </div>
 
       <footer class="dialog-footer">
+        @if (canReturn(sale)) {
+          <button type="button" class="btn btn-outline-warning" (click)="openReturn(sale)">Return Products</button>
+        }
+        @if (canCancel(sale)) {
+          <button type="button" class="btn btn-outline-danger" (click)="openCancellation(sale)">Cancel Sale</button>
+        }
         <button type="button" class="btn btn-outline-secondary" (click)="closeDetails()">Close</button>
       </footer>
+    </section>
+  </div>
+}
+
+@if (returnDialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeReturnDialog()">
+    <section class="dialog-card return-dialog" role="dialog" aria-modal="true" aria-labelledby="return-dialog-title" (click)="$event.stopPropagation()">
+      <header class="dialog-header">
+        <div>
+          <h2 id="return-dialog-title">Return Products</h2>
+          <div class="dialog-subtitle">
+            {{ returnSale()?.saleNumber }} · refunded at the original actual selling prices
+          </div>
+        </div>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeReturnDialog()"></button>
+      </header>
+
+      <form [formGroup]="returnForm" (ngSubmit)="submitReturn()" novalidate>
+        <div class="dialog-body">
+          @if (returnError()) {
+            <div class="alert alert-danger" role="alert">{{ returnError() }}</div>
+          }
+
+          <div class="alert alert-light border small">
+            Returned Products are restored to stock using their unit cost from the original Sale. Previously returned quantities cannot be returned again.
+          </div>
+
+          <div class="table-responsive return-items-table mb-3" formArrayName="items">
+            <table class="table mb-0">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th class="text-end">Sold</th>
+                  <th class="text-end">Already Returned</th>
+                  <th class="text-end">Available</th>
+                  <th class="return-quantity-column">Return Quantity</th>
+                  <th class="text-end">Refund</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of returnItemControls; track row; let index = $index) {
+                  @if (returnItem(row); as item) {
+                    <tr [formGroupName]="index">
+                      <td>
+                        <strong>{{ item.productName }}</strong>
+                        <small>{{ item.productSku }}</small>
+                      </td>
+                      <td class="text-end">{{ item.quantity }}</td>
+                      <td class="text-end">{{ item.returnedQuantity }}</td>
+                      <td class="text-end fw-semibold">{{ remainingReturnable(item) }}</td>
+                      <td>
+                        <input
+                          class="form-control form-control-sm"
+                          type="number"
+                          min="0"
+                          step="1"
+                          [attr.max]="remainingReturnable(item)"
+                          formControlName="quantity"
+                          [attr.aria-label]="'Return quantity for ' + item.productName"
+                        />
+                        @if (returnQuantityExceedsAvailable(row)) {
+                          <div class="invalid-feedback d-block">Exceeds available quantity.</div>
+                        } @else if (row.controls.quantity.touched && row.controls.quantity.invalid) {
+                          <div class="invalid-feedback d-block">Enter a whole number.</div>
+                        }
+                      </td>
+                      <td class="text-end">
+                        {{ (row.controls.quantity.value ?? 0) * item.unitPrice | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label" for="return-date">Return Date *</label>
+              <input
+                id="return-date"
+                class="form-control"
+                type="date"
+                [attr.min]="returnSale()?.saleDate"
+                formControlName="returnDate"
+              />
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="return-reason">Reason *</label>
+              <select id="return-reason" class="form-select" formControlName="reason">
+                @for (reason of returnReasons; track reason.value) {
+                  <option [value]="reason.value">{{ reason.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="sale-totals mb-3">
+            <div><span>Refund</span><strong>{{ returnRefund() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+            <div><span>Returned Cost</span><strong>{{ returnCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+            <div><span>Profit Reversal</span><strong>{{ returnRefund() - returnCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+          </div>
+
+          <div>
+            <label class="form-label" for="return-notes">Notes</label>
+            <textarea id="return-notes" class="form-control" rows="3" maxlength="1000" formControlName="notes"></textarea>
+          </div>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeReturnDialog()">Cancel</button>
+          <button
+            type="submit"
+            class="btn btn-warning"
+            [disabled]="returning() || selectedReturnItems().length === 0 || hasReturnQuantityError()"
+          >{{ returning() ? 'Processing...' : 'Complete Return' }}</button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}
+
+@if (cancellationDialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeCancellationDialog()">
+    <section class="dialog-card cancellation-dialog" role="dialog" aria-modal="true" aria-labelledby="cancellation-dialog-title" (click)="$event.stopPropagation()">
+      <header class="dialog-header">
+        <div>
+          <h2 id="cancellation-dialog-title">Cancel Sale</h2>
+          <div class="dialog-subtitle">{{ cancellationSale()?.saleNumber }}</div>
+        </div>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeCancellationDialog()"></button>
+      </header>
+
+      <form [formGroup]="cancellationForm" (ngSubmit)="submitCancellation()" novalidate>
+        <div class="dialog-body">
+          @if (cancellationError()) {
+            <div class="alert alert-danger" role="alert">{{ cancellationError() }}</div>
+          }
+
+          <div class="alert alert-danger">
+            This operation cancels the entire Sale, refunds its full amount, and restores every Product to stock. The Sale will remain in the audit history and cannot be activated again.
+          </div>
+
+          <div class="cancellation-summary mb-3">
+            <div><span>Products Restored</span><strong>{{ cancellationSale()?.items?.length ?? 0 }} lines</strong></div>
+            <div><span>Full Refund</span><strong>{{ (cancellationSale()?.totalRevenue ?? 0) | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label" for="cancellation-date">Cancellation Date *</label>
+              <input
+                id="cancellation-date"
+                class="form-control"
+                type="date"
+                [attr.min]="cancellationSale()?.saleDate"
+                formControlName="cancellationDate"
+              />
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="cancellation-reason">Reason *</label>
+              <select id="cancellation-reason" class="form-select" formControlName="reason">
+                @for (reason of cancellationReasons; track reason.value) {
+                  <option [value]="reason.value">{{ reason.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label" for="cancellation-notes">Notes</label>
+            <textarea id="cancellation-notes" class="form-control" rows="3" maxlength="1000" formControlName="notes"></textarea>
+          </div>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeCancellationDialog()">Keep Sale</button>
+          <button type="submit" class="btn btn-danger" [disabled]="cancelling()">
+            {{ cancelling() ? 'Cancelling...' : 'Confirm Cancellation' }}
+          </button>
+        </footer>
+      </form>
     </section>
   </div>
 }

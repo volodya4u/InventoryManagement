@@ -102,10 +102,15 @@ class InventorySchemaMigrationTest {
             var productMovementColumns = jdbcTemplate.queryForList("PRAGMA table_info(product_stock_movement)");
             assertThat(productMovementColumns)
                     .extracting(column -> column.get("name"))
-                    .contains("sale_id");
+                    .contains("sale_id", "sale_return_id");
+            var saleColumns = jdbcTemplate.queryForList("PRAGMA table_info(sale)");
+            assertThat(saleColumns)
+                    .extracting(column -> column.get("name"))
+                    .contains("status");
             assertThat(jdbcTemplate.queryForObject(
                     "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'product_stock_movement'",
-                    String.class)).contains("'SALE'", "'WRITE_OFF'", "'ADJUSTMENT_DECREASE'");
+                    String.class)).contains(
+                            "'SALE'", "'WRITE_OFF'", "'ADJUSTMENT_DECREASE'", "'SALE_CANCELLATION'");
         } finally {
             dataSource.destroy();
         }

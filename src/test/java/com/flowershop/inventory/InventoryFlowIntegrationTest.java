@@ -49,6 +49,7 @@ class InventoryFlowIntegrationTest {
     @BeforeEach
     void resetDatabase() {
         jdbcTemplate.update("DELETE FROM product_stock_movement");
+        jdbcTemplate.update("DELETE FROM sale_return");
         jdbcTemplate.update("DELETE FROM sale");
         jdbcTemplate.update("DELETE FROM product");
         jdbcTemplate.update("DELETE FROM raw_material");
@@ -58,7 +59,7 @@ class InventoryFlowIntegrationTest {
                 WHERE name IN (
                     'raw_material', 'raw_material_stock_movement', 'product',
                     'production_batch', 'production_consumption', 'product_stock_movement',
-                    'sale', 'sale_item'
+                    'sale', 'sale_item', 'sale_return', 'sale_return_item'
                 )
                 """);
         userRepository.insertAdmin("admin", passwordEncoder.encode(testPassword));
@@ -140,6 +141,161 @@ class InventoryFlowIntegrationTest {
         mockMvc.perform(get("/api/dashboard").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.salesCount").value(1));
+    }
+
+    @Test
+    void returnsAndCancelsSalesWhileRestoringStockAndMonthlyResults() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (sku, name, description, quantity, price, markup_percentage, average_unit_cost)
+                VALUES ('ROSE-BOX-001', 'Rose Box', '', 10, 200, 100, 100)
+                """);
+
+        mockMvc.perform(post("/api/sales")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "saleDate": "2026-07-20",
+                                  "paymentMethod": "CARD",
+                                  "notes": "Return scenario",
+                                  "items": [{"productId": 1, "quantity": 4, "unitPrice": 200}]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.items[0].id").value(1))
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        mockMvc.perform(post("/api/sales/1/returns")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "returnDate": "2026-08-02",
+                                  "reason": "Customer Return",
+                                  "notes": "Unopened item",
+                                  "items": [{"saleItemId": 1, "quantity": 1}]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PARTIALLY_RETURNED"))
+                .andExpect(jsonPath("$.items[0].returnedQuantity").value(1))
+                .andExpect(jsonPath("$.refundedRevenue").value(200))
+                .andExpect(jsonPath("$.returnedCost").value(100))
+                .andExpect(jsonPath("$.netRevenue").value(600))
+                .andExpect(jsonPath("$.netGrossProfit").value(300))
+                .andExpect(jsonPath("$.returns[0].returnNumber").value("RET-20260802-0001"));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("7");
+
+        mockMvc.perform(post("/api/sales/1/returns")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "returnDate": "2026-08-02",
+                                  "reason": "Invalid Excess Return",
+                                  "items": [{"saleItemId": 1, "quantity": 4}]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(
+                        "Return quantity for Rose Box exceeds the remaining returnable quantity 3"));
+
+        mockMvc.perform(post("/api/sales/1/returns")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "returnDate": "2026-08-03",
+                                  "reason": "Customer Return",
+                                  "items": [{"saleItemId": 1, "quantity": 3}]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("RETURNED"))
+                .andExpect(jsonPath("$.items[0].returnedQuantity").value(4))
+                .andExpect(jsonPath("$.netRevenue").value(0))
+                .andExpect(jsonPath("$.netCost").value(0));
+
+        mockMvc.perform(post("/api/sales")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "saleDate": "2026-07-21",
+                                  "paymentMethod": "CASH",
+                                  "items": [{"productId": 1, "quantity": 2, "unitPrice": 200}]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(2));
+
+        mockMvc.perform(post("/api/sales/2/cancellation")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "cancellationDate": "2026-08-04",
+                                  "reason": "Entry Error",
+                                  "notes": "Duplicate document"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.returns[0].operationType").value("CANCELLATION"))
+                .andExpect(jsonPath("$.netRevenue").value(0));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("10");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT average_unit_cost FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("100");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM product_stock_movement WHERE movement_type = 'SALE_RETURN'",
+                Integer.class)).isEqualTo(2);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM product_stock_movement WHERE movement_type = 'SALE_CANCELLATION'",
+                Integer.class)).isEqualTo(1);
+
+        mockMvc.perform(get("/api/reports/monthly-sales")
+                        .param("month", "2026-08")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.salesCount").value(0))
+                .andExpect(jsonPath("$.returnCount").value(3))
+                .andExpect(jsonPath("$.unitsSold").value(-6))
+                .andExpect(jsonPath("$.unitsReturned").value(6))
+                .andExpect(jsonPath("$.grossRevenue").value(0))
+                .andExpect(jsonPath("$.refunds").value(1200))
+                .andExpect(jsonPath("$.revenue").value(-1200))
+                .andExpect(jsonPath("$.returnedCost").value(600))
+                .andExpect(jsonPath("$.totalCost").value(-600))
+                .andExpect(jsonPath("$.grossProfit").value(-600))
+                .andExpect(jsonPath("$.returns.length()").value(3));
     }
 
     @Test
