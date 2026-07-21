@@ -2,6 +2,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
 import { PaymentMethod, Product, Sale } from '../core/models';
@@ -59,7 +60,10 @@ export class SalesComponent implements OnInit {
     items: new FormArray<SaleItemFormGroup>([])
   });
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -81,6 +85,10 @@ export class SalesComponent implements OnInit {
         next: ({ sales, products }) => {
           this.sales.set(sales);
           this.products.set(products);
+          const requestedSaleId = Number(this.route.snapshot.queryParamMap.get('saleId'));
+          if (requestedSaleId > 0) {
+            this.detailSale.set(sales.find((sale) => sale.id === requestedSaleId) ?? null);
+          }
         },
         error: (error) => this.error.set(apiErrorMessage(error))
       });

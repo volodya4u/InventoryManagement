@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.flowershop.inventory.auth.AuthController;
@@ -139,6 +140,58 @@ class InventoryFlowIntegrationTest {
         mockMvc.perform(get("/api/dashboard").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.salesCount").value(1));
+    }
+
+    @Test
+    void reportsMonthlySalesWithoutMixingOtherMonths() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (sku, name, description, quantity, price, markup_percentage, average_unit_cost)
+                VALUES ('ROSE-BOX-001', 'Rose Box', '', 10, 250, 50, 150)
+                """);
+        insertSale("SALE-20260705-0001", "2026-07-05", "CARD", "480", "300", "180", "2", "240");
+        insertSale("SALE-20260720-0001", "2026-07-20", "CASH", "250", "150", "100", "1", "250");
+        insertSale("SALE-20260630-0001", "2026-06-30", "BANK_TRANSFER", "100", "50", "50", "1", "100");
+
+        mockMvc.perform(get("/api/reports/monthly-sales")
+                        .param("month", "2026-07")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.month").value("2026-07"))
+                .andExpect(jsonPath("$.periodStart").value("2026-07-01"))
+                .andExpect(jsonPath("$.periodEnd").value("2026-07-31"))
+                .andExpect(jsonPath("$.salesCount").value(2))
+                .andExpect(jsonPath("$.unitsSold").value(3))
+                .andExpect(jsonPath("$.revenue").value(730))
+                .andExpect(jsonPath("$.totalCost").value(450))
+                .andExpect(jsonPath("$.grossProfit").value(280))
+                .andExpect(jsonPath("$.averageSaleValue").value(365))
+                .andExpect(jsonPath("$.paymentSummaries.length()").value(3))
+                .andExpect(jsonPath("$.paymentSummaries[0].paymentMethod").value("CASH"))
+                .andExpect(jsonPath("$.paymentSummaries[0].salesCount").value(1))
+                .andExpect(jsonPath("$.paymentSummaries[1].paymentMethod").value("CARD"))
+                .andExpect(jsonPath("$.paymentSummaries[2].paymentMethod").value("BANK_TRANSFER"))
+                .andExpect(jsonPath("$.paymentSummaries[2].revenue").value(0))
+                .andExpect(jsonPath("$.dailySummaries.length()").value(2))
+                .andExpect(jsonPath("$.productSummaries[0].quantitySold").value(3))
+                .andExpect(jsonPath("$.productSummaries[0].grossProfit").value(280))
+                .andExpect(jsonPath("$.sales.length()").value(2));
+
+        mockMvc.perform(get("/api/reports/monthly-sales")
+                        .param("month", "July 2026")
+                        .session(session))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Month must use the YYYY-MM format"));
+    }
+
+    @Test
+    void forwardsNestedReportRoutesToTheAngularApplication() throws Exception {
+        mockMvc.perform(get("/reports/monthly-sales"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/index.html"));
     }
 
     @Test
@@ -450,5 +503,47 @@ class InventoryFlowIntegrationTest {
                 "SELECT quantity FROM raw_material WHERE name = ?",
                 BigDecimal.class,
                 name)).isEqualByComparingTo(expected);
+    }
+
+    private void insertSale(
+            String saleNumber,
+            String saleDate,
+            String paymentMethod,
+            String revenue,
+            String cost,
+            String profit,
+            String quantity,
+            String unitPrice) {
+        jdbcTemplate.update(
+                """
+                INSERT INTO sale
+                    (sale_number, sale_date, payment_method, notes,
+                     total_revenue, total_cost, gross_profit)
+                VALUES (?, ?, ?, '', ?, ?, ?)
+                """,
+                saleNumber,
+                saleDate,
+                paymentMethod,
+                revenue,
+                cost,
+                profit);
+        var saleId = jdbcTemplate.queryForObject(
+                "SELECT id FROM sale WHERE sale_number = ?",
+                Long.class,
+                saleNumber);
+        jdbcTemplate.update(
+                """
+                INSERT INTO sale_item
+                    (sale_id, product_id, product_sku, product_name, quantity,
+                     recommended_unit_price, unit_price, unit_cost,
+                     line_revenue, line_cost, line_profit)
+                VALUES (?, 1, 'ROSE-BOX-001', 'Rose Box', ?, 250, ?, 150, ?, ?, ?)
+                """,
+                saleId,
+                quantity,
+                unitPrice,
+                revenue,
+                cost,
+                profit);
     }
 }

@@ -27,6 +27,11 @@ export const routes: Routes = [
         loadComponent: () => import('./sales/sales.component').then((module) => module.SalesComponent)
       },
       {
+        path: 'reports/monthly-sales',
+        loadComponent: () => import('./reports/monthly-sales/monthly-sales-report.component')
+          .then((module) => module.MonthlySalesReportComponent)
+      },
+      {
         path: 'change-password',
         loadComponent: () => import('./change-password/change-password.component').then((module) => module.ChangePasswordComponent)
       },

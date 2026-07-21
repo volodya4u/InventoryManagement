@@ -78,6 +78,85 @@ nav a {
   text-decoration: none;
 }
 
+.nav-dropdown {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.nav-dropdown__toggle {
+  position: relative;
+  border: 0;
+  color: #cdd7d2;
+  background: transparent;
+  padding: 0 1.6rem 0 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 580;
+}
+
+.nav-dropdown__toggle::before {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  content: '';
+  transform: translateY(-70%) rotate(45deg);
+}
+
+.nav-dropdown:hover .nav-dropdown__toggle,
+.nav-dropdown:focus-within .nav-dropdown__toggle,
+.nav-dropdown.active .nav-dropdown__toggle {
+  color: #fff;
+}
+
+.nav-dropdown.active .nav-dropdown__toggle::after {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0;
+  left: 0.8rem;
+  height: 3px;
+  border-radius: 2px 2px 0 0;
+  background: #c48a8f;
+  content: '';
+}
+
+.nav-dropdown__menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% - 0.15rem);
+  left: 0.35rem;
+  min-width: 180px;
+  display: none;
+  padding: 0.35rem;
+  border: 1px solid #43524b;
+  border-radius: 0.55rem;
+  background: #2d3c35;
+  box-shadow: 0 12px 28px rgba(15, 29, 23, 0.26);
+}
+
+.nav-dropdown:hover .nav-dropdown__menu,
+.nav-dropdown:focus-within .nav-dropdown__menu {
+  display: block;
+}
+
+.nav-dropdown__menu a {
+  min-height: 40px;
+  border-radius: 0.35rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.nav-dropdown__menu a:hover,
+.nav-dropdown__menu a.active {
+  background: #3b4d44;
+}
+
+.nav-dropdown__menu a.active::after {
+  display: none;
+}
+
 nav a:hover,
 nav a.active {
   color: #fff;
@@ -164,6 +243,47 @@ nav a.active::after {
     padding: 0 0.25rem;
   }
 
+  .nav-dropdown {
+    display: block;
+  }
+
+  .nav-dropdown__toggle {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 1.5rem 0 0.25rem;
+    text-align: left;
+  }
+
+  .nav-dropdown__toggle::before {
+    right: 0.35rem;
+  }
+
+  .nav-dropdown.active .nav-dropdown__toggle::after {
+    top: 0.4rem;
+    right: auto;
+    bottom: 0.4rem;
+    left: -0.5rem;
+    width: 3px;
+    height: auto;
+  }
+
+  .nav-dropdown__menu {
+    position: static;
+    min-width: 0;
+    display: block;
+    margin-left: 0.75rem;
+    padding: 0 0 0.25rem;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .nav-dropdown__menu a {
+    min-height: 36px;
+    padding-left: 0.7rem;
+    font-size: 0.84rem;
+  }
+
   nav a.active::after {
     top: 0.4rem;
     right: auto;
@@ -194,4 +314,3 @@ nav a.active::after {
     padding-top: 1.35rem;
   }
 }
-

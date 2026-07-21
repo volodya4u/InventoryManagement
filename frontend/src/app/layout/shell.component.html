@@ -22,6 +22,14 @@
         <a routerLink="/raw-materials" routerLinkActive="active" (click)="closeMenu()">Raw Materials</a>
         <a routerLink="/products" routerLinkActive="active" (click)="closeMenu()">Products</a>
         <a routerLink="/sales" routerLinkActive="active" (click)="closeMenu()">Sales</a>
+        <div class="nav-dropdown" routerLinkActive="active">
+          <button type="button" class="nav-dropdown__toggle" aria-haspopup="true">Reports</button>
+          <div class="nav-dropdown__menu">
+            <a routerLink="/reports/monthly-sales" routerLinkActive="active" (click)="closeMenu()">
+              Monthly Sales
+            </a>
+          </div>
+        </div>
         <a routerLink="/change-password" routerLinkActive="active" (click)="closeMenu()">Change Password</a>
       </nav>
 

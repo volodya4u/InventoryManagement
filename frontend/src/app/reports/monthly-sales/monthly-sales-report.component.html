@@ -1,0 +1,213 @@
+<section class="page-heading report-heading">
+  <div>
+    <div class="report-breadcrumb">Reports / Monthly Sales</div>
+    <h1>Monthly Sales</h1>
+    <p>Review revenue, cost, gross profit, payments, and sold Products for one month.</p>
+  </div>
+  <div class="report-controls">
+    <div>
+      <label class="form-label" for="report-month">Report Month</label>
+      <input
+        id="report-month"
+        class="form-control"
+        type="month"
+        [value]="selectedMonth()"
+        (change)="monthChanged($event)"
+      />
+    </div>
+    <button
+      type="button"
+      class="btn btn-outline-success"
+      (click)="exportCsv()"
+      [disabled]="loading() || !report()?.sales?.length"
+    >Export CSV</button>
+  </div>
+</section>
+
+@if (error()) {
+  <div class="alert alert-danger" role="alert">
+    {{ error() }}
+    <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Try Again</button>
+  </div>
+}
+
+@if (loading()) {
+  <section class="surface-card empty-state">Loading monthly sales report...</section>
+} @else if (report(); as report) {
+  <section class="report-period" aria-label="Report period">
+    {{ report.periodStart | date:'longDate':'UTC' }} – {{ report.periodEnd | date:'longDate':'UTC' }}
+  </section>
+
+  <section class="summary-grid" aria-label="Monthly totals">
+    <article class="summary-card">
+      <span>Sales</span>
+      <strong>{{ report.salesCount | number:'1.0-0' }}</strong>
+      <small>completed documents</small>
+    </article>
+    <article class="summary-card">
+      <span>Units Sold</span>
+      <strong>{{ report.unitsSold | number:'1.0-2' }}</strong>
+      <small>finished Products</small>
+    </article>
+    <article class="summary-card summary-card--revenue">
+      <span>Revenue</span>
+      <strong>{{ report.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <small>actual sales prices</small>
+    </article>
+    <article class="summary-card">
+      <span>Cost</span>
+      <strong>{{ report.totalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <small>cost at sale time</small>
+    </article>
+    <article class="summary-card summary-card--profit">
+      <span>Gross Profit</span>
+      <strong [class.text-danger]="report.grossProfit < 0">
+        {{ report.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}
+      </strong>
+      <small>revenue minus cost</small>
+    </article>
+    <article class="summary-card">
+      <span>Average Sale</span>
+      <strong>{{ report.averageSaleValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <small>revenue per document</small>
+    </article>
+  </section>
+
+  @if (report.salesCount === 0) {
+    <section class="surface-card empty-state">
+      <strong>No sales in this month</strong>
+      <p>Choose another month or create a sale from the Sales page.</p>
+      <a class="btn btn-success" routerLink="/sales">Go to Sales</a>
+    </section>
+  } @else {
+    <section class="report-section">
+      <div class="section-heading">
+        <div>
+          <h2>Payment Methods</h2>
+          <p>Monthly revenue and profit grouped by how customers paid.</p>
+        </div>
+      </div>
+      <div class="payment-grid">
+        @for (payment of report.paymentSummaries; track payment.paymentMethod) {
+          <article class="payment-card">
+            <div class="payment-card__heading">
+              <strong>{{ paymentMethodLabel(payment.paymentMethod) }}</strong>
+              <span>{{ payment.salesCount }} sale{{ payment.salesCount === 1 ? '' : 's' }}</span>
+            </div>
+            <dl>
+              <div><dt>Revenue</dt><dd>{{ payment.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</dd></div>
+              <div><dt>Gross Profit</dt><dd [class.text-danger]="payment.grossProfit < 0">{{ payment.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}</dd></div>
+            </dl>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="surface-card report-table-card">
+      <div class="section-heading section-heading--padded">
+        <div>
+          <h2>Products Sold</h2>
+          <p>Product performance for the selected month.</p>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product</th>
+              <th class="text-end">Units</th>
+              <th class="text-end">Revenue</th>
+              <th class="text-end">Cost</th>
+              <th class="text-end">Gross Profit</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of report.productSummaries; track product.productId + '-' + product.productSku + '-' + product.productName) {
+              <tr>
+                <td><span class="code-label">{{ product.productSku }}</span></td>
+                <td class="fw-semibold">{{ product.productName }}</td>
+                <td class="text-end">{{ product.quantitySold | number:'1.0-2' }}</td>
+                <td class="text-end">{{ product.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                <td class="text-end">{{ product.totalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                <td class="text-end fw-semibold" [class.text-danger]="product.grossProfit < 0">
+                  {{ product.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="report-columns">
+      <section class="surface-card report-table-card">
+        <div class="section-heading section-heading--padded">
+          <div>
+            <h2>Sales by Day</h2>
+            <p>Daily totals within the selected month.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th class="text-end">Sales</th>
+                <th class="text-end">Revenue</th>
+                <th class="text-end">Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (day of report.dailySummaries; track day.saleDate) {
+                <tr>
+                  <td>{{ day.saleDate | date:'MMM d, y':'UTC' }}</td>
+                  <td class="text-end">{{ day.salesCount }}</td>
+                  <td class="text-end">{{ day.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                  <td class="text-end" [class.text-danger]="day.grossProfit < 0">
+                    {{ day.grossProfit | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="surface-card report-table-card">
+        <div class="section-heading section-heading--padded">
+          <div>
+            <h2>Sales Documents</h2>
+            <p>Open any sale to review its Product lines.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Sale</th>
+                <th>Date</th>
+                <th>Payment</th>
+                <th class="text-end">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (sale of report.sales; track sale.id) {
+                <tr>
+                  <td>
+                    <a class="sale-link" routerLink="/sales" [queryParams]="{ saleId: sale.id }">
+                      {{ sale.saleNumber }}
+                    </a>
+                  </td>
+                  <td>{{ sale.saleDate | date:'MMM d':'UTC' }}</td>
+                  <td>{{ paymentMethodLabel(sale.paymentMethod) }}</td>
+                  <td class="text-end">{{ sale.revenue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  }
+}

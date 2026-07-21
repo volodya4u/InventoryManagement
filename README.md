@@ -11,6 +11,7 @@ A local inventory system for tracking raw materials and finished products for a 
 - Raw-material receipts and weighted-average inventory valuation.
 - Product recipes, atomic production, and raw-material consumption.
 - Sales with automatic Product stock deduction and immutable financial snapshots.
+- Monthly Sales report with revenue, cost, gross profit, payment, daily, and Product breakdowns.
 - JPG, JPEG, and PNG images stored as BLOBs.
 - Image validation in both the browser and the server.
 - Maximum image size of 2 MB.
@@ -86,6 +87,19 @@ A sale can contain one or more finished Products. The current recommended sellin
 - **Gross Profit** is revenue minus cost and can be negative when the actual price is below cost.
 
 Changing or deleting catalog data later does not rewrite completed sale values. Sales are currently immutable; cancellation and returns are planned as separate stock operations.
+
+### Monthly Sales Report
+
+Open **Reports → Monthly Sales** and select a report month. The report includes completed sales whose sale date belongs to that calendar month.
+
+- **Sales** is the number of completed sale documents.
+- **Units Sold** is the total number of finished Product units in those sales.
+- **Revenue**, **Cost**, and **Gross Profit** use the immutable financial snapshots stored when each sale was completed.
+- **Average Sale** is monthly revenue divided by the number of sale documents.
+- Payment totals are grouped into **Cash**, **Card**, and **Bank Transfer**.
+- Product and daily tables show which Products generated the result and on which days.
+- A sale number opens the full document on the Sales page.
+- **Export CSV** downloads the selected month's sale documents and financial totals.
 
 ## Local Profile
 

@@ -81,3 +81,58 @@ export interface SaleItem {
   lineCost: number;
   lineProfit: number;
 }
+
+export interface MonthlySalesReport {
+  month: string;
+  periodStart: string;
+  periodEnd: string;
+  salesCount: number;
+  unitsSold: number;
+  revenue: number;
+  totalCost: number;
+  grossProfit: number;
+  averageSaleValue: number;
+  paymentSummaries: MonthlySalesPaymentSummary[];
+  dailySummaries: MonthlySalesDailySummary[];
+  productSummaries: MonthlySalesProductSummary[];
+  sales: MonthlySaleSummary[];
+}
+
+export interface MonthlySalesPaymentSummary {
+  paymentMethod: PaymentMethod;
+  salesCount: number;
+  revenue: number;
+  totalCost: number;
+  grossProfit: number;
+}
+
+export interface MonthlySalesDailySummary {
+  saleDate: string;
+  salesCount: number;
+  unitsSold: number;
+  revenue: number;
+  totalCost: number;
+  grossProfit: number;
+}
+
+export interface MonthlySalesProductSummary {
+  productId: number;
+  productSku: string;
+  productName: string;
+  quantitySold: number;
+  revenue: number;
+  totalCost: number;
+  grossProfit: number;
+}
+
+export interface MonthlySaleSummary {
+  id: number;
+  saleNumber: string;
+  saleDate: string;
+  paymentMethod: PaymentMethod;
+  productLines: number;
+  unitsSold: number;
+  revenue: number;
+  totalCost: number;
+  grossProfit: number;
+}
