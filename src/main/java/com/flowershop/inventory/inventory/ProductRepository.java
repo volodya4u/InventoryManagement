@@ -210,16 +210,65 @@ public class ProductRepository {
             BigDecimal totalCost,
             LocalDate occurredAt,
             String notes) {
+        insertStockMovement(
+                productId,
+                productionBatchId,
+                saleId,
+                null,
+                movementType,
+                quantity,
+                unitCost,
+                totalCost,
+                occurredAt,
+                notes);
+    }
+
+    public void insertSaleReversalStockMovement(
+            long productId,
+            long saleId,
+            long saleReturnId,
+            String movementType,
+            BigDecimal quantity,
+            BigDecimal unitCost,
+            BigDecimal totalCost,
+            LocalDate occurredAt,
+            String notes) {
+        insertStockMovement(
+                productId,
+                null,
+                saleId,
+                saleReturnId,
+                movementType,
+                quantity,
+                unitCost,
+                totalCost,
+                occurredAt,
+                notes);
+    }
+
+    private void insertStockMovement(
+            long productId,
+            Long productionBatchId,
+            Long saleId,
+            Long saleReturnId,
+            String movementType,
+            BigDecimal quantity,
+            BigDecimal unitCost,
+            BigDecimal totalCost,
+            LocalDate occurredAt,
+            String notes) {
         jdbcTemplate.update(
                 """
                 INSERT INTO product_stock_movement
-                    (product_id, production_batch_id, sale_id, movement_type, quantity,
+                    (product_id, production_batch_id, sale_id, sale_return_id,
+                     movement_type, quantity,
                      unit_cost, total_cost, occurred_at, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 productId,
                 productionBatchId,
                 saleId,
+                saleReturnId,
                 movementType,
                 quantity,
                 unitCost,

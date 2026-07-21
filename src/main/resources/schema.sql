@@ -104,6 +104,9 @@ CREATE TABLE IF NOT EXISTS sale (
     sale_number TEXT NOT NULL UNIQUE COLLATE NOCASE,
     sale_date TEXT NOT NULL,
     payment_method TEXT NOT NULL CHECK (payment_method IN ('CASH', 'CARD', 'BANK_TRANSFER')),
+    status TEXT NOT NULL DEFAULT 'COMPLETED' CHECK (
+        status IN ('COMPLETED', 'PARTIALLY_RETURNED', 'RETURNED', 'CANCELLED')
+    ),
     notes TEXT NOT NULL DEFAULT '',
     total_revenue NUMERIC NOT NULL CHECK (total_revenue >= 0),
     total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
@@ -133,14 +136,54 @@ CREATE TABLE IF NOT EXISTS sale_item (
 CREATE INDEX IF NOT EXISTS idx_sale_item_sale ON sale_item(sale_id);
 CREATE INDEX IF NOT EXISTS idx_sale_item_product ON sale_item(product_id);
 
+CREATE TABLE IF NOT EXISTS sale_return (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_id INTEGER NOT NULL,
+    return_number TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    return_date TEXT NOT NULL,
+    operation_type TEXT NOT NULL CHECK (operation_type IN ('RETURN', 'CANCELLATION')),
+    reason TEXT NOT NULL,
+    notes TEXT NOT NULL DEFAULT '',
+    total_refund NUMERIC NOT NULL CHECK (total_refund >= 0),
+    total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
+    gross_profit_reversal NUMERIC NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_sale_return_sale ON sale_return(sale_id, return_date);
+CREATE INDEX IF NOT EXISTS idx_sale_return_date ON sale_return(return_date, id);
+
+CREATE TABLE IF NOT EXISTS sale_return_item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_return_id INTEGER NOT NULL,
+    sale_item_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity NUMERIC NOT NULL CHECK (quantity > 0),
+    unit_price NUMERIC NOT NULL CHECK (unit_price >= 0),
+    unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
+    line_refund NUMERIC NOT NULL CHECK (line_refund >= 0),
+    line_cost NUMERIC NOT NULL CHECK (line_cost >= 0),
+    gross_profit_reversal NUMERIC NOT NULL,
+    UNIQUE (sale_return_id, sale_item_id),
+    FOREIGN KEY (sale_return_id) REFERENCES sale_return(id) ON DELETE CASCADE,
+    FOREIGN KEY (sale_item_id) REFERENCES sale_item(id) ON DELETE RESTRICT,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_sale_return_item_return ON sale_return_item(sale_return_id);
+CREATE INDEX IF NOT EXISTS idx_sale_return_item_sale_item ON sale_return_item(sale_item_id);
+
 CREATE TABLE IF NOT EXISTS product_stock_movement (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id INTEGER NOT NULL,
     production_batch_id INTEGER,
     sale_id INTEGER,
+    sale_return_id INTEGER,
     movement_type TEXT NOT NULL CHECK (movement_type IN (
         'OPENING_BALANCE', 'PRODUCTION', 'SALE',
-        'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE'
+        'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE',
+        'SALE_RETURN', 'SALE_CANCELLATION'
     )),
     quantity NUMERIC NOT NULL CHECK (quantity > 0),
     unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
@@ -150,7 +193,8 @@ CREATE TABLE IF NOT EXISTS product_stock_movement (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
     FOREIGN KEY (production_batch_id) REFERENCES production_batch(id) ON DELETE CASCADE,
-    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT
+    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT,
+    FOREIGN KEY (sale_return_id) REFERENCES sale_return(id) ON DELETE RESTRICT
 );
 
 CREATE INDEX IF NOT EXISTS idx_product_stock_movement_product

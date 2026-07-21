@@ -2,17 +2,15 @@ package com.flowershop.inventory.sales;
 
 import java.math.BigDecimal;
 
-public record SaleItemDto(
-        long id,
+public record SaleReturnItemDto(
+        long saleItemId,
         long productId,
         String productSku,
         String productName,
         BigDecimal quantity,
-        BigDecimal recommendedUnitPrice,
         BigDecimal unitPrice,
         BigDecimal unitCost,
-        BigDecimal lineRevenue,
+        BigDecimal lineRefund,
         BigDecimal lineCost,
-        BigDecimal lineProfit,
-        BigDecimal returnedQuantity) {
+        BigDecimal grossProfitReversal) {
 }

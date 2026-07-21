@@ -36,4 +36,18 @@ public class SaleController {
     public SaleDto create(@Valid @RequestBody CreateSaleRequest request) {
         return service.create(request);
     }
+
+    @PostMapping("/{id}/returns")
+    public SaleDto returnProducts(
+            @PathVariable long id,
+            @Valid @RequestBody CreateSaleReturnRequest request) {
+        return service.returnProducts(id, request);
+    }
+
+    @PostMapping("/{id}/cancellation")
+    public SaleDto cancel(
+            @PathVariable long id,
+            @Valid @RequestBody CancelSaleRequest request) {
+        return service.cancel(id, request);
+    }
 }

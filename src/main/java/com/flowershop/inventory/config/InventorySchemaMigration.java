@@ -49,8 +49,17 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     """);
         }
 
+        if (!hasColumn("sale", "status")) {
+            jdbcTemplate.execute("""
+                    ALTER TABLE sale
+                    ADD COLUMN status TEXT NOT NULL DEFAULT 'COMPLETED'
+                        CHECK (status IN ('COMPLETED', 'PARTIALLY_RETURNED', 'RETURNED', 'CANCELLED'))
+                    """);
+        }
+
         if (!hasColumn("product_stock_movement", "sale_id")
-                || !tableDefinitionContains("product_stock_movement", "'ADJUSTMENT_DECREASE'")) {
+                || !hasColumn("product_stock_movement", "sale_return_id")
+                || !tableDefinitionContains("product_stock_movement", "'SALE_CANCELLATION'")) {
             migrateProductStockMovement();
         }
 
@@ -120,16 +129,19 @@ public class InventorySchemaMigration implements ApplicationRunner {
     private void migrateProductStockMovement() {
         jdbcTemplate.execute("ALTER TABLE product_stock_movement RENAME TO product_stock_movement_old");
         var oldTableHasSaleId = hasColumn("product_stock_movement_old", "sale_id");
+        var oldTableHasSaleReturnId = hasColumn("product_stock_movement_old", "sale_return_id");
         jdbcTemplate.execute("""
                 CREATE TABLE product_stock_movement (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     product_id INTEGER NOT NULL,
                     production_batch_id INTEGER,
                     sale_id INTEGER,
+                    sale_return_id INTEGER,
                     movement_type TEXT NOT NULL CHECK (
                         movement_type IN (
                             'OPENING_BALANCE', 'PRODUCTION', 'SALE',
-                            'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE')),
+                            'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE',
+                            'SALE_RETURN', 'SALE_CANCELLATION')),
                     quantity NUMERIC NOT NULL CHECK (quantity > 0),
                     unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
                     total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
@@ -138,10 +150,20 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
                     FOREIGN KEY (production_batch_id) REFERENCES production_batch(id) ON DELETE CASCADE,
-                    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT
+                    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT,
+                    FOREIGN KEY (sale_return_id) REFERENCES sale_return(id) ON DELETE RESTRICT
                 )
                 """);
-        if (oldTableHasSaleId) {
+        if (oldTableHasSaleId && oldTableHasSaleReturnId) {
+            jdbcTemplate.update("""
+                    INSERT INTO product_stock_movement
+                        (id, product_id, production_batch_id, sale_id, sale_return_id,
+                         movement_type, quantity, unit_cost, total_cost, occurred_at, notes, created_at)
+                    SELECT id, product_id, production_batch_id, sale_id, sale_return_id,
+                           movement_type, quantity, unit_cost, total_cost, occurred_at, notes, created_at
+                    FROM product_stock_movement_old
+                    """);
+        } else if (oldTableHasSaleId) {
             jdbcTemplate.update("""
                     INSERT INTO product_stock_movement
                         (id, product_id, production_batch_id, sale_id, movement_type, quantity,
