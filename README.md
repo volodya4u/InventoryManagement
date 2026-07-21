@@ -12,6 +12,7 @@ A local inventory system for tracking raw materials and finished products for a 
 - Product recipes, atomic production, and raw-material consumption.
 - Sales with automatic Product stock deduction, returns, cancellations, and immutable financial snapshots.
 - Raw Material and Product write-offs and physical-count stock adjustments with audited movements.
+- Unified Stock Movement History with inventory, movement type, item, and date filters.
 - Monthly Sales report with revenue, cost, gross profit, payment, daily, and Product breakdowns.
 - JPG, JPEG, and PNG images stored as BLOBs.
 - Image validation in both the browser and the server.
@@ -84,6 +85,18 @@ Both **Raw Materials** and **Products** provide dedicated **Write Off** and **Ad
 - A write-off or downward adjustment keeps the existing average unit cost and reduces Stock Value proportionally.
 - An upward adjustment values the discovered units at the existing average unit cost. Increasing Product stock through an adjustment does not consume Raw Materials because it corrects an existing balance rather than recording new production.
 - Product write-offs and adjustments accept only whole units. Raw Material quantities may use decimals according to their unit of measurement.
+
+### Stock Movement History
+
+Open **Stock History** to review Raw Material and Product movements in one chronological list.
+
+- Filter by **Inventory**, **Movement Type**, item name or SKU, and an optional date range.
+- Incoming movements include opening balances, receipts, production, upward adjustments, returns, and sale cancellations.
+- Outgoing movements include production consumption, sales, write-offs, and downward adjustments.
+- **Quantity Change** and **Value Change** use a positive sign for incoming stock and a negative sign for outgoing stock.
+- Summary cards show movement count, Stock Value In, Stock Value Out, and the net value change for the complete filtered result.
+- Sale and return references open the original Sales document. Production references identify the recorded batch.
+- Results are ordered newest first and displayed in pages of 25 movements.
 
 ### Sales
 

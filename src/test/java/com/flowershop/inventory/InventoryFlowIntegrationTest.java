@@ -633,6 +633,73 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void listsAndFiltersUnifiedStockMovementHistory() throws Exception {
+        jdbcTemplate.update("""
+                INSERT INTO raw_material
+                    (id, name, description, unit, quantity, average_unit_cost)
+                VALUES (1, 'Rose', '', 'PIECE', 8, 5)
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (id, sku, name, description, quantity, price,
+                     markup_percentage, advertising_cost_per_unit, average_unit_cost)
+                VALUES (1, 'ROSE-BOX-001', 'Rose Box', '', 2, 40, 50, 2, 20)
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO raw_material_stock_movement
+                    (raw_material_id, movement_type, quantity, unit_cost,
+                     total_cost, occurred_at, notes)
+                VALUES
+                    (1, 'RECEIPT', 10, 5, 50, '2026-07-01', 'Supplier delivery'),
+                    (1, 'WRITE_OFF', 2, 5, 10, '2026-07-02', 'Reason: Damaged')
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product_stock_movement
+                    (product_id, movement_type, quantity, unit_cost,
+                     total_cost, occurred_at, notes)
+                VALUES
+                    (1, 'PRODUCTION', 3, 20, 60, '2026-07-03', 'Production batch'),
+                    (1, 'SALE', 1, 20, 20, '2026-07-04', 'Sale document')
+                """);
+
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+
+        mockMvc.perform(get("/api/stock-movements")
+                        .param("from", "2026-07-01")
+                        .param("to", "2026-07-31")
+                        .param("size", "2")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(4))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.movements.length()").value(2))
+                .andExpect(jsonPath("$.movements[0].movementType").value("SALE"))
+                .andExpect(jsonPath("$.movements[0].signedQuantity").value(-1))
+                .andExpect(jsonPath("$.totals.incomingValue").value(110))
+                .andExpect(jsonPath("$.totals.outgoingValue").value(30))
+                .andExpect(jsonPath("$.totals.netValueChange").value(80));
+
+        mockMvc.perform(get("/api/stock-movements")
+                        .param("inventoryType", "RAW_MATERIAL")
+                        .param("movementType", "RECEIPT")
+                        .param("query", "rose")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.movements[0].inventoryType").value("RAW_MATERIAL"))
+                .andExpect(jsonPath("$.movements[0].movementType").value("RECEIPT"))
+                .andExpect(jsonPath("$.movements[0].signedTotalCost").value(50));
+
+        mockMvc.perform(get("/api/stock-movements")
+                        .param("from", "2026-07-31")
+                        .param("to", "2026-07-01")
+                        .session(session))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("From date cannot be later than To date"));
+    }
+
+    @Test
     void authenticatesAdminAndStoresValidatedPngAsBlob() throws Exception {
         mockMvc.perform(get("/api/raw-materials"))
                 .andExpect(status().isUnauthorized());

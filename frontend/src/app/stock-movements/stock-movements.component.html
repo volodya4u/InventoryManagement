@@ -1,0 +1,146 @@
+<section class="page-heading stock-heading">
+  <div>
+    <h1>Stock Movement History</h1>
+    <p>Review every recorded increase and decrease in Raw Material and Product stock.</p>
+  </div>
+</section>
+
+<form class="surface-card filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
+  <div>
+    <label class="form-label" for="stock-inventory-type">Inventory</label>
+    <select id="stock-inventory-type" class="form-select" formControlName="inventoryType">
+      @for (option of inventoryTypes; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label class="form-label" for="stock-movement-type">Movement Type</label>
+    <select id="stock-movement-type" class="form-select" formControlName="movementType">
+      @for (option of movementTypes; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="filter-search">
+    <label class="form-label" for="stock-query">Item</label>
+    <input id="stock-query" class="form-control" type="search" formControlName="query" maxlength="120" placeholder="Name or SKU" />
+  </div>
+  <div>
+    <label class="form-label" for="stock-from">From</label>
+    <input id="stock-from" class="form-control" type="date" formControlName="from" />
+  </div>
+  <div>
+    <label class="form-label" for="stock-to">To</label>
+    <input id="stock-to" class="form-control" type="date" formControlName="to" />
+  </div>
+  <div class="filter-actions">
+    <button type="submit" class="btn btn-success" [disabled]="loading()">Apply</button>
+    <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()" [disabled]="loading()">Reset</button>
+  </div>
+</form>
+
+@if (error()) {
+  <div class="alert alert-danger" role="alert">
+    {{ error() }}
+    <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Try Again</button>
+  </div>
+}
+
+@if (loading()) {
+  <section class="surface-card empty-state">Loading stock movements...</section>
+} @else if (history(); as history) {
+  <section class="movement-summary" aria-label="Filtered stock movement totals">
+    <article>
+      <span>Movements</span>
+      <strong>{{ history.totals.movementCount | number:'1.0-0' }}</strong>
+    </article>
+    <article class="summary-in">
+      <span>Stock Value In</span>
+      <strong>{{ history.totals.incomingValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+    </article>
+    <article class="summary-out">
+      <span>Stock Value Out</span>
+      <strong>{{ history.totals.outgoingValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+    </article>
+    <article>
+      <span>Net Value Change</span>
+      <strong [class.text-danger]="history.totals.netValueChange < 0">
+        {{ history.totals.netValueChange | currency:'UAH':'symbol-narrow':'1.2-2' }}
+      </strong>
+    </article>
+  </section>
+
+  <section class="surface-card movement-table-card">
+    @if (history.movements.length === 0) {
+      <div class="empty-state">
+        <strong>No stock movements found</strong>
+        <p>Change the filters or record a stock operation.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Inventory</th>
+              <th>Item</th>
+              <th>Movement</th>
+              <th class="text-end">Quantity Change</th>
+              <th class="text-end">Unit Cost</th>
+              <th class="text-end">Value Change</th>
+              <th>Reference</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (movement of history.movements; track movement.inventoryType + '-' + movement.movementId) {
+              <tr>
+                <td class="date-column">{{ movement.occurredAt | date:'MMM d, y':'UTC' }}</td>
+                <td><span class="inventory-badge">{{ inventoryTypeLabel(movement.inventoryType) }}</span></td>
+                <td class="item-column">
+                  <strong>{{ movement.itemName }}</strong>
+                  @if (movement.itemCode) { <small>{{ movement.itemCode }}</small> }
+                </td>
+                <td>
+                  <span class="movement-badge" [class.movement-badge--in]="movement.direction === 'IN'" [class.movement-badge--out]="movement.direction === 'OUT'">
+                    {{ movementTypeLabel(movement.movementType) }}
+                  </span>
+                </td>
+                <td class="text-end quantity-change" [class.value-in]="movement.direction === 'IN'" [class.value-out]="movement.direction === 'OUT'">
+                  {{ movement.signedQuantity > 0 ? '+' : '' }}{{ movement.signedQuantity | number:'1.0-4' }}
+                  <small>{{ unitLabel(movement.unit) }}</small>
+                </td>
+                <td class="text-end">{{ movement.unitCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+                <td class="text-end fw-semibold" [class.value-in]="movement.direction === 'IN'" [class.value-out]="movement.direction === 'OUT'">
+                  {{ movement.signedTotalCost > 0 ? '+' : '' }}{{ movement.signedTotalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                </td>
+                <td class="reference-column">
+                  @if (movement.referenceNumber) {
+                    @if (canOpenSale(movement)) {
+                      <a routerLink="/sales" [queryParams]="{ saleId: movement.referenceId }">{{ movement.referenceNumber }}</a>
+                    } @else {
+                      <span>{{ movement.referenceNumber }}</span>
+                    }
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+                <td class="notes-column" [title]="movement.notes">{{ movement.notes || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="pagination-bar">
+        <span>Showing {{ pageStart(history) }}–{{ pageEnd(history) }} of {{ history.totalElements }}</span>
+        <div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="previousPage()" [disabled]="history.page === 0">Previous</button>
+          <span>Page {{ history.page + 1 }} of {{ history.totalPages }}</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="nextPage()" [disabled]="history.page + 1 >= history.totalPages">Next</button>
+        </div>
+      </footer>
+    }
+  </section>
+}

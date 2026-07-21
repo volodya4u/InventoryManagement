@@ -27,6 +27,11 @@ export const routes: Routes = [
         loadComponent: () => import('./sales/sales.component').then((module) => module.SalesComponent)
       },
       {
+        path: 'stock-movements',
+        loadComponent: () => import('./stock-movements/stock-movements.component')
+          .then((module) => module.StockMovementsComponent)
+      },
+      {
         path: 'reports/monthly-sales',
         loadComponent: () => import('./reports/monthly-sales/monthly-sales-report.component')
           .then((module) => module.MonthlySalesReportComponent)

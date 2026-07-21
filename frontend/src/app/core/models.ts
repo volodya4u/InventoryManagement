@@ -55,6 +55,55 @@ export interface ProductRecipeItem {
   averageUnitCost: number;
 }
 
+export type InventoryType = 'ALL' | 'RAW_MATERIAL' | 'PRODUCT';
+export type StockMovementType =
+  | 'OPENING_BALANCE'
+  | 'RECEIPT'
+  | 'PRODUCTION_CONSUMPTION'
+  | 'PRODUCTION'
+  | 'SALE'
+  | 'SALE_RETURN'
+  | 'SALE_CANCELLATION'
+  | 'WRITE_OFF'
+  | 'ADJUSTMENT_INCREASE'
+  | 'ADJUSTMENT_DECREASE';
+
+export interface StockMovement {
+  inventoryType: Exclude<InventoryType, 'ALL'>;
+  movementId: number;
+  itemId: number;
+  itemCode: string;
+  itemName: string;
+  unit: string;
+  movementType: StockMovementType;
+  direction: 'IN' | 'OUT';
+  quantity: number;
+  signedQuantity: number;
+  unitCost: number;
+  totalCost: number;
+  signedTotalCost: number;
+  occurredAt: string;
+  notes: string;
+  referenceType: '' | 'SALE' | 'SALE_RETURN' | 'PRODUCTION_BATCH';
+  referenceId: number | null;
+  referenceNumber: string;
+  createdAt: string;
+}
+
+export interface StockMovementHistory {
+  movements: StockMovement[];
+  totalElements: number;
+  page: number;
+  size: number;
+  totalPages: number;
+  totals: {
+    movementCount: number;
+    incomingValue: number;
+    outgoingValue: number;
+    netValueChange: number;
+  };
+}
+
 export type PaymentMethod = 'CASH' | 'CARD' | 'BANK_TRANSFER';
 export type SaleStatus = 'COMPLETED' | 'PARTIALLY_RETURNED' | 'RETURNED' | 'CANCELLED';
 export type SaleReturnType = 'RETURN' | 'CANCELLATION';
