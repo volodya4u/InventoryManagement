@@ -67,6 +67,13 @@
   font-size: 1.05rem;
 }
 
+.stock-value-total td {
+  border-top: 2px solid var(--pf-sage);
+  background: #f1f6f2;
+  color: var(--pf-forest-dark);
+  font-weight: 700;
+}
+
 .dialog-subtitle {
   margin-top: 0.15rem;
   font-size: 0.85rem;

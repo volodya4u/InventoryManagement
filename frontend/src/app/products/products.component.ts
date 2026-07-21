@@ -1,6 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -52,6 +52,9 @@ function productFormValidator(control: AbstractControl): ValidationErrors | null
 })
 export class ProductsComponent implements OnInit {
   readonly items = signal<Product[]>([]);
+  readonly totalStockValue = computed(() =>
+    this.items().reduce((total, item) => total + item.stockValue, 0)
+  );
   readonly rawMaterials = signal<RawMaterial[]>([]);
   readonly loading = signal(true);
   readonly saving = signal(false);
