@@ -16,7 +16,8 @@ import org.springframework.stereotype.Repository;
 public class ProductRepository {
 
     private static final String SUMMARY_COLUMNS = """
-            id, sku, name, description, quantity, markup_percentage, price, average_unit_cost,
+            id, sku, name, description, quantity, markup_percentage, advertising_cost_per_unit,
+            price, average_unit_cost,
             image IS NOT NULL AS has_image, created_at, updated_at
             """;
 
@@ -49,6 +50,7 @@ public class ProductRepository {
             String description,
             BigDecimal quantity,
             BigDecimal markupPercentage,
+            BigDecimal advertisingCostPerUnit,
             BigDecimal sellingPrice,
             BigDecimal averageUnitCost,
             ImagePayload image) {
@@ -57,9 +59,9 @@ public class ProductRepository {
             var statement = connection.prepareStatement(
                     """
                     INSERT INTO product
-                        (sku, name, description, quantity, markup_percentage, price,
-                         average_unit_cost, image, image_content_type)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        (sku, name, description, quantity, markup_percentage,
+                         advertising_cost_per_unit, price, average_unit_cost, image, image_content_type)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, sku);
@@ -67,10 +69,11 @@ public class ProductRepository {
             statement.setString(3, description);
             statement.setBigDecimal(4, quantity);
             statement.setBigDecimal(5, markupPercentage);
-            statement.setBigDecimal(6, sellingPrice);
-            statement.setBigDecimal(7, averageUnitCost);
-            statement.setBytes(8, image == null ? null : image.bytes());
-            statement.setString(9, image == null ? null : image.contentType());
+            statement.setBigDecimal(6, advertisingCostPerUnit);
+            statement.setBigDecimal(7, sellingPrice);
+            statement.setBigDecimal(8, averageUnitCost);
+            statement.setBytes(9, image == null ? null : image.bytes());
+            statement.setString(10, image == null ? null : image.contentType());
             return statement;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -81,6 +84,7 @@ public class ProductRepository {
             String sku,
             String name,
             String description,
+            BigDecimal advertisingCostPerUnit,
             BigDecimal markupPercentage,
             BigDecimal sellingPrice,
             ImagePayload image) {
@@ -88,13 +92,15 @@ public class ProductRepository {
             return jdbcTemplate.update(
                     """
                     UPDATE product
-                    SET sku = ?, name = ?, description = ?, markup_percentage = ?, price = ?,
+                    SET sku = ?, name = ?, description = ?, advertising_cost_per_unit = ?,
+                        markup_percentage = ?, price = ?,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                     """,
                     sku,
                     name,
                     description,
+                    advertisingCostPerUnit,
                     markupPercentage,
                     sellingPrice,
                     id);
@@ -102,13 +108,15 @@ public class ProductRepository {
         return jdbcTemplate.update(
                 """
                 UPDATE product
-                SET sku = ?, name = ?, description = ?, markup_percentage = ?, price = ?,
+                SET sku = ?, name = ?, description = ?, advertising_cost_per_unit = ?,
+                    markup_percentage = ?, price = ?,
                     image = ?, image_content_type = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """,
                 sku,
                 name,
                 description,
+                advertisingCostPerUnit,
                 markupPercentage,
                 sellingPrice,
                 image.bytes(),
@@ -159,6 +167,7 @@ public class ProductRepository {
             BigDecimal quantity,
             BigDecimal unitCost,
             BigDecimal totalCost,
+            BigDecimal advertisingCost,
             LocalDate producedAt,
             String notes) {
         var keyHolder = new GeneratedKeyHolder();
@@ -166,16 +175,17 @@ public class ProductRepository {
             var statement = connection.prepareStatement(
                     """
                     INSERT INTO production_batch
-                        (product_id, quantity, unit_cost, total_cost, produced_at, notes)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                        (product_id, quantity, unit_cost, total_cost, advertising_cost, produced_at, notes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     """,
                     Statement.RETURN_GENERATED_KEYS);
             statement.setLong(1, productId);
             statement.setBigDecimal(2, quantity);
             statement.setBigDecimal(3, unitCost);
             statement.setBigDecimal(4, totalCost.setScale(2, RoundingMode.HALF_UP));
-            statement.setString(5, producedAt.toString());
-            statement.setString(6, notes);
+            statement.setBigDecimal(5, advertisingCost.setScale(2, RoundingMode.HALF_UP));
+            statement.setString(6, producedAt.toString());
+            statement.setString(7, notes);
             return statement;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -312,6 +322,7 @@ public class ProductRepository {
                 product.description(),
                 product.quantity(),
                 product.markupPercentage(),
+                product.advertisingCostPerUnit(),
                 product.sellingPrice(),
                 product.averageUnitCost(),
                 product.stockValue(),
@@ -352,6 +363,7 @@ public class ProductRepository {
                 rs.getString("description"),
                 quantity,
                 rs.getBigDecimal("markup_percentage"),
+                rs.getBigDecimal("advertising_cost_per_unit"),
                 rs.getBigDecimal("price"),
                 averageUnitCost,
                 quantity.multiply(averageUnitCost).setScale(2, RoundingMode.HALF_UP),

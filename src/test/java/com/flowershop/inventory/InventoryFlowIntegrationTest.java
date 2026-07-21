@@ -550,6 +550,7 @@ class InventoryFlowIntegrationTest {
                         .param("description", "Gift box with roses")
                         .param("quantity", "2")
                         .param("initialUnitCost", "100")
+                        .param("advertisingCostPerUnit", "12")
                         .param("markupPercentage", "50")
                         .session(session)
                         .cookie(csrfCookie)
@@ -558,8 +559,9 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.quantity").value(2))
                 .andExpect(jsonPath("$.averageUnitCost").value(100))
                 .andExpect(jsonPath("$.stockValue").value(200))
+                .andExpect(jsonPath("$.advertisingCostPerUnit").value(12))
                 .andExpect(jsonPath("$.markupPercentage").value(50))
-                .andExpect(jsonPath("$.sellingPrice").value(207))
+                .andExpect(jsonPath("$.sellingPrice").value(225))
                 .andExpect(jsonPath("$.recipe.length()").value(3));
 
         assertMaterialQuantity("Rose", "12");
@@ -604,8 +606,8 @@ class InventoryFlowIntegrationTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quantity").value(3))
-                .andExpect(jsonPath("$.averageUnitCost").value(112.6667))
-                .andExpect(jsonPath("$.stockValue").value(338.0));
+                .andExpect(jsonPath("$.averageUnitCost").value(116.6667))
+                .andExpect(jsonPath("$.stockValue").value(350.0));
 
         assertMaterialQuantity("Rose", "7");
         assertMaterialQuantity("Ribbon", "0.2");
@@ -614,6 +616,12 @@ class InventoryFlowIntegrationTest {
                 "SELECT COUNT(*) FROM production_batch", Integer.class)).isEqualTo(1);
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM production_consumption", Integer.class)).isEqualTo(3);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT advertising_cost FROM production_batch", BigDecimal.class))
+                .isEqualByComparingTo("12");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT total_cost FROM production_batch", BigDecimal.class))
+                .isEqualByComparingTo("150");
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM product_stock_movement", Integer.class)).isEqualTo(2);
         assertThat(jdbcTemplate.queryForObject(

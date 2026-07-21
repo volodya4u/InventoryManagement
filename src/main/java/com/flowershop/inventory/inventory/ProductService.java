@@ -49,19 +49,23 @@ public class ProductService {
             String description,
             BigDecimal initialQuantity,
             BigDecimal initialUnitCost,
+            BigDecimal advertisingCostPerUnit,
             BigDecimal markupPercentage,
             List<ProductRecipeItemInput> recipe,
             MultipartFile image) {
         var validatedRecipe = validateRecipe(recipe);
         var normalizedInitialCost = normalizeInitialUnitCost(initialQuantity, initialUnitCost);
+        var normalizedAdvertisingCost = normalizeAdvertisingCost(advertisingCostPerUnit);
         var normalizedMarkup = normalizeMarkup(markupPercentage);
-        var sellingPrice = calculateSellingPrice(validatedRecipe, normalizedMarkup);
+        var sellingPrice = calculateSellingPrice(
+                validatedRecipe, normalizedAdvertisingCost, normalizedMarkup);
         long id = repository.insert(
                 sku.trim(),
                 name.trim(),
                 normalizeDescription(description),
                 initialQuantity,
                 normalizedMarkup,
+                normalizedAdvertisingCost,
                 sellingPrice,
                 normalizedInitialCost,
                 imageValidator.validate(image));
@@ -87,17 +91,21 @@ public class ProductService {
             String sku,
             String name,
             String description,
+            BigDecimal advertisingCostPerUnit,
             BigDecimal markupPercentage,
             List<ProductRecipeItemInput> recipe,
             MultipartFile image) {
         var validatedRecipe = validateRecipe(recipe);
+        var normalizedAdvertisingCost = normalizeAdvertisingCost(advertisingCostPerUnit);
         var normalizedMarkup = normalizeMarkup(markupPercentage);
-        var sellingPrice = calculateSellingPrice(validatedRecipe, normalizedMarkup);
+        var sellingPrice = calculateSellingPrice(
+                validatedRecipe, normalizedAdvertisingCost, normalizedMarkup);
         int changed = repository.update(
                 id,
                 sku.trim(),
                 name.trim(),
                 normalizeDescription(description),
+                normalizedAdvertisingCost,
                 normalizedMarkup,
                 sellingPrice,
                 imageValidator.validate(image));
@@ -121,7 +129,8 @@ public class ProductService {
 
         var requirements = new ArrayList<ProductionRequirement>();
         var shortages = new ArrayList<StockShortage>();
-        var totalProductionCost = BigDecimal.ZERO;
+        var totalAdvertisingCost = product.advertisingCostPerUnit().multiply(producedQuantity);
+        var totalProductionCost = totalAdvertisingCost;
 
         for (var recipeItem : product.recipe()) {
             var material = rawMaterialRepository.findById(recipeItem.rawMaterialId())
@@ -148,6 +157,7 @@ public class ProductService {
                 producedQuantity,
                 productionUnitCost,
                 totalProductionCost,
+                totalAdvertisingCost,
                 productionDate,
                 normalizedNotes);
 
@@ -308,8 +318,16 @@ public class ProductService {
         return markupPercentage.setScale(MARKUP_SCALE, RoundingMode.HALF_UP);
     }
 
+    private BigDecimal normalizeAdvertisingCost(BigDecimal advertisingCostPerUnit) {
+        if (advertisingCostPerUnit == null || advertisingCostPerUnit.signum() < 0) {
+            throw new IllegalArgumentException("Advertising cost per unit cannot be negative");
+        }
+        return advertisingCostPerUnit.setScale(PRICE_SCALE, RoundingMode.HALF_UP);
+    }
+
     private BigDecimal calculateSellingPrice(
             List<ProductRecipeItemInput> recipe,
+            BigDecimal advertisingCostPerUnit,
             BigDecimal markupPercentage) {
         var recipeUnitCost = recipe.stream()
                 .map(item -> {
@@ -319,8 +337,9 @@ public class ProductService {
                     return item.quantityPerUnit().multiply(material.averageUnitCost());
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var totalUnitCost = recipeUnitCost.add(advertisingCostPerUnit);
         var multiplier = BigDecimal.ONE.add(markupPercentage.divide(ONE_HUNDRED));
-        return recipeUnitCost.multiply(multiplier).setScale(PRICE_SCALE, RoundingMode.HALF_UP);
+        return totalUnitCost.multiply(multiplier).setScale(PRICE_SCALE, RoundingMode.HALF_UP);
     }
 
     private StockShortage shortage(RawMaterialDto material, BigDecimal requiredQuantity) {

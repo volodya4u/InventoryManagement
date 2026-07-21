@@ -47,6 +47,11 @@ class InventorySchemaMigrationTest {
                     )
                     """);
             jdbcTemplate.execute("""
+                    CREATE TABLE production_batch (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT
+                    )
+                    """);
+            jdbcTemplate.execute("""
                     CREATE TABLE product_stock_movement (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         product_id INTEGER NOT NULL,
@@ -83,7 +88,11 @@ class InventorySchemaMigrationTest {
             var productColumns = jdbcTemplate.queryForList("PRAGMA table_info(product)");
             assertThat(productColumns)
                     .extracting(column -> column.get("name"))
-                    .contains("average_unit_cost", "markup_percentage");
+                    .contains("average_unit_cost", "markup_percentage", "advertising_cost_per_unit");
+            var productionBatchColumns = jdbcTemplate.queryForList("PRAGMA table_info(production_batch)");
+            assertThat(productionBatchColumns)
+                    .extracting(column -> column.get("name"))
+                    .contains("advertising_cost");
             assertThat(jdbcTemplate.queryForObject(
                     "SELECT average_unit_cost FROM raw_material WHERE id = 1",
                     Integer.class)).isZero();

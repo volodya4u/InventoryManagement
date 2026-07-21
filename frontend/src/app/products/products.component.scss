@@ -159,6 +159,30 @@
   color: var(--pf-forest-dark);
 }
 
+.production-cost small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--pf-muted);
+}
+
+.additional-costs {
+  padding: 0.85rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 0.6rem;
+  background: #fafbf9;
+}
+
+.additional-costs h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.additional-costs p {
+  margin: 0.15rem 0 0.75rem;
+  color: var(--pf-muted);
+  font-size: 0.78rem;
+}
+
 .requirement-table {
   border: 1px solid var(--pf-border);
   border-radius: 0.6rem;

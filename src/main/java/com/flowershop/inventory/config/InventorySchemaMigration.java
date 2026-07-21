@@ -49,6 +49,22 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     """);
         }
 
+        if (!hasColumn("product", "advertising_cost_per_unit")) {
+            jdbcTemplate.execute("""
+                    ALTER TABLE product
+                    ADD COLUMN advertising_cost_per_unit NUMERIC NOT NULL DEFAULT 0
+                        CHECK (advertising_cost_per_unit >= 0)
+                    """);
+        }
+
+        if (!hasColumn("production_batch", "advertising_cost")) {
+            jdbcTemplate.execute("""
+                    ALTER TABLE production_batch
+                    ADD COLUMN advertising_cost NUMERIC NOT NULL DEFAULT 0
+                        CHECK (advertising_cost >= 0)
+                    """);
+        }
+
         if (!hasColumn("sale", "status")) {
             jdbcTemplate.execute("""
                     ALTER TABLE sale

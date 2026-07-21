@@ -10,6 +10,7 @@ public record ProductDto(
         String description,
         BigDecimal quantity,
         BigDecimal markupPercentage,
+        BigDecimal advertisingCostPerUnit,
         BigDecimal sellingPrice,
         BigDecimal averageUnitCost,
         BigDecimal stockValue,

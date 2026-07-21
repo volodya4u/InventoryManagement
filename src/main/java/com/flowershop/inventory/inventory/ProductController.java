@@ -51,12 +51,15 @@ public class ProductController {
             @RequestParam(defaultValue = "") @Size(max = 1000) String description,
             @RequestParam @DecimalMin("0.0") @Digits(integer = 12, fraction = 0) BigDecimal quantity,
             @RequestParam(required = false) @DecimalMin("0.0") BigDecimal initialUnitCost,
+            @RequestParam(defaultValue = "0") @DecimalMin("0.0") @Digits(integer = 12, fraction = 2)
+            BigDecimal advertisingCostPerUnit,
             @RequestParam @NotNull @DecimalMin("0.0") @Digits(integer = 6, fraction = 2)
             BigDecimal markupPercentage,
             @RequestPart("recipe") @Size(min = 1) List<@Valid ProductRecipeItemInput> recipe,
             @RequestParam(required = false) MultipartFile image) {
         return service.create(
-                sku, name, description, quantity, initialUnitCost, markupPercentage, recipe, image);
+                sku, name, description, quantity, initialUnitCost, advertisingCostPerUnit,
+                markupPercentage, recipe, image);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -65,11 +68,14 @@ public class ProductController {
             @RequestParam @NotBlank @Size(max = 60) String sku,
             @RequestParam @NotBlank @Size(max = 120) String name,
             @RequestParam(defaultValue = "") @Size(max = 1000) String description,
+            @RequestParam(defaultValue = "0") @DecimalMin("0.0") @Digits(integer = 12, fraction = 2)
+            BigDecimal advertisingCostPerUnit,
             @RequestParam @NotNull @DecimalMin("0.0") @Digits(integer = 6, fraction = 2)
             BigDecimal markupPercentage,
             @RequestPart("recipe") @Size(min = 1) List<@Valid ProductRecipeItemInput> recipe,
             @RequestParam(required = false) MultipartFile image) {
-        return service.update(id, sku, name, description, markupPercentage, recipe, image);
+        return service.update(
+                id, sku, name, description, advertisingCostPerUnit, markupPercentage, recipe, image);
     }
 
     @PostMapping("/{id}/production")

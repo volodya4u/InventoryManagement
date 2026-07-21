@@ -215,9 +215,39 @@
               <div class="invalid-feedback d-block">Add at least one raw material to the recipe.</div>
             }
             <div class="recipe-cost">
-              Estimated recipe unit cost at current material prices:
+              Estimated raw-material cost per unit:
               <strong>{{ estimatedRecipeUnitCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
             </div>
+
+            <section class="additional-costs mt-3" aria-labelledby="additional-production-costs">
+              <div>
+                <h4 id="additional-production-costs">Additional Production Costs</h4>
+                <p>Costs applied to every produced Product unit.</p>
+              </div>
+              <div class="row g-3 align-items-end">
+                <div class="col-sm-6">
+                  <label class="form-label" for="product-advertising-cost">Advertising Cost per Unit, ₴ *</label>
+                  <input
+                    id="product-advertising-cost"
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    formControlName="advertisingCostPerUnit"
+                  />
+                  @if (form.controls.advertisingCostPerUnit.touched && form.controls.advertisingCostPerUnit.invalid) {
+                    <div class="invalid-feedback d-block">Advertising cost cannot be negative.</div>
+                  }
+                </div>
+                <div class="col-sm-6">
+                  <div class="value-preview h-100">
+                    <span>Estimated Total Unit Cost</span>
+                    <strong>{{ estimatedTotalUnitCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+                    <small>Raw materials plus advertising.</small>
+                  </div>
+                </div>
+              </div>
+            </section>
 
             <div class="row g-3 mt-1">
               <div class="col-sm-6">
@@ -231,7 +261,7 @@
                 <div class="value-preview h-100">
                   <span>Selling Price</span>
                   <strong>{{ calculatedSellingPrice() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
-                  <small>Recipe cost plus {{ form.controls.markupPercentage.value }}% markup.</small>
+                  <small>Total unit cost plus {{ form.controls.markupPercentage.value }}% markup.</small>
                 </div>
               </div>
             </div>
@@ -322,6 +352,10 @@
             <div class="production-cost mb-3">
               Estimated Production Cost:
               <strong>{{ estimatedProductionCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+              <small>
+                Raw materials {{ estimatedMaterialsProductionCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                + advertising {{ estimatedAdvertisingProductionCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}
+              </small>
             </div>
           }
 

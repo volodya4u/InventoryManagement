@@ -36,6 +36,7 @@ export interface Product {
   description: string;
   quantity: number;
   markupPercentage: number;
+  advertisingCostPerUnit: number;
   sellingPrice: number;
   averageUnitCost: number;
   stockValue: number;

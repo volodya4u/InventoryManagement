@@ -104,6 +104,10 @@ export class ProductsComponent implements OnInit {
       validators: [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]
     }),
     initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)]),
+    advertisingCostPerUnit: new FormControl(0, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(0)]
+    }),
     markupPercentage: new FormControl(0, {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0), Validators.max(999999.99)]
@@ -166,6 +170,7 @@ export class ProductsComponent implements OnInit {
       description: '',
       quantity: 0,
       initialUnitCost: null,
+      advertisingCostPerUnit: 0,
       markupPercentage: 0
     });
     this.form.controls.recipe.clear();
@@ -184,6 +189,7 @@ export class ProductsComponent implements OnInit {
       description: item.description,
       quantity: item.quantity,
       initialUnitCost: item.averageUnitCost,
+      advertisingCostPerUnit: item.advertisingCostPerUnit,
       markupPercentage: item.markupPercentage
     });
     this.form.controls.recipe.clear();
@@ -241,6 +247,7 @@ export class ProductsComponent implements OnInit {
     data.append('sku', value.sku.trim());
     data.append('name', value.name.trim());
     data.append('description', value.description.trim());
+    data.append('advertisingCostPerUnit', String(value.advertisingCostPerUnit));
     data.append('markupPercentage', String(value.markupPercentage));
     data.append('recipe', new Blob([JSON.stringify(recipe)], { type: 'application/json' }), 'recipe.json');
     if (!this.editing()) {
@@ -313,7 +320,16 @@ export class ProductsComponent implements OnInit {
   }
 
   estimatedProductionCost(): number {
+    return this.estimatedMaterialsProductionCost() + this.estimatedAdvertisingProductionCost();
+  }
+
+  estimatedMaterialsProductionCost(): number {
     return this.productionRequirements().reduce((total, requirement) => total + requirement.cost, 0);
+  }
+
+  estimatedAdvertisingProductionCost(): number {
+    const quantity = this.productionForm.controls.quantity.value ?? 0;
+    return (this.productionProduct()?.advertisingCostPerUnit ?? 0) * quantity;
   }
 
   submitProduction(): void {
@@ -447,9 +463,13 @@ export class ProductsComponent implements OnInit {
     }, 0);
   }
 
+  estimatedTotalUnitCost(): number {
+    return this.estimatedRecipeUnitCost() + this.form.controls.advertisingCostPerUnit.value;
+  }
+
   calculatedSellingPrice(): number {
     const markupPercentage = this.form.controls.markupPercentage.value;
-    const price = this.estimatedRecipeUnitCost() * (1 + markupPercentage / 100);
+    const price = this.estimatedTotalUnitCost() * (1 + markupPercentage / 100);
     return Math.round((price + Number.EPSILON) * 100) / 100;
   }
 

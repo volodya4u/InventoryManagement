@@ -63,13 +63,14 @@ Every finished product has a recipe that defines the raw materials required for 
 
 - **Initial Product Stock** represents finished products that existed before inventory tracking started. It does not consume raw materials.
 - **Initial Unit Cost** values the initial finished-product stock and is required when the initial stock is greater than zero.
-- **Markup, %** is configured separately for every product and represents the percentage added to the current recipe cost.
-- **Recommended Selling Price** is calculated automatically as `recipe unit cost × (1 + markup / 100)`. It is recalculated while recipe materials, recipe quantities, or the product markup are changed and cannot be entered manually.
+- **Advertising Cost per Unit** is an additional production cost assigned to every newly produced Product unit. It is added to raw-material cost, included in Product inventory valuation, and stored in each production batch total.
+- **Markup, %** is configured separately for every Product and represents the percentage added to its raw-material and advertising unit cost.
+- **Selling Price** is calculated automatically as `(raw-material unit cost + advertising cost per unit) × (1 + markup / 100)`. It is recalculated while recipe materials, recipe quantities, advertising cost, or Product markup are changed and cannot be entered manually.
 - **Produce** is the only operation that adds subsequent product units. Direct stock editing is not allowed.
 - Before production, the application multiplies every recipe quantity by the requested production quantity and checks all raw-material balances.
 - If any material is insufficient, the entire operation is rejected and no stock is changed.
 - Successful production deducts every required raw material, adds the finished products, and records the production batch and all stock movements in one database transaction.
-- Production cost is calculated from the current weighted-average costs of the consumed raw materials. The product's weighted-average unit cost is then recalculated. This cost is separate from the product's selling price.
+- Production cost is calculated from the current weighted-average costs of the consumed raw materials plus the Product's advertising cost per unit. The Product's weighted-average unit cost is then recalculated. This cost is separate from the Product's selling price.
 
 Editing a recipe affects only future production. Previous production batches keep the quantities and costs that were recorded when they were completed.
 
