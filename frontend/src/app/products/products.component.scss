@@ -47,7 +47,8 @@
 }
 
 .product-dialog,
-.production-dialog {
+.production-dialog,
+.stock-operation-dialog {
   width: min(860px, 100%);
 }
 
@@ -153,6 +154,39 @@
   border-radius: 0.6rem;
 }
 
+.stock-operation-dialog {
+  width: min(680px, 100%);
+}
+
+.operation-preview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.operation-preview > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 0.5rem;
+  background: #f5f8f5;
+}
+
+.operation-preview span {
+  color: var(--pf-muted);
+  font-size: 0.75rem;
+}
+
+.operation-preview strong {
+  overflow: hidden;
+  color: var(--pf-forest-dark);
+  font-size: 0.98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 575.98px) {
   .recipe-heading {
     align-items: stretch;
@@ -160,6 +194,10 @@
   }
 
   .recipe-row {
+    grid-template-columns: 1fr;
+  }
+
+  .operation-preview {
     grid-template-columns: 1fr;
   }
 

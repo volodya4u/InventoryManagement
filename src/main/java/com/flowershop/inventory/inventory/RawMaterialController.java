@@ -75,6 +75,30 @@ public class RawMaterialController {
                 request.notes());
     }
 
+    @PostMapping("/{id}/write-offs")
+    public RawMaterialDto writeOffStock(
+            @PathVariable long id,
+            @Valid @RequestBody StockWriteOffRequest request) {
+        return service.writeOffStock(
+                id,
+                request.quantity(),
+                request.operationDate(),
+                request.reason(),
+                request.notes());
+    }
+
+    @PostMapping("/{id}/adjustments")
+    public RawMaterialDto adjustStock(
+            @PathVariable long id,
+            @Valid @RequestBody StockAdjustmentRequest request) {
+        return service.adjustStock(
+                id,
+                request.actualQuantity(),
+                request.operationDate(),
+                request.reason(),
+                request.notes());
+    }
+
     @GetMapping("/{id}/image")
     public ResponseEntity<byte[]> image(@PathVariable long id) {
         var image = service.findImage(id);

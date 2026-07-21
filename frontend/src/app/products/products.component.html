@@ -77,6 +77,15 @@
                   <button type="button" class="btn btn-sm btn-outline-success" (click)="openProduction(item)">
                     Produce
                   </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="openStockOperation(item, 'WRITE_OFF')"
+                    [disabled]="item.quantity <= 0"
+                  >Write Off</button>
+                  <button type="button" class="btn btn-sm btn-outline-warning" (click)="openStockOperation(item, 'ADJUSTMENT')">
+                    Adjust Stock
+                  </button>
                   <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openEdit(item)">Edit</button>
                   <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
                 </div>
@@ -329,6 +338,136 @@
             class="btn btn-success"
             [disabled]="producing() || productionForm.invalid || hasProductionShortage()">
             {{ producing() ? 'Producing…' : 'Produce Product' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}
+
+@if (stockOperationDialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeStockOperationDialog()">
+    <section
+      class="dialog-card stock-operation-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="product-stock-operation-dialog"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="dialog-header">
+        <div>
+          <h2 id="product-stock-operation-dialog">
+            {{ stockOperationType() === 'WRITE_OFF' ? 'Write Off Product' : 'Adjust Product Stock' }}
+          </h2>
+          <div class="dialog-subtitle">
+            {{ stockOperationProduct()?.sku }} · {{ stockOperationProduct()?.name }} · current stock:
+            {{ stockOperationProduct()?.quantity }} units
+          </div>
+        </div>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeStockOperationDialog()"></button>
+      </header>
+
+      <form [formGroup]="stockOperationForm" (ngSubmit)="submitStockOperation()" novalidate>
+        <div class="dialog-body">
+          @if (stockOperationError()) {
+            <div class="alert alert-danger" role="alert">{{ stockOperationError() }}</div>
+          }
+
+          @if (stockOperationType() === 'WRITE_OFF') {
+            <div class="alert alert-warning small">
+              Use this operation for damaged, lost, rejected, or unsellable Products. It reduces finished stock without affecting Raw Materials.
+            </div>
+          } @else {
+            <div class="alert alert-light border small">
+              Enter the number of finished Products physically counted. An increase corrects the Product balance and does not consume Raw Materials because it is not a production operation.
+            </div>
+          }
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label" for="product-stock-operation-quantity">
+                {{ stockOperationType() === 'WRITE_OFF' ? 'Quantity to Write Off' : 'Actual Counted Stock' }} *
+              </label>
+              <input
+                id="product-stock-operation-quantity"
+                class="form-control"
+                type="number"
+                min="0"
+                step="1"
+                [attr.max]="stockOperationType() === 'WRITE_OFF' ? stockOperationProduct()?.quantity : null"
+                formControlName="quantity"
+              />
+              @if (hasWriteOffShortage()) {
+                <div class="invalid-feedback d-block">The write-off quantity exceeds available Product stock.</div>
+              } @else if (stockOperationForm.controls.quantity.touched && stockOperationForm.controls.quantity.invalid) {
+                <div class="invalid-feedback d-block">
+                  {{ stockOperationType() === 'WRITE_OFF' ? 'Enter a positive whole number.' : 'Enter a non-negative whole number.' }}
+                </div>
+              }
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="product-stock-operation-date">Operation Date *</label>
+              <input id="product-stock-operation-date" class="form-control" type="date" formControlName="operationDate" />
+            </div>
+          </div>
+
+          <div class="operation-preview mb-3">
+            <div>
+              <span>Recorded Change</span>
+              <strong [class.text-danger]="stockDifference() < 0" [class.text-success]="stockDifference() > 0">
+                {{ stockDifference() > 0 ? '+' : '' }}{{ stockDifference() }} units
+              </strong>
+            </div>
+            <div>
+              <span>New Stock</span>
+              <strong [class.text-danger]="projectedStock() < 0">{{ projectedStock() }} units</strong>
+            </div>
+            <div>
+              <span>Value of Change</span>
+              <strong>{{ stockValueChange() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          @if (hasNoAdjustmentChange()) {
+            <div class="alert alert-info small">The counted quantity already matches the recorded Product stock.</div>
+          }
+
+          <div class="mb-3">
+            <label class="form-label" for="product-stock-operation-reason">Reason *</label>
+            <select id="product-stock-operation-reason" class="form-select" formControlName="reason">
+              @for (reason of stockOperationReasons(); track reason.value) {
+                <option [value]="reason.value">{{ reason.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label" for="product-stock-operation-notes">Notes</label>
+            <textarea
+              id="product-stock-operation-notes"
+              class="form-control"
+              rows="3"
+              maxlength="1000"
+              formControlName="notes"
+              placeholder="Optional details for the audit history"
+            ></textarea>
+          </div>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeStockOperationDialog()">Cancel</button>
+          <button
+            type="submit"
+            class="btn"
+            [class.btn-danger]="stockOperationType() === 'WRITE_OFF'"
+            [class.btn-success]="stockOperationType() === 'ADJUSTMENT'"
+            [disabled]="stockOperationSaving() || hasWriteOffShortage() || hasNoAdjustmentChange()"
+          >
+            @if (stockOperationSaving()) {
+              Saving...
+            } @else {
+              {{ stockOperationType() === 'WRITE_OFF' ? 'Confirm Write-Off' : 'Save Adjustment' }}
+            }
           </button>
         </footer>
       </form>

@@ -20,6 +20,13 @@ type RecipeFormGroup = FormGroup<{
   quantityPerUnit: FormControl<number | null>;
 }>;
 
+type StockOperationType = 'WRITE_OFF' | 'ADJUSTMENT';
+
+interface ReasonOption {
+  value: string;
+  label: string;
+}
+
 interface ProductionRequirement {
   rawMaterialId: number;
   name: string;
@@ -67,6 +74,26 @@ export class ProductsComponent implements OnInit {
   readonly producing = signal(false);
   readonly productionProduct = signal<Product | null>(null);
   readonly productionError = signal('');
+  readonly stockOperationDialogOpen = signal(false);
+  readonly stockOperationSaving = signal(false);
+  readonly stockOperationError = signal('');
+  readonly stockOperationType = signal<StockOperationType>('WRITE_OFF');
+  readonly stockOperationProduct = signal<Product | null>(null);
+
+  readonly writeOffReasons: ReasonOption[] = [
+    { value: 'Damaged', label: 'Damaged' },
+    { value: 'Unsellable', label: 'Unsellable' },
+    { value: 'Lost', label: 'Lost' },
+    { value: 'Quality Rejection', label: 'Quality Rejection' },
+    { value: 'Other', label: 'Other' }
+  ];
+
+  readonly adjustmentReasons: ReasonOption[] = [
+    { value: 'Physical Inventory Count', label: 'Physical Inventory Count' },
+    { value: 'Data Entry Correction', label: 'Data Entry Correction' },
+    { value: 'Opening Balance Correction', label: 'Opening Balance Correction' },
+    { value: 'Other', label: 'Other' }
+  ];
 
   readonly form = new FormGroup({
     sku: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
@@ -87,6 +114,20 @@ export class ProductsComponent implements OnInit {
   readonly productionForm = new FormGroup({
     quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]),
     productionDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
+  });
+
+  readonly stockOperationForm = new FormGroup({
+    quantity: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(1),
+      Validators.pattern(/^\d+$/)
+    ]),
+    operationDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    reason: new FormControl('Damaged', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(200)]
+    }),
     notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
   });
 
@@ -291,6 +332,104 @@ export class ProductsComponent implements OnInit {
           this.load();
         },
         error: (error) => this.productionError.set(apiErrorMessage(error))
+      });
+  }
+
+  openStockOperation(item: Product, type: StockOperationType): void {
+    this.stockOperationProduct.set(item);
+    this.stockOperationType.set(type);
+    const quantityControl = this.stockOperationForm.controls.quantity;
+    quantityControl.setValidators([
+      Validators.required,
+      Validators.min(type === 'WRITE_OFF' ? 1 : 0),
+      Validators.pattern(/^\d+$/)
+    ]);
+    this.stockOperationForm.reset({
+      quantity: type === 'ADJUSTMENT' ? item.quantity : null,
+      operationDate: this.today(),
+      reason: type === 'WRITE_OFF' ? this.writeOffReasons[0].value : this.adjustmentReasons[0].value,
+      notes: ''
+    });
+    quantityControl.updateValueAndValidity();
+    this.stockOperationError.set('');
+    this.error.set('');
+    this.stockOperationDialogOpen.set(true);
+  }
+
+  closeStockOperationDialog(): void {
+    if (!this.stockOperationSaving()) this.stockOperationDialogOpen.set(false);
+  }
+
+  stockOperationReasons(): ReasonOption[] {
+    return this.stockOperationType() === 'WRITE_OFF'
+      ? this.writeOffReasons
+      : this.adjustmentReasons;
+  }
+
+  stockDifference(): number {
+    const product = this.stockOperationProduct();
+    const quantity = this.stockOperationForm.controls.quantity.value;
+    if (!product || quantity === null) return 0;
+    return this.stockOperationType() === 'WRITE_OFF'
+      ? -quantity
+      : quantity - product.quantity;
+  }
+
+  projectedStock(): number {
+    const product = this.stockOperationProduct();
+    if (!product) return 0;
+    return product.quantity + this.stockDifference();
+  }
+
+  stockValueChange(): number {
+    return Math.abs(this.stockDifference()) * (this.stockOperationProduct()?.averageUnitCost ?? 0);
+  }
+
+  hasWriteOffShortage(): boolean {
+    const product = this.stockOperationProduct();
+    const quantity = this.stockOperationForm.controls.quantity.value ?? 0;
+    return this.stockOperationType() === 'WRITE_OFF' && !!product && quantity > product.quantity;
+  }
+
+  hasNoAdjustmentChange(): boolean {
+    return this.stockOperationType() === 'ADJUSTMENT' && this.stockDifference() === 0;
+  }
+
+  submitStockOperation(): void {
+    const product = this.stockOperationProduct();
+    if (!product || this.stockOperationForm.invalid || this.hasWriteOffShortage()
+        || this.hasNoAdjustmentChange() || this.stockOperationSaving()) {
+      this.stockOperationForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.stockOperationForm.getRawValue();
+    const writeOff = this.stockOperationType() === 'WRITE_OFF';
+    const endpoint = writeOff ? 'write-offs' : 'adjustments';
+    const request = writeOff
+      ? {
+          quantity: value.quantity,
+          operationDate: value.operationDate,
+          reason: value.reason,
+          notes: value.notes.trim()
+        }
+      : {
+          actualQuantity: value.quantity,
+          operationDate: value.operationDate,
+          reason: value.reason,
+          notes: value.notes.trim()
+        };
+
+    this.stockOperationSaving.set(true);
+    this.stockOperationError.set('');
+    this.http.post<Product>(`/api/products/${product.id}/${endpoint}`, request)
+      .pipe(finalize(() => this.stockOperationSaving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.items.update((items) => items.map((item) => item.id === updated.id ? updated : item));
+          this.stockOperationDialogOpen.set(false);
+        },
+        error: (error) => this.stockOperationError.set(apiErrorMessage(error))
       });
   }
 

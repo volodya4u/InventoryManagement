@@ -25,7 +25,10 @@ CREATE INDEX IF NOT EXISTS idx_raw_material_name ON raw_material(name);
 CREATE TABLE IF NOT EXISTS raw_material_stock_movement (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     raw_material_id INTEGER NOT NULL,
-    movement_type TEXT NOT NULL CHECK (movement_type IN ('OPENING_BALANCE', 'RECEIPT', 'PRODUCTION_CONSUMPTION')),
+    movement_type TEXT NOT NULL CHECK (movement_type IN (
+        'OPENING_BALANCE', 'RECEIPT', 'PRODUCTION_CONSUMPTION',
+        'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE'
+    )),
     quantity NUMERIC NOT NULL CHECK (quantity > 0),
     unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
     total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
@@ -135,7 +138,10 @@ CREATE TABLE IF NOT EXISTS product_stock_movement (
     product_id INTEGER NOT NULL,
     production_batch_id INTEGER,
     sale_id INTEGER,
-    movement_type TEXT NOT NULL CHECK (movement_type IN ('OPENING_BALANCE', 'PRODUCTION', 'SALE')),
+    movement_type TEXT NOT NULL CHECK (movement_type IN (
+        'OPENING_BALANCE', 'PRODUCTION', 'SALE',
+        'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE'
+    )),
     quantity NUMERIC NOT NULL CHECK (quantity > 0),
     unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
     total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),

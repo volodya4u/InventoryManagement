@@ -53,10 +53,21 @@
               <td class="text-end fw-semibold">{{ item.quantity }}</td>
               <td class="text-end">{{ item.averageUnitCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
               <td class="text-end fw-semibold">{{ item.stockValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
-              <td class="text-end text-nowrap">
-                <button type="button" class="btn btn-sm btn-outline-success me-2" (click)="openReceipt(item)">Receive Stock</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary me-2" (click)="openEdit(item)">Edit</button>
-                <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
+              <td class="actions-column">
+                <div class="material-actions">
+                  <button type="button" class="btn btn-sm btn-outline-success" (click)="openReceipt(item)">Receive Stock</button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="openStockOperation(item, 'WRITE_OFF')"
+                    [disabled]="item.quantity <= 0"
+                  >Write Off</button>
+                  <button type="button" class="btn btn-sm btn-outline-warning" (click)="openStockOperation(item, 'ADJUSTMENT')">
+                    Adjust Stock
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openEdit(item)">Edit</button>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
+                </div>
               </td>
             </tr>
           }
@@ -214,6 +225,139 @@
           <button type="button" class="btn btn-outline-secondary" (click)="closeReceiptDialog()">Cancel</button>
           <button type="submit" class="btn btn-success" [disabled]="receiving()">
             {{ receiving() ? 'Receiving…' : 'Receive Stock' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}
+
+@if (stockOperationDialogOpen()) {
+  <div class="dialog-backdrop" (click)="closeStockOperationDialog()">
+    <section
+      class="dialog-card stock-operation-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="raw-stock-operation-dialog"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="dialog-header">
+        <div>
+          <h2 id="raw-stock-operation-dialog">
+            {{ stockOperationType() === 'WRITE_OFF' ? 'Write Off Raw Material' : 'Adjust Raw Material Stock' }}
+          </h2>
+          <div class="dialog-subtitle">
+            {{ stockOperationMaterial()?.name }} · current stock:
+            {{ stockOperationMaterial()?.quantity }} {{ unitLabel(stockOperationMaterial()?.unit ?? '') }}
+          </div>
+        </div>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeStockOperationDialog()"></button>
+      </header>
+
+      <form [formGroup]="stockOperationForm" (ngSubmit)="submitStockOperation()" novalidate>
+        <div class="dialog-body">
+          @if (stockOperationError()) {
+            <div class="alert alert-danger" role="alert">{{ stockOperationError() }}</div>
+          }
+
+          @if (stockOperationType() === 'WRITE_OFF') {
+            <div class="alert alert-warning small">
+              Use this operation for damaged, spoiled, lost, or otherwise unusable material. It reduces stock without changing the average unit cost.
+            </div>
+          } @else {
+            <div class="alert alert-light border small">
+              Enter the quantity physically counted during inventory. The system will record the difference as an increase or decrease at the current average unit cost.
+            </div>
+          }
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label" for="raw-stock-operation-quantity">
+                {{ stockOperationType() === 'WRITE_OFF' ? 'Quantity to Write Off' : 'Actual Counted Stock' }} *
+              </label>
+              <input
+                id="raw-stock-operation-quantity"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                [attr.max]="stockOperationType() === 'WRITE_OFF' ? stockOperationMaterial()?.quantity : null"
+                formControlName="quantity"
+              />
+              @if (hasWriteOffShortage()) {
+                <div class="invalid-feedback d-block">The write-off quantity exceeds available stock.</div>
+              } @else if (stockOperationForm.controls.quantity.touched && stockOperationForm.controls.quantity.invalid) {
+                <div class="invalid-feedback d-block">
+                  {{ stockOperationType() === 'WRITE_OFF' ? 'Enter a quantity greater than zero.' : 'Enter a non-negative actual quantity.' }}
+                </div>
+              }
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="raw-stock-operation-date">Operation Date *</label>
+              <input id="raw-stock-operation-date" class="form-control" type="date" formControlName="operationDate" />
+            </div>
+          </div>
+
+          <div class="operation-preview mb-3">
+            <div>
+              <span>Recorded Change</span>
+              <strong [class.text-danger]="stockDifference() < 0" [class.text-success]="stockDifference() > 0">
+                {{ stockDifference() > 0 ? '+' : '' }}{{ stockDifference() }}
+                {{ unitLabel(stockOperationMaterial()?.unit ?? '') }}
+              </strong>
+            </div>
+            <div>
+              <span>New Stock</span>
+              <strong [class.text-danger]="projectedStock() < 0">
+                {{ projectedStock() }} {{ unitLabel(stockOperationMaterial()?.unit ?? '') }}
+              </strong>
+            </div>
+            <div>
+              <span>Value of Change</span>
+              <strong>{{ stockValueChange() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          @if (hasNoAdjustmentChange()) {
+            <div class="alert alert-info small">The counted quantity already matches the recorded stock.</div>
+          }
+
+          <div class="mb-3">
+            <label class="form-label" for="raw-stock-operation-reason">Reason *</label>
+            <select id="raw-stock-operation-reason" class="form-select" formControlName="reason">
+              @for (reason of stockOperationReasons(); track reason.value) {
+                <option [value]="reason.value">{{ reason.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label" for="raw-stock-operation-notes">Notes</label>
+            <textarea
+              id="raw-stock-operation-notes"
+              class="form-control"
+              rows="3"
+              maxlength="1000"
+              formControlName="notes"
+              placeholder="Optional details for the audit history"
+            ></textarea>
+          </div>
+        </div>
+
+        <footer class="dialog-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeStockOperationDialog()">Cancel</button>
+          <button
+            type="submit"
+            class="btn"
+            [class.btn-danger]="stockOperationType() === 'WRITE_OFF'"
+            [class.btn-success]="stockOperationType() === 'ADJUSTMENT'"
+            [disabled]="stockOperationSaving() || hasWriteOffShortage() || hasNoAdjustmentChange()"
+          >
+            @if (stockOperationSaving()) {
+              Saving...
+            } @else {
+              {{ stockOperationType() === 'WRITE_OFF' ? 'Confirm Write-Off' : 'Save Adjustment' }}
+            }
           </button>
         </footer>
       </form>

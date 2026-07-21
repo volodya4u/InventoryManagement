@@ -29,7 +29,7 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     """);
         }
 
-        if (!tableDefinitionContains("raw_material_stock_movement", "PRODUCTION_CONSUMPTION")) {
+        if (!tableDefinitionContains("raw_material_stock_movement", "'ADJUSTMENT_DECREASE'")) {
             migrateRawMaterialStockMovement();
         }
 
@@ -50,7 +50,7 @@ public class InventorySchemaMigration implements ApplicationRunner {
         }
 
         if (!hasColumn("product_stock_movement", "sale_id")
-                || !tableDefinitionContains("product_stock_movement", "'SALE'")) {
+                || !tableDefinitionContains("product_stock_movement", "'ADJUSTMENT_DECREASE'")) {
             migrateProductStockMovement();
         }
 
@@ -90,7 +90,9 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     raw_material_id INTEGER NOT NULL,
                     movement_type TEXT NOT NULL CHECK (
-                        movement_type IN ('OPENING_BALANCE', 'RECEIPT', 'PRODUCTION_CONSUMPTION')),
+                        movement_type IN (
+                            'OPENING_BALANCE', 'RECEIPT', 'PRODUCTION_CONSUMPTION',
+                            'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE')),
                     quantity NUMERIC NOT NULL CHECK (quantity > 0),
                     unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
                     total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
@@ -117,6 +119,7 @@ public class InventorySchemaMigration implements ApplicationRunner {
 
     private void migrateProductStockMovement() {
         jdbcTemplate.execute("ALTER TABLE product_stock_movement RENAME TO product_stock_movement_old");
+        var oldTableHasSaleId = hasColumn("product_stock_movement_old", "sale_id");
         jdbcTemplate.execute("""
                 CREATE TABLE product_stock_movement (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -124,7 +127,9 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     production_batch_id INTEGER,
                     sale_id INTEGER,
                     movement_type TEXT NOT NULL CHECK (
-                        movement_type IN ('OPENING_BALANCE', 'PRODUCTION', 'SALE')),
+                        movement_type IN (
+                            'OPENING_BALANCE', 'PRODUCTION', 'SALE',
+                            'WRITE_OFF', 'ADJUSTMENT_INCREASE', 'ADJUSTMENT_DECREASE')),
                     quantity NUMERIC NOT NULL CHECK (quantity > 0),
                     unit_cost NUMERIC NOT NULL CHECK (unit_cost >= 0),
                     total_cost NUMERIC NOT NULL CHECK (total_cost >= 0),
@@ -136,14 +141,25 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE RESTRICT
                 )
                 """);
-        jdbcTemplate.update("""
-                INSERT INTO product_stock_movement
-                    (id, product_id, production_batch_id, movement_type, quantity,
-                     unit_cost, total_cost, occurred_at, notes, created_at)
-                SELECT id, product_id, production_batch_id, movement_type, quantity,
-                       unit_cost, total_cost, occurred_at, notes, created_at
-                FROM product_stock_movement_old
-                """);
+        if (oldTableHasSaleId) {
+            jdbcTemplate.update("""
+                    INSERT INTO product_stock_movement
+                        (id, product_id, production_batch_id, sale_id, movement_type, quantity,
+                         unit_cost, total_cost, occurred_at, notes, created_at)
+                    SELECT id, product_id, production_batch_id, sale_id, movement_type, quantity,
+                           unit_cost, total_cost, occurred_at, notes, created_at
+                    FROM product_stock_movement_old
+                    """);
+        } else {
+            jdbcTemplate.update("""
+                    INSERT INTO product_stock_movement
+                        (id, product_id, production_batch_id, movement_type, quantity,
+                         unit_cost, total_cost, occurred_at, notes, created_at)
+                    SELECT id, product_id, production_batch_id, movement_type, quantity,
+                           unit_cost, total_cost, occurred_at, notes, created_at
+                    FROM product_stock_movement_old
+                    """);
+        }
         jdbcTemplate.execute("DROP TABLE product_stock_movement_old");
         jdbcTemplate.execute("""
                 CREATE INDEX idx_product_stock_movement_product

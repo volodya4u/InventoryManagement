@@ -11,6 +11,7 @@ A local inventory system for tracking raw materials and finished products for a 
 - Raw-material receipts and weighted-average inventory valuation.
 - Product recipes, atomic production, and raw-material consumption.
 - Sales with automatic Product stock deduction and immutable financial snapshots.
+- Raw Material and Product write-offs and physical-count stock adjustments with audited movements.
 - Monthly Sales report with revenue, cost, gross profit, payment, daily, and Product breakdowns.
 - JPG, JPEG, and PNG images stored as BLOBs.
 - Image validation in both the browser and the server.
@@ -71,6 +72,17 @@ Every finished product has a recipe that defines the raw materials required for 
 - Production cost is calculated from the current weighted-average costs of the consumed raw materials. The product's weighted-average unit cost is then recalculated. This cost is separate from the product's selling price.
 
 Editing a recipe affects only future production. Previous production batches keep the quantities and costs that were recorded when they were completed.
+
+### Write-Offs and Stock Adjustments
+
+Both **Raw Materials** and **Products** provide dedicated **Write Off** and **Adjust Stock** actions. Regular catalog editing cannot change stock quantities.
+
+- **Write Off** reduces the available quantity for damaged, spoiled, lost, rejected, or otherwise unusable stock. The operation is rejected when the requested quantity exceeds the current balance.
+- **Adjust Stock** sets the balance to the quantity physically counted during inventory. The system records the difference as either `ADJUSTMENT_INCREASE` or `ADJUSTMENT_DECREASE`.
+- Every operation stores its date, reason, optional notes, quantity difference, current average unit cost, and the resulting value change in the stock-movement history.
+- A write-off or downward adjustment keeps the existing average unit cost and reduces Stock Value proportionally.
+- An upward adjustment values the discovered units at the existing average unit cost. Increasing Product stock through an adjustment does not consume Raw Materials because it corrects an existing balance rather than recording new production.
+- Product write-offs and adjustments accept only whole units. Raw Material quantities may use decimals according to their unit of measurement.
 
 ### Sales
 

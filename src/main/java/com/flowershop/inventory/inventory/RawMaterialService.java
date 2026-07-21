@@ -1,5 +1,7 @@
 package com.flowershop.inventory.inventory;
 
+import com.flowershop.inventory.common.InsufficientStockException;
+import com.flowershop.inventory.common.InsufficientStockException.StockShortage;
 import com.flowershop.inventory.common.NotFoundException;
 import com.flowershop.inventory.image.ImageValidator;
 import com.flowershop.inventory.image.StoredImage;
@@ -105,6 +107,59 @@ public class RawMaterialService {
         return findById(id);
     }
 
+    @Transactional
+    public RawMaterialDto writeOffStock(
+            long id,
+            BigDecimal quantity,
+            LocalDate operationDate,
+            String reason,
+            String notes) {
+        var material = findById(id);
+        if (material.quantity().compareTo(quantity) < 0) {
+            throw insufficientStock(material, quantity);
+        }
+        if (repository.consumeStock(id, quantity) == 0) {
+            var current = findById(id);
+            throw insufficientStock(current, quantity);
+        }
+        repository.insertStockMovement(
+                id,
+                "WRITE_OFF",
+                quantity,
+                material.averageUnitCost(),
+                quantity.multiply(material.averageUnitCost()),
+                operationDate,
+                operationNotes(reason, notes));
+        return findById(id);
+    }
+
+    @Transactional
+    public RawMaterialDto adjustStock(
+            long id,
+            BigDecimal actualQuantity,
+            LocalDate operationDate,
+            String reason,
+            String notes) {
+        var material = findById(id);
+        var difference = actualQuantity.subtract(material.quantity());
+        if (difference.signum() == 0) {
+            throw new IllegalArgumentException("Actual stock already matches the recorded raw material stock");
+        }
+        if (repository.updateStock(id, actualQuantity, material.averageUnitCost()) == 0) {
+            throw notFound(id);
+        }
+        var movementQuantity = difference.abs();
+        repository.insertStockMovement(
+                id,
+                difference.signum() > 0 ? "ADJUSTMENT_INCREASE" : "ADJUSTMENT_DECREASE",
+                movementQuantity,
+                material.averageUnitCost(),
+                movementQuantity.multiply(material.averageUnitCost()),
+                operationDate,
+                operationNotes(reason, notes));
+        return findById(id);
+    }
+
     public RawMaterialDto findById(long id) {
         return repository.findById(id).orElseThrow(() -> notFound(id));
     }
@@ -123,6 +178,26 @@ public class RawMaterialService {
 
     private String normalizeDescription(String description) {
         return description == null ? "" : description.trim();
+    }
+
+    private String operationNotes(String reason, String notes) {
+        var normalizedReason = reason.trim();
+        var normalizedNotes = normalizeDescription(notes);
+        return normalizedNotes.isEmpty()
+                ? "Reason: " + normalizedReason
+                : "Reason: " + normalizedReason + ". " + normalizedNotes;
+    }
+
+    private InsufficientStockException insufficientStock(
+            RawMaterialDto material,
+            BigDecimal requiredQuantity) {
+        return new InsufficientStockException(List.of(new StockShortage(
+                material.id(),
+                material.name(),
+                material.unit(),
+                requiredQuantity,
+                material.quantity(),
+                requiredQuantity.subtract(material.quantity()).max(BigDecimal.ZERO))));
     }
 
     private BigDecimal normalizeInitialUnitCost(BigDecimal quantity, BigDecimal initialUnitCost) {

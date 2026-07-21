@@ -195,6 +195,173 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void writesOffAndAdjustsRawMaterialAndProductStock() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        jdbcTemplate.update("""
+                INSERT INTO raw_material
+                    (name, description, unit, quantity, average_unit_cost)
+                VALUES ('Rose', '', 'PIECE', 10, 20)
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (sku, name, description, quantity, price, markup_percentage, average_unit_cost)
+                VALUES ('ROSE-BOX-001', 'Rose Box', '', 5, 250, 50, 150)
+                """);
+
+        mockMvc.perform(post("/api/raw-materials/1/write-offs")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "quantity": 2.5,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Damaged",
+                                  "notes": "Water damage"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(7.5))
+                .andExpect(jsonPath("$.averageUnitCost").value(20))
+                .andExpect(jsonPath("$.stockValue").value(150));
+
+        mockMvc.perform(post("/api/raw-materials/1/write-offs")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "quantity": 8,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Damaged"
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Insufficient raw material stock"));
+
+        mockMvc.perform(post("/api/raw-materials/1/adjustments")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "actualQuantity": 9,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Physical Inventory Count"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(9))
+                .andExpect(jsonPath("$.stockValue").value(180));
+
+        mockMvc.perform(post("/api/raw-materials/1/adjustments")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "actualQuantity": 4,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Physical Inventory Count"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(4));
+
+        mockMvc.perform(post("/api/products/1/write-offs")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "quantity": 2,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Unsellable"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(3))
+                .andExpect(jsonPath("$.averageUnitCost").value(150))
+                .andExpect(jsonPath("$.stockValue").value(450));
+
+        mockMvc.perform(post("/api/products/1/write-offs")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "quantity": 4,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Damaged"
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Insufficient product stock"));
+
+        mockMvc.perform(post("/api/products/1/adjustments")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "actualQuantity": 6,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Data Entry Correction"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(6));
+
+        mockMvc.perform(post("/api/products/1/adjustments")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "actualQuantity": 1,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Physical Inventory Count"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(1));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM raw_material_stock_movement WHERE movement_type = 'WRITE_OFF'",
+                Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT total_cost FROM raw_material_stock_movement WHERE movement_type = 'WRITE_OFF'",
+                BigDecimal.class)).isEqualByComparingTo("50");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT notes FROM raw_material_stock_movement WHERE movement_type = 'WRITE_OFF'",
+                String.class)).isEqualTo("Reason: Damaged. Water damage");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM raw_material_stock_movement WHERE movement_type LIKE 'ADJUSTMENT_%'",
+                Integer.class)).isEqualTo(2);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM product_stock_movement WHERE movement_type = 'WRITE_OFF'",
+                Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM product_stock_movement WHERE movement_type LIKE 'ADJUSTMENT_%'",
+                Integer.class)).isEqualTo(2);
+    }
+
+    @Test
     void producesAProductAtomicallyFromItsRawMaterialRecipe() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);

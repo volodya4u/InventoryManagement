@@ -12,6 +12,13 @@ interface UnitOption {
   label: string;
 }
 
+type StockOperationType = 'WRITE_OFF' | 'ADJUSTMENT';
+
+interface ReasonOption {
+  value: string;
+  label: string;
+}
+
 function initialUnitCostValidator(control: AbstractControl): ValidationErrors | null {
   const quantity = Number(control.get('quantity')?.value ?? 0);
   const initialUnitCost = control.get('initialUnitCost')?.value;
@@ -41,6 +48,11 @@ export class RawMaterialsComponent implements OnInit {
   readonly receiptDialogOpen = signal(false);
   readonly receiving = signal(false);
   readonly receivingMaterial = signal<RawMaterial | null>(null);
+  readonly stockOperationDialogOpen = signal(false);
+  readonly stockOperationSaving = signal(false);
+  readonly stockOperationError = signal('');
+  readonly stockOperationType = signal<StockOperationType>('WRITE_OFF');
+  readonly stockOperationMaterial = signal<RawMaterial | null>(null);
 
   readonly units: UnitOption[] = [
     { value: 'PIECE', label: 'Piece' },
@@ -49,6 +61,21 @@ export class RawMaterialsComponent implements OnInit {
     { value: 'KILOGRAM', label: 'Kilogram' },
     { value: 'METER', label: 'Meter' },
     { value: 'PACKAGE', label: 'Package' }
+  ];
+
+  readonly writeOffReasons: ReasonOption[] = [
+    { value: 'Damaged', label: 'Damaged' },
+    { value: 'Spoiled or Expired', label: 'Spoiled or Expired' },
+    { value: 'Lost', label: 'Lost' },
+    { value: 'Production Waste', label: 'Production Waste' },
+    { value: 'Other', label: 'Other' }
+  ];
+
+  readonly adjustmentReasons: ReasonOption[] = [
+    { value: 'Physical Inventory Count', label: 'Physical Inventory Count' },
+    { value: 'Data Entry Correction', label: 'Data Entry Correction' },
+    { value: 'Opening Balance Correction', label: 'Opening Balance Correction' },
+    { value: 'Other', label: 'Other' }
   ];
 
   readonly form = new FormGroup({
@@ -63,6 +90,16 @@ export class RawMaterialsComponent implements OnInit {
     receivedQuantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
     unitPurchaseCost: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
     receiptDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
+  });
+
+  readonly stockOperationForm = new FormGroup({
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
+    operationDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    reason: new FormControl('Damaged', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(200)]
+    }),
     notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
   });
 
@@ -194,6 +231,104 @@ export class RawMaterialsComponent implements OnInit {
           this.receiptDialogOpen.set(false);
         },
         error: (error) => this.error.set(apiErrorMessage(error))
+      });
+  }
+
+  openStockOperation(item: RawMaterial, type: StockOperationType): void {
+    this.stockOperationMaterial.set(item);
+    this.stockOperationType.set(type);
+    const quantityControl = this.stockOperationForm.controls.quantity;
+    quantityControl.setValidators([
+      Validators.required,
+      Validators.min(type === 'WRITE_OFF' ? 0.0001 : 0)
+    ]);
+    this.stockOperationForm.reset({
+      quantity: type === 'ADJUSTMENT' ? item.quantity : null,
+      operationDate: this.today(),
+      reason: type === 'WRITE_OFF' ? this.writeOffReasons[0].value : this.adjustmentReasons[0].value,
+      notes: ''
+    });
+    quantityControl.updateValueAndValidity();
+    this.stockOperationError.set('');
+    this.error.set('');
+    this.stockOperationDialogOpen.set(true);
+  }
+
+  closeStockOperationDialog(): void {
+    if (!this.stockOperationSaving()) this.stockOperationDialogOpen.set(false);
+  }
+
+  stockOperationReasons(): ReasonOption[] {
+    return this.stockOperationType() === 'WRITE_OFF'
+      ? this.writeOffReasons
+      : this.adjustmentReasons;
+  }
+
+  stockDifference(): number {
+    const material = this.stockOperationMaterial();
+    const quantity = this.stockOperationForm.controls.quantity.value;
+    if (!material || quantity === null) return 0;
+    const difference = this.stockOperationType() === 'WRITE_OFF'
+      ? -quantity
+      : quantity - material.quantity;
+    return Number(difference.toFixed(4));
+  }
+
+  projectedStock(): number {
+    const material = this.stockOperationMaterial();
+    if (!material) return 0;
+    return Number((material.quantity + this.stockDifference()).toFixed(4));
+  }
+
+  stockValueChange(): number {
+    return Math.abs(this.stockDifference()) * (this.stockOperationMaterial()?.averageUnitCost ?? 0);
+  }
+
+  hasWriteOffShortage(): boolean {
+    const material = this.stockOperationMaterial();
+    const quantity = this.stockOperationForm.controls.quantity.value ?? 0;
+    return this.stockOperationType() === 'WRITE_OFF' && !!material && quantity > material.quantity;
+  }
+
+  hasNoAdjustmentChange(): boolean {
+    return this.stockOperationType() === 'ADJUSTMENT' && this.stockDifference() === 0;
+  }
+
+  submitStockOperation(): void {
+    const material = this.stockOperationMaterial();
+    if (!material || this.stockOperationForm.invalid || this.hasWriteOffShortage()
+        || this.hasNoAdjustmentChange() || this.stockOperationSaving()) {
+      this.stockOperationForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.stockOperationForm.getRawValue();
+    const writeOff = this.stockOperationType() === 'WRITE_OFF';
+    const endpoint = writeOff ? 'write-offs' : 'adjustments';
+    const request = writeOff
+      ? {
+          quantity: value.quantity,
+          operationDate: value.operationDate,
+          reason: value.reason,
+          notes: value.notes.trim()
+        }
+      : {
+          actualQuantity: value.quantity,
+          operationDate: value.operationDate,
+          reason: value.reason,
+          notes: value.notes.trim()
+        };
+
+    this.stockOperationSaving.set(true);
+    this.stockOperationError.set('');
+    this.http.post<RawMaterial>(`/api/raw-materials/${material.id}/${endpoint}`, request)
+      .pipe(finalize(() => this.stockOperationSaving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.items.update((items) => items.map((item) => item.id === updated.id ? updated : item));
+          this.stockOperationDialogOpen.set(false);
+        },
+        error: (error) => this.stockOperationError.set(apiErrorMessage(error))
       });
   }
 

@@ -2,6 +2,8 @@ package com.flowershop.inventory.inventory;
 
 import com.flowershop.inventory.common.InsufficientStockException;
 import com.flowershop.inventory.common.InsufficientStockException.StockShortage;
+import com.flowershop.inventory.common.InsufficientProductStockException;
+import com.flowershop.inventory.common.InsufficientProductStockException.ProductShortage;
 import com.flowershop.inventory.common.NotFoundException;
 import com.flowershop.inventory.image.ImageValidator;
 import com.flowershop.inventory.image.StoredImage;
@@ -195,6 +197,65 @@ public class ProductService {
         return findById(id);
     }
 
+    @Transactional
+    public ProductDto writeOffStock(
+            long id,
+            BigDecimal quantity,
+            LocalDate operationDate,
+            String reason,
+            String notes) {
+        validateWholeQuantity(quantity, "Write-off quantity");
+        var product = findById(id);
+        if (product.quantity().compareTo(quantity) < 0) {
+            throw insufficientProductStock(product, quantity);
+        }
+        if (repository.consumeStock(id, quantity) == 0) {
+            var current = findById(id);
+            throw insufficientProductStock(current, quantity);
+        }
+        repository.insertStockMovement(
+                id,
+                null,
+                null,
+                "WRITE_OFF",
+                quantity,
+                product.averageUnitCost(),
+                quantity.multiply(product.averageUnitCost()),
+                operationDate,
+                operationNotes(reason, notes));
+        return findById(id);
+    }
+
+    @Transactional
+    public ProductDto adjustStock(
+            long id,
+            BigDecimal actualQuantity,
+            LocalDate operationDate,
+            String reason,
+            String notes) {
+        validateWholeQuantity(actualQuantity, "Actual Product stock");
+        var product = findById(id);
+        var difference = actualQuantity.subtract(product.quantity());
+        if (difference.signum() == 0) {
+            throw new IllegalArgumentException("Actual stock already matches the recorded Product stock");
+        }
+        if (repository.updateStock(id, actualQuantity, product.averageUnitCost()) == 0) {
+            throw notFound(id);
+        }
+        var movementQuantity = difference.abs();
+        repository.insertStockMovement(
+                id,
+                null,
+                null,
+                difference.signum() > 0 ? "ADJUSTMENT_INCREASE" : "ADJUSTMENT_DECREASE",
+                movementQuantity,
+                product.averageUnitCost(),
+                movementQuantity.multiply(product.averageUnitCost()),
+                operationDate,
+                operationNotes(reason, notes));
+        return findById(id);
+    }
+
     public ProductDto findById(long id) {
         return repository.findById(id).orElseThrow(() -> notFound(id));
     }
@@ -274,6 +335,32 @@ public class ProductService {
 
     private String normalizeDescription(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private void validateWholeQuantity(BigDecimal quantity, String fieldName) {
+        if (quantity.stripTrailingZeros().scale() > 0) {
+            throw new IllegalArgumentException(fieldName + " must be a whole number");
+        }
+    }
+
+    private String operationNotes(String reason, String notes) {
+        var normalizedReason = reason.trim();
+        var normalizedNotes = normalizeDescription(notes);
+        return normalizedNotes.isEmpty()
+                ? "Reason: " + normalizedReason
+                : "Reason: " + normalizedReason + ". " + normalizedNotes;
+    }
+
+    private InsufficientProductStockException insufficientProductStock(
+            ProductDto product,
+            BigDecimal requiredQuantity) {
+        return new InsufficientProductStockException(List.of(new ProductShortage(
+                product.id(),
+                product.sku(),
+                product.name(),
+                requiredQuantity,
+                product.quantity(),
+                requiredQuantity.subtract(product.quantity()).max(BigDecimal.ZERO))));
     }
 
     private NotFoundException notFound(long id) {
