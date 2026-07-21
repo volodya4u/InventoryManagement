@@ -70,7 +70,7 @@ class InventorySchemaMigrationTest {
             var productColumns = jdbcTemplate.queryForList("PRAGMA table_info(product)");
             assertThat(productColumns)
                     .extracting(column -> column.get("name"))
-                    .contains("average_unit_cost");
+                    .contains("average_unit_cost", "markup_percentage");
             assertThat(jdbcTemplate.queryForObject(
                     "SELECT average_unit_cost FROM raw_material WHERE id = 1",
                     Integer.class)).isZero();

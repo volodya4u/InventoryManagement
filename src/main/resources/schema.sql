@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS product (
     description TEXT NOT NULL DEFAULT '',
     quantity NUMERIC NOT NULL DEFAULT 0 CHECK (quantity >= 0),
     price NUMERIC NOT NULL DEFAULT 0 CHECK (price >= 0),
+    markup_percentage NUMERIC NOT NULL DEFAULT 0 CHECK (markup_percentage >= 0),
     average_unit_cost NUMERIC NOT NULL DEFAULT 0 CHECK (average_unit_cost >= 0),
     image BLOB,
     image_content_type TEXT,

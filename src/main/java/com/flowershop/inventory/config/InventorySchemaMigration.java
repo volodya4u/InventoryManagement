@@ -41,6 +41,14 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     """);
         }
 
+        if (!hasColumn("product", "markup_percentage")) {
+            jdbcTemplate.execute("""
+                    ALTER TABLE product
+                    ADD COLUMN markup_percentage NUMERIC NOT NULL DEFAULT 0
+                        CHECK (markup_percentage >= 0)
+                    """);
+        }
+
         jdbcTemplate.update("""
                 INSERT INTO raw_material_stock_movement
                     (raw_material_id, movement_type, quantity, unit_cost, total_cost, occurred_at, notes)

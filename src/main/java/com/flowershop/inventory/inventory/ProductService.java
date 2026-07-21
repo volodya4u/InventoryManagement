@@ -19,6 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductService {
 
     private static final int UNIT_COST_SCALE = 4;
+    private static final int PRICE_SCALE = 2;
+    private static final int MARKUP_SCALE = 2;
+    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
     private final ProductRepository repository;
     private final RawMaterialRepository rawMaterialRepository;
@@ -43,18 +46,21 @@ public class ProductService {
             String name,
             String description,
             BigDecimal initialQuantity,
-            BigDecimal price,
             BigDecimal initialUnitCost,
+            BigDecimal markupPercentage,
             List<ProductRecipeItemInput> recipe,
             MultipartFile image) {
         var validatedRecipe = validateRecipe(recipe);
         var normalizedInitialCost = normalizeInitialUnitCost(initialQuantity, initialUnitCost);
+        var normalizedMarkup = normalizeMarkup(markupPercentage);
+        var sellingPrice = calculateSellingPrice(validatedRecipe, normalizedMarkup);
         long id = repository.insert(
                 sku.trim(),
                 name.trim(),
                 normalizeDescription(description),
                 initialQuantity,
-                price,
+                normalizedMarkup,
+                sellingPrice,
                 normalizedInitialCost,
                 imageValidator.validate(image));
         repository.replaceRecipe(id, validatedRecipe);
@@ -78,16 +84,19 @@ public class ProductService {
             String sku,
             String name,
             String description,
-            BigDecimal price,
+            BigDecimal markupPercentage,
             List<ProductRecipeItemInput> recipe,
             MultipartFile image) {
         var validatedRecipe = validateRecipe(recipe);
+        var normalizedMarkup = normalizeMarkup(markupPercentage);
+        var sellingPrice = calculateSellingPrice(validatedRecipe, normalizedMarkup);
         int changed = repository.update(
                 id,
                 sku.trim(),
                 name.trim(),
                 normalizeDescription(description),
-                price,
+                normalizedMarkup,
+                sellingPrice,
                 imageValidator.validate(image));
         if (changed == 0) {
             throw notFound(id);
@@ -227,6 +236,28 @@ public class ProductService {
         }
         var cost = initialUnitCost == null ? BigDecimal.ZERO : initialUnitCost;
         return cost.setScale(UNIT_COST_SCALE, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal normalizeMarkup(BigDecimal markupPercentage) {
+        if (markupPercentage == null || markupPercentage.signum() < 0) {
+            throw new IllegalArgumentException("Markup percentage cannot be negative");
+        }
+        return markupPercentage.setScale(MARKUP_SCALE, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calculateSellingPrice(
+            List<ProductRecipeItemInput> recipe,
+            BigDecimal markupPercentage) {
+        var recipeUnitCost = recipe.stream()
+                .map(item -> {
+                    var material = rawMaterialRepository.findById(item.rawMaterialId())
+                            .orElseThrow(() -> new NotFoundException(
+                                    "Raw material with id " + item.rawMaterialId() + " not found"));
+                    return item.quantityPerUnit().multiply(material.averageUnitCost());
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var multiplier = BigDecimal.ONE.add(markupPercentage.divide(ONE_HUNDRED));
+        return recipeUnitCost.multiply(multiplier).setScale(PRICE_SCALE, RoundingMode.HALF_UP);
     }
 
     private StockShortage shortage(RawMaterialDto material, BigDecimal requiredQuantity) {

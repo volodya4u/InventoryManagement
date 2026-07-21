@@ -59,6 +59,8 @@ Every finished product has a recipe that defines the raw materials required for 
 
 - **Initial Product Stock** represents finished products that existed before inventory tracking started. It does not consume raw materials.
 - **Initial Unit Cost** values the initial finished-product stock and is required when the initial stock is greater than zero.
+- **Markup, %** is configured separately for every product and represents the percentage added to the current recipe cost.
+- **Recommended Selling Price** is calculated automatically as `recipe unit cost × (1 + markup / 100)`. It is recalculated while recipe materials, recipe quantities, or the product markup are changed and cannot be entered manually.
 - **Produce** is the only operation that adds subsequent product units. Direct stock editing is not allowed.
 - Before production, the application multiplies every recipe quantity by the requested production quantity and checks all raw-material balances.
 - If any material is insufficient, the entire operation is rejected and no stock is changed.

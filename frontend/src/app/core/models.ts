@@ -35,7 +35,8 @@ export interface Product {
   name: string;
   description: string;
   quantity: number;
-  price: number;
+  markupPercentage: number;
+  sellingPrice: number;
   averageUnitCost: number;
   stockValue: number;
   recipe: ProductRecipeItem[];

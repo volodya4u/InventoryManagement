@@ -74,7 +74,10 @@ export class ProductsComponent implements OnInit {
       validators: [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]
     }),
     initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)]),
-    price: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+    markupPercentage: new FormControl(0, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(0), Validators.max(999999.99)]
+    }),
     recipe: new FormArray<RecipeFormGroup>([])
   }, { validators: productFormValidator });
 
@@ -119,7 +122,7 @@ export class ProductsComponent implements OnInit {
       description: '',
       quantity: 0,
       initialUnitCost: null,
-      price: 0
+      markupPercentage: 0
     });
     this.form.controls.recipe.clear();
     this.addRecipeItem();
@@ -137,7 +140,7 @@ export class ProductsComponent implements OnInit {
       description: item.description,
       quantity: item.quantity,
       initialUnitCost: item.averageUnitCost,
-      price: item.price
+      markupPercentage: item.markupPercentage
     });
     this.form.controls.recipe.clear();
     for (const recipeItem of item.recipe) {
@@ -194,7 +197,7 @@ export class ProductsComponent implements OnInit {
     data.append('sku', value.sku.trim());
     data.append('name', value.name.trim());
     data.append('description', value.description.trim());
-    data.append('price', String(value.price));
+    data.append('markupPercentage', String(value.markupPercentage));
     data.append('recipe', new Blob([JSON.stringify(recipe)], { type: 'application/json' }), 'recipe.json');
     if (!this.editing()) {
       data.append('quantity', String(value.quantity));
@@ -300,6 +303,12 @@ export class ProductsComponent implements OnInit {
       );
       return total + (row.controls.quantityPerUnit.value ?? 0) * (material?.averageUnitCost ?? 0);
     }, 0);
+  }
+
+  calculatedSellingPrice(): number {
+    const markupPercentage = this.form.controls.markupPercentage.value;
+    const price = this.estimatedRecipeUnitCost() * (1 + markupPercentage / 100);
+    return Math.round((price + Number.EPSILON) * 100) / 100;
   }
 
   recipeSummary(item: Product): string {

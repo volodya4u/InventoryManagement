@@ -93,7 +93,7 @@ class InventoryFlowIntegrationTest {
                         .param("description", "Gift box with roses")
                         .param("quantity", "2")
                         .param("initialUnitCost", "100")
-                        .param("price", "250")
+                        .param("markupPercentage", "50")
                         .session(session)
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue()))
@@ -101,6 +101,8 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.quantity").value(2))
                 .andExpect(jsonPath("$.averageUnitCost").value(100))
                 .andExpect(jsonPath("$.stockValue").value(200))
+                .andExpect(jsonPath("$.markupPercentage").value(50))
+                .andExpect(jsonPath("$.sellingPrice").value(207))
                 .andExpect(jsonPath("$.recipe.length()").value(3));
 
         assertMaterialQuantity("Rose", "12");
