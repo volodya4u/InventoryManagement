@@ -1,6 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormArray,
@@ -135,7 +136,18 @@ export class ProductsComponent implements OnInit {
     notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
   });
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    destroyRef: DestroyRef
+  ) {
+    this.form.controls.recipe.valueChanges
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(() => this.syncInitialUnitCost());
+
+    this.form.controls.advertisingCostPerUnit.valueChanges
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(() => this.syncInitialUnitCost());
+  }
 
   ngOnInit(): void {
     this.load();
@@ -465,6 +477,14 @@ export class ProductsComponent implements OnInit {
 
   estimatedTotalUnitCost(): number {
     return this.estimatedRecipeUnitCost() + this.form.controls.advertisingCostPerUnit.value;
+  }
+
+  private syncInitialUnitCost(): void {
+    if (this.editing()) return;
+
+    const estimatedUnitCost = this.estimatedTotalUnitCost();
+    const roundedUnitCost = Math.round((estimatedUnitCost + Number.EPSILON) * 100) / 100;
+    this.form.controls.initialUnitCost.setValue(roundedUnitCost, { emitEvent: false });
   }
 
   calculatedSellingPrice(): number {

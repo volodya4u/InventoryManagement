@@ -152,6 +152,7 @@
               <div class="col-sm-6">
                 <label class="form-label" for="product-initial-unit-cost">Initial Unit Cost, ₴</label>
                 <input id="product-initial-unit-cost" class="form-control" type="number" min="0" step="0.01" formControlName="initialUnitCost" />
+                <div class="form-text">Defaults to the current estimated total unit cost and can be adjusted.</div>
                 @if (form.hasError('initialUnitCostRequired') && (form.controls.quantity.touched || form.controls.initialUnitCost.touched)) {
                   <div class="invalid-feedback d-block">Enter the initial unit cost when initial stock is greater than zero.</div>
                 } @else if (form.controls.initialUnitCost.touched && form.controls.initialUnitCost.invalid) {
