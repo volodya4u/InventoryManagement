@@ -291,6 +291,21 @@ public class ProductRepository {
                 .findFirst();
     }
 
+    public boolean existsBySku(String sku, long excludedProductId) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM product WHERE sku = ? AND id <> ?)",
+                Boolean.class,
+                sku,
+                excludedProductId));
+    }
+
+    public boolean hasSales(long id) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM sale_item WHERE product_id = ?)",
+                Boolean.class,
+                id));
+    }
+
     public int delete(long id) {
         return jdbcTemplate.update("DELETE FROM product WHERE id = ?", id);
     }

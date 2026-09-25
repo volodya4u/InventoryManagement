@@ -1,5 +1,6 @@
 package com.flowershop.inventory.inventory;
 
+import com.flowershop.inventory.common.ConflictException;
 import com.flowershop.inventory.common.InsufficientStockException;
 import com.flowershop.inventory.common.InsufficientStockException.StockShortage;
 import com.flowershop.inventory.common.InsufficientProductStockException;
@@ -53,6 +54,7 @@ public class ProductService {
             BigDecimal markupPercentage,
             List<ProductRecipeItemInput> recipe,
             MultipartFile image) {
+        ensureSkuAvailable(sku.trim(), 0);
         var validatedRecipe = validateRecipe(recipe);
         var normalizedInitialCost = normalizeInitialUnitCost(initialQuantity, initialUnitCost);
         var normalizedAdvertisingCost = normalizeAdvertisingCost(advertisingCostPerUnit);
@@ -95,6 +97,7 @@ public class ProductService {
             BigDecimal markupPercentage,
             List<ProductRecipeItemInput> recipe,
             MultipartFile image) {
+        ensureSkuAvailable(sku.trim(), id);
         var validatedRecipe = validateRecipe(recipe);
         var normalizedAdvertisingCost = normalizeAdvertisingCost(advertisingCostPerUnit);
         var normalizedMarkup = normalizeMarkup(markupPercentage);
@@ -277,8 +280,19 @@ public class ProductService {
 
     @Transactional
     public void delete(long id) {
+        var product = findById(id);
+        if (repository.hasSales(id)) {
+            throw new ConflictException(
+                    "Product “%s” cannot be deleted because it has been sold.".formatted(product.name()));
+        }
         if (repository.delete(id) == 0) {
             throw notFound(id);
+        }
+    }
+
+    private void ensureSkuAvailable(String sku, long productId) {
+        if (repository.existsBySku(sku, productId)) {
+            throw new ConflictException("A product with SKU “%s” already exists.".formatted(sku));
         }
     }
 

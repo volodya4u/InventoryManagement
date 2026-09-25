@@ -1,5 +1,6 @@
 package com.flowershop.inventory.inventory;
 
+import com.flowershop.inventory.common.ConflictException;
 import com.flowershop.inventory.common.InsufficientStockException;
 import com.flowershop.inventory.common.InsufficientStockException.StockShortage;
 import com.flowershop.inventory.common.NotFoundException;
@@ -171,6 +172,18 @@ public class RawMaterialService {
 
     @Transactional
     public void delete(long id) {
+        var material = findById(id);
+        var recipeProducts = repository.findRecipeProductNames(id);
+        if (!recipeProducts.isEmpty()) {
+            throw new ConflictException(
+                    "Raw material “%s” is used in the recipe of %s. Remove it from the recipe before deleting it."
+                            .formatted(material.name(), String.join(", ", recipeProducts)));
+        }
+        if (repository.hasProductionConsumption(id)) {
+            throw new ConflictException(
+                    "Raw material “%s” cannot be deleted because production batches have consumed it."
+                            .formatted(material.name()));
+        }
         if (repository.delete(id) == 0) {
             throw notFound(id);
         }

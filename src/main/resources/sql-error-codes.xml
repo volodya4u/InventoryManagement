@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	- Spring has no built-in error codes for SQLite, so constraint violations would surface
+	- as UncategorizedSQLException. Map SQLITE_CONSTRAINT (19) to DataIntegrityViolationException.
+	-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="SQLite" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="dataIntegrityViolationCodes">
+			<value>19</value>
+		</property>
+	</bean>
+
+</beans>

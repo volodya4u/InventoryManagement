@@ -42,8 +42,13 @@ public class ApiExceptionHandler {
         return problem(HttpStatus.BAD_REQUEST, "Invalid data", exception.getMessage());
     }
 
+    @ExceptionHandler(ConflictException.class)
+    ProblemDetail conflict(ConflictException exception) {
+        return problem(HttpStatus.CONFLICT, "Data conflict", exception.getMessage());
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
-    ProblemDetail conflict(DataIntegrityViolationException exception) {
+    ProblemDetail dataIntegrityViolation(DataIntegrityViolationException exception) {
         return problem(
                 HttpStatus.CONFLICT,
                 "Data conflict",
