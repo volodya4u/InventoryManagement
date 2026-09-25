@@ -5,9 +5,12 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -166,8 +169,14 @@ public class StockMovementRepository {
             parameters.put("movementType", filter.movementType().name());
         }
         if (!filter.query().isBlank()) {
-            conditions.add("(LOWER(item_name) LIKE :query OR LOWER(item_code) LIKE :query)");
-            parameters.put("query", "%" + filter.query().toLowerCase() + "%");
+            // SQLite's LOWER() and LIKE only fold ASCII letters, so names such as "Троянда" are
+            // matched here and the movements are filtered by the matching item ids.
+            var query = filter.query().toLowerCase(Locale.ROOT);
+            conditions.add("""
+                    ((inventory_type = 'RAW_MATERIAL' AND item_id IN (:rawMaterialIds))
+                        OR (inventory_type = 'PRODUCT' AND item_id IN (:productIds)))""");
+            parameters.put("rawMaterialIds", matchingItemIds("SELECT id, name, '' AS code FROM raw_material", query));
+            parameters.put("productIds", matchingItemIds("SELECT id, name, sku AS code FROM product", query));
         }
         if (filter.from() != null) {
             conditions.add("occurred_at >= :fromDate");
@@ -180,6 +189,17 @@ public class StockMovementRepository {
         return new FilteredQuery(
                 conditions.isEmpty() ? "" : " WHERE " + String.join(" AND ", conditions),
                 parameters);
+    }
+
+    private List<Long> matchingItemIds(String itemsSql, String lowerCaseQuery) {
+        var ids = new ArrayList<Long>();
+        jdbcTemplate.query(itemsSql, Map.of(), (RowCallbackHandler) rs -> {
+            if (rs.getString("name").toLowerCase(Locale.ROOT).contains(lowerCaseQuery)
+                    || rs.getString("code").toLowerCase(Locale.ROOT).contains(lowerCaseQuery)) {
+                ids.add(rs.getLong("id"));
+            }
+        });
+        return ids;
     }
 
     private StockMovementDto map(ResultSet rs) throws SQLException {

@@ -842,6 +842,49 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void searchesStockHistoryByNameOrSkuIgnoringCaseInAnyAlphabet() throws Exception {
+        jdbcTemplate.update("""
+                INSERT INTO raw_material
+                    (id, name, description, unit, quantity, average_unit_cost)
+                VALUES (1, 'Троянда', '', 'PIECE', 10, 5)
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (id, sku, name, description, quantity, price, average_unit_cost)
+                VALUES (1, 'ROSE-BOX-001', 'Букет Троянд', '', 3, 40, 20)
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO raw_material_stock_movement
+                    (raw_material_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                VALUES (1, 'RECEIPT', 10, 5, 50, '2026-07-01')
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product_stock_movement
+                    (product_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                VALUES (1, 'PRODUCTION', 3, 20, 60, '2026-07-02')
+                """);
+
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+
+        mockMvc.perform(get("/api/stock-movements").param("query", "троянда").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.movements[0].itemName").value("Троянда"));
+        mockMvc.perform(get("/api/stock-movements").param("query", "ТРОЯНД").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(2));
+        mockMvc.perform(get("/api/stock-movements").param("query", "rose-box").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.movements[0].itemCode").value("ROSE-BOX-001"));
+        mockMvc.perform(get("/api/stock-movements").param("query", "tulip").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totals.netValueChange").value(0));
+    }
+
+    @Test
     void authenticatesAdminAndStoresValidatedPngAsBlob() throws Exception {
         mockMvc.perform(get("/api/raw-materials"))
                 .andExpect(status().isUnauthorized());
