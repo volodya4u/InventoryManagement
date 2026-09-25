@@ -41,6 +41,8 @@ export class RawMaterialsComponent implements OnInit {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly error = signal('');
+  readonly saveError = signal('');
+  readonly receiptError = signal('');
   readonly dialogOpen = signal(false);
   readonly editing = signal<RawMaterial | null>(null);
   readonly selectedFile = signal<File | null>(null);
@@ -126,6 +128,7 @@ export class RawMaterialsComponent implements OnInit {
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');
+    this.saveError.set('');
     this.dialogOpen.set(true);
   }
 
@@ -141,6 +144,7 @@ export class RawMaterialsComponent implements OnInit {
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');
+    this.saveError.set('');
     this.dialogOpen.set(true);
   }
 
@@ -174,7 +178,7 @@ export class RawMaterialsComponent implements OnInit {
     if (this.selectedFile()) data.append('image', this.selectedFile()!);
 
     this.saving.set(true);
-    this.error.set('');
+    this.saveError.set('');
     const current = this.editing();
     const request = current
       ? this.http.put<RawMaterial>(`/api/raw-materials/${current.id}`, data)
@@ -185,7 +189,7 @@ export class RawMaterialsComponent implements OnInit {
         this.dialogOpen.set(false);
         this.load();
       },
-      error: (error) => this.error.set(apiErrorMessage(error))
+      error: (error) => this.saveError.set(apiErrorMessage(error))
     });
   }
 
@@ -207,6 +211,7 @@ export class RawMaterialsComponent implements OnInit {
       notes: ''
     });
     this.error.set('');
+    this.receiptError.set('');
     this.receiptDialogOpen.set(true);
   }
 
@@ -222,7 +227,7 @@ export class RawMaterialsComponent implements OnInit {
     }
 
     this.receiving.set(true);
-    this.error.set('');
+    this.receiptError.set('');
     this.http.post<RawMaterial>(`/api/raw-materials/${material.id}/receipts`, this.receiptForm.getRawValue())
       .pipe(finalize(() => this.receiving.set(false)))
       .subscribe({
@@ -230,7 +235,7 @@ export class RawMaterialsComponent implements OnInit {
           this.items.update((items) => items.map((item) => item.id === updated.id ? updated : item));
           this.receiptDialogOpen.set(false);
         },
-        error: (error) => this.error.set(apiErrorMessage(error))
+        error: (error) => this.receiptError.set(apiErrorMessage(error))
       });
   }
 

@@ -162,6 +162,9 @@
               <div class="invalid-feedback d-block">{{ fileError() }}</div>
             }
           </div>
+          @if (saveError()) {
+            <div class="alert alert-danger mt-3 mb-0" role="alert">{{ saveError() }}</div>
+          }
         </div>
 
         <footer class="dialog-footer">
@@ -219,6 +222,9 @@
             <label class="form-label" for="receipt-notes">Notes</label>
             <textarea id="receipt-notes" class="form-control" rows="3" maxlength="1000" formControlName="notes"></textarea>
           </div>
+          @if (receiptError()) {
+            <div class="alert alert-danger mt-3 mb-0" role="alert">{{ receiptError() }}</div>
+          }
         </div>
 
         <footer class="dialog-footer">

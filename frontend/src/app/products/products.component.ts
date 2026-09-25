@@ -67,6 +67,7 @@ export class ProductsComponent implements OnInit {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly error = signal('');
+  readonly saveError = signal('');
   readonly dialogOpen = signal(false);
   readonly editing = signal<Product | null>(null);
   readonly selectedFile = signal<File | null>(null);
@@ -190,6 +191,7 @@ export class ProductsComponent implements OnInit {
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');
+    this.saveError.set('');
     this.dialogOpen.set(true);
   }
 
@@ -215,6 +217,7 @@ export class ProductsComponent implements OnInit {
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');
+    this.saveError.set('');
     this.dialogOpen.set(true);
   }
 
@@ -271,7 +274,7 @@ export class ProductsComponent implements OnInit {
     if (this.selectedFile()) data.append('image', this.selectedFile()!);
 
     this.saving.set(true);
-    this.error.set('');
+    this.saveError.set('');
     const current = this.editing();
     const request = current
       ? this.http.put<Product>(`/api/products/${current.id}`, data)
@@ -282,7 +285,7 @@ export class ProductsComponent implements OnInit {
         this.dialogOpen.set(false);
         this.load();
       },
-      error: (error) => this.error.set(apiErrorMessage(error))
+      error: (error) => this.saveError.set(apiErrorMessage(error))
     });
   }
 
