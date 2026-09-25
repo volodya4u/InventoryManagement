@@ -953,11 +953,18 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
-    void changesTheAuthenticatedAdminPasswordAndInvalidatesTheSession() throws Exception {
+    void changesTheAuthenticatedAdminPasswordAndEndsAllSessions() throws Exception {
         var login = login(testPassword)
                 .andExpect(status().isOk())
                 .andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);
+        var otherBrowser = (MockHttpSession) login(testPassword)
+                .andExpect(status().isOk())
+                .andReturn()
+                .getRequest()
+                .getSession(false);
+        mockMvc.perform(get("/api/auth/me").session(otherBrowser))
+                .andExpect(status().isOk());
         var newPassword = "Changed-" + UUID.randomUUID();
         var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
                 .andExpect(status().isOk())
@@ -1026,6 +1033,10 @@ class InventoryFlowIntegrationTest {
                 .andExpect(status().isNoContent());
 
         assertThat(session.isInvalid()).isTrue();
+        mockMvc.perform(get("/api/auth/me").session(otherBrowser))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Your session has ended. Please sign in again."));
+        assertThat(otherBrowser.isInvalid()).isTrue();
         login(testPassword).andExpect(status().isUnauthorized());
         login(newPassword).andExpect(status().isOk());
     }
