@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@angular/build": "^21.2.19",
-    "@angular/cli": "^21.2.19",
+    "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^21.2.0",
     "jsdom": "^30.1.1",
     "prettier": "^3.9.8",
