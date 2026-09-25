@@ -276,6 +276,9 @@
               <div class="invalid-feedback d-block">{{ fileError() }}</div>
             }
           </div>
+          @if (saveError()) {
+            <div class="alert alert-danger mt-3 mb-0" role="alert">{{ saveError() }}</div>
+          }
         </div>
 
         <footer class="dialog-footer">
