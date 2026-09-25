@@ -1,6 +1,8 @@
 package com.flowershop.inventory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -17,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -558,6 +562,97 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void rejectsDuplicateSkusAndDeletingRecordsThatAreInUse() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        createRawMaterial(session, csrfCookie, "Rose", "PIECE", "10", "20");
+        createRawMaterial(session, csrfCookie, "Ribbon", "METER", "5", "10");
+        createRawMaterial(session, csrfCookie, "Moss", "GRAM", "100", "1");
+        saveProduct(HttpMethod.POST, "/api/products", session, csrfCookie, "ROSE-BOX-001", "Rose Box", 1)
+                .andExpect(status().isCreated());
+        saveProduct(HttpMethod.POST, "/api/products", session, csrfCookie, "MOSS-BOX-001", "Moss Box", 3)
+                .andExpect(status().isCreated());
+
+        saveProduct(HttpMethod.POST, "/api/products", session, csrfCookie, "rose-box-001", "Copy", 1)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("A product with SKU “rose-box-001” already exists."));
+        saveProduct(HttpMethod.PUT, "/api/products/2", session, csrfCookie, "ROSE-BOX-001", "Moss Box", 3)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("A product with SKU “ROSE-BOX-001” already exists."));
+        saveProduct(HttpMethod.PUT, "/api/products/2", session, csrfCookie, "MOSS-BOX-001", "Moss Box", 3)
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/api/raw-materials/1")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        "Raw material “Rose” is used in the recipe of Rose Box. "
+                                + "Remove it from the recipe before deleting it."));
+        mockMvc.perform(delete("/api/raw-materials/2")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(post("/api/products/2/production")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"quantity": 1, "productionDate": "2026-07-21"}
+                                """))
+                .andExpect(status().isOk());
+        saveProduct(HttpMethod.PUT, "/api/products/2", session, csrfCookie, "MOSS-BOX-001", "Moss Box", 1)
+                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/raw-materials/3")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        "Raw material “Moss” cannot be deleted because production batches have consumed it."));
+
+        mockMvc.perform(post("/api/sales")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "saleDate": "2026-07-21",
+                                  "paymentMethod": "CASH",
+                                  "items": [{"productId": 1, "quantity": 1, "unitPrice": 30}]
+                                }
+                                """))
+                .andExpect(status().isCreated());
+        mockMvc.perform(delete("/api/products/1")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        "Product “Rose Box” cannot be deleted because it has been sold."));
+        mockMvc.perform(delete("/api/products/2")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent());
+
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                "INSERT INTO product (sku, name) VALUES ('ROSE-BOX-001', 'Copy')"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
     void producesAProductAtomicallyFromItsRawMaterialRecipe() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);
@@ -934,6 +1029,33 @@ class InventoryFlowIntegrationTest {
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue()))
                 .andExpect(status().isCreated());
+    }
+
+    private ResultActions saveProduct(
+            HttpMethod method,
+            String path,
+            MockHttpSession session,
+            jakarta.servlet.http.Cookie csrfCookie,
+            String sku,
+            String name,
+            long recipeMaterialId) throws Exception {
+        var recipe = new MockMultipartFile(
+                "recipe",
+                "recipe.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                """
+                [{"rawMaterialId":%d,"quantityPerUnit":1}]
+                """.formatted(recipeMaterialId).getBytes(StandardCharsets.UTF_8));
+        return mockMvc.perform(multipart(method, path)
+                .file(recipe)
+                .param("sku", sku)
+                .param("name", name)
+                .param("quantity", "2")
+                .param("initialUnitCost", "20")
+                .param("markupPercentage", "50")
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue()));
     }
 
     private void assertMaterialQuantity(String name, String expected) {

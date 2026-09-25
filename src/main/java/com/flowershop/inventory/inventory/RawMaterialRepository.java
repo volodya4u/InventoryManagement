@@ -155,6 +155,26 @@ public class RawMaterialRepository {
                 .findFirst();
     }
 
+    public List<String> findRecipeProductNames(long id) {
+        return jdbcTemplate.queryForList(
+                """
+                SELECT product.name
+                FROM product_recipe_item recipe
+                JOIN product ON product.id = recipe.product_id
+                WHERE recipe.raw_material_id = ?
+                ORDER BY product.name COLLATE NOCASE
+                """,
+                String.class,
+                id);
+    }
+
+    public boolean hasProductionConsumption(long id) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM production_consumption WHERE raw_material_id = ?)",
+                Boolean.class,
+                id));
+    }
+
     public int delete(long id) {
         return jdbcTemplate.update("DELETE FROM raw_material WHERE id = ?", id);
     }
