@@ -11,6 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -33,14 +35,17 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityContextRepository securityContextRepository;
+    private final SessionRegistry sessionRegistry;
 
     public AuthController(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            SecurityContextRepository securityContextRepository) {
+            SecurityContextRepository securityContextRepository,
+            SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.securityContextRepository = securityContextRepository;
+        this.sessionRegistry = sessionRegistry;
     }
 
     @GetMapping("/csrf")
@@ -72,6 +77,7 @@ public class AuthController {
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
         securityContextRepository.saveContext(securityContext, request, response);
+        sessionRegistry.registerNewSession(request.getSession().getId(), user.username());
 
         return new AuthResponse(user.username(), user.role());
     }
@@ -132,6 +138,7 @@ public class AuthController {
                     "Unable to update password");
         }
 
+        sessionRegistry.getAllSessions(user.username(), false).forEach(SessionInformation::expireNow);
         new SecurityContextLogoutHandler().logout(request, response, authentication);
     }
 
