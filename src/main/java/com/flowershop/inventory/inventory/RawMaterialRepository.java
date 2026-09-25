@@ -1,5 +1,6 @@
 package com.flowershop.inventory.inventory;
 
+import com.flowershop.inventory.common.SqliteDecimals;
 import com.flowershop.inventory.image.ImagePayload;
 import com.flowershop.inventory.image.StoredImage;
 import java.math.BigDecimal;
@@ -117,15 +118,7 @@ public class RawMaterialRepository {
     }
 
     public int consumeStock(long id, BigDecimal quantity) {
-        return jdbcTemplate.update(
-                """
-                UPDATE raw_material
-                SET quantity = quantity - ?, updated_at = CURRENT_TIMESTAMP
-                WHERE id = ? AND quantity >= ?
-                """,
-                quantity,
-                id,
-                quantity);
+        return StockQuantities.consume(jdbcTemplate, "raw_material", id, quantity);
     }
 
     public void insertStockMovement(
@@ -172,8 +165,8 @@ public class RawMaterialRepository {
     }
 
     private RawMaterialDto map(java.sql.ResultSet rs) throws java.sql.SQLException {
-        var quantity = rs.getBigDecimal("quantity");
-        var averageUnitCost = rs.getBigDecimal("average_unit_cost");
+        var quantity = SqliteDecimals.read(rs, "quantity");
+        var averageUnitCost = SqliteDecimals.read(rs, "average_unit_cost");
         return new RawMaterialDto(
                 rs.getLong("id"),
                 rs.getString("name"),

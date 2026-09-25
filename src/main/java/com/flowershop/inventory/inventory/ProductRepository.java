@@ -1,5 +1,6 @@
 package com.flowershop.inventory.inventory;
 
+import com.flowershop.inventory.common.SqliteDecimals;
 import com.flowershop.inventory.image.ImagePayload;
 import com.flowershop.inventory.image.StoredImage;
 import java.math.BigDecimal;
@@ -151,15 +152,7 @@ public class ProductRepository {
     }
 
     public int consumeStock(long id, BigDecimal quantity) {
-        return jdbcTemplate.update(
-                """
-                UPDATE product
-                SET quantity = quantity - ?, updated_at = CURRENT_TIMESTAMP
-                WHERE id = ? AND quantity >= ?
-                """,
-                quantity,
-                id,
-                quantity);
+        return StockQuantities.consume(jdbcTemplate, "product", id, quantity);
     }
 
     public long insertProductionBatch(
@@ -311,7 +304,7 @@ public class ProductRepository {
         BigDecimal value = jdbcTemplate.queryForObject(
                 "SELECT COALESCE(SUM(quantity), 0) FROM product",
                 BigDecimal.class);
-        return value == null ? BigDecimal.ZERO : value;
+        return value == null ? BigDecimal.ZERO : SqliteDecimals.normalize(value);
     }
 
     private ProductDto withRecipe(ProductDto product) {
@@ -346,25 +339,25 @@ public class ProductRepository {
                         rs.getLong("raw_material_id"),
                         rs.getString("name"),
                         rs.getString("unit"),
-                        rs.getBigDecimal("quantity_per_unit"),
-                        rs.getBigDecimal("quantity"),
-                        rs.getBigDecimal("average_unit_cost")),
+                        SqliteDecimals.read(rs, "quantity_per_unit"),
+                        SqliteDecimals.read(rs, "quantity"),
+                        SqliteDecimals.read(rs, "average_unit_cost")),
                 productId);
     }
 
     private ProductDto map(java.sql.ResultSet rs, List<ProductRecipeItemDto> recipe)
             throws java.sql.SQLException {
-        var quantity = rs.getBigDecimal("quantity");
-        var averageUnitCost = rs.getBigDecimal("average_unit_cost");
+        var quantity = SqliteDecimals.read(rs, "quantity");
+        var averageUnitCost = SqliteDecimals.read(rs, "average_unit_cost");
         return new ProductDto(
                 rs.getLong("id"),
                 rs.getString("sku"),
                 rs.getString("name"),
                 rs.getString("description"),
                 quantity,
-                rs.getBigDecimal("markup_percentage"),
-                rs.getBigDecimal("advertising_cost_per_unit"),
-                rs.getBigDecimal("price"),
+                SqliteDecimals.read(rs, "markup_percentage"),
+                SqliteDecimals.read(rs, "advertising_cost_per_unit"),
+                SqliteDecimals.read(rs, "price"),
                 averageUnitCost,
                 quantity.multiply(averageUnitCost).setScale(2, RoundingMode.HALF_UP),
                 recipe,
