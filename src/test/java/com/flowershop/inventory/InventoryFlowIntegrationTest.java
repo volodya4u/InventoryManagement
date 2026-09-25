@@ -355,6 +355,13 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void forwardsTheStockHistoryRouteToTheAngularApplication() throws Exception {
+        mockMvc.perform(get("/stock-movements"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/index.html"));
+    }
+
+    @Test
     void writesOffAndAdjustsRawMaterialAndProductStock() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);

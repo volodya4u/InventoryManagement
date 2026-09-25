@@ -13,6 +13,7 @@ public class SpaController {
         "/raw-materials",
         "/products",
         "/sales",
+        "/stock-movements",
         "/change-password",
         "/reports/**"
     })
