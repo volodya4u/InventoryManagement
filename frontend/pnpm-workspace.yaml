@@ -1,0 +1,9 @@
+# pnpm 11 fails install when a dependency's build script is neither allowed nor denied.
+allowBuilds:
+  # Verifies and links the platform-specific esbuild binary.
+  esbuild: true
+  # These ship prebuilt binaries via platform-specific optional dependencies;
+  # their install scripts only fall back to compiling from source with node-gyp.
+  '@parcel/watcher': false
+  lmdb: false
+  msgpackr-extract: false
