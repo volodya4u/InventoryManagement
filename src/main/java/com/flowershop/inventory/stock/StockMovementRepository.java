@@ -1,5 +1,6 @@
 package com.flowershop.inventory.stock;
 
+import com.flowershop.inventory.common.SqliteDecimals;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -122,9 +123,9 @@ public class StockMovementRepository {
                 query.parameters(),
                 (rs, rowNum) -> new StockMovementHistoryDto.Totals(
                         rs.getLong("movement_count"),
-                        money(rs.getBigDecimal("incoming_value")),
-                        money(rs.getBigDecimal("outgoing_value")),
-                        money(rs.getBigDecimal("net_value_change"))));
+                        money(SqliteDecimals.read(rs, "incoming_value")),
+                        money(SqliteDecimals.read(rs, "outgoing_value")),
+                        money(SqliteDecimals.read(rs, "net_value_change"))));
 
         var pageParameters = new HashMap<>(query.parameters());
         pageParameters.put("limit", filter.size());
@@ -194,11 +195,11 @@ public class StockMovementRepository {
                 rs.getString("unit"),
                 rs.getString("movement_type"),
                 rs.getString("direction"),
-                rs.getBigDecimal("quantity"),
-                rs.getBigDecimal("signed_quantity"),
-                rs.getBigDecimal("unit_cost"),
-                money(rs.getBigDecimal("total_cost")),
-                money(rs.getBigDecimal("signed_total_cost")),
+                SqliteDecimals.read(rs, "quantity"),
+                SqliteDecimals.read(rs, "signed_quantity"),
+                SqliteDecimals.read(rs, "unit_cost"),
+                money(SqliteDecimals.read(rs, "total_cost")),
+                money(SqliteDecimals.read(rs, "signed_total_cost")),
                 LocalDate.parse(rs.getString("occurred_at")),
                 rs.getString("notes"),
                 rs.getString("reference_type"),

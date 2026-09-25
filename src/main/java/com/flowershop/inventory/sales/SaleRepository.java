@@ -1,5 +1,6 @@
 package com.flowershop.inventory.sales;
 
+import com.flowershop.inventory.common.SqliteDecimals;
 import java.math.BigDecimal;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -237,14 +238,14 @@ public class SaleRepository {
                         rs.getLong("product_id"),
                         rs.getString("product_sku"),
                         rs.getString("product_name"),
-                        rs.getBigDecimal("quantity"),
-                        rs.getBigDecimal("recommended_unit_price"),
-                        rs.getBigDecimal("unit_price"),
-                        rs.getBigDecimal("unit_cost"),
-                        rs.getBigDecimal("line_revenue"),
-                        rs.getBigDecimal("line_cost"),
-                        rs.getBigDecimal("line_profit"),
-                        rs.getBigDecimal("returned_quantity")),
+                        SqliteDecimals.read(rs, "quantity"),
+                        SqliteDecimals.read(rs, "recommended_unit_price"),
+                        SqliteDecimals.read(rs, "unit_price"),
+                        SqliteDecimals.read(rs, "unit_cost"),
+                        SqliteDecimals.read(rs, "line_revenue"),
+                        SqliteDecimals.read(rs, "line_cost"),
+                        SqliteDecimals.read(rs, "line_profit"),
+                        SqliteDecimals.read(rs, "returned_quantity")),
                 saleId);
     }
 
@@ -264,9 +265,9 @@ public class SaleRepository {
                                 SaleReturnType.valueOf(rs.getString("operation_type")),
                                 rs.getString("reason"),
                                 rs.getString("notes"),
-                                rs.getBigDecimal("total_refund"),
-                                rs.getBigDecimal("total_cost"),
-                                rs.getBigDecimal("gross_profit_reversal"),
+                                SqliteDecimals.read(rs, "total_refund"),
+                                SqliteDecimals.read(rs, "total_cost"),
+                                SqliteDecimals.read(rs, "gross_profit_reversal"),
                                 List.of(),
                                 rs.getString("created_at")),
                         saleId)
@@ -306,12 +307,12 @@ public class SaleRepository {
                         rs.getLong("product_id"),
                         rs.getString("product_sku"),
                         rs.getString("product_name"),
-                        rs.getBigDecimal("quantity"),
-                        rs.getBigDecimal("unit_price"),
-                        rs.getBigDecimal("unit_cost"),
-                        rs.getBigDecimal("line_refund"),
-                        rs.getBigDecimal("line_cost"),
-                        rs.getBigDecimal("gross_profit_reversal")),
+                        SqliteDecimals.read(rs, "quantity"),
+                        SqliteDecimals.read(rs, "unit_price"),
+                        SqliteDecimals.read(rs, "unit_cost"),
+                        SqliteDecimals.read(rs, "line_refund"),
+                        SqliteDecimals.read(rs, "line_cost"),
+                        SqliteDecimals.read(rs, "gross_profit_reversal")),
                 saleReturnId);
     }
 
@@ -319,12 +320,12 @@ public class SaleRepository {
             java.sql.ResultSet rs,
             List<SaleItemDto> items,
             List<SaleReturnDto> returns) throws java.sql.SQLException {
-        var totalRevenue = rs.getBigDecimal("total_revenue");
-        var totalCost = rs.getBigDecimal("total_cost");
-        var grossProfit = rs.getBigDecimal("gross_profit");
-        var refundedRevenue = rs.getBigDecimal("refunded_revenue");
-        var returnedCost = rs.getBigDecimal("returned_cost");
-        var reversedGrossProfit = rs.getBigDecimal("reversed_gross_profit");
+        var totalRevenue = SqliteDecimals.read(rs, "total_revenue");
+        var totalCost = SqliteDecimals.read(rs, "total_cost");
+        var grossProfit = SqliteDecimals.read(rs, "gross_profit");
+        var refundedRevenue = SqliteDecimals.read(rs, "refunded_revenue");
+        var returnedCost = SqliteDecimals.read(rs, "returned_cost");
+        var reversedGrossProfit = SqliteDecimals.read(rs, "reversed_gross_profit");
         return new SaleDto(
                 rs.getLong("id"),
                 rs.getString("sale_number"),

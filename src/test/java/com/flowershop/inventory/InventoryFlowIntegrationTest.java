@@ -518,6 +518,46 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void readsAndConsumesFloatingPointDriftedStockAsExactDecimals() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        // Earlier versions subtracted stock in SQL, leaving values such as 1 - 0.8 in existing databases.
+        jdbcTemplate.update("""
+                INSERT INTO raw_material
+                    (name, description, unit, quantity, average_unit_cost)
+                VALUES ('Ribbon', '', 'METER', 1 - 0.8, 10)
+                """);
+
+        mockMvc.perform(get("/api/raw-materials").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].quantity").value(0.2))
+                .andExpect(jsonPath("$[0].stockValue").value(2.0));
+
+        mockMvc.perform(post("/api/raw-materials/1/write-offs")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "quantity": 0.2,
+                                  "operationDate": "2026-07-21",
+                                  "reason": "Damaged"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(0));
+
+        assertMaterialQuantity("Ribbon", "0");
+    }
+
+    @Test
     void producesAProductAtomicallyFromItsRawMaterialRecipe() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);
