@@ -13,6 +13,7 @@ import {
 } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
+import { multiplyDecimals, subtractDecimals, wholeQuotient } from '../core/decimal';
 import { imageFileError } from '../core/image-file';
 import { Product, RawMaterial } from '../core/models';
 
@@ -305,14 +306,14 @@ export class ProductsComponent implements OnInit {
     return product.recipe.map((recipeItem) => {
       const material = this.rawMaterials().find((candidate) => candidate.id === recipeItem.rawMaterialId);
       const available = material?.quantity ?? recipeItem.availableQuantity;
-      const required = recipeItem.quantityPerUnit * quantity;
+      const required = multiplyDecimals(recipeItem.quantityPerUnit, quantity);
       return {
         rawMaterialId: recipeItem.rawMaterialId,
         name: recipeItem.rawMaterialName,
         unit: recipeItem.unit,
         required,
         available,
-        missing: Math.max(required - available, 0),
+        missing: Math.max(subtractDecimals(required, available), 0),
         cost: required * (material?.averageUnitCost ?? recipeItem.averageUnitCost)
       };
     });
@@ -325,10 +326,10 @@ export class ProductsComponent implements OnInit {
   maximumProducible(): number {
     const product = this.productionProduct();
     if (!product || product.recipe.length === 0) return 0;
-    return Math.max(0, Math.floor(Math.min(...product.recipe.map((recipeItem) => {
+    return Math.max(0, Math.min(...product.recipe.map((recipeItem) => {
       const material = this.rawMaterials().find((candidate) => candidate.id === recipeItem.rawMaterialId);
-      return (material?.quantity ?? recipeItem.availableQuantity) / recipeItem.quantityPerUnit;
-    }))));
+      return wholeQuotient(material?.quantity ?? recipeItem.availableQuantity, recipeItem.quantityPerUnit);
+    })));
   }
 
   estimatedProductionCost(): number {
