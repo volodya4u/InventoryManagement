@@ -143,6 +143,7 @@ export interface SaleItem {
   lineCost: number;
   lineProfit: number;
   returnedQuantity: number;
+  returnedCost: number;
 }
 
 export interface SaleReturn {

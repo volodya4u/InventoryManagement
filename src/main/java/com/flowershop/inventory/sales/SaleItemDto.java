@@ -14,5 +14,6 @@ public record SaleItemDto(
         BigDecimal lineRevenue,
         BigDecimal lineCost,
         BigDecimal lineProfit,
-        BigDecimal returnedQuantity) {
+        BigDecimal returnedQuantity,
+        BigDecimal returnedCost) {
 }

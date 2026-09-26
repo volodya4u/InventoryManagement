@@ -111,6 +111,7 @@ public class SaleService {
                     prepared.lineRevenue(),
                     prepared.lineCost(),
                     money(prepared.lineRevenue().subtract(prepared.lineCost())),
+                    BigDecimal.ZERO,
                     BigDecimal.ZERO);
             repository.insertItem(saleId, item);
             productRepository.insertStockMovement(
@@ -269,11 +270,17 @@ public class SaleService {
     }
 
     private PreparedReturnItem prepareReturnItem(SaleItemDto item, BigDecimal quantity) {
+        // The recorded line cost is rounded once for the whole line (3 × 0.3333 = 1.00), so rounding
+        // each return separately (0.33 each) would never reverse all of it. Reverse the share of the
+        // line cost for all units returned so far, minus what earlier returns already reversed.
+        var reversedCostAfterReturn = item.lineCost()
+                .multiply(item.returnedQuantity().add(quantity))
+                .divide(item.quantity(), MONEY_SCALE, RoundingMode.HALF_UP);
         return new PreparedReturnItem(
                 item,
                 quantity,
                 money(quantity.multiply(item.unitPrice())),
-                money(quantity.multiply(item.unitCost())));
+                reversedCostAfterReturn.subtract(item.returnedCost()).max(BigDecimal.ZERO));
     }
 
     private void restoreProductStock(long productId, BigDecimal quantity, BigDecimal returnUnitCost) {
