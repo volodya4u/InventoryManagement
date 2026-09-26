@@ -110,6 +110,11 @@
                   <option [value]="unit.value">{{ unit.label }}</option>
                 }
               </select>
+              @if (form.controls.unit.disabled) {
+                <div class="file-hint mt-1">
+                  The unit can’t change once stock, stock history, or recipes use it. Create a new raw material for a different unit.
+                </div>
+              }
             </div>
             @if (editing()) {
               <div class="col-sm-6">

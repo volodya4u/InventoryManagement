@@ -125,6 +125,7 @@ export class RawMaterialsComponent implements OnInit {
   openCreate(): void {
     this.editing.set(null);
     this.form.reset({ name: '', description: '', unit: 'PIECE', quantity: 0, initialUnitCost: null });
+    this.form.controls.unit.enable();
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');
@@ -141,6 +142,11 @@ export class RawMaterialsComponent implements OnInit {
       quantity: item.quantity,
       initialUnitCost: item.averageUnitCost
     });
+    if (item.unitChangeable) {
+      this.form.controls.unit.enable();
+    } else {
+      this.form.controls.unit.disable();
+    }
     this.selectedFile.set(null);
     this.fileError.set('');
     this.error.set('');

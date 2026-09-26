@@ -660,6 +660,44 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void keepsTheUnitOfRawMaterialsWhoseQuantitiesAreAlreadyRecorded() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        createRawMaterial(session, csrfCookie, "Rose", "PIECE", "10", "20");
+        createRawMaterial(session, csrfCookie, "Moss", "GRAM", "0", "0");
+        mockMvc.perform(get("/api/raw-materials").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.name == 'Rose')].unitChangeable").value(false))
+                .andExpect(jsonPath("$[?(@.name == 'Moss')].unitChangeable").value(true));
+
+        updateRawMaterial(session, csrfCookie, 1, "Rose", "KILOGRAM")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        "The unit of “Rose” cannot be changed because stock, stock history, or recipes "
+                                + "already use it. Create a new raw material for the new unit instead."));
+        updateRawMaterial(session, csrfCookie, 1, "Red Rose", "PIECE")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Red Rose"))
+                .andExpect(jsonPath("$.unit").value("PIECE"));
+
+        updateRawMaterial(session, csrfCookie, 2, "Moss", "KILOGRAM")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.unit").value("KILOGRAM"));
+        saveProduct(HttpMethod.POST, "/api/products", session, csrfCookie, "MOSS-BOX-001", "Moss Box", 2)
+                .andExpect(status().isCreated());
+        updateRawMaterial(session, csrfCookie, 2, "Moss", "GRAM")
+                .andExpect(status().isConflict());
+        assertThat(jdbcTemplate.queryForObject("SELECT unit FROM raw_material WHERE id = 2", String.class))
+                .isEqualTo("KILOGRAM");
+    }
+
+    @Test
     void producesAProductAtomicallyFromItsRawMaterialRecipe() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);
@@ -1090,6 +1128,20 @@ class InventoryFlowIntegrationTest {
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue()))
                 .andExpect(status().isCreated());
+    }
+
+    private ResultActions updateRawMaterial(
+            MockHttpSession session,
+            jakarta.servlet.http.Cookie csrfCookie,
+            long id,
+            String name,
+            String unit) throws Exception {
+        return mockMvc.perform(multipart(HttpMethod.PUT, "/api/raw-materials/" + id)
+                .param("name", name)
+                .param("unit", unit)
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue()));
     }
 
     private ResultActions saveProduct(

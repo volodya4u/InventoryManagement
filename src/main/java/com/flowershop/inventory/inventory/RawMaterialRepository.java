@@ -16,10 +16,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RawMaterialRepository {
 
+    // The unit may only change while nothing is recorded in it yet: no stock, no stock history,
+    // and no product recipe quantities.
     private static final String SUMMARY_COLUMNS = """
             id, name, description, unit, quantity,
             average_unit_cost,
-            image IS NOT NULL AS has_image, created_at, updated_at
+            image IS NOT NULL AS has_image,
+            quantity = 0
+                AND NOT EXISTS (
+                    SELECT 1 FROM raw_material_stock_movement movement
+                    WHERE movement.raw_material_id = raw_material.id)
+                AND NOT EXISTS (
+                    SELECT 1 FROM product_recipe_item recipe
+                    WHERE recipe.raw_material_id = raw_material.id) AS unit_changeable,
+            created_at, updated_at
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -196,6 +206,7 @@ public class RawMaterialRepository {
                 averageUnitCost,
                 quantity.multiply(averageUnitCost).setScale(2, RoundingMode.HALF_UP),
                 rs.getBoolean("has_image"),
+                rs.getBoolean("unit_changeable"),
                 rs.getString("created_at"),
                 rs.getString("updated_at"));
     }
