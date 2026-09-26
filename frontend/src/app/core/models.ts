@@ -25,6 +25,7 @@ export interface RawMaterial {
   averageUnitCost: number;
   stockValue: number;
   hasImage: boolean;
+  unitChangeable: boolean;
   createdAt: string;
   updatedAt: string;
 }

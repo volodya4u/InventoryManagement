@@ -67,11 +67,18 @@ public class RawMaterialService {
             String description,
             String unit,
             MultipartFile image) {
+        var material = findById(id);
+        var measurementUnit = MeasurementUnit.from(unit);
+        if (!measurementUnit.name().equals(material.unit()) && !material.unitChangeable()) {
+            throw new ConflictException(("The unit of “%s” cannot be changed because stock, stock history, "
+                    + "or recipes already use it. Create a new raw material for the new unit instead.")
+                    .formatted(material.name()));
+        }
         int changed = repository.update(
                 id,
                 name.trim(),
                 normalizeDescription(description),
-                MeasurementUnit.from(unit),
+                measurementUnit,
                 imageValidator.validate(image));
         if (changed == 0) {
             throw notFound(id);

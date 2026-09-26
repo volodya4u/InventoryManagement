@@ -11,6 +11,7 @@ public record RawMaterialDto(
         BigDecimal averageUnitCost,
         BigDecimal stockValue,
         boolean hasImage,
+        boolean unitChangeable,
         String createdAt,
         String updatedAt) {
 }
