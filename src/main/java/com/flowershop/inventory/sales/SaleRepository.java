@@ -224,7 +224,8 @@ public class SaleRepository {
                 SELECT si.id, si.product_id, si.product_sku, si.product_name, si.quantity,
                        si.recommended_unit_price, si.unit_price, si.unit_cost,
                        si.line_revenue, si.line_cost, si.line_profit,
-                       COALESCE(SUM(sri.quantity), 0) AS returned_quantity
+                       COALESCE(SUM(sri.quantity), 0) AS returned_quantity,
+                       COALESCE(SUM(sri.line_cost), 0) AS returned_cost
                 FROM sale_item si
                 LEFT JOIN sale_return_item sri ON sri.sale_item_id = si.id
                 WHERE si.sale_id = ?
@@ -245,7 +246,8 @@ public class SaleRepository {
                         SqliteDecimals.read(rs, "line_revenue"),
                         SqliteDecimals.read(rs, "line_cost"),
                         SqliteDecimals.read(rs, "line_profit"),
-                        SqliteDecimals.read(rs, "returned_quantity")),
+                        SqliteDecimals.read(rs, "returned_quantity"),
+                        SqliteDecimals.read(rs, "returned_cost")),
                 saleId);
     }
 

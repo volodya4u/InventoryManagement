@@ -303,6 +303,72 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void reversesTheWholeRecordedCostWhenUnitsAreReturnedOneByOne() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (sku, name, description, quantity, price, markup_percentage, average_unit_cost)
+                VALUES ('MOSS-BOX-001', 'Moss Box', '', 3, 1, 0, 0.3333)
+                """);
+        mockMvc.perform(post("/api/sales")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "saleDate": "2026-07-20",
+                                  "paymentMethod": "CASH",
+                                  "items": [{"productId": 1, "quantity": 3, "unitPrice": 1}]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalCost").value(1.0))
+                .andExpect(jsonPath("$.grossProfit").value(2.0));
+
+        for (int returned = 1; returned <= 3; returned++) {
+            mockMvc.perform(post("/api/sales/1/returns")
+                            .session(session)
+                            .cookie(csrfCookie)
+                            .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {
+                                      "returnDate": "2026-07-21",
+                                      "reason": "Customer Return",
+                                      "items": [{"saleItemId": 1, "quantity": 1}]
+                                    }
+                                    """))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.items[0].returnedQuantity").value(returned));
+        }
+
+        assertThat(jdbcTemplate.queryForList(
+                "SELECT line_cost FROM sale_return_item ORDER BY id", BigDecimal.class))
+                .usingElementComparator(BigDecimal::compareTo)
+                .containsExactly(new BigDecimal("0.33"), new BigDecimal("0.34"), new BigDecimal("0.33"));
+        mockMvc.perform(get("/api/sales/1").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("RETURNED"))
+                .andExpect(jsonPath("$.returnedCost").value(1.0))
+                .andExpect(jsonPath("$.netRevenue").value(0))
+                .andExpect(jsonPath("$.netCost").value(0))
+                .andExpect(jsonPath("$.netGrossProfit").value(0));
+        mockMvc.perform(get("/api/reports/monthly-sales").param("month", "2026-07").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.revenue").value(0))
+                .andExpect(jsonPath("$.totalCost").value(0))
+                .andExpect(jsonPath("$.grossProfit").value(0));
+    }
+
+    @Test
     void reportsMonthlySalesWithoutMixingOtherMonths() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);

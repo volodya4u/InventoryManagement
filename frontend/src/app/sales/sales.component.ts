@@ -18,6 +18,10 @@ type ReturnItemFormGroup = FormGroup<{
   quantity: FormControl<number | null>;
 }>;
 
+function roundMoney(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
 interface PaymentMethodOption {
   value: PaymentMethod;
   label: string;
@@ -329,7 +333,8 @@ export class SalesComponent implements OnInit {
   returnCost(): number {
     return this.returnItemControls.reduce((total, row) => {
       const item = this.returnItem(row);
-      return total + (row.controls.quantity.value ?? 0) * (item?.unitCost ?? 0);
+      const quantity = row.controls.quantity.value ?? 0;
+      return item && quantity > 0 ? total + this.returnLineCost(item, quantity) : total;
     }, 0);
   }
 
@@ -434,6 +439,15 @@ export class SalesComponent implements OnInit {
     return sale.items
       .map((item) => `${item.quantity} × ${item.productName}`)
       .join(' · ');
+  }
+
+  // Matches the server: a return reverses the item's share of the recorded line cost for all units
+  // returned so far, minus what earlier returns reversed, so returning everything reverses it exactly.
+  private returnLineCost(item: SaleItem, quantity: number): number {
+    const reversedAfterReturn = roundMoney(
+      (item.lineCost * (item.returnedQuantity + quantity)) / item.quantity
+    );
+    return Math.max(roundMoney(reversedAfterReturn - item.returnedCost), 0);
   }
 
   private createItemRow(): SaleItemFormGroup {
