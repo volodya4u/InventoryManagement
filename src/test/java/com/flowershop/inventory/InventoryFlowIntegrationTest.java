@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 import com.flowershop.inventory.auth.AuthController;
 import com.flowershop.inventory.auth.UserRepository;
@@ -1054,6 +1055,29 @@ class InventoryFlowIntegrationTest {
                 "SELECT COUNT(*) FROM raw_material_stock_movement WHERE raw_material_id = 1",
                 Integer.class);
         assertThat(movements).isEqualTo(2);
+    }
+
+    @Test
+    void reportsTheActualSessionTimeoutWithoutCreatingAnonymousSessions() throws Exception {
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().doesNotExist("X-Session-Timeout-Seconds"));
+        var result = login(testPassword)
+                .andExpect(status().isOk())
+                .andExpect(header().exists("X-Session-Timeout-Seconds"))
+                .andReturn();
+        var session = (MockHttpSession) result.getRequest().getSession(false);
+        session.setMaxInactiveInterval(90);
+        mockMvc.perform(get("/api/auth/me").session(session))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Session-Timeout-Seconds", "90"));
+        mockMvc.perform(get("/api/dashboard").session(session))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Session-Timeout-Seconds", "90"));
+        session.invalidate();
+        mockMvc.perform(get("/api/dashboard").session(session))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().doesNotExist("X-Session-Timeout-Seconds"));
     }
 
     @Test

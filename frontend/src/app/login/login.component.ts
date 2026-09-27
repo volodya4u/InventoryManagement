@@ -38,6 +38,8 @@ export class LoginComponent implements OnDestroy {
   ) {
     if (route.snapshot.queryParamMap.get('passwordChanged') === 'true') {
       this.notice.set('Password changed successfully. Sign in with your new password.');
+    } else if (route.snapshot.queryParamMap.get('sessionExpired') === 'true') {
+      this.notice.set('Your session has ended. Please sign in again.');
     }
   }
 

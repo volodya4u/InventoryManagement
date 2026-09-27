@@ -5,6 +5,8 @@ A local inventory system for tracking raw materials and finished products for a 
 ## Current Features
 
 - Secure session-based sign-in for a single administrator.
+- Idle pages automatically return to sign-in when the server's session timeout is reached (8 hours by default). API activity renews the browser timer across tabs sharing the session; no background keep-alive requests are sent. Rejected sessions also return to sign-in immediately.
+- Protected pages recheck authentication on navigation. Saves check the local deadline and confirm the server session before sending changes; signing out immediately removes protected forms.
 - The password is stored in SQLite as a one-way bcrypt hash.
 - Raw material and finished product catalogs.
 - Create, edit, and delete operations.
