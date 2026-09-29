@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      # Also installs Node and pnpm into target/frontend-tooling and builds
+      # the Angular frontend.
+      - name: Build and test
+        run: mvn -B -ntp verify
+
+      - name: Frontend unit tests
+        working-directory: frontend
+        run: |
+          export PATH="$GITHUB_WORKSPACE/target/frontend-tooling/node:$PATH"
+          pnpm exec ng test --watch=false
