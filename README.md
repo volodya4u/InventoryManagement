@@ -179,3 +179,22 @@ pnpm start
 ```
 
 The development frontend will be available at `http://localhost:4200`.
+
+## Agent Harness
+
+The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js 20+ on `PATH`; the Node that Maven installs into `target/frontend-tooling` is not on `PATH`.
+
+- `AGENTS.md` and `CLAUDE.md`: project rules, commands, definition of done, and boundaries for coding agents.
+- `.claude/settings.json`: trust level 1 (`defaultMode: default`), allow/ask/deny rules, and hooks.
+- `.claude/hooks/protect-env.mjs`: blocks agents from reading or editing `.env*` files.
+- `.claude/hooks/log-action.mjs`: appends every proposed and executed tool call to `.agent-log/actions.jsonl`.
+- `.agents/skills/agent-log-report`: skill that reports the agent log; `node scripts/skills-sync.mjs` copies it to `.claude/skills/`.
+
+Run from the project root:
+
+```powershell
+node scripts/hooks-selftest.mjs        # verify the hooks without an agent
+node scripts/agent-log-summary.mjs     # summarize what the agent did
+```
+
+Check the active hooks with `/hooks` in Claude Code; restart Claude Code if they are missing after a change to `.claude/settings.json`.

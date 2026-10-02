@@ -9,3 +9,10 @@ frontend/dist/
 .vscode/
 *.iml
 *.log
+
+# agent harness
+.env
+.env.*
+!.env.example
+CLAUDE.local.md
+.claude/settings.local.json
