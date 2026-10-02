@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Read",
+      "Bash(mvn -B -ntp verify)",
+      "Bash(mvn verify)",
+      "Bash(mvn test)",
+      "Bash(mvn test *)",
+      "Bash(mvn -Dskip.frontend=true test *)",
+      "Bash(pnpm exec ng test *)",
+      "Bash(pnpm test *)",
+      "Bash(node scripts/agent-log-summary.mjs *)",
+      "Bash(node scripts/hooks-selftest.mjs)",
+      "Bash(node .claude/skills/agent-log-report/scripts/report.mjs *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm i)",
+      "Bash(pnpm i *)",
+      "Bash(pnpm up*)",
+      "Bash(pnpm remove*)",
+      "Bash(pnpm rm*)",
+      "Bash(pnpm un*)",
+      "Bash(mvn versions:*)",
+      "Edit(./pom.xml)",
+      "Edit(./frontend/package.json)",
+      "Edit(./frontend/pnpm-lock.yaml)",
+      "Edit(./frontend/pnpm-workspace.yaml)",
+      "Edit(./.github/**)",
+      "Edit(./.claude/settings.json)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/protect-env.mjs"],
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
