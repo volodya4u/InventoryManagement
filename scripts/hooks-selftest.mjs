@@ -10,12 +10,13 @@
 //      commands (others exit 2), while other agents pass untouched
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const here = process.cwd();
 const tmp = mkdtempSync(join(tmpdir(), "hooks-selftest-"));
+mkdirSync(join(tmp, ".git")); // the temp project is the git work tree protect-env resolves paths against
 const env = { ...process.env, CLAUDE_PROJECT_DIR: tmp };
 const run = (script, payload) =>
   spawnSync(process.execPath, [join(here, ".claude", "hooks", script)], { input: JSON.stringify(payload), env, encoding: "utf8" });
@@ -76,6 +77,10 @@ for (const [toolInput, expect] of [
   [{ pattern: "KEY", glob: "*.ts .env.production" }, 2],
   [{ pattern: "KEY", glob: "*.ts,.env" }, 2],
   [{ pattern: "KEY", path: "src", glob: "src/**" }, 2],
+  [{ pattern: "KEY", glob: ".en[]v]" }, 2],
+  [{ pattern: "KEY", glob: ".en[]v]*" }, 2],
+  [{ pattern: "KEY", glob: ".e?v.qa" }, 2],
+  [{ pattern: "KEY", glob: "*.{yml,json}" }, 0],
 ]) {
   const status = guardEnv("Grep", toolInput);
   check(`protect-env Grep ${JSON.stringify(toolInput)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
@@ -97,6 +102,10 @@ for (const [command, expect] of [
   [`cd "${tmp}" && git diff --stat`, 0],
   ["cd frontend && git diff --stat", 0],
   ["cd .. && git diff a b", 2],
+  ["cd frontend && cd .. && git diff --stat", 0],
+  ["cd frontend && git diff -- ../README.md", 0],
+  ["git -C frontend diff -- ../README.md", 0],
+  ["git diff -- ../README.md", 2],
   ["grep -rn TODO src/app --include=*.ts", 0],
   ["grep -r --include '*.java' x src", 0],
   ["grep -r --include=* x .", 2],
@@ -162,6 +171,28 @@ for (const [command, expect] of [
   ["rg --no-ignore KEY", 2],
   ["rg -g '*' KEY", 2],
   ["rg --iglob=.ENV* KEY", 2],
+  // bracket expressions and brace sequences
+  ["cat .en[]v]", 2],
+  ["cat .en[[:alpha:]]", 2],
+  ["cat .e?v.qa", 2],
+  ["cat .en{u..w}", 2],
+  ["ls file{1..3}.txt", 0],
+  // a << in a comment, after \< or in a here-string starts no heredoc; a ) in quotes does not close $(
+  ["true # <<X\ncat .e*\nX", 2],
+  ["echo \\<<X\ncat .e*\nX", 2],
+  ["grep x <<<abc\ncat .e*\nabc", 2],
+  ['echo "$(echo ")"; cat .e*)"', 2],
+  ["git commit -m \"$(cat <<'EOF'\n1) first\n`grep -r` and .e* in a message\nEOF\n)\"", 0],
+  ["echo $((1+2)) && git diff --stat", 0],
+  // more ways out of the project
+  ["git diff '\\\\localhost\\C$\\x' e", 2],
+  ["GIT_DIR=x git diff e .", 2],
+  ["export GIT_DIR=x; git diff e .", 2],
+  ["git --git-dir=../x/.git diff a b", 2],
+  ["git --git-dir=.git diff a b", 2],
+  ["pushd / && git diff a b", 2],
+  ["rgrep x .", 2],
+  ["grep.exe -r x .", 2],
 ]) {
   const status = guardEnv("Bash", { command });
   check(`protect-env Bash ${JSON.stringify(command)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
