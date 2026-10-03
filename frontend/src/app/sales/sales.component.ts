@@ -5,7 +5,7 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { ActivatedRoute } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
-import { addDecimals, multiplyDecimals, subtractDecimals } from '../core/decimal';
+import { addDecimals, divideDecimals, multiplyDecimals, subtractDecimals } from '../core/decimal';
 import { PaymentMethod, Product, Sale, SaleItem, SaleStatus } from '../core/models';
 
 type SaleItemFormGroup = FormGroup<{
@@ -18,10 +18,6 @@ type ReturnItemFormGroup = FormGroup<{
   saleItemId: FormControl<number>;
   quantity: FormControl<number | null>;
 }>;
-
-function roundMoney(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
 
 interface PaymentMethodOption {
   value: PaymentMethod;
@@ -480,10 +476,12 @@ export class SalesComponent implements OnInit {
   // Matches the server: a return reverses the item's share of the recorded line cost for all units
   // returned so far, minus what earlier returns reversed, so returning everything reverses it exactly.
   private returnLineCost(item: SaleItem, quantity: number): number {
-    const reversedAfterReturn = roundMoney(
-      (item.lineCost * (item.returnedQuantity + quantity)) / item.quantity,
+    const reversedAfterReturn = divideDecimals(
+      multiplyDecimals(item.lineCost, item.returnedQuantity + quantity),
+      item.quantity,
+      2,
     );
-    return Math.max(roundMoney(reversedAfterReturn - item.returnedCost), 0);
+    return Math.max(subtractDecimals(reversedAfterReturn, item.returnedCost), 0);
   }
 
   private createItemRow(): SaleItemFormGroup {
