@@ -31,7 +31,7 @@ if (/[;&|<>`$\\\r\n]/.test(cmd)) block("shell operators, redirection and substit
 if (/(^|\s)--(output|ext-diff|no-index)\b/.test(cmd)) block("--output, --ext-diff and --no-index are not allowed.");
 if (/[*?[\]{}]/.test(cmd)) block("shell globs and braces are not allowed.");
 const unquoted = cmd.replace(/["']/g, "");
-if (unquoted.split(/\s+/).some((arg) => /^(\/|~|\.\.(\/|$)|[A-Za-z]:\/)/.test(arg) || arg.includes("/../"))) {
+if (unquoted.split(/\s+/).some((arg) => /^(\/|~|[A-Za-z]:\/)/.test(arg) || arg.split("/").includes(".."))) {
   block("paths outside the work tree are not allowed.");
 }
 if (/(^|[\s:/])\.env(?!\.example\b)(\.\S*)?(\s|$)/.test(unquoted)) block(".env files are secrets.");
