@@ -118,8 +118,45 @@ for (const [command, expect] of [
   ["grep -R x .", 2],
   ["grep -d recurse x .", 2],
   ["cd frontend && grep --recursive x .", 2],
-  ["git ls-files -o | xargs grep -r x", 2],
+  ["ls | xargs grep -r x", 2],
   ["diff -r a b", 2],
+  // redirection targets are not arguments, comments are not commands, plain heredoc text is not globbed
+  ["git diff --stat main...HEAD 2>/dev/null", 0],
+  ["git diff main...HEAD > /tmp/review.diff", 0],
+  ["git -C frontend diff --stat", 0],
+  ["cat <<EOF\nplain .e* text\nEOF", 0],
+  ["ls # .e*", 0],
+  ["grep -d skip x *.md", 0],
+  ["cat < .e*", 2],
+  // command substitutions run inside double quotes, backticks and unquoted heredocs
+  ['echo "$(cat .e*)"', 2],
+  ['git commit -m "$(cat .e*)"', 2],
+  ["echo `cat .e*`", 2],
+  ["cat <<EOF\n$(cat .e*)\nEOF", 2],
+  ["echo '<<X'\nls .e*\nX", 2],
+  ['echo "a \\" b" .e*', 2],
+  ["git \\\ndiff --no-index a b", 2],
+  // git run outside the project
+  ["git -C / diff a b", 2],
+  ["git -C .. diff a b", 2],
+  ["git --work-tree=/ diff a b", 2],
+  ["git -C / -c grep.fallbackToNoIndex=true grep KEY", 2],
+  ["cd -P / && git diff a b", 2],
+  // GNU long-option prefixes
+  ["grep --recur KEY .", 2],
+  ["grep --directories recurse KEY .", 2],
+  ["grep -d rec KEY .", 2],
+  ["grep --dir=rec KEY .", 2],
+  ["diff --recur a b", 2],
+  ["grep -r --include=*.ts --inclu=.env x .", 2],
+  // rg honours .gitignore unless told not to
+  ["rg -n TODO src", 0],
+  ["rg -g '*.ts' TODO", 0],
+  ["rg --hidden TODO", 0],
+  ["rg -uu KEY", 2],
+  ["rg --no-ignore KEY", 2],
+  ["rg -g '*' KEY", 2],
+  ["rg --iglob=.ENV* KEY", 2],
 ]) {
   const status = guardEnv("Bash", { command });
   check(`protect-env Bash ${JSON.stringify(command)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
