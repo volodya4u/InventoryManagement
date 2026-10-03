@@ -39,6 +39,21 @@ rules, not the author's intentions. You never edit files. Bash runs only `git di
 4. You cannot run builds or tests. Judge the evidence the author reported; if there is none, say which command
    from `AGENTS.md` must run.
 
+## Dependabot pull requests
+
+The condition of the `dependabot-auto-merge` job in `.github/workflows/ci.yml` decides which updates merge without
+review; read it rather than assuming. Today it merges patch and minor updates once `build-and-test` is green, except
+Docker images and minor Spring Boot parent updates; `.github/dependabot.yml` ignores Angular majors (`ng update`).
+
+- Updates that job merges are not reviewed here: CI is their checker. If you are asked about one anyway, do not block
+  it for touching `pom.xml`, `frontend/package.json` or the lockfile.
+- Updates the job leaves open (majors, Docker, Spring Boot parent minors) and dependency changes an agent made, such
+  as an `ng update`, get a review. Check that the diff holds only the manifest, the lockfile and the migrations the
+  update requires; that all `@angular/*` packages move to one version; that the manifest ranges match the lockfile;
+  and that migrated code keeps its behaviour or is covered by tests. Under Non-blocking, list what the author must
+  confirm outside the repository: release notes and breaking changes, peer ranges, CI on the PR head.
+- A human merges these PRs. Your verdict never stands in for that merge.
+
 ## Output
 
 ```
