@@ -31,6 +31,8 @@ than one file or running anything that is not on the allow-list in `.claude/sett
   with `SqliteDecimals.read`, never `rs.getBigDecimal` directly.
 - A schema change goes to `src/main/resources/schema.sql` (new databases) AND an idempotent step in
   `InventorySchemaMigration` (existing local databases) with a case in `InventorySchemaMigrationTest`.
+- A feature that changes the schema, an API and a page together starts with `docs/specs/<feature>.md` from
+  `docs/specs/TEMPLATE.md`, approved by a human; each acceptance criterion names its test.
 - Frontend: Prettier settings in `frontend/.prettierrc` (100 columns, single quotes).
 - English UI copy, code, comments and commit messages. Commit subject: one short imperative sentence
   ("Prevent changing a raw material's unit once quantities use it"), one logical change per commit.
