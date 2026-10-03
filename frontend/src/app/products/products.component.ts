@@ -20,7 +20,13 @@ import {
 } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
-import { addDecimals, multiplyDecimals, subtractDecimals, wholeQuotient } from '../core/decimal';
+import {
+  addDecimals,
+  multiplyDecimals,
+  roundHalfUp,
+  subtractDecimals,
+  wholeQuotient,
+} from '../core/decimal';
 import { imageFileError } from '../core/image-file';
 import { Product, RawMaterial } from '../core/models';
 
@@ -559,16 +565,14 @@ export class ProductsComponent implements OnInit {
   private syncInitialUnitCost(): void {
     if (this.editing()) return;
 
-    const estimatedUnitCost = this.estimatedTotalUnitCost();
-    const roundedUnitCost = Math.round((estimatedUnitCost + Number.EPSILON) * 100) / 100;
+    const roundedUnitCost = roundHalfUp(this.estimatedTotalUnitCost(), 2);
     this.form.controls.initialUnitCost.setValue(roundedUnitCost, { emitEvent: false });
   }
 
   calculatedSellingPrice(): number {
     const markupPercentage = this.form.controls.markupPercentage.value;
     const multiplier = addDecimals(1, multiplyDecimals(markupPercentage, 0.01));
-    const price = multiplyDecimals(this.estimatedTotalUnitCost(), multiplier);
-    return Math.round((price + Number.EPSILON) * 100) / 100;
+    return roundHalfUp(multiplyDecimals(this.estimatedTotalUnitCost(), multiplier), 2);
   }
 
   recipeSummary(item: Product): string {

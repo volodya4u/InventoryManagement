@@ -10,7 +10,7 @@
     "angular-cli": {
       "type": "stdio",
       "command": "node",
-      "args": ["frontend/node_modules/@angular/cli/bin/ng.js", "mcp", "--read-only"]
+      "args": ["scripts/ng-mcp.mjs"]
     }
   }
 }

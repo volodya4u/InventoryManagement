@@ -345,14 +345,15 @@ export class SalesComponent implements OnInit {
       .filter((item) => item.quantity > 0);
   }
 
+  returnLineRefund(row: ReturnItemFormGroup): number {
+    return multiplyDecimals(row.controls.quantity.value ?? 0, this.returnItem(row)?.unitPrice ?? 0);
+  }
+
   returnRefund(): number {
-    return this.returnItemControls.reduce((total, row) => {
-      const item = this.returnItem(row);
-      return addDecimals(
-        total,
-        multiplyDecimals(row.controls.quantity.value ?? 0, item?.unitPrice ?? 0),
-      );
-    }, 0);
+    return this.returnItemControls.reduce(
+      (total, row) => addDecimals(total, this.returnLineRefund(row)),
+      0,
+    );
   }
 
   returnCost(): number {

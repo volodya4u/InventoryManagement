@@ -183,13 +183,15 @@ The development frontend will be available at `http://localhost:4200`.
 
 ## Agent Harness
 
-The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js on `PATH`: 20+ for the hooks and scripts, 24.15+ (the version Maven pins) for the Angular CLI MCP server. The Node that Maven installs into `target/frontend-tooling` is not on `PATH`.
+The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js 20+ on `PATH`. The Node that Maven installs into `target/frontend-tooling` is not on `PATH`; `scripts/ng-mcp.mjs` starts the Angular CLI MCP server with it when it exists, because the Angular CLI refuses Node releases older than 22.22.3 or 24.15.
 
 - `AGENTS.md` and `CLAUDE.md`: project rules, commands, definition of done, and boundaries for coding agents.
 - `.claude/settings.json`: trust level 1 (`defaultMode: default`), allow/ask/deny rules, and hooks.
 - `.claude/hooks/protect-env.mjs`: blocks agents from reading or editing `.env*` files.
 - `.claude/hooks/log-action.mjs`: appends every proposed and executed tool call to `.agent-log/actions.jsonl`.
 - `.agents/skills/agent-log-report`: skill that reports the agent log; `node scripts/skills-sync.mjs` copies it to `.claude/skills/`.
+- `.agents/skills/test-first-loop`: skill that runs a change as a loop (failing test, smallest fix, `node scripts/dod.mjs`, reviewer) and reports the evidence. `scripts/dod.mjs` runs the Definition of done in CI order and prints a Markdown table of commands, exit codes and test counts.
+- `docs/specs/TEMPLATE.md`: one-screen spec for features that change the schema, an API and a page together; each acceptance criterion names its test.
 - `.claude/agents/reviewer.md`: read-only reviewer subagent with a fresh context (maker ≠ checker). `scripts/reviewer-bash-guard.mjs`, a `PreToolUse` hook in `.claude/settings.json` that acts only inside that subagent, limits its shell to `git diff`, `git log`, `git show` and `git status`. Dependabot updates that the `dependabot-auto-merge` CI job merges skip the reviewer; the ones it leaves open get a review before a human merges them.
 - `.mcp.json`: documentation servers for agents, so they look up the library versions Dependabot keeps updating instead of relying on model memory. `context7` covers Spring Boot and other libraries; `angular-cli` (`ng mcp --read-only`) searches the Angular documentation for the version installed in `frontend/`.
 
@@ -215,4 +217,4 @@ To use the MCP servers:
 
 Tools from the JetBrains IDE MCP server (`idea`) always ask for permission in this project, even after "always allow": its file and terminal tools work outside the `protect-env` hook and the `.env` deny rules.
 
-In Claude Code cloud sessions, allow `mcp.context7.com` and `*.algolia.net` (Angular documentation search) in the environment's network access settings and add `CONTEXT7_API_KEY` as an environment variable.
+In Claude Code cloud sessions, allow `mcp.context7.com`, `*.algolia.net` (Angular documentation search) and `angular.dev` (full text of the top documentation result) in the environment's network access settings and add `CONTEXT7_API_KEY` as an environment variable. The `SessionStart` hook (`scripts/session-start.mjs`, cloud only) installs the pinned Node, pnpm and `frontend/node_modules`, compiles the backend to fetch the Maven dependencies, and puts the pinned Node first on `PATH`, so tests, Prettier and the `angular-cli` server work in a fresh container.

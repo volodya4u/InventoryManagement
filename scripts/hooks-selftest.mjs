@@ -6,6 +6,7 @@
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
 //   4. scripts/reviewer-bash-guard.mjs is wired in settings and lets the reviewer subagent run only read-only git
 //      commands (others exit 2), while other agents pass untouched
+//   5. scripts/session-start.mjs does nothing outside Claude Code cloud sessions
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -118,6 +119,17 @@ for (const [command, expect] of [
   const status = guard(command);
   check(`reviewer guard "${command}" -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
 }
+
+// 5. session start (scripts/session-start.mjs) installs nothing outside Claude Code cloud sessions
+const localEnv = { ...env };
+delete localEnv.CLAUDE_CODE_REMOTE;
+const started = Date.now();
+const sessionStart = spawnSync(process.execPath, [join(here, "scripts", "session-start.mjs")], {
+  input: JSON.stringify({ ...base, hook_event_name: "SessionStart", source: "startup" }),
+  env: localEnv,
+  encoding: "utf8",
+});
+check("session-start is a silent no-op outside cloud sessions", sessionStart.status === 0 && sessionStart.stdout === "" && Date.now() - started < 5000);
 
 rmSync(tmp, { recursive: true, force: true });
 console.log(failed ? `\n${failed} check(s) failed` : "\nall hook checks passed");
