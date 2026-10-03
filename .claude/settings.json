@@ -14,6 +14,7 @@
       "Bash(pnpm exec prettier --check .)",
       "Bash(node scripts/agent-log-summary.mjs *)",
       "Bash(node scripts/hooks-selftest.mjs)",
+      "Bash(node scripts/dod.mjs)",
       "Bash(node .claude/skills/agent-log-report/scripts/report.mjs *)",
       "Bash(git status *)",
       "Bash(git diff *)",
