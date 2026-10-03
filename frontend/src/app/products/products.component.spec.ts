@@ -78,14 +78,31 @@ describe('ProductsComponent amounts', () => {
     expect(component.estimatedTotalUnitCost()).toBe(0.9);
   });
 
-  it('previews the selling price the server calculates', () => {
-    component.rawMaterials.set([rawMaterial({ id: 1, averageUnitCost: 0.73 })]);
+  function previewSellingPrice(
+    averageUnitCost: number,
+    quantityPerUnit: number,
+    markupPercentage: number,
+  ): number {
+    component.rawMaterials.set([rawMaterial({ id: 1, averageUnitCost })]);
     component.openCreate();
-    component.recipeControls[0].setValue({ rawMaterialId: 1, quantityPerUnit: 2 });
-    component.form.controls.markupPercentage.setValue(75);
+    component.recipeControls[0].setValue({ rawMaterialId: 1, quantityPerUnit });
+    component.form.controls.markupPercentage.setValue(markupPercentage);
+    return component.calculatedSellingPrice();
+  }
 
-    // 1.46 * 1.75 is exactly 2.555, which the server rounds half up.
-    expect(component.calculatedSellingPrice()).toBe(2.56);
+  it('previews the selling price the server calculates', () => {
+    // The server rounds the exact price half up: 2.555, 4.015 and 2.135 here.
+    expect(previewSellingPrice(0.73, 2, 75)).toBe(2.56);
+    expect(previewSellingPrice(3.65, 1, 10)).toBe(4.02);
+    expect(previewSellingPrice(0.61, 1, 250)).toBe(2.14);
+  });
+
+  it('prefills the initial unit cost rounded half up to cents', () => {
+    component.rawMaterials.set([rawMaterial({ id: 1, averageUnitCost: 3.65 })]);
+    component.openCreate();
+    component.recipeControls[0].setValue({ rawMaterialId: 1, quantityPerUnit: 1.1 });
+
+    expect(component.form.controls.initialUnitCost.value).toBe(4.02);
   });
 
   it('costs a production run without floating-point drift', () => {
