@@ -37,7 +37,8 @@
       "Edit(./frontend/pnpm-workspace.yaml)",
       "Edit(./.github/**)",
       "Edit(./.claude/settings.json)",
-      "Edit(./.mcp.json)"
+      "Edit(./.mcp.json)",
+      "mcp__idea"
     ],
     "deny": [
       "Read(./.env)",
