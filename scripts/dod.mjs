@@ -70,6 +70,8 @@ const checks = [
 
 const logDir = join(root, "target", "dod");
 mkdirSync(logDir, { recursive: true });
+// Every log starts as "not run", so a check skipped after a failure never shows an earlier run's output.
+for (const [i, check] of checks.entries()) writeFileSync(join(logDir, `${i + 1}.log`), `${check.name}: not run\n`);
 const head = sh("git", ["rev-parse", "--short", "HEAD"]).stdout?.trim() || "unknown";
 const dirty = (sh("git", ["status", "--porcelain"]).stdout ?? "").split("\n").filter(Boolean).length;
 const rows = [];
