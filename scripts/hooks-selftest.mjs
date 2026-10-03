@@ -87,6 +87,12 @@ for (const [command, expect] of [
   ["git diff --no-index /dev/null .env", 2],
   ["git show HEAD:.env.local", 2],
   ["git checkout main", 2],
+  ["git diff /dev/null .en?", 2],
+  ["git diff -- .e'nv'", 2],
+  ["git diff ../outside.txt README.md", 2],
+  ["git diff /dev/null README.md", 2],
+  ["git diff -- '*.ts'", 2],
+  ["git log --oneline main..HEAD -- src/../README.md", 2],
 ]) {
   const status = guard(command);
   check(`reviewer guard "${command}" -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
