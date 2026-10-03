@@ -11,6 +11,8 @@
       "Bash(mvn -Dskip.frontend=true test *)",
       "Bash(pnpm exec ng test *)",
       "Bash(pnpm test *)",
+      "Bash(pnpm exec prettier --check *)",
+      "Bash(pnpm exec prettier --write *)",
       "Bash(node scripts/agent-log-summary.mjs *)",
       "Bash(node scripts/hooks-selftest.mjs)",
       "Bash(node .claude/skills/agent-log-report/scripts/report.mjs *)",

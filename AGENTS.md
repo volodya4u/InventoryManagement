@@ -16,7 +16,7 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 
 ## Definition of done
 
-- `mvn -B -ntp verify` and the frontend tests are green.
+- `mvn -B -ntp verify`, the frontend tests and `pnpm exec prettier --check .` (in `frontend/`) are green.
 - New backend behaviour has a JUnit test under `src/test/java` in the same package (API flows go to
   `InventoryFlowIntegrationTest`); new frontend logic has a `*.spec.ts` next to the code.
 - Evidence, not claims: report the command you ran and its exit code / test count.

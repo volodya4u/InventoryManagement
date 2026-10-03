@@ -46,6 +46,8 @@ Docker images and minor Spring Boot parent updates; `.github/dependabot.yml` ign
   and that migrated code keeps its behaviour or is covered by tests. Under Non-blocking, list what the author must
   confirm outside the repository: release notes and breaking changes, peer ranges, CI on the PR head.
 - A human merges these PRs. Your verdict never stands in for that merge.
+- A Prettier update that reformats code fails the formatting check in `build-and-test`, so it stays open even as a
+  patch or minor. The fix is one formatting-only `prettier --write` commit on that branch; then CI merges it as usual.
 
 ## Output
 
