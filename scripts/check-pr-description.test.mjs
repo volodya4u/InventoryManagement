@@ -44,7 +44,7 @@ test("a missing Reviewer verdict section fails", () => {
 });
 
 test("a verdict without APPROVE fails", () => {
-  assert.match(checkPrDescription(body(table, "Review: CHANGES REQUESTED"))[0], /does not end on APPROVE/);
+  assert.match(checkPrDescription(body(table, "Review: CHANGES REQUESTED"))[0], /final verdict in the Reviewer verdict section is not APPROVE/);
 });
 
 // What the tools print, pasted as the template asks: both start with their own "## " heading.
@@ -63,7 +63,7 @@ test("pasted dod.mjs output with its own heading counts as evidence", () => {
 });
 
 test("a pasted reviewer report that requests changes fails", () => {
-  assert.match(checkPrDescription(body(dodOutput, review("CHANGES REQUESTED")))[0], /does not end on APPROVE/);
+  assert.match(checkPrDescription(body(dodOutput, review("CHANGES REQUESTED")))[0], /final verdict in the Reviewer verdict section is not APPROVE/);
 });
 
 test("earlier rounds may request changes when the final review approves", () => {
@@ -72,7 +72,7 @@ test("earlier rounds may request changes when the final review approves", () => 
 });
 
 test("the template's format line is not a verdict", () => {
-  assert.match(checkPrDescription(body(table, "APPROVE | CHANGES REQUESTED"))[0], /does not end on APPROVE/);
+  assert.match(checkPrDescription(body(table, "APPROVE | CHANGES REQUESTED"))[0], /final verdict in the Reviewer verdict section is not APPROVE/);
 });
 
 test("an approving report may quote CHANGES REQUESTED in its own findings", () => {
@@ -82,7 +82,19 @@ test("an approving report may quote CHANGES REQUESTED in its own findings", () =
 
 test("a report requesting changes fails even if its text mentions APPROVE later", () => {
   const mentioned = review("CHANGES REQUESTED").replace("- Tests.", "- Re-run after the fix to get APPROVE.");
-  assert.match(checkPrDescription(body(dodOutput, mentioned))[0], /does not end on APPROVE/);
+  assert.match(checkPrDescription(body(dodOutput, mentioned))[0], /final verdict in the Reviewer verdict section is not APPROVE/);
+});
+
+test("the reviewer's unfilled format line is not a report verdict", () => {
+  assert.match(
+    checkPrDescription(body(table, "## Review: APPROVE | CHANGES REQUESTED"))[0],
+    /final verdict in the Reviewer verdict section is not APPROVE/,
+  );
+});
+
+test("a pasted report decides over a verdict written in prose after it", () => {
+  const mixed = `${review("CHANGES REQUESTED")}\n\nRe-reviewed after the fix: APPROVE.`;
+  assert.match(checkPrDescription(body(dodOutput, mixed))[0], /the last pasted "## Review:" line decides/);
 });
 
 test("every heading of the template ends the section before it", () => {
@@ -97,7 +109,7 @@ test("every heading of the template ends the section before it", () => {
 
 test("APPROVE in another section does not fill the verdict", () => {
   const problems = checkPrDescription(body(table, "Pending.").replace("None.", "Will APPROVE later."));
-  assert.match(problems[0], /does not end on APPROVE/);
+  assert.match(problems[0], /final verdict in the Reviewer verdict section is not APPROVE/);
 });
 
 test("only HTML comments count as empty", () => {

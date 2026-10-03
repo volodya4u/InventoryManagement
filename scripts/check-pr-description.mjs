@@ -14,7 +14,9 @@ export const TEMPLATE_HEADINGS = ["Summary", "Why", "Evidence", "Reviewer verdic
 // The reviewer's own "## Review: APPROVE | CHANGES REQUESTED" line decides when the report is pasted (the last one,
 // after earlier rounds); otherwise the last verdict keyword written in the section does.
 function finalVerdict(text) {
-  const reportLines = [...text.matchAll(/^##[ \t]+Review:[ \t]*(APPROVE|CHANGES REQUESTED)\b/gm)];
+  // The verdict must end the line, so the reviewer's unfilled format line "## Review: APPROVE | CHANGES REQUESTED"
+  // is not a report line (and its last keyword is CHANGES REQUESTED).
+  const reportLines = [...text.matchAll(/^##[ \t]+Review:[ \t]*(APPROVE|CHANGES REQUESTED)[ \t]*$/gm)];
   const keywords = reportLines.length ? reportLines : [...text.matchAll(/\b(APPROVE|CHANGES REQUESTED)\b/g)];
   return keywords.at(-1)?.[1];
 }
@@ -44,7 +46,10 @@ export function checkPrDescription(rawBody) {
   if (verdict === null) problems.push('Missing the "## Reviewer verdict" section.');
   else if (!verdict) problems.push("The Reviewer verdict section is empty: give the reviewer subagent's verdict.");
   else if (finalVerdict(verdict) !== "APPROVE") {
-    problems.push("The Reviewer verdict section does not end on APPROVE: fix or answer the blocking findings first.");
+    problems.push(
+      'The final verdict in the Reviewer verdict section is not APPROVE (the last pasted "## Review:" line decides, ' +
+        "otherwise the last APPROVE / CHANGES REQUESTED): fix or answer the blocking findings first.",
+    );
   }
 
   return problems;

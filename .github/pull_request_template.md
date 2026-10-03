@@ -13,9 +13,10 @@
 
 ## Reviewer verdict
 
-<!-- Required, checked by CI: the last verdict in this section must be APPROVE. Give what earlier rounds of the
-     fresh-context `reviewer` subagent (.claude/agents/reviewer.md) found and how it was fixed, then its verdict on
-     the final diff; pasting its report as is works.
+<!-- Required, checked by CI: the final verdict must be APPROVE. Give what earlier rounds of the fresh-context
+     `reviewer` subagent (.claude/agents/reviewer.md) found and how it was fixed, then its verdict on the final diff.
+     Pasting its reports as is works: the last pasted "## Review: ..." line decides, otherwise the last APPROVE /
+     CHANGES REQUESTED you write.
      Changes to auth/, SecurityConfig, .claude/ or CI also report `/security-review`. -->
 
 ## Boundaries touched
