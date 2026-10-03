@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { checkPrDescription } from "./check-pr-description.mjs";
+import { checkPrDescription, TEMPLATE_HEADINGS } from "./check-pr-description.mjs";
 
 const table = [
   "| Check | Command | Exit | Time | Result |",
@@ -73,6 +73,26 @@ test("earlier rounds may request changes when the final review approves", () => 
 
 test("the template's format line is not a verdict", () => {
   assert.match(checkPrDescription(body(table, "APPROVE | CHANGES REQUESTED"))[0], /does not end on APPROVE/);
+});
+
+test("an approving report may quote CHANGES REQUESTED in its own findings", () => {
+  const quoted = review("APPROVE").replace("- Tests.", "- The template's format line `APPROVE | CHANGES REQUESTED` now fails.");
+  assert.deepEqual(checkPrDescription(body(dodOutput, quoted)), []);
+});
+
+test("a report requesting changes fails even if its text mentions APPROVE later", () => {
+  const mentioned = review("CHANGES REQUESTED").replace("- Tests.", "- Re-run after the fix to get APPROVE.");
+  assert.match(checkPrDescription(body(dodOutput, mentioned))[0], /does not end on APPROVE/);
+});
+
+test("every heading of the template ends the section before it", () => {
+  const template = readFileSync(new URL("../.github/pull_request_template.md", import.meta.url), "utf8");
+  const headings = [...template.matchAll(/^## (.+)$/gm)].map((match) => match[1]);
+  assert.equal(headings.length, TEMPLATE_HEADINGS.length);
+  for (const heading of headings.filter((h) => !/^(Evidence|Reviewer verdict)/.test(h))) {
+    const text = `## Evidence (\`dod.mjs\`)\n\n## ${heading}\n\n${table}\n\n## Reviewer verdict\n\nAPPROVE\n`;
+    assert.match(checkPrDescription(text)[0], /Evidence section is empty/, `"## ${heading}" must end the section`);
+  }
 });
 
 test("APPROVE in another section does not fill the verdict", () => {
