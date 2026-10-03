@@ -1,4 +1,10 @@
-import { addDecimals, multiplyDecimals, subtractDecimals, wholeQuotient } from './decimal';
+import {
+  addDecimals,
+  multiplyDecimals,
+  roundHalfUp,
+  subtractDecimals,
+  wholeQuotient,
+} from './decimal';
 
 describe('decimal helpers', () => {
   it('multiplies without floating-point drift', () => {
@@ -22,6 +28,16 @@ describe('decimal helpers', () => {
     expect(subtractDecimals(0.3, 0.3)).toBe(0);
     expect(subtractDecimals(0.7, 0.4)).toBe(0.3);
     expect(subtractDecimals(3.3, 1)).toBe(2.3);
+  });
+
+  it('rounds half up like the server', () => {
+    expect(roundHalfUp(4.015, 2)).toBe(4.02);
+    expect(roundHalfUp(2.135, 2)).toBe(2.14);
+    expect(roundHalfUp(1.005, 2)).toBe(1.01);
+    expect(roundHalfUp(2.5549, 2)).toBe(2.55);
+    expect(roundHalfUp(12, 2)).toBe(12);
+    expect(roundHalfUp(-2.135, 2)).toBe(-2.14);
+    expect(roundHalfUp(-0.001, 2)).toBe(0);
   });
 
   it('counts how many whole units fit', () => {

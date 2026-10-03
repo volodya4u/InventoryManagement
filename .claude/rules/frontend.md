@@ -10,7 +10,7 @@ paths:
 - `HttpClient` defaults to the Fetch backend in v22. Keep `withXhr()` in `app.config.ts`; never add the deprecated `withFetch()`.
 - Templates use built-in control flow (`@if`, `@for` with `track`), never `*ngIf`/`*ngFor`. `strictTemplates` is on.
 - Quantity and money arithmetic goes through `src/app/core/decimal.ts` (`addDecimals`, `multiplyDecimals`,
-  `subtractDecimals`, `wholeQuotient`), never plain float math.
+  `subtractDecimals`, `wholeQuotient`, `roundHalfUp`), never plain float math.
 - Protected pages are child routes of `ShellComponent` behind `authGuard`; show API errors with `apiErrorMessage` from
   `core/api-error.ts`.
 - A new route in `app.routes.ts` also needs its path in the backend `SpaController` and a forwarding test in

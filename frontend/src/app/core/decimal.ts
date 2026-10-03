@@ -13,6 +13,13 @@ export function subtractDecimals(left: number, right: number): number {
   return roundToPlaces(left - right, Math.max(decimalPlaces(left), decimalPlaces(right)));
 }
 
+/** Rounds half away from zero, like the server's RoundingMode.HALF_UP. */
+export function roundHalfUp(value: number, places: number): number {
+  const scale = 10 ** places;
+  const rounded = Math.round(multiplyDecimals(Math.abs(value), scale)) / scale;
+  return value < 0 && rounded !== 0 ? -rounded : rounded;
+}
+
 /** How many whole times the divisor fits into the dividend. */
 export function wholeQuotient(dividend: number, divisor: number): number {
   const scale = 10 ** Math.max(decimalPlaces(dividend), decimalPlaces(divisor));
