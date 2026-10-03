@@ -97,12 +97,17 @@ describe('ProductsComponent amounts', () => {
     expect(previewSellingPrice(0.61, 1, 250)).toBe(2.14);
   });
 
-  it('prefills the initial unit cost rounded half up to cents', () => {
-    component.rawMaterials.set([rawMaterial({ id: 1, averageUnitCost: 3.65 })]);
+  function prefillInitialUnitCost(averageUnitCost: number, quantityPerUnit: number): number | null {
+    component.rawMaterials.set([rawMaterial({ id: 1, averageUnitCost })]);
     component.openCreate();
-    component.recipeControls[0].setValue({ rawMaterialId: 1, quantityPerUnit: 1.1 });
+    component.recipeControls[0].setValue({ rawMaterialId: 1, quantityPerUnit });
+    return component.form.controls.initialUnitCost.value;
+  }
 
-    expect(component.form.controls.initialUnitCost.value).toBe(4.02);
+  it('prefills the initial unit cost rounded half up to cents', () => {
+    // 4.015 and 2.135 exactly.
+    expect(prefillInitialUnitCost(3.65, 1.1)).toBe(4.02);
+    expect(prefillInitialUnitCost(0.61, 3.5)).toBe(2.14);
   });
 
   it('costs a production run without floating-point drift', () => {
