@@ -1,4 +1,4 @@
-import { multiplyDecimals, subtractDecimals, wholeQuotient } from './decimal';
+import { addDecimals, multiplyDecimals, subtractDecimals, wholeQuotient } from './decimal';
 
 describe('decimal helpers', () => {
   it('multiplies without floating-point drift', () => {
@@ -7,6 +7,15 @@ describe('decimal helpers', () => {
     expect(multiplyDecimals(1.1, 3)).toBe(3.3);
     expect(multiplyDecimals(0.15, 3)).toBe(0.45);
     expect(multiplyDecimals(0.0000001, 3)).toBe(0.0000003);
+  });
+
+  it('adds without floating-point drift', () => {
+    expect(addDecimals(0.1, 0.2)).toBe(0.3);
+    expect(addDecimals(0.1, 0.7)).toBe(0.8);
+    expect(addDecimals(1.1, 2.2)).toBe(3.3);
+    expect(addDecimals(-0.1, 0.3)).toBe(0.2);
+    expect(addDecimals(0.00000012, 0.00000006)).toBe(0.00000018);
+    expect(addDecimals(6.67, 20)).toBe(26.67);
   });
 
   it('subtracts without floating-point drift', () => {

@@ -5,6 +5,10 @@ export function multiplyDecimals(left: number, right: number): number {
   return roundToPlaces(left * right, decimalPlaces(left) + decimalPlaces(right));
 }
 
+export function addDecimals(left: number, right: number): number {
+  return roundToPlaces(left + right, Math.max(decimalPlaces(left), decimalPlaces(right)));
+}
+
 export function subtractDecimals(left: number, right: number): number {
   return roundToPlaces(left - right, Math.max(decimalPlaces(left), decimalPlaces(right)));
 }
