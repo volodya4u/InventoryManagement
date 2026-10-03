@@ -4,6 +4,8 @@
 //   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files
 //   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
+//   4. scripts/reviewer-bash-guard.mjs is wired in settings and lets the reviewer subagent run only read-only git
+//      commands (others exit 2), while other agents pass untouched
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -63,6 +65,59 @@ const proposedOnly = lines.filter((l) => l.event === "PreToolUse" && !executedId
 check("exactly one proposed-but-not-executed action (.env edit)", proposedOnly.length === 1 && proposedOnly[0].path === ".env");
 const summary = spawnSync(process.execPath, [join(here, "scripts", "agent-log-summary.mjs"), join(tmp, ".agent-log", "actions.jsonl")], { encoding: "utf8" });
 check("agent-log-summary reports 1 proposed but not executed", summary.status === 0 && /1 proposed but not executed/.test(summary.stdout));
+
+// 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
+const settings = JSON.parse(readFileSync(join(here, ".claude", "settings.json"), "utf8"));
+const guardWired = (settings.hooks?.PreToolUse ?? []).some(
+  (entry) => entry.matcher === "Bash" && entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/scripts/reviewer-bash-guard.mjs"))),
+);
+check("reviewer guard is wired as a PreToolUse Bash hook in .claude/settings.json", guardWired);
+check("reviewer subagent is named reviewer", /^name: reviewer$/m.test(readFileSync(join(here, ".claude", "agents", "reviewer.md"), "utf8")));
+const guard = (command, agentType = "reviewer") =>
+  spawnSync(process.execPath, [join(here, "scripts", "reviewer-bash-guard.mjs")], {
+    input: JSON.stringify({
+      ...base,
+      hook_event_name: "PreToolUse",
+      tool_name: "Bash",
+      tool_input: { command },
+      ...(agentType ? { agent_id: "a1", agent_type: agentType } : {}),
+    }),
+    encoding: "utf8",
+  }).status;
+check("reviewer guard leaves the main agent alone", guard("rm x", null) === 0);
+check("reviewer guard leaves other subagents alone", guard("rm x", "Explore") === 0);
+for (const [command, expect] of [
+  ["git diff main...HEAD", 0],
+  ["git log --oneline main..HEAD", 0],
+  ['git log --format="%h %s" -n 5', 0],
+  ["git show HEAD:AGENTS.md", 0],
+  ["git status", 0],
+  ["git diff -- .env.example", 0],
+  ["rm x", 2],
+  ["git diff; rm x", 2],
+  ["git log | head", 2],
+  ["git diff > out.txt", 2],
+  ["git diff --output=out.txt", 2],
+  ["git diff --ext-diff", 2],
+  ["git diff --no-index /dev/null .env", 2],
+  ["git show HEAD:.env.local", 2],
+  ["git checkout main", 2],
+  ["git diff /dev/null .en?", 2],
+  ["git diff -- .e'nv'", 2],
+  ["git diff ../outside.txt README.md", 2],
+  ["git diff /dev/null README.md", 2],
+  ["git diff -- '*.ts'", 2],
+  ["git log --oneline main..HEAD -- src/../README.md", 2],
+  ["git diff ./.. .", 2],
+  ["git diff . .//..", 2],
+  ["git diff --outp=out.txt", 2],
+  ["git log --ext", 2],
+  ["git diff --no-ind README.md", 2],
+  ["git diff --stat --output-indicator-new=x", 0],
+]) {
+  const status = guard(command);
+  check(`reviewer guard "${command}" -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
+}
 
 rmSync(tmp, { recursive: true, force: true });
 console.log(failed ? `\n${failed} check(s) failed` : "\nall hook checks passed");

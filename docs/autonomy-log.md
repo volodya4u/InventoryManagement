@@ -20,6 +20,7 @@ Levels (Agentic Engineering Crash Course): 1 Assistant (the agent proposes, a hu
 | 9 | Path-scoped rule for Angular 22 frontend work (#29) | 1 | Human chose it from the day 1 gap list | Each Angular fact checked against `@angular/core` and `@angular/common` 22.2.1 typings | Static context is team policy |
 | 10 | `GET /api/health`, start script waits for it (#30) | 1 | Plan approved by a human (it touches `SecurityConfig`); agent wrote the test first | Test red (401) before the change, green after; `mvn -B -ntp verify` 25 tests | First task through the full loop: plan, failing test, change, evidence |
 | 11 | This log and `merge=union` for the agent log | 1 | Human chose it from the day 1 gap list | A merge of two branches that both appended to the log kept both lines without a conflict | Documentation of decisions belongs to the human |
+| 12 | Read-only `reviewer` subagent and a review step before every PR; Dependabot patch and minor updates keep merging without review | 1 | Human chose it from the practices audit and ruled that auto-merge stays as it is; agent implemented | Four fresh-context review rounds found six guard gaps, all fixed; in a cloud session the reviewer's `ls` and `git diff /dev/null README.md` were blocked and `git status` ran; self-test green | The checker's limits are harness policy, so a human approves every rule |
 
 ## Escalation and de-escalation
 
