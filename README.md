@@ -190,6 +190,7 @@ The repository carries a Claude Code harness adapted from the Agentic Engineerin
 - `.claude/hooks/protect-env.mjs`: blocks agents from reading or editing `.env*` files.
 - `.claude/hooks/log-action.mjs`: appends every proposed and executed tool call to `.agent-log/actions.jsonl`.
 - `.agents/skills/agent-log-report`: skill that reports the agent log; `node scripts/skills-sync.mjs` copies it to `.claude/skills/`.
+- `.claude/agents/reviewer.md`: read-only reviewer subagent with a fresh context (maker ≠ checker). `scripts/reviewer-bash-guard.mjs`, a `PreToolUse` hook in `.claude/settings.json` that acts only inside that subagent, limits its shell to `git diff`, `git log`, `git show` and `git status`. Dependabot updates that the `dependabot-auto-merge` CI job merges skip the reviewer; the ones it leaves open get a review before a human merges them.
 - `.mcp.json`: documentation servers for agents, so they look up the library versions Dependabot keeps updating instead of relying on model memory. `context7` covers Spring Boot and other libraries; `angular-cli` (`ng mcp --read-only`) searches the Angular documentation for the version installed in `frontend/`.
 
 Run from the project root:
