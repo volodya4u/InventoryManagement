@@ -5,8 +5,19 @@ export function multiplyDecimals(left: number, right: number): number {
   return roundToPlaces(left * right, decimalPlaces(left) + decimalPlaces(right));
 }
 
+export function addDecimals(left: number, right: number): number {
+  return roundToPlaces(left + right, Math.max(decimalPlaces(left), decimalPlaces(right)));
+}
+
 export function subtractDecimals(left: number, right: number): number {
   return roundToPlaces(left - right, Math.max(decimalPlaces(left), decimalPlaces(right)));
+}
+
+/** Rounds half away from zero, like the server's RoundingMode.HALF_UP. */
+export function roundHalfUp(value: number, places: number): number {
+  const scale = 10 ** places;
+  const rounded = Math.round(multiplyDecimals(Math.abs(value), scale)) / scale;
+  return value < 0 && rounded !== 0 ? -rounded : rounded;
 }
 
 /** How many whole times the divisor fits into the dividend. */
