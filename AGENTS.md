@@ -20,6 +20,8 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 - New backend behaviour has a JUnit test under `src/test/java` in the same package (API flows go to
   `InventoryFlowIntegrationTest`); new frontend logic has a `*.spec.ts` next to the code.
 - Evidence, not claims: report the command you ran and its exit code / test count.
+- Before a PR, a fresh-context, read-only reviewer checks the diff (Claude Code: the `reviewer` subagent); fix or
+  answer every blocking finding.
 
 ## Conventions the build does not enforce
 

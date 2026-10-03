@@ -4,6 +4,7 @@
 //   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files
 //   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
+//   4. scripts/reviewer-bash-guard.mjs lets the reviewer subagent run only read-only git commands (others exit 2)
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -63,6 +64,33 @@ const proposedOnly = lines.filter((l) => l.event === "PreToolUse" && !executedId
 check("exactly one proposed-but-not-executed action (.env edit)", proposedOnly.length === 1 && proposedOnly[0].path === ".env");
 const summary = spawnSync(process.execPath, [join(here, "scripts", "agent-log-summary.mjs"), join(tmp, ".agent-log", "actions.jsonl")], { encoding: "utf8" });
 check("agent-log-summary reports 1 proposed but not executed", summary.status === 0 && /1 proposed but not executed/.test(summary.stdout));
+
+// 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/agents/reviewer.md): read-only git only
+const guard = (command) =>
+  spawnSync(process.execPath, [join(here, "scripts", "reviewer-bash-guard.mjs")], {
+    input: JSON.stringify({ ...base, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command } }),
+    encoding: "utf8",
+  }).status;
+for (const [command, expect] of [
+  ["git diff main...HEAD", 0],
+  ["git log --oneline main..HEAD", 0],
+  ['git log --format="%h %s" -n 5', 0],
+  ["git show HEAD:AGENTS.md", 0],
+  ["git status", 0],
+  ["git diff -- .env.example", 0],
+  ["rm x", 2],
+  ["git diff; rm x", 2],
+  ["git log | head", 2],
+  ["git diff > out.txt", 2],
+  ["git diff --output=out.txt", 2],
+  ["git diff --ext-diff", 2],
+  ["git diff --no-index /dev/null .env", 2],
+  ["git show HEAD:.env.local", 2],
+  ["git checkout main", 2],
+]) {
+  const status = guard(command);
+  check(`reviewer guard "${command}" -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
+}
 
 rmSync(tmp, { recursive: true, force: true });
 console.log(failed ? `\n${failed} check(s) failed` : "\nall hook checks passed");
