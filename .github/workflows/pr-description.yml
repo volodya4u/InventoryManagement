@@ -1,0 +1,32 @@
+name: PR description
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-description-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # The description must carry the dod.mjs evidence and the reviewer's verdict
+  # (.github/pull_request_template.md). Dependabot writes its own descriptions and
+  # its patch and minor updates keep merging through ci.yml, so its PRs skip this.
+  check:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Checker unit tests
+        run: node --test scripts/check-pr-description.test.mjs
+
+      # The body goes through an environment variable, never into the shell command.
+      - name: Evidence and reviewer verdict in the description
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node scripts/check-pr-description.mjs
