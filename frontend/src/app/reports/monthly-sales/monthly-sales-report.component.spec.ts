@@ -117,7 +117,8 @@ describe('MonthlySalesReportComponent', () => {
     expect(component.report()?.month).toBe('2025-12');
 
     component.monthChanged({ target: { value: '' } } as unknown as Event);
-    requests.expectNone('/api/reports/monthly-sales');
+    // A string matcher compares the URL with its query string, so match the path instead.
+    requests.expectNone((request) => request.url === '/api/reports/monthly-sales');
     expect(component.selectedMonth()).toBe('2025-12');
   });
 
