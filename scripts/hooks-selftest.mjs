@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Self-test for the Claude Code hooks in .claude/hooks/ — no agent needed.
 // Pipes realistic hook payloads through both scripts against a TEMP project dir and checks:
-//   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files
+//   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files;
+//      it also blocks Grep on a .env path or with a glob that can match one
 //   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
 //   4. scripts/reviewer-bash-guard.mjs is wired in settings and lets the reviewer subagent run only read-only git
@@ -37,6 +38,38 @@ for (const [tool, file, expect] of [
   const r = run("protect-env.mjs", { ...base, hook_event_name: "PreToolUse", tool_name: tool, tool_input: { file_path: file } });
   check(`protect-env ${tool} ${file.split(/[\\/]/).pop()} -> exit ${expect}`, r.status === expect, r.status === 2 ? r.stderr.trim() : "");
 }
+const settings = JSON.parse(readFileSync(join(here, ".claude", "settings.json"), "utf8"));
+const envMatcher = (settings.hooks?.PreToolUse ?? []).find((entry) =>
+  entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/.claude/hooks/protect-env.mjs"))),
+)?.matcher;
+check("protect-env is wired for Grep in .claude/settings.json", envMatcher?.split("|").includes("Grep"), envMatcher);
+// Grep: the path, and globs (a ripgrep glob searches files .gitignore hides)
+const guardEnv = (tool, toolInput) =>
+  run("protect-env.mjs", { ...base, hook_event_name: "PreToolUse", tool_name: tool, tool_input: toolInput }).status;
+for (const [toolInput, expect] of [
+  [{ pattern: "KEY", path: ".env" }, 2],
+  [{ pattern: "KEY", path: join(tmp, "frontend", ".env.local") }, 2],
+  [{ pattern: "KEY", path: ".env.example" }, 0],
+  [{ pattern: "\\.env", path: "src" }, 0],
+  [{ pattern: "KEY" }, 0],
+  [{ pattern: "KEY", glob: "*.ts" }, 0],
+  [{ pattern: "KEY", glob: "**/*.{ts,html}" }, 0],
+  [{ pattern: "KEY", glob: "!.env*" }, 0],
+  [{ pattern: "KEY", glob: ".env.example" }, 0],
+  [{ pattern: "KEY", glob: "*" }, 2],
+  [{ pattern: "KEY", glob: "**" }, 2],
+  [{ pattern: "KEY", glob: "*.*" }, 2],
+  [{ pattern: "KEY", glob: ".env*" }, 2],
+  [{ pattern: "KEY", glob: ".env.q*" }, 2],
+  [{ pattern: "KEY", glob: "*.local" }, 2],
+  [{ pattern: "KEY", glob: "*.{ts,env}" }, 2],
+  [{ pattern: "KEY", glob: "*.ts .env.production" }, 2],
+  [{ pattern: "KEY", glob: "*.ts,.env" }, 2],
+  [{ pattern: "KEY", path: "src", glob: "src/**" }, 2],
+]) {
+  const status = guardEnv("Grep", toolInput);
+  check(`protect-env Grep ${JSON.stringify(toolInput)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
+}
 
 // 2. logger: a proposed+executed Bash, a proposed+executed Edit, a proposed+failed Bash, a proposed-only Edit (blocked)
 const events = [
@@ -67,7 +100,6 @@ const summary = spawnSync(process.execPath, [join(here, "scripts", "agent-log-su
 check("agent-log-summary reports 1 proposed but not executed", summary.status === 0 && /1 proposed but not executed/.test(summary.stdout));
 
 // 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
-const settings = JSON.parse(readFileSync(join(here, ".claude", "settings.json"), "utf8"));
 const guardWired = (settings.hooks?.PreToolUse ?? []).some(
   (entry) => entry.matcher === "Bash" && entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/scripts/reviewer-bash-guard.mjs"))),
 );
