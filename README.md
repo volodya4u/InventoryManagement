@@ -143,6 +143,7 @@ Open **Reports -> Monthly Sales** and select a report month. Sales are included 
 - Default username: `admin`
 - Initial password: supplied through `APP_ADMIN_INITIAL_PASSWORD`
 - Database: `flower-shop-local.db` in the project root
+- Health check: `GET /api/health` returns `{"status":"UP"}` without signing in; `Start OnlineStore.cmd` waits for it before opening the browser
 
 The application does not contain a default password. Before the first start with a new database, provide a strong, unique password through an environment variable:
 
