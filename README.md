@@ -211,4 +211,6 @@ To use the MCP servers:
 2. Install the frontend dependencies once (`mvn package`, or `pnpm install` in `frontend`); the `angular-cli` server runs from `frontend/node_modules`.
 3. Start Claude Code in the project root, trust the folder and approve the project servers, then check `/mcp`.
 
+Tools from the JetBrains IDE MCP server (`idea`) always ask for permission in this project, even after "always allow": its file and terminal tools work outside the `protect-env` hook and the `.env` deny rules.
+
 In Claude Code cloud sessions, allow `mcp.context7.com` and `*.algolia.net` (Angular documentation search) in the environment's network access settings and add `CONTEXT7_API_KEY` as an environment variable.
