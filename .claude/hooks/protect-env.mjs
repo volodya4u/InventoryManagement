@@ -292,8 +292,10 @@ const project = (() => {
   }
 })();
 const inProject = (dir) => `${norm(dir)}/`.startsWith(`${project}/`);
-// Does `arg`, seen from `dir`, point outside the work tree? /dev/null, \\server\share and ~ do.
-const outsideWorkTree = (arg, dir = cwd) => /^~/.test(arg) || !inProject(resolve(dir, native(arg)));
+// Does `arg`, seen from `dir`, point outside the work tree? /dev/null, \\server\share and ~ do, and so does a
+// Windows drive path on Linux too, so the rule is the same on a Windows machine and in Linux CI.
+const outsideWorkTree = (arg, dir = cwd) =>
+  /^(~|\\)/.test(arg) || (!win && /^[A-Za-z]:[\\/]/.test(arg)) || !inProject(resolve(dir, native(arg)));
 // The value of option `arg` (from --opt=value or the next word), when arg is a prefix of one of `options`.
 const optionValue = (arg, i, args, options) => {
   if (arg.startsWith("-") && !arg.startsWith("--")) return options.includes(arg) ? args[i + 1] : undefined;
