@@ -355,6 +355,33 @@ describe('SalesComponent amounts', () => {
     expect(component.returnProfitReversal()).toBe(0.3);
   });
 
+  it.each([
+    // 4.35 / 2 is exactly 2.175.
+    { lineCost: 4.35, quantity: 2, returnedQuantity: 0, returnedCost: 0, returning: 1, cost: 2.18 },
+    {
+      lineCost: 4.35,
+      quantity: 2,
+      returnedQuantity: 1,
+      returnedCost: 2.18,
+      returning: 1,
+      cost: 2.17,
+    },
+    // 0.07 * 3 / 6 is exactly 0.035, but 0.21 / 6 is 0.034999999999999996 in floating point.
+    { lineCost: 0.07, quantity: 6, returnedQuantity: 0, returnedCost: 0, returning: 3, cost: 0.04 },
+    // 0.29 * 3 / 6 is exactly 0.145, but 0.29 * 3 is 0.8699999999999999 in floating point.
+    { lineCost: 0.29, quantity: 6, returnedQuantity: 0, returnedCost: 0, returning: 3, cost: 0.15 },
+  ])(
+    'reverses $cost of a $lineCost line cost when $returning of $quantity units come back',
+    ({ lineCost, quantity, returnedQuantity, returnedCost, returning, cost }) => {
+      component.openReturn(
+        sale({ items: [saleItem({ quantity, lineCost, returnedQuantity, returnedCost })] }),
+      );
+      component.returnItemControls[0].controls.quantity.setValue(returning);
+
+      expect(component.returnCost()).toBe(cost);
+    },
+  );
+
   it('sums the net totals of all sales without floating-point drift', () => {
     component.sales.set([
       sale({ id: 1, netRevenue: 10.1, netCost: 10, netGrossProfit: 0.1 }),

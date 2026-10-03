@@ -309,10 +309,12 @@ describe('ProductsComponent amounts', () => {
   }
 
   it('previews the selling price the server calculates', () => {
-    // The server rounds the exact price half up: 2.555, 4.015 and 2.135 here.
+    // The server rounds the exact price half up: 2.555, 4.015, 2.135 and 2.175 (twice) here.
     expect(previewSellingPrice(0.73, 2, 75)).toBe(2.56);
     expect(previewSellingPrice(3.65, 1, 10)).toBe(4.02);
     expect(previewSellingPrice(0.61, 1, 250)).toBe(2.14);
+    expect(previewSellingPrice(1.45, 1, 50)).toBe(2.18);
+    expect(previewSellingPrice(1.5, 1, 45)).toBe(2.18);
   });
 
   function prefillInitialUnitCost(averageUnitCost: number, quantityPerUnit: number): number | null {
