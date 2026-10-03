@@ -53,6 +53,12 @@ const envMatcher = (settings.hooks?.PreToolUse ?? []).find((entry) =>
   entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/.claude/hooks/protect-env.mjs"))),
 )?.matcher;
 check("protect-env is wired for Grep and Bash in .claude/settings.json", ["Grep", "Bash"].every((t) => envMatcher?.split("|").includes(t)), envMatcher);
+// A ! carve-out only applies to the rules listed before it in the same list.
+const deny = settings.permissions?.deny ?? [];
+check(
+  "deny rules keep .env.example readable (Read(!.env.example) after Read(./.env.*))",
+  deny.indexOf("Read(./.env.*)") >= 0 && deny.indexOf("Read(!.env.example)") > deny.indexOf("Read(./.env.*)"),
+);
 // Grep: the path, and globs (a ripgrep glob searches files .gitignore hides)
 const guardEnv = (tool, toolInput) =>
   run("protect-env.mjs", { ...base, hook_event_name: "PreToolUse", tool_name: tool, tool_input: toolInput }).status;
