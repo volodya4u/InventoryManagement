@@ -183,7 +183,7 @@ The development frontend will be available at `http://localhost:4200`.
 
 ## Agent Harness
 
-The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js on `PATH`: 20+ for the hooks and scripts, 24.15+ (the version Maven pins) for the Angular CLI MCP server. The Node that Maven installs into `target/frontend-tooling` is not on `PATH`.
+The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js 20+ on `PATH`. The Node that Maven installs into `target/frontend-tooling` is not on `PATH`; `scripts/ng-mcp.mjs` starts the Angular CLI MCP server with it when it exists, because the Angular CLI refuses Node releases older than 22.22.3 or 24.15.
 
 - `AGENTS.md` and `CLAUDE.md`: project rules, commands, definition of done, and boundaries for coding agents.
 - `.claude/settings.json`: trust level 1 (`defaultMode: default`), allow/ask/deny rules, and hooks.
@@ -215,4 +215,4 @@ To use the MCP servers:
 
 Tools from the JetBrains IDE MCP server (`idea`) always ask for permission in this project, even after "always allow": its file and terminal tools work outside the `protect-env` hook and the `.env` deny rules.
 
-In Claude Code cloud sessions, allow `mcp.context7.com` and `*.algolia.net` (Angular documentation search) in the environment's network access settings and add `CONTEXT7_API_KEY` as an environment variable.
+In Claude Code cloud sessions, allow `mcp.context7.com` and `*.algolia.net` (Angular documentation search) in the environment's network access settings and add `CONTEXT7_API_KEY` as an environment variable. The `SessionStart` hook (`scripts/session-start.mjs`, cloud only) installs the pinned Node, pnpm and `frontend/node_modules`, compiles the backend to fetch the Maven dependencies, and puts the pinned Node first on `PATH`, so tests, Prettier and the `angular-cli` server work in a fresh container.
