@@ -33,8 +33,10 @@ describe('decimal helpers', () => {
   it('rounds half up like the server', () => {
     expect(roundHalfUp(4.015, 2)).toBe(4.02);
     expect(roundHalfUp(2.135, 2)).toBe(2.14);
+    expect(roundHalfUp(2.175, 2)).toBe(2.18);
     expect(roundHalfUp(1.005, 2)).toBe(1.01);
     expect(roundHalfUp(2.5549, 2)).toBe(2.55);
+    expect(roundHalfUp(2.5549999, 2)).toBe(2.55);
     expect(roundHalfUp(12, 2)).toBe(12);
     expect(roundHalfUp(-2.135, 2)).toBe(-2.14);
     expect(roundHalfUp(-0.001, 2)).toBe(0);
