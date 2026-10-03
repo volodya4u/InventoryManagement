@@ -47,7 +47,9 @@ Docker images and minor Spring Boot parent updates; `.github/dependabot.yml` ign
   confirm outside the repository: release notes and breaking changes, peer ranges, CI on the PR head.
 - A human merges these PRs. Your verdict never stands in for that merge.
 - A Prettier update that reformats code fails the formatting check in `build-and-test`, so it stays open even as a
-  patch or minor. The fix is one formatting-only `prettier --write` commit on that branch; then CI merges it as usual.
+  patch or minor. The fix is one formatting-only `prettier --write` commit on that branch, and then a human merges it:
+  `dependabot/fetch-metadata` returns no metadata once a PR holds a commit Dependabot did not make, so the auto-merge
+  job skips it.
 
 ## Output
 
