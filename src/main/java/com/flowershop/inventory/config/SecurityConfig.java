@@ -66,7 +66,7 @@ public class SecurityConfig {
                                 HttpServletResponse.SC_UNAUTHORIZED,
                                 "Your session has ended. Please sign in again.")))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/auth/csrf", "/error").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/csrf", "/api/health", "/error").permitAll()
                         .requestMatchers("/api/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .exceptionHandling(exceptions -> exceptions

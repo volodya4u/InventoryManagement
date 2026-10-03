@@ -429,6 +429,15 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void reportsHealthWithoutSigningInOrCreatingASession() throws Exception {
+        var result = mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andReturn();
+        assertThat(result.getRequest().getSession(false)).isNull();
+    }
+
+    @Test
     void writesOffAndAdjustsRawMaterialAndProductStock() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);
