@@ -4,7 +4,8 @@
 //   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files
 //   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
-//   4. scripts/reviewer-bash-guard.mjs lets the reviewer subagent run only read-only git commands (others exit 2)
+//   4. scripts/reviewer-bash-guard.mjs is wired in settings and lets the reviewer subagent run only read-only git
+//      commands (others exit 2), while other agents pass untouched
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -65,12 +66,26 @@ check("exactly one proposed-but-not-executed action (.env edit)", proposedOnly.l
 const summary = spawnSync(process.execPath, [join(here, "scripts", "agent-log-summary.mjs"), join(tmp, ".agent-log", "actions.jsonl")], { encoding: "utf8" });
 check("agent-log-summary reports 1 proposed but not executed", summary.status === 0 && /1 proposed but not executed/.test(summary.stdout));
 
-// 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/agents/reviewer.md): read-only git only
-const guard = (command) =>
+// 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
+const settings = JSON.parse(readFileSync(join(here, ".claude", "settings.json"), "utf8"));
+const guardWired = (settings.hooks?.PreToolUse ?? []).some(
+  (entry) => entry.matcher === "Bash" && entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/scripts/reviewer-bash-guard.mjs"))),
+);
+check("reviewer guard is wired as a PreToolUse Bash hook in .claude/settings.json", guardWired);
+check("reviewer subagent is named reviewer", /^name: reviewer$/m.test(readFileSync(join(here, ".claude", "agents", "reviewer.md"), "utf8")));
+const guard = (command, agentType = "reviewer") =>
   spawnSync(process.execPath, [join(here, "scripts", "reviewer-bash-guard.mjs")], {
-    input: JSON.stringify({ ...base, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command } }),
+    input: JSON.stringify({
+      ...base,
+      hook_event_name: "PreToolUse",
+      tool_name: "Bash",
+      tool_input: { command },
+      ...(agentType ? { agent_id: "a1", agent_type: agentType } : {}),
+    }),
     encoding: "utf8",
   }).status;
+check("reviewer guard leaves the main agent alone", guard("rm x", null) === 0);
+check("reviewer guard leaves other subagents alone", guard("rm x", "Explore") === 0);
 for (const [command, expect] of [
   ["git diff main...HEAD", 0],
   ["git log --oneline main..HEAD", 0],

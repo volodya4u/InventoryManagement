@@ -72,6 +72,17 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/scripts/reviewer-bash-guard.mjs"],
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
