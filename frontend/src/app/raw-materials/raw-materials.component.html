@@ -17,7 +17,9 @@
     <div class="empty-state">
       <strong>No raw materials yet</strong>
       <p class="mb-3">Add roses or decorative greenery, for example.</p>
-      <button type="button" class="btn btn-outline-success btn-sm" (click)="openCreate()">Create First Record</button>
+      <button type="button" class="btn btn-outline-success btn-sm" (click)="openCreate()">
+        Create First Record
+      </button>
     </div>
   } @else {
     <div class="table-responsive">
@@ -40,7 +42,9 @@
                 @if (item.hasImage) {
                   <img class="item-image" [src]="imageUrl(item)" [alt]="item.name" loading="lazy" />
                 } @else {
-                  <span class="item-image-placeholder" aria-label="No image">{{ item.name.charAt(0) }}</span>
+                  <span class="item-image-placeholder" aria-label="No image">{{
+                    item.name.charAt(0)
+                  }}</span>
                 }
               </td>
               <td class="name-column">
@@ -51,22 +55,50 @@
               </td>
               <td>{{ unitLabel(item.unit) }}</td>
               <td class="text-end fw-semibold">{{ item.quantity }}</td>
-              <td class="text-end">{{ item.averageUnitCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
-              <td class="text-end fw-semibold">{{ item.stockValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+              <td class="text-end">
+                {{ item.averageUnitCost | currency: 'UAH' : 'symbol-narrow' : '1.2-2' }}
+              </td>
+              <td class="text-end fw-semibold">
+                {{ item.stockValue | currency: 'UAH' : 'symbol-narrow' : '1.2-2' }}
+              </td>
               <td class="actions-column">
                 <div class="material-actions">
-                  <button type="button" class="btn btn-sm btn-outline-success" (click)="openReceipt(item)">Receive Stock</button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-success"
+                    (click)="openReceipt(item)"
+                  >
+                    Receive Stock
+                  </button>
                   <button
                     type="button"
                     class="btn btn-sm btn-outline-danger"
                     (click)="openStockOperation(item, 'WRITE_OFF')"
                     [disabled]="item.quantity <= 0"
-                  >Write Off</button>
-                  <button type="button" class="btn btn-sm btn-outline-warning" (click)="openStockOperation(item, 'ADJUSTMENT')">
+                  >
+                    Write Off
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-warning"
+                    (click)="openStockOperation(item, 'ADJUSTMENT')"
+                  >
                     Adjust Stock
                   </button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openEdit(item)">Edit</button>
-                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(item)">Delete</button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    (click)="openEdit(item)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="remove(item)"
+                  >
+                    Delete
+                  </button>
                 </div>
               </td>
             </tr>
@@ -75,7 +107,9 @@
         <tfoot>
           <tr class="stock-value-total">
             <td colspan="5" class="text-end">Total Raw Materials Stock Value</td>
-            <td class="text-end">{{ totalStockValue() | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
+            <td class="text-end">
+              {{ totalStockValue() | currency: 'UAH' : 'symbol-narrow' : '1.2-2' }}
+            </td>
             <td></td>
           </tr>
         </tfoot>
@@ -86,7 +120,13 @@
 
 @if (dialogOpen()) {
   <div class="dialog-backdrop" (click)="closeDialog()">
-    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="raw-material-dialog" (click)="$event.stopPropagation()">
+    <section
+      class="dialog-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="raw-material-dialog"
+      (click)="$event.stopPropagation()"
+    >
       <header class="dialog-header">
         <h2 id="raw-material-dialog">{{ editing() ? 'Edit Raw Material' : 'New Raw Material' }}</h2>
         <button type="button" class="btn-close" aria-label="Close" (click)="closeDialog()"></button>
@@ -96,7 +136,13 @@
         <div class="dialog-body">
           <div class="mb-3">
             <label class="form-label" for="raw-name">Name *</label>
-            <input id="raw-name" class="form-control" type="text" formControlName="name" maxlength="120" />
+            <input
+              id="raw-name"
+              class="form-control"
+              type="text"
+              formControlName="name"
+              maxlength="120"
+            />
             @if (form.controls.name.touched && form.controls.name.invalid) {
               <div class="invalid-feedback d-block">Enter a name of up to 120 characters.</div>
             }
@@ -112,7 +158,8 @@
               </select>
               @if (form.controls.unit.disabled) {
                 <div class="file-hint mt-1">
-                  The unit can’t change once stock, stock history, or recipes use it. Create a new raw material for a different unit.
+                  The unit can’t change once stock, stock history, or recipes use it. Create a new
+                  raw material for a different unit.
                 </div>
               }
             </div>
@@ -121,48 +168,95 @@
                 <div class="stock-summary h-100">
                   <span>Current Stock</span>
                   <strong>{{ editing()!.quantity }} {{ unitLabel(editing()!.unit) }}</strong>
-                  <small>{{ editing()!.averageUnitCost | currency:'UAH':'symbol-narrow':'1.2-2' }} average unit cost</small>
+                  <small
+                    >{{
+                      editing()!.averageUnitCost | currency: 'UAH' : 'symbol-narrow' : '1.2-2'
+                    }}
+                    average unit cost</small
+                  >
                 </div>
               </div>
             } @else {
               <div class="col-sm-6">
                 <label class="form-label" for="raw-quantity">Initial Stock *</label>
-                <input id="raw-quantity" class="form-control" type="number" min="0" step="0.01" formControlName="quantity" />
+                <input
+                  id="raw-quantity"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  formControlName="quantity"
+                />
                 @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
                   <div class="invalid-feedback d-block">Stock cannot be negative.</div>
                 }
               </div>
               <div class="col-sm-6">
                 <label class="form-label" for="raw-initial-unit-cost">Initial Unit Cost, ₴</label>
-                <input id="raw-initial-unit-cost" class="form-control" type="number" min="0" step="0.01" formControlName="initialUnitCost" />
-                @if (form.hasError('initialUnitCostRequired') && (form.controls.quantity.touched || form.controls.initialUnitCost.touched)) {
-                  <div class="invalid-feedback d-block">Enter the initial unit cost when initial stock is greater than zero.</div>
-                } @else if (form.controls.initialUnitCost.touched && form.controls.initialUnitCost.invalid) {
+                <input
+                  id="raw-initial-unit-cost"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  formControlName="initialUnitCost"
+                />
+                @if (
+                  form.hasError('initialUnitCostRequired') &&
+                  (form.controls.quantity.touched || form.controls.initialUnitCost.touched)
+                ) {
+                  <div class="invalid-feedback d-block">
+                    Enter the initial unit cost when initial stock is greater than zero.
+                  </div>
+                } @else if (
+                  form.controls.initialUnitCost.touched && form.controls.initialUnitCost.invalid
+                ) {
                   <div class="invalid-feedback d-block">Unit cost cannot be negative.</div>
                 }
               </div>
               <div class="col-sm-6">
                 <div class="value-preview h-100">
                   <span>Initial Stock Value</span>
-                  <strong>{{ initialStockValue() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+                  <strong>{{
+                    initialStockValue() | currency: 'UAH' : 'symbol-narrow' : '1.2-2'
+                  }}</strong>
                 </div>
               </div>
             }
           </div>
 
           @if (editing()) {
-            <div class="alert alert-light border small">Use <strong>Receive Stock</strong> to change quantity and inventory value.</div>
+            <div class="alert alert-light border small">
+              Use <strong>Receive Stock</strong> to change quantity and inventory value.
+            </div>
           }
 
           <div class="mb-3">
             <label class="form-label" for="raw-description">Description</label>
-            <textarea id="raw-description" class="form-control" rows="3" formControlName="description" maxlength="1000"></textarea>
+            <textarea
+              id="raw-description"
+              class="form-control"
+              rows="3"
+              formControlName="description"
+              maxlength="1000"
+            ></textarea>
           </div>
 
           <div>
             <label class="form-label" for="raw-image">Image</label>
-            <input id="raw-image" class="form-control" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" (change)="selectFile($event)" />
-            <div class="file-hint mt-1">JPG, JPEG, or PNG · up to 2 MB@if (editing()?.hasImage) { · the current image will be kept unless you select a new file }</div>
+            <input
+              id="raw-image"
+              class="form-control"
+              type="file"
+              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              (change)="selectFile($event)"
+            />
+            <div class="file-hint mt-1">
+              JPG, JPEG, or PNG · up to 2 MB
+              @if (editing()?.hasImage) {
+                · the current image will be kept unless you select a new file
+              }
+            </div>
             @if (fileError()) {
               <div class="invalid-feedback d-block">{{ fileError() }}</div>
             }
@@ -173,7 +267,9 @@
         </div>
 
         <footer class="dialog-footer">
-          <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">Cancel</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">
+            Cancel
+          </button>
           <button type="submit" class="btn btn-success" [disabled]="saving()">
             {{ saving() ? 'Saving…' : 'Save' }}
           </button>
@@ -185,13 +281,24 @@
 
 @if (receiptDialogOpen()) {
   <div class="dialog-backdrop" (click)="closeReceiptDialog()">
-    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="stock-receipt-dialog" (click)="$event.stopPropagation()">
+    <section
+      class="dialog-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stock-receipt-dialog"
+      (click)="$event.stopPropagation()"
+    >
       <header class="dialog-header">
         <div>
           <h2 id="stock-receipt-dialog">Receive Stock</h2>
           <div class="dialog-subtitle">{{ receivingMaterial()?.name }}</div>
         </div>
-        <button type="button" class="btn-close" aria-label="Close" (click)="closeReceiptDialog()"></button>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="closeReceiptDialog()"
+        ></button>
       </header>
 
       <form [formGroup]="receiptForm" (ngSubmit)="submitReceipt()" novalidate>
@@ -199,33 +306,64 @@
           <div class="row g-3 mb-3">
             <div class="col-sm-6">
               <label class="form-label" for="received-quantity">Received Quantity *</label>
-              <input id="received-quantity" class="form-control" type="number" min="0.01" step="0.01" formControlName="receivedQuantity" />
-              @if (receiptForm.controls.receivedQuantity.touched && receiptForm.controls.receivedQuantity.invalid) {
+              <input
+                id="received-quantity"
+                class="form-control"
+                type="number"
+                min="0.01"
+                step="0.01"
+                formControlName="receivedQuantity"
+              />
+              @if (
+                receiptForm.controls.receivedQuantity.touched &&
+                receiptForm.controls.receivedQuantity.invalid
+              ) {
                 <div class="invalid-feedback d-block">Enter a quantity greater than zero.</div>
               }
             </div>
             <div class="col-sm-6">
               <label class="form-label" for="unit-purchase-cost">Unit Purchase Cost, ₴ *</label>
-              <input id="unit-purchase-cost" class="form-control" type="number" min="0" step="0.01" formControlName="unitPurchaseCost" />
-              @if (receiptForm.controls.unitPurchaseCost.touched && receiptForm.controls.unitPurchaseCost.invalid) {
+              <input
+                id="unit-purchase-cost"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                formControlName="unitPurchaseCost"
+              />
+              @if (
+                receiptForm.controls.unitPurchaseCost.touched &&
+                receiptForm.controls.unitPurchaseCost.invalid
+              ) {
                 <div class="invalid-feedback d-block">Enter a unit cost of zero or more.</div>
               }
             </div>
             <div class="col-sm-6">
               <label class="form-label" for="receipt-date">Receipt Date *</label>
-              <input id="receipt-date" class="form-control" type="date" formControlName="receiptDate" />
+              <input
+                id="receipt-date"
+                class="form-control"
+                type="date"
+                formControlName="receiptDate"
+              />
             </div>
             <div class="col-sm-6">
               <div class="value-preview h-100">
                 <span>Receipt Value</span>
-                <strong>{{ receiptValue() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+                <strong>{{ receiptValue() | currency: 'UAH' : 'symbol-narrow' : '1.2-2' }}</strong>
               </div>
             </div>
           </div>
 
           <div>
             <label class="form-label" for="receipt-notes">Notes</label>
-            <textarea id="receipt-notes" class="form-control" rows="3" maxlength="1000" formControlName="notes"></textarea>
+            <textarea
+              id="receipt-notes"
+              class="form-control"
+              rows="3"
+              maxlength="1000"
+              formControlName="notes"
+            ></textarea>
           </div>
           @if (receiptError()) {
             <div class="alert alert-danger mt-3 mb-0" role="alert">{{ receiptError() }}</div>
@@ -233,7 +371,9 @@
         </div>
 
         <footer class="dialog-footer">
-          <button type="button" class="btn btn-outline-secondary" (click)="closeReceiptDialog()">Cancel</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="closeReceiptDialog()">
+            Cancel
+          </button>
           <button type="submit" class="btn btn-success" [disabled]="receiving()">
             {{ receiving() ? 'Receiving…' : 'Receive Stock' }}
           </button>
@@ -255,14 +395,24 @@
       <header class="dialog-header">
         <div>
           <h2 id="raw-stock-operation-dialog">
-            {{ stockOperationType() === 'WRITE_OFF' ? 'Write Off Raw Material' : 'Adjust Raw Material Stock' }}
+            {{
+              stockOperationType() === 'WRITE_OFF'
+                ? 'Write Off Raw Material'
+                : 'Adjust Raw Material Stock'
+            }}
           </h2>
           <div class="dialog-subtitle">
             {{ stockOperationMaterial()?.name }} · current stock:
-            {{ stockOperationMaterial()?.quantity }} {{ unitLabel(stockOperationMaterial()?.unit ?? '') }}
+            {{ stockOperationMaterial()?.quantity }}
+            {{ unitLabel(stockOperationMaterial()?.unit ?? '') }}
           </div>
         </div>
-        <button type="button" class="btn-close" aria-label="Close" (click)="closeStockOperationDialog()"></button>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="closeStockOperationDialog()"
+        ></button>
       </header>
 
       <form [formGroup]="stockOperationForm" (ngSubmit)="submitStockOperation()" novalidate>
@@ -273,18 +423,25 @@
 
           @if (stockOperationType() === 'WRITE_OFF') {
             <div class="alert alert-warning small">
-              Use this operation for damaged, spoiled, lost, or otherwise unusable material. It reduces stock without changing the average unit cost.
+              Use this operation for damaged, spoiled, lost, or otherwise unusable material. It
+              reduces stock without changing the average unit cost.
             </div>
           } @else {
             <div class="alert alert-light border small">
-              Enter the quantity physically counted during inventory. The system will record the difference as an increase or decrease at the current average unit cost.
+              Enter the quantity physically counted during inventory. The system will record the
+              difference as an increase or decrease at the current average unit cost.
             </div>
           }
 
           <div class="row g-3 mb-3">
             <div class="col-sm-6">
               <label class="form-label" for="raw-stock-operation-quantity">
-                {{ stockOperationType() === 'WRITE_OFF' ? 'Quantity to Write Off' : 'Actual Counted Stock' }} *
+                {{
+                  stockOperationType() === 'WRITE_OFF'
+                    ? 'Quantity to Write Off'
+                    : 'Actual Counted Stock'
+                }}
+                *
               </label>
               <input
                 id="raw-stock-operation-quantity"
@@ -292,27 +449,46 @@
                 type="number"
                 min="0"
                 step="0.01"
-                [attr.max]="stockOperationType() === 'WRITE_OFF' ? stockOperationMaterial()?.quantity : null"
+                [attr.max]="
+                  stockOperationType() === 'WRITE_OFF' ? stockOperationMaterial()?.quantity : null
+                "
                 formControlName="quantity"
               />
               @if (hasWriteOffShortage()) {
-                <div class="invalid-feedback d-block">The write-off quantity exceeds available stock.</div>
-              } @else if (stockOperationForm.controls.quantity.touched && stockOperationForm.controls.quantity.invalid) {
                 <div class="invalid-feedback d-block">
-                  {{ stockOperationType() === 'WRITE_OFF' ? 'Enter a quantity greater than zero.' : 'Enter a non-negative actual quantity.' }}
+                  The write-off quantity exceeds available stock.
+                </div>
+              } @else if (
+                stockOperationForm.controls.quantity.touched &&
+                stockOperationForm.controls.quantity.invalid
+              ) {
+                <div class="invalid-feedback d-block">
+                  {{
+                    stockOperationType() === 'WRITE_OFF'
+                      ? 'Enter a quantity greater than zero.'
+                      : 'Enter a non-negative actual quantity.'
+                  }}
                 </div>
               }
             </div>
             <div class="col-sm-6">
               <label class="form-label" for="raw-stock-operation-date">Operation Date *</label>
-              <input id="raw-stock-operation-date" class="form-control" type="date" formControlName="operationDate" />
+              <input
+                id="raw-stock-operation-date"
+                class="form-control"
+                type="date"
+                formControlName="operationDate"
+              />
             </div>
           </div>
 
           <div class="operation-preview mb-3">
             <div>
               <span>Recorded Change</span>
-              <strong [class.text-danger]="stockDifference() < 0" [class.text-success]="stockDifference() > 0">
+              <strong
+                [class.text-danger]="stockDifference() < 0"
+                [class.text-success]="stockDifference() > 0"
+              >
                 {{ stockDifference() > 0 ? '+' : '' }}{{ stockDifference() }}
                 {{ unitLabel(stockOperationMaterial()?.unit ?? '') }}
               </strong>
@@ -325,12 +501,16 @@
             </div>
             <div>
               <span>Value of Change</span>
-              <strong>{{ stockValueChange() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+              <strong>{{
+                stockValueChange() | currency: 'UAH' : 'symbol-narrow' : '1.2-2'
+              }}</strong>
             </div>
           </div>
 
           @if (hasNoAdjustmentChange()) {
-            <div class="alert alert-info small">The counted quantity already matches the recorded stock.</div>
+            <div class="alert alert-info small">
+              The counted quantity already matches the recorded stock.
+            </div>
           }
 
           <div class="mb-3">
@@ -356,7 +536,13 @@
         </div>
 
         <footer class="dialog-footer">
-          <button type="button" class="btn btn-outline-secondary" (click)="closeStockOperationDialog()">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="closeStockOperationDialog()"
+          >
+            Cancel
+          </button>
           <button
             type="submit"
             class="btn"
