@@ -24,7 +24,14 @@
   </div>
   <div class="filter-search">
     <label class="form-label" for="stock-query">Item</label>
-    <input id="stock-query" class="form-control" type="search" formControlName="query" maxlength="120" placeholder="Name or SKU" />
+    <input
+      id="stock-query"
+      class="form-control"
+      type="search"
+      formControlName="query"
+      maxlength="120"
+      placeholder="Name or SKU"
+    />
   </div>
   <div>
     <label class="form-label" for="stock-from">From</label>
@@ -36,14 +43,23 @@
   </div>
   <div class="filter-actions">
     <button type="submit" class="btn btn-success" [disabled]="loading()">Apply</button>
-    <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()" [disabled]="loading()">Reset</button>
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      (click)="resetFilters()"
+      [disabled]="loading()"
+    >
+      Reset
+    </button>
   </div>
 </form>
 
 @if (error()) {
   <div class="alert alert-danger" role="alert">
     {{ error() }}
-    <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Try Again</button>
+    <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">
+      Try Again
+    </button>
   </div>
 }
 
@@ -53,20 +69,24 @@
   <section class="movement-summary" aria-label="Filtered stock movement totals">
     <article>
       <span>Movements</span>
-      <strong>{{ history.totals.movementCount | number:'1.0-0' }}</strong>
+      <strong>{{ history.totals.movementCount | number: '1.0-0' }}</strong>
     </article>
     <article class="summary-in">
       <span>Stock Value In</span>
-      <strong>{{ history.totals.incomingValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <strong>{{
+        history.totals.incomingValue | currency: 'UAH' : 'symbol-narrow' : '1.2-2'
+      }}</strong>
     </article>
     <article class="summary-out">
       <span>Stock Value Out</span>
-      <strong>{{ history.totals.outgoingValue | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong>
+      <strong>{{
+        history.totals.outgoingValue | currency: 'UAH' : 'symbol-narrow' : '1.2-2'
+      }}</strong>
     </article>
     <article>
       <span>Net Value Change</span>
       <strong [class.text-danger]="history.totals.netValueChange < 0">
-        {{ history.totals.netValueChange | currency:'UAH':'symbol-narrow':'1.2-2' }}
+        {{ history.totals.netValueChange | currency: 'UAH' : 'symbol-narrow' : '1.2-2' }}
       </strong>
     </article>
   </section>
@@ -94,31 +114,58 @@
             </tr>
           </thead>
           <tbody>
-            @for (movement of history.movements; track movement.inventoryType + '-' + movement.movementId) {
+            @for (
+              movement of history.movements;
+              track movement.inventoryType + '-' + movement.movementId
+            ) {
               <tr>
-                <td class="date-column">{{ movement.occurredAt | date:'MMM d, y':'UTC' }}</td>
-                <td><span class="inventory-badge">{{ inventoryTypeLabel(movement.inventoryType) }}</span></td>
+                <td class="date-column">{{ movement.occurredAt | date: 'MMM d, y' : 'UTC' }}</td>
+                <td>
+                  <span class="inventory-badge">{{
+                    inventoryTypeLabel(movement.inventoryType)
+                  }}</span>
+                </td>
                 <td class="item-column">
                   <strong>{{ movement.itemName }}</strong>
-                  @if (movement.itemCode) { <small>{{ movement.itemCode }}</small> }
+                  @if (movement.itemCode) {
+                    <small>{{ movement.itemCode }}</small>
+                  }
                 </td>
                 <td>
-                  <span class="movement-badge" [class.movement-badge--in]="movement.direction === 'IN'" [class.movement-badge--out]="movement.direction === 'OUT'">
+                  <span
+                    class="movement-badge"
+                    [class.movement-badge--in]="movement.direction === 'IN'"
+                    [class.movement-badge--out]="movement.direction === 'OUT'"
+                  >
                     {{ movementTypeLabel(movement.movementType) }}
                   </span>
                 </td>
-                <td class="text-end quantity-change" [class.value-in]="movement.direction === 'IN'" [class.value-out]="movement.direction === 'OUT'">
-                  {{ movement.signedQuantity > 0 ? '+' : '' }}{{ movement.signedQuantity | number:'1.0-4' }}
+                <td
+                  class="text-end quantity-change"
+                  [class.value-in]="movement.direction === 'IN'"
+                  [class.value-out]="movement.direction === 'OUT'"
+                >
+                  {{ movement.signedQuantity > 0 ? '+' : ''
+                  }}{{ movement.signedQuantity | number: '1.0-4' }}
                   <small>{{ unitLabel(movement.unit) }}</small>
                 </td>
-                <td class="text-end">{{ movement.unitCost | currency:'UAH':'symbol-narrow':'1.2-2' }}</td>
-                <td class="text-end fw-semibold" [class.value-in]="movement.direction === 'IN'" [class.value-out]="movement.direction === 'OUT'">
-                  {{ movement.signedTotalCost > 0 ? '+' : '' }}{{ movement.signedTotalCost | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                <td class="text-end">
+                  {{ movement.unitCost | currency: 'UAH' : 'symbol-narrow' : '1.2-2' }}
+                </td>
+                <td
+                  class="text-end fw-semibold"
+                  [class.value-in]="movement.direction === 'IN'"
+                  [class.value-out]="movement.direction === 'OUT'"
+                >
+                  {{ movement.signedTotalCost > 0 ? '+' : ''
+                  }}{{ movement.signedTotalCost | currency: 'UAH' : 'symbol-narrow' : '1.2-2' }}
                 </td>
                 <td class="reference-column">
                   @if (movement.referenceNumber) {
                     @if (canOpenSale(movement)) {
-                      <a routerLink="/sales" [queryParams]="{ saleId: movement.referenceId }">{{ movement.referenceNumber }}</a>
+                      <a routerLink="/sales" [queryParams]="{ saleId: movement.referenceId }">{{
+                        movement.referenceNumber
+                      }}</a>
                     } @else {
                       <span>{{ movement.referenceNumber }}</span>
                     }
@@ -134,11 +181,28 @@
       </div>
 
       <footer class="pagination-bar">
-        <span>Showing {{ pageStart(history) }}–{{ pageEnd(history) }} of {{ history.totalElements }}</span>
+        <span
+          >Showing {{ pageStart(history) }}–{{ pageEnd(history) }} of
+          {{ history.totalElements }}</span
+        >
         <div>
-          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="previousPage()" [disabled]="history.page === 0">Previous</button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="previousPage()"
+            [disabled]="history.page === 0"
+          >
+            Previous
+          </button>
           <span>Page {{ history.page + 1 }} of {{ history.totalPages }}</span>
-          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="nextPage()" [disabled]="history.page + 1 >= history.totalPages">Next</button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="nextPage()"
+            [disabled]="history.page + 1 >= history.totalPages"
+          >
+            Next
+          </button>
         </div>
       </footer>
     }

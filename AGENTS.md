@@ -10,13 +10,15 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 - `cd frontend && pnpm exec ng test --watch=false` — frontend unit tests (Vitest). pnpm only — never npm or yarn.
 - Dev: `mvn "-Dskip.frontend=true" spring-boot:run` (http://localhost:8081) + `cd frontend && pnpm start`
   (http://localhost:4200). Never start a second instance of either.
+- `node scripts/dod.mjs` — the whole Definition of done in CI order; prints a Markdown evidence table. The
+  `test-first-loop` skill drives a change from a failing test to this table and a review.
 - `node scripts/agent-log-summary.mjs` — summary of `.agent-log/actions.jsonl`: what you actually did this session.
 - Docs: Dependabot moves versions monthly, so when unsure about an API, look it up — `angular-cli` MCP
   (`list_projects`, then `search_documentation` with that version) for Angular, `context7` for Spring Boot and other libraries.
 
 ## Definition of done
 
-- `mvn -B -ntp verify` and the frontend tests are green.
+- `mvn -B -ntp verify`, the frontend tests and `pnpm exec prettier --check .` (in `frontend/`) are green.
 - New backend behaviour has a JUnit test under `src/test/java` in the same package (API flows go to
   `InventoryFlowIntegrationTest`); new frontend logic has a `*.spec.ts` next to the code.
 - Evidence, not claims: report the command you ran and its exit code / test count.
@@ -31,6 +33,8 @@ than one file or running anything that is not on the allow-list in `.claude/sett
   with `SqliteDecimals.read`, never `rs.getBigDecimal` directly.
 - A schema change goes to `src/main/resources/schema.sql` (new databases) AND an idempotent step in
   `InventorySchemaMigration` (existing local databases) with a case in `InventorySchemaMigrationTest`.
+- A feature that changes the schema, an API and a page together starts with `docs/specs/<feature>.md` from
+  `docs/specs/TEMPLATE.md`, approved by a human; each acceptance criterion names its test.
 - Frontend: Prettier settings in `frontend/.prettierrc` (100 columns, single quotes).
 - English UI copy, code, comments and commit messages. Commit subject: one short imperative sentence
   ("Prevent changing a raw material's unit once quantities use it"), one logical change per commit.

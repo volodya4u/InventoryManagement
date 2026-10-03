@@ -34,6 +34,13 @@ jobs:
       - name: Build and test
         run: mvn -B -ntp verify
 
+      # pnpm-lock.yaml is excluded in frontend/.prettierignore.
+      - name: Frontend formatting
+        working-directory: frontend
+        run: |
+          export PATH="$GITHUB_WORKSPACE/target/frontend-tooling/node:$PATH"
+          pnpm exec prettier --check .
+
       - name: Frontend unit tests
         working-directory: frontend
         run: |

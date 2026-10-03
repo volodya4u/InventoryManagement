@@ -13,7 +13,11 @@ export class AuthService {
   private checkingSession = false;
   sessionVersion = 0;
 
-  constructor(private readonly http: HttpClient, private readonly router: Router, destroyRef: DestroyRef) {
+  constructor(
+    private readonly http: HttpClient,
+    private readonly router: Router,
+    destroyRef: DestroyRef,
+  ) {
     const storageChanged = (event: StorageEvent) => {
       if (event.key !== this.expiryKey || !this.user()) return;
       if (event.newValue === null) this.expireSession();
@@ -35,7 +39,11 @@ export class AuthService {
     if (!Number.isFinite(timeoutSeconds)) return;
     const deadline = timeoutSeconds > 0 ? Date.now() + timeoutSeconds * 1000 : 0;
     this.setDeadline(deadline);
-    try { localStorage.setItem(this.expiryKey, String(deadline)); } catch { /* Storage may be disabled. */ }
+    try {
+      localStorage.setItem(this.expiryKey, String(deadline));
+    } catch {
+      /* Storage may be disabled. */
+    }
   }
 
   canSendProtectedRequest(): boolean {
@@ -51,7 +59,10 @@ export class AuthService {
     const wasSignedIn = this.user() !== null;
     this.clearSession();
     if (wasSignedIn || forceRedirect) {
-      void this.router.navigate(['/login'], { queryParams: { sessionExpired: 'true' }, replaceUrl: true });
+      void this.router.navigate(['/login'], {
+        queryParams: { sessionExpired: 'true' },
+        replaceUrl: true,
+      });
     }
   }
 
@@ -59,7 +70,9 @@ export class AuthService {
   checkSession(): void {
     if (!this.user() || this.checkingSession) return;
     this.checkingSession = true;
-    this.ensureAuthenticated().pipe(finalize(() => this.checkingSession = false)).subscribe({ error: () => {} });
+    this.ensureAuthenticated()
+      .pipe(finalize(() => (this.checkingSession = false)))
+      .subscribe({ error: () => {} });
   }
 
   private setDeadline(deadline: number): void {
@@ -67,8 +80,10 @@ export class AuthService {
     clearTimeout(this.expiryTimer);
     this.expiresAt = deadline;
     if (deadline > 0) {
-      this.expiryTimer = setTimeout(() => this.checkDeadline(),
-        Math.min(Math.max(deadline - Date.now(), 0), 2_147_483_647));
+      this.expiryTimer = setTimeout(
+        () => this.checkDeadline(),
+        Math.min(Math.max(deadline - Date.now(), 0), 2_147_483_647),
+      );
     }
   }
 
@@ -78,7 +93,9 @@ export class AuthService {
     try {
       const shared = localStorage.getItem(this.expiryKey);
       if (shared !== null) this.setDeadline(Number(shared));
-    } catch { /* The local timer also works without storage. */ }
+    } catch {
+      /* The local timer also works without storage. */
+    }
     if (this.expiresAt > 0 && Date.now() >= this.expiresAt) this.expireSession();
     else this.setDeadline(this.expiresAt);
   }
@@ -87,41 +104,39 @@ export class AuthService {
     this.sessionVersion++;
     this.user.set(null);
     this.setDeadline(0);
-    try { localStorage.removeItem(this.expiryKey); } catch { /* Storage may be disabled. */ }
+    try {
+      localStorage.removeItem(this.expiryKey);
+    } catch {
+      /* Storage may be disabled. */
+    }
   }
 
   ensureAuthenticated(): Observable<AuthUser> {
-    return this.http.get<AuthUser>('/api/auth/me').pipe(
-      tap((user) => this.user.set(user))
-    );
+    return this.http.get<AuthUser>('/api/auth/me').pipe(tap((user) => this.user.set(user)));
   }
 
   login(username: string, password: string): Observable<AuthUser> {
     return this.http.get('/api/auth/csrf').pipe(
-      switchMap(() =>
-        this.http.post<AuthUser>('/api/auth/login', { username, password })
-      ),
-      tap((user) => this.user.set(user))
+      switchMap(() => this.http.post<AuthUser>('/api/auth/login', { username, password })),
+      tap((user) => this.user.set(user)),
     );
   }
 
   logout(): Observable<void> {
-    return this.http.post<void>('/api/auth/logout', {}).pipe(
-      tap(() => this.clearSession())
-    );
+    return this.http.post<void>('/api/auth/logout', {}).pipe(tap(() => this.clearSession()));
   }
 
   changePassword(
     currentPassword: string,
     newPassword: string,
-    newPasswordConfirmation: string
+    newPasswordConfirmation: string,
   ): Observable<void> {
-    return this.http.post<void>('/api/auth/change-password', {
-      currentPassword,
-      newPassword,
-      newPasswordConfirmation
-    }).pipe(
-      tap(() => this.clearSession())
-    );
+    return this.http
+      .post<void>('/api/auth/change-password', {
+        currentPassword,
+        newPassword,
+        newPasswordConfirmation,
+      })
+      .pipe(tap(() => this.clearSession()));
   }
 }

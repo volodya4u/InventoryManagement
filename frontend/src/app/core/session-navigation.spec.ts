@@ -13,7 +13,9 @@ describe('protected material page', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    TestBed.configureTestingModule({ providers: [...appConfig.providers, provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [...appConfig.providers, provideHttpClientTesting()],
+    });
     requests = TestBed.inject(HttpTestingController);
   });
 
@@ -24,14 +26,25 @@ describe('protected material page', () => {
   });
 
   it.each([
-    '/dashboard', '/raw-materials', '/products', '/sales',
-    '/stock-movements', '/reports/monthly-sales', '/change-password'
+    '/dashboard',
+    '/raw-materials',
+    '/products',
+    '/sales',
+    '/stock-movements',
+    '/reports/monthly-sales',
+    '/change-password',
   ])('redirects an unauthorized visit to %s without showing the page', async (url) => {
     const harness = await RouterTestingHarness.create();
     const navigation = harness.navigateByUrl(url);
-    await vi.waitFor(() => requests.expectOne('/api/auth/me').flush({}, {
-      status: 401, statusText: 'Unauthorized'
-    }));
+    await vi.waitFor(() =>
+      requests.expectOne('/api/auth/me').flush(
+        {},
+        {
+          status: 401,
+          statusText: 'Unauthorized',
+        },
+      ),
+    );
     await navigation;
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toBe('/login');
@@ -42,9 +55,11 @@ describe('protected material page', () => {
   it('removes the material form and goes to login when the pre-save session check fails', async () => {
     const harness = await RouterTestingHarness.create();
     const navigation = harness.navigateByUrl('/raw-materials');
-    await vi.waitFor(() => requests.expectOne('/api/auth/me').flush(user, {
-      headers: { 'X-Session-Timeout-Seconds': '60' }
-    }));
+    await vi.waitFor(() =>
+      requests.expectOne('/api/auth/me').flush(user, {
+        headers: { 'X-Session-Timeout-Seconds': '60' },
+      }),
+    );
     await navigation;
     requests.expectOne('/api/raw-materials').flush([]);
     harness.detectChanges();
@@ -76,9 +91,15 @@ describe('protected material page', () => {
     requests.expectOne('/api/raw-materials').flush([]);
 
     const second = harness.navigateByUrl('/products');
-    await vi.waitFor(() => requests.expectOne('/api/auth/me').flush({}, {
-      status: 401, statusText: 'Unauthorized'
-    }));
+    await vi.waitFor(() =>
+      requests.expectOne('/api/auth/me').flush(
+        {},
+        {
+          status: 401,
+          statusText: 'Unauthorized',
+        },
+      ),
+    );
     await second;
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toContain('/login');
