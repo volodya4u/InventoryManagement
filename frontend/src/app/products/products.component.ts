@@ -20,7 +20,7 @@ import {
 } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
-import { multiplyDecimals, subtractDecimals, wholeQuotient } from '../core/decimal';
+import { addDecimals, multiplyDecimals, subtractDecimals, wholeQuotient } from '../core/decimal';
 import { imageFileError } from '../core/image-file';
 import { Product, RawMaterial } from '../core/models';
 
@@ -70,7 +70,7 @@ function productFormValidator(control: AbstractControl): ValidationErrors | null
 export class ProductsComponent implements OnInit {
   readonly items = signal<Product[]>([]);
   readonly totalStockValue = computed(() =>
-    this.items().reduce((total, item) => total + item.stockValue, 0),
+    this.items().reduce((total, item) => addDecimals(total, item.stockValue), 0),
   );
   readonly rawMaterials = signal<RawMaterial[]>([]);
   readonly loading = signal(true);
@@ -352,7 +352,7 @@ export class ProductsComponent implements OnInit {
         required,
         available,
         missing: Math.max(subtractDecimals(required, available), 0),
-        cost: required * (material?.averageUnitCost ?? recipeItem.averageUnitCost),
+        cost: multiplyDecimals(required, material?.averageUnitCost ?? recipeItem.averageUnitCost),
       };
     });
   }
@@ -381,19 +381,22 @@ export class ProductsComponent implements OnInit {
   }
 
   estimatedProductionCost(): number {
-    return this.estimatedMaterialsProductionCost() + this.estimatedAdvertisingProductionCost();
+    return addDecimals(
+      this.estimatedMaterialsProductionCost(),
+      this.estimatedAdvertisingProductionCost(),
+    );
   }
 
   estimatedMaterialsProductionCost(): number {
     return this.productionRequirements().reduce(
-      (total, requirement) => total + requirement.cost,
+      (total, requirement) => addDecimals(total, requirement.cost),
       0,
     );
   }
 
   estimatedAdvertisingProductionCost(): number {
     const quantity = this.productionForm.controls.quantity.value ?? 0;
-    return (this.productionProduct()?.advertisingCostPerUnit ?? 0) * quantity;
+    return multiplyDecimals(this.productionProduct()?.advertisingCostPerUnit ?? 0, quantity);
   }
 
   submitProduction(): void {
@@ -467,7 +470,10 @@ export class ProductsComponent implements OnInit {
   }
 
   stockValueChange(): number {
-    return Math.abs(this.stockDifference()) * (this.stockOperationProduct()?.averageUnitCost ?? 0);
+    return multiplyDecimals(
+      Math.abs(this.stockDifference()),
+      this.stockOperationProduct()?.averageUnitCost ?? 0,
+    );
   }
 
   hasWriteOffShortage(): boolean {
@@ -528,7 +534,7 @@ export class ProductsComponent implements OnInit {
 
   initialStockValue(): number {
     const { quantity, initialUnitCost } = this.form.getRawValue();
-    return quantity * (initialUnitCost ?? 0);
+    return multiplyDecimals(quantity, initialUnitCost ?? 0);
   }
 
   estimatedRecipeUnitCost(): number {
@@ -536,12 +542,18 @@ export class ProductsComponent implements OnInit {
       const material = this.rawMaterials().find(
         (candidate) => candidate.id === row.controls.rawMaterialId.value,
       );
-      return total + (row.controls.quantityPerUnit.value ?? 0) * (material?.averageUnitCost ?? 0);
+      return addDecimals(
+        total,
+        multiplyDecimals(row.controls.quantityPerUnit.value ?? 0, material?.averageUnitCost ?? 0),
+      );
     }, 0);
   }
 
   estimatedTotalUnitCost(): number {
-    return this.estimatedRecipeUnitCost() + this.form.controls.advertisingCostPerUnit.value;
+    return addDecimals(
+      this.estimatedRecipeUnitCost(),
+      this.form.controls.advertisingCostPerUnit.value,
+    );
   }
 
   private syncInitialUnitCost(): void {
@@ -554,7 +566,8 @@ export class ProductsComponent implements OnInit {
 
   calculatedSellingPrice(): number {
     const markupPercentage = this.form.controls.markupPercentage.value;
-    const price = this.estimatedTotalUnitCost() * (1 + markupPercentage / 100);
+    const multiplier = addDecimals(1, multiplyDecimals(markupPercentage, 0.01));
+    const price = multiplyDecimals(this.estimatedTotalUnitCost(), multiplier);
     return Math.round((price + Number.EPSILON) * 100) / 100;
   }
 

@@ -427,7 +427,7 @@
           <div class="sale-totals mb-3">
             <div><span>Refund</span><strong>{{ returnRefund() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
             <div><span>Returned Cost</span><strong>{{ returnCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
-            <div><span>Profit Reversal</span><strong>{{ returnRefund() - returnCost() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
+            <div><span>Profit Reversal</span><strong>{{ returnProfitReversal() | currency:'UAH':'symbol-narrow':'1.2-2' }}</strong></div>
           </div>
 
           <div>

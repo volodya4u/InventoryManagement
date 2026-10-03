@@ -5,6 +5,7 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { ActivatedRoute } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
+import { addDecimals, multiplyDecimals, subtractDecimals } from '../core/decimal';
 import { PaymentMethod, Product, Sale, SaleItem, SaleStatus } from '../core/models';
 
 type SaleItemFormGroup = FormGroup<{
@@ -58,13 +59,13 @@ export class SalesComponent implements OnInit {
   readonly cancellationSale = signal<Sale | null>(null);
 
   readonly totalRevenue = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.netRevenue, 0),
+    this.sales().reduce((total, sale) => addDecimals(total, sale.netRevenue), 0),
   );
   readonly totalCost = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.netCost, 0),
+    this.sales().reduce((total, sale) => addDecimals(total, sale.netCost), 0),
   );
   readonly totalGrossProfit = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.netGrossProfit, 0),
+    this.sales().reduce((total, sale) => addDecimals(total, sale.netGrossProfit), 0),
   );
 
   readonly paymentMethods: PaymentMethodOption[] = [
@@ -206,27 +207,30 @@ export class SalesComponent implements OnInit {
   }
 
   lineRevenue(row: SaleItemFormGroup): number {
-    return (row.controls.quantity.value ?? 0) * (row.controls.unitPrice.value ?? 0);
+    return multiplyDecimals(row.controls.quantity.value ?? 0, row.controls.unitPrice.value ?? 0);
   }
 
   lineCost(row: SaleItemFormGroup): number {
-    return (row.controls.quantity.value ?? 0) * (this.productForRow(row)?.averageUnitCost ?? 0);
+    return multiplyDecimals(
+      row.controls.quantity.value ?? 0,
+      this.productForRow(row)?.averageUnitCost ?? 0,
+    );
   }
 
   lineProfit(row: SaleItemFormGroup): number {
-    return this.lineRevenue(row) - this.lineCost(row);
+    return subtractDecimals(this.lineRevenue(row), this.lineCost(row));
   }
 
   formRevenue(): number {
-    return this.itemControls.reduce((total, row) => total + this.lineRevenue(row), 0);
+    return this.itemControls.reduce((total, row) => addDecimals(total, this.lineRevenue(row)), 0);
   }
 
   formCost(): number {
-    return this.itemControls.reduce((total, row) => total + this.lineCost(row), 0);
+    return this.itemControls.reduce((total, row) => addDecimals(total, this.lineCost(row)), 0);
   }
 
   formGrossProfit(): number {
-    return this.formRevenue() - this.formCost();
+    return subtractDecimals(this.formRevenue(), this.formCost());
   }
 
   rowHasShortage(row: SaleItemFormGroup): boolean {
@@ -344,7 +348,10 @@ export class SalesComponent implements OnInit {
   returnRefund(): number {
     return this.returnItemControls.reduce((total, row) => {
       const item = this.returnItem(row);
-      return total + (row.controls.quantity.value ?? 0) * (item?.unitPrice ?? 0);
+      return addDecimals(
+        total,
+        multiplyDecimals(row.controls.quantity.value ?? 0, item?.unitPrice ?? 0),
+      );
     }, 0);
   }
 
@@ -352,8 +359,12 @@ export class SalesComponent implements OnInit {
     return this.returnItemControls.reduce((total, row) => {
       const item = this.returnItem(row);
       const quantity = row.controls.quantity.value ?? 0;
-      return item && quantity > 0 ? total + this.returnLineCost(item, quantity) : total;
+      return item && quantity > 0 ? addDecimals(total, this.returnLineCost(item, quantity)) : total;
     }, 0);
+  }
+
+  returnProfitReversal(): number {
+    return subtractDecimals(this.returnRefund(), this.returnCost());
   }
 
   hasReturnQuantityError(): boolean {
