@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -9,7 +9,7 @@ import {
   InventoryType,
   StockMovement,
   StockMovementHistory,
-  StockMovementType
+  StockMovementType,
 } from '../core/models';
 
 interface SelectOption<T> {
@@ -21,7 +21,8 @@ interface SelectOption<T> {
   selector: 'app-stock-movements',
   imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './stock-movements.component.html',
-  styleUrl: './stock-movements.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './stock-movements.component.scss',
 })
 export class StockMovementsComponent implements OnInit {
   readonly history = signal<StockMovementHistory | null>(null);
@@ -33,7 +34,7 @@ export class StockMovementsComponent implements OnInit {
   readonly inventoryTypes: SelectOption<InventoryType>[] = [
     { value: 'ALL', label: 'All Inventory' },
     { value: 'RAW_MATERIAL', label: 'Raw Materials' },
-    { value: 'PRODUCT', label: 'Products' }
+    { value: 'PRODUCT', label: 'Products' },
   ];
 
   readonly movementTypes: SelectOption<StockMovementType | ''>[] = [
@@ -47,7 +48,7 @@ export class StockMovementsComponent implements OnInit {
     { value: 'SALE_CANCELLATION', label: 'Sale Cancellation' },
     { value: 'WRITE_OFF', label: 'Write Off' },
     { value: 'ADJUSTMENT_INCREASE', label: 'Adjustment Increase' },
-    { value: 'ADJUSTMENT_DECREASE', label: 'Adjustment Decrease' }
+    { value: 'ADJUSTMENT_DECREASE', label: 'Adjustment Decrease' },
   ];
 
   readonly filters = new FormGroup({
@@ -55,7 +56,7 @@ export class StockMovementsComponent implements OnInit {
     movementType: new FormControl<StockMovementType | ''>('', { nonNullable: true }),
     query: new FormControl('', { nonNullable: true }),
     from: new FormControl('', { nonNullable: true }),
-    to: new FormControl('', { nonNullable: true })
+    to: new FormControl('', { nonNullable: true }),
   });
 
   constructor(private readonly http: HttpClient) {}
@@ -75,7 +76,7 @@ export class StockMovementsComponent implements OnInit {
       movementType: '',
       query: '',
       from: '',
-      to: ''
+      to: '',
     });
     this.page.set(0);
     this.load();
@@ -107,14 +108,15 @@ export class StockMovementsComponent implements OnInit {
 
     this.loading.set(true);
     this.error.set('');
-    this.http.get<StockMovementHistory>('/api/stock-movements', { params })
+    this.http
+      .get<StockMovementHistory>('/api/stock-movements', { params })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (history) => this.history.set(history),
         error: (error) => {
           this.history.set(null);
           this.error.set(apiErrorMessage(error));
-        }
+        },
       });
   }
 
@@ -139,7 +141,9 @@ export class StockMovementsComponent implements OnInit {
   }
 
   canOpenSale(movement: StockMovement): boolean {
-    return (movement.referenceType === 'SALE' || movement.referenceType === 'SALE_RETURN')
-      && movement.referenceId !== null;
+    return (
+      (movement.referenceType === 'SALE' || movement.referenceType === 'SALE_RETURN') &&
+      movement.referenceId !== null
+    );
   }
 }

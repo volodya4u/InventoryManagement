@@ -1,11 +1,11 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -23,7 +23,8 @@ function matchingPasswords(control: AbstractControl): ValidationErrors | null {
   selector: 'app-change-password',
   imports: [ReactiveFormsModule],
   templateUrl: './change-password.component.html',
-  styleUrl: './change-password.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './change-password.component.scss',
 })
 export class ChangePasswordComponent implements OnDestroy {
   private readonly currentPasswordVisibility = new TimedPasswordVisibility();
@@ -36,24 +37,27 @@ export class ChangePasswordComponent implements OnDestroy {
   readonly showNewPassword = this.newPasswordVisibility.visible;
   readonly showNewPasswordConfirmation = this.newPasswordConfirmationVisibility.visible;
 
-  readonly form = new FormGroup({
-    currentPassword: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
-    newPassword: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(10), Validators.maxLength(64)]
-    }),
-    newPasswordConfirmation: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    })
-  }, { validators: matchingPasswords });
+  readonly form = new FormGroup(
+    {
+      currentPassword: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required],
+      }),
+      newPassword: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.minLength(10), Validators.maxLength(64)],
+      }),
+      newPasswordConfirmation: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required],
+      }),
+    },
+    { validators: matchingPasswords },
+  );
 
   constructor(
     private readonly auth: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
   toggleCurrentPasswordVisibility(): void {
@@ -84,14 +88,16 @@ export class ChangePasswordComponent implements OnDestroy {
     this.submitting.set(true);
     const { currentPassword, newPassword, newPasswordConfirmation } = this.form.getRawValue();
 
-    this.auth.changePassword(currentPassword, newPassword, newPasswordConfirmation)
+    this.auth
+      .changePassword(currentPassword, newPassword, newPasswordConfirmation)
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
-        next: () => this.router.navigate(['/login'], {
-          queryParams: { passwordChanged: 'true' },
-          replaceUrl: true
-        }),
-        error: (error) => this.error.set(apiErrorMessage(error))
+        next: () =>
+          this.router.navigate(['/login'], {
+            queryParams: { passwordChanged: 'true' },
+            replaceUrl: true,
+          }),
+        error: (error) => this.error.set(apiErrorMessage(error)),
       });
   }
 }

@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../../core/api-error';
@@ -9,14 +9,15 @@ import {
   MonthlySalesReport,
   PaymentMethod,
   SaleReturnType,
-  SaleStatus
+  SaleStatus,
 } from '../../core/models';
 
 @Component({
   selector: 'app-monthly-sales-report',
   imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './monthly-sales-report.component.html',
-  styleUrl: './monthly-sales-report.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './monthly-sales-report.component.scss',
 })
 export class MonthlySalesReportComponent implements OnInit {
   readonly selectedMonth = signal(this.currentMonth());
@@ -41,14 +42,15 @@ export class MonthlySalesReportComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
     const params = new HttpParams().set('month', this.selectedMonth());
-    this.http.get<MonthlySalesReport>('/api/reports/monthly-sales', { params })
+    this.http
+      .get<MonthlySalesReport>('/api/reports/monthly-sales', { params })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (report) => this.report.set(report),
         error: (error) => {
           this.report.set(null);
           this.error.set(apiErrorMessage(error));
-        }
+        },
       });
   }
 
@@ -56,7 +58,7 @@ export class MonthlySalesReportComponent implements OnInit {
     const labels: Record<PaymentMethod, string> = {
       CASH: 'Cash',
       CARD: 'Card',
-      BANK_TRANSFER: 'Bank Transfer'
+      BANK_TRANSFER: 'Bank Transfer',
     };
     return labels[value];
   }
@@ -66,7 +68,7 @@ export class MonthlySalesReportComponent implements OnInit {
       COMPLETED: 'Completed',
       PARTIALLY_RETURNED: 'Partially Returned',
       RETURNED: 'Returned',
-      CANCELLED: 'Cancelled'
+      CANCELLED: 'Cancelled',
     };
     return labels[value];
   }
@@ -83,11 +85,33 @@ export class MonthlySalesReportComponent implements OnInit {
       ['Monthly Sales Report', report.month],
       [],
       ['Sales'],
-      ['Sale Number', 'Date', 'Status', 'Payment Method', 'Product Lines', 'Units Sold', 'Gross Revenue (UAH)', 'Refunded (UAH)', 'Net Revenue (UAH)', 'Net Cost (UAH)', 'Net Gross Profit (UAH)'],
+      [
+        'Sale Number',
+        'Date',
+        'Status',
+        'Payment Method',
+        'Product Lines',
+        'Units Sold',
+        'Gross Revenue (UAH)',
+        'Refunded (UAH)',
+        'Net Revenue (UAH)',
+        'Net Cost (UAH)',
+        'Net Gross Profit (UAH)',
+      ],
       ...report.sales.map((sale) => this.saleCsvRow(sale)),
       [],
       ['Returns and Cancellations'],
-      ['Document', 'Date', 'Type', 'Original Sale', 'Payment Method', 'Units Returned', 'Refund (UAH)', 'Returned Cost (UAH)', 'Profit Reversal (UAH)'],
+      [
+        'Document',
+        'Date',
+        'Type',
+        'Original Sale',
+        'Payment Method',
+        'Units Returned',
+        'Refund (UAH)',
+        'Returned Cost (UAH)',
+        'Profit Reversal (UAH)',
+      ],
       ...report.returns.map((saleReturn) => [
         saleReturn.returnNumber,
         saleReturn.returnDate,
@@ -97,14 +121,25 @@ export class MonthlySalesReportComponent implements OnInit {
         saleReturn.unitsReturned,
         saleReturn.refund,
         saleReturn.returnedCost,
-        saleReturn.grossProfitReversal
+        saleReturn.grossProfitReversal,
       ]),
       [],
-      ['Monthly Net Totals', '', '', '', '', report.unitsSold, report.grossRevenue, report.refunds, report.revenue, report.totalCost, report.grossProfit]
+      [
+        'Monthly Net Totals',
+        '',
+        '',
+        '',
+        '',
+        report.unitsSold,
+        report.grossRevenue,
+        report.refunds,
+        report.revenue,
+        report.totalCost,
+        report.grossProfit,
+      ],
     ];
-    const csv = '\uFEFF' + rows
-      .map((row) => row.map((value) => this.csvCell(value)).join(','))
-      .join('\r\n');
+    const csv =
+      '\uFEFF' + rows.map((row) => row.map((value) => this.csvCell(value)).join(',')).join('\r\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
@@ -125,7 +160,7 @@ export class MonthlySalesReportComponent implements OnInit {
       sale.refunds,
       sale.netRevenue,
       sale.totalCost,
-      sale.grossProfit
+      sale.grossProfit,
     ];
   }
 

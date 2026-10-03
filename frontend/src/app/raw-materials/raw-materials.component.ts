@@ -1,7 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Component, OnInit, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
 import { imageFileError } from '../core/image-file';
@@ -31,12 +38,13 @@ function initialUnitCostValidator(control: AbstractControl): ValidationErrors | 
   selector: 'app-raw-materials',
   imports: [ReactiveFormsModule, CurrencyPipe],
   templateUrl: './raw-materials.component.html',
-  styleUrl: './raw-materials.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './raw-materials.component.scss',
 })
 export class RawMaterialsComponent implements OnInit {
   readonly items = signal<RawMaterial[]>([]);
   readonly totalStockValue = computed(() =>
-    this.items().reduce((total, item) => total + item.stockValue, 0)
+    this.items().reduce((total, item) => total + item.stockValue, 0),
   );
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -62,7 +70,7 @@ export class RawMaterialsComponent implements OnInit {
     { value: 'GRAM', label: 'Gram' },
     { value: 'KILOGRAM', label: 'Kilogram' },
     { value: 'METER', label: 'Meter' },
-    { value: 'PACKAGE', label: 'Package' }
+    { value: 'PACKAGE', label: 'Package' },
   ];
 
   readonly writeOffReasons: ReasonOption[] = [
@@ -70,39 +78,63 @@ export class RawMaterialsComponent implements OnInit {
     { value: 'Spoiled or Expired', label: 'Spoiled or Expired' },
     { value: 'Lost', label: 'Lost' },
     { value: 'Production Waste', label: 'Production Waste' },
-    { value: 'Other', label: 'Other' }
+    { value: 'Other', label: 'Other' },
   ];
 
   readonly adjustmentReasons: ReasonOption[] = [
     { value: 'Physical Inventory Count', label: 'Physical Inventory Count' },
     { value: 'Data Entry Correction', label: 'Data Entry Correction' },
     { value: 'Opening Balance Correction', label: 'Opening Balance Correction' },
-    { value: 'Other', label: 'Other' }
+    { value: 'Other', label: 'Other' },
   ];
 
-  readonly form = new FormGroup({
-    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
-    description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
-    unit: new FormControl('PIECE', { nonNullable: true, validators: [Validators.required] }),
-    quantity: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
-    initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)])
-  }, { validators: initialUnitCostValidator });
+  readonly form = new FormGroup(
+    {
+      name: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(120)],
+      }),
+      description: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.maxLength(1000)],
+      }),
+      unit: new FormControl('PIECE', { nonNullable: true, validators: [Validators.required] }),
+      quantity: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(0)],
+      }),
+      initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)]),
+    },
+    { validators: initialUnitCostValidator },
+  );
 
   readonly receiptForm = new FormGroup({
-    receivedQuantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    unitPurchaseCost: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
-    receiptDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
-    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
+    receivedQuantity: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(0.01),
+    ]),
+    unitPurchaseCost: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(0),
+    ]),
+    receiptDate: new FormControl(this.today(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   readonly stockOperationForm = new FormGroup({
     quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
-    operationDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    operationDate: new FormControl(this.today(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
     reason: new FormControl('Damaged', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(200)]
+      validators: [Validators.required, Validators.maxLength(200)],
     }),
-    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   constructor(private readonly http: HttpClient) {}
@@ -114,17 +146,24 @@ export class RawMaterialsComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    this.http.get<RawMaterial[]>('/api/raw-materials')
+    this.http
+      .get<RawMaterial[]>('/api/raw-materials')
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (items) => this.items.set(items),
-        error: (error) => this.error.set(apiErrorMessage(error))
+        error: (error) => this.error.set(apiErrorMessage(error)),
       });
   }
 
   openCreate(): void {
     this.editing.set(null);
-    this.form.reset({ name: '', description: '', unit: 'PIECE', quantity: 0, initialUnitCost: null });
+    this.form.reset({
+      name: '',
+      description: '',
+      unit: 'PIECE',
+      quantity: 0,
+      initialUnitCost: null,
+    });
     this.form.controls.unit.enable();
     this.selectedFile.set(null);
     this.fileError.set('');
@@ -140,7 +179,7 @@ export class RawMaterialsComponent implements OnInit {
       description: item.description,
       unit: item.unit,
       quantity: item.quantity,
-      initialUnitCost: item.averageUnitCost
+      initialUnitCost: item.averageUnitCost,
     });
     if (item.unitChangeable) {
       this.form.controls.unit.enable();
@@ -195,7 +234,7 @@ export class RawMaterialsComponent implements OnInit {
         this.dialogOpen.set(false);
         this.load();
       },
-      error: (error) => this.saveError.set(apiErrorMessage(error))
+      error: (error) => this.saveError.set(apiErrorMessage(error)),
     });
   }
 
@@ -203,8 +242,9 @@ export class RawMaterialsComponent implements OnInit {
     if (!window.confirm(`Delete raw material “${item.name}”?`)) return;
     this.error.set('');
     this.http.delete<void>(`/api/raw-materials/${item.id}`).subscribe({
-      next: () => this.items.update((items) => items.filter((candidate) => candidate.id !== item.id)),
-      error: (error) => this.error.set(apiErrorMessage(error))
+      next: () =>
+        this.items.update((items) => items.filter((candidate) => candidate.id !== item.id)),
+      error: (error) => this.error.set(apiErrorMessage(error)),
     });
   }
 
@@ -214,7 +254,7 @@ export class RawMaterialsComponent implements OnInit {
       receivedQuantity: null,
       unitPurchaseCost: null,
       receiptDate: this.today(),
-      notes: ''
+      notes: '',
     });
     this.error.set('');
     this.receiptError.set('');
@@ -234,14 +274,20 @@ export class RawMaterialsComponent implements OnInit {
 
     this.receiving.set(true);
     this.receiptError.set('');
-    this.http.post<RawMaterial>(`/api/raw-materials/${material.id}/receipts`, this.receiptForm.getRawValue())
+    this.http
+      .post<RawMaterial>(
+        `/api/raw-materials/${material.id}/receipts`,
+        this.receiptForm.getRawValue(),
+      )
       .pipe(finalize(() => this.receiving.set(false)))
       .subscribe({
         next: (updated) => {
-          this.items.update((items) => items.map((item) => item.id === updated.id ? updated : item));
+          this.items.update((items) =>
+            items.map((item) => (item.id === updated.id ? updated : item)),
+          );
           this.receiptDialogOpen.set(false);
         },
-        error: (error) => this.receiptError.set(apiErrorMessage(error))
+        error: (error) => this.receiptError.set(apiErrorMessage(error)),
       });
   }
 
@@ -251,13 +297,14 @@ export class RawMaterialsComponent implements OnInit {
     const quantityControl = this.stockOperationForm.controls.quantity;
     quantityControl.setValidators([
       Validators.required,
-      Validators.min(type === 'WRITE_OFF' ? 0.0001 : 0)
+      Validators.min(type === 'WRITE_OFF' ? 0.0001 : 0),
     ]);
     this.stockOperationForm.reset({
       quantity: type === 'ADJUSTMENT' ? item.quantity : null,
       operationDate: this.today(),
-      reason: type === 'WRITE_OFF' ? this.writeOffReasons[0].value : this.adjustmentReasons[0].value,
-      notes: ''
+      reason:
+        type === 'WRITE_OFF' ? this.writeOffReasons[0].value : this.adjustmentReasons[0].value,
+      notes: '',
     });
     quantityControl.updateValueAndValidity();
     this.stockOperationError.set('');
@@ -279,9 +326,8 @@ export class RawMaterialsComponent implements OnInit {
     const material = this.stockOperationMaterial();
     const quantity = this.stockOperationForm.controls.quantity.value;
     if (!material || quantity === null) return 0;
-    const difference = this.stockOperationType() === 'WRITE_OFF'
-      ? -quantity
-      : quantity - material.quantity;
+    const difference =
+      this.stockOperationType() === 'WRITE_OFF' ? -quantity : quantity - material.quantity;
     return Number(difference.toFixed(4));
   }
 
@@ -307,8 +353,13 @@ export class RawMaterialsComponent implements OnInit {
 
   submitStockOperation(): void {
     const material = this.stockOperationMaterial();
-    if (!material || this.stockOperationForm.invalid || this.hasWriteOffShortage()
-        || this.hasNoAdjustmentChange() || this.stockOperationSaving()) {
+    if (
+      !material ||
+      this.stockOperationForm.invalid ||
+      this.hasWriteOffShortage() ||
+      this.hasNoAdjustmentChange() ||
+      this.stockOperationSaving()
+    ) {
       this.stockOperationForm.markAllAsTouched();
       return;
     }
@@ -321,25 +372,28 @@ export class RawMaterialsComponent implements OnInit {
           quantity: value.quantity,
           operationDate: value.operationDate,
           reason: value.reason,
-          notes: value.notes.trim()
+          notes: value.notes.trim(),
         }
       : {
           actualQuantity: value.quantity,
           operationDate: value.operationDate,
           reason: value.reason,
-          notes: value.notes.trim()
+          notes: value.notes.trim(),
         };
 
     this.stockOperationSaving.set(true);
     this.stockOperationError.set('');
-    this.http.post<RawMaterial>(`/api/raw-materials/${material.id}/${endpoint}`, request)
+    this.http
+      .post<RawMaterial>(`/api/raw-materials/${material.id}/${endpoint}`, request)
       .pipe(finalize(() => this.stockOperationSaving.set(false)))
       .subscribe({
         next: (updated) => {
-          this.items.update((items) => items.map((item) => item.id === updated.id ? updated : item));
+          this.items.update((items) =>
+            items.map((item) => (item.id === updated.id ? updated : item)),
+          );
           this.stockOperationDialogOpen.set(false);
         },
-        error: (error) => this.stockOperationError.set(apiErrorMessage(error))
+        error: (error) => this.stockOperationError.set(apiErrorMessage(error)),
       });
   }
 
