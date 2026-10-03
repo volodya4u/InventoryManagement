@@ -15,11 +15,13 @@ describe('session expiry', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     localStorage.clear();
-    TestBed.configureTestingModule({ providers: [
-      provideHttpClient(withInterceptors([sessionInterceptor])),
-      provideHttpClientTesting(),
-      provideRouter([])
-    ] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([sessionInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
+    });
     auth = TestBed.inject(AuthService);
     http = TestBed.inject(HttpClient);
     requests = TestBed.inject(HttpTestingController);
@@ -36,12 +38,14 @@ describe('session expiry', () => {
   function signIn(timeout = 60): void {
     auth.ensureAuthenticated().subscribe();
     requests.expectOne('/api/auth/me').flush(user, {
-      headers: { 'X-Session-Timeout-Seconds': String(timeout) }
+      headers: { 'X-Session-Timeout-Seconds': String(timeout) },
     });
   }
 
   function allowSave(): void {
-    requests.expectOne('/api/auth/me').flush(user, { headers: { 'X-Session-Timeout-Seconds': '60' } });
+    requests
+      .expectOne('/api/auth/me')
+      .flush(user, { headers: { 'X-Session-Timeout-Seconds': '60' } });
   }
 
   it('clears an idle view at the server timeout without sending keep-alive requests', () => {
@@ -51,7 +55,8 @@ describe('session expiry', () => {
     vi.advanceTimersByTime(1);
     expect(auth.user()).toBeNull();
     expect(navigate).toHaveBeenCalledWith(['/login'], {
-      queryParams: { sessionExpired: 'true' }, replaceUrl: true
+      queryParams: { sessionExpired: 'true' },
+      replaceUrl: true,
     });
     requests.expectNone(() => true);
   });
@@ -60,7 +65,9 @@ describe('session expiry', () => {
     signIn();
     vi.advanceTimersByTime(30_000);
     http.get('/api/products').subscribe();
-    requests.expectOne('/api/products').flush([], { headers: { 'X-Session-Timeout-Seconds': '60' } });
+    requests
+      .expectOne('/api/products')
+      .flush([], { headers: { 'X-Session-Timeout-Seconds': '60' } });
     vi.advanceTimersByTime(30_000);
     expect(auth.user()).toEqual(user);
     vi.advanceTimersByTime(30_000);
@@ -81,9 +88,14 @@ describe('session expiry', () => {
     vi.advanceTimersByTime(30_000);
     http.post('/api/sales', {}).subscribe({ error: () => {} });
     allowSave();
-    requests.expectOne('/api/sales').flush({}, {
-      status: 400, statusText: 'Bad Request', headers: { 'X-Session-Timeout-Seconds': '60' }
-    });
+    requests.expectOne('/api/sales').flush(
+      {},
+      {
+        status: 400,
+        statusText: 'Bad Request',
+        headers: { 'X-Session-Timeout-Seconds': '60' },
+      },
+    );
     vi.advanceTimersByTime(30_000);
     expect(auth.user()).toEqual(user);
     vi.advanceTimersByTime(30_000);
@@ -105,7 +117,9 @@ describe('session expiry', () => {
     http.post('/api/sales', {}).subscribe({ error: () => {} });
     allowSave();
     requests.expectOne('/api/sales').flush({}, { status: 403, statusText: 'Forbidden' });
-    requests.expectOne('/api/auth/me').flush(user, { headers: { 'X-Session-Timeout-Seconds': '60' } });
+    requests
+      .expectOne('/api/auth/me')
+      .flush(user, { headers: { 'X-Session-Timeout-Seconds': '60' } });
     expect(auth.user()).toEqual(user);
     expect(navigate).not.toHaveBeenCalled();
   });
@@ -154,7 +168,9 @@ describe('session expiry', () => {
 
   it('clears the view when another tab signs out', () => {
     signIn();
-    window.dispatchEvent(new StorageEvent('storage', { key: 'flower-shop.session-expiry', newValue: null }));
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: 'flower-shop.session-expiry', newValue: null }),
+    );
     expect(auth.user()).toBeNull();
     expect(navigate).toHaveBeenCalledTimes(1);
   });
@@ -190,7 +206,7 @@ describe('session expiry', () => {
     ['POST', '/api/sales'],
     ['POST', '/api/sales/1/returns'],
     ['POST', '/api/sales/1/cancellation'],
-    ['POST', '/api/auth/change-password']
+    ['POST', '/api/auth/change-password'],
   ])('blocks %s %s when the server has revoked the session', (method, url) => {
     signIn();
     const error = vi.fn();

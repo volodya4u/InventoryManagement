@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
+import { addDecimals, multiplyDecimals, subtractDecimals } from '../core/decimal';
 import { imageFileError } from '../core/image-file';
 import { RawMaterial } from '../core/models';
 
@@ -44,7 +45,7 @@ function initialUnitCostValidator(control: AbstractControl): ValidationErrors | 
 export class RawMaterialsComponent implements OnInit {
   readonly items = signal<RawMaterial[]>([]);
   readonly totalStockValue = computed(() =>
-    this.items().reduce((total, item) => total + item.stockValue, 0),
+    this.items().reduce((total, item) => addDecimals(total, item.stockValue), 0),
   );
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -326,19 +327,22 @@ export class RawMaterialsComponent implements OnInit {
     const material = this.stockOperationMaterial();
     const quantity = this.stockOperationForm.controls.quantity.value;
     if (!material || quantity === null) return 0;
-    const difference =
-      this.stockOperationType() === 'WRITE_OFF' ? -quantity : quantity - material.quantity;
-    return Number(difference.toFixed(4));
+    return this.stockOperationType() === 'WRITE_OFF'
+      ? -quantity
+      : subtractDecimals(quantity, material.quantity);
   }
 
   projectedStock(): number {
     const material = this.stockOperationMaterial();
     if (!material) return 0;
-    return Number((material.quantity + this.stockDifference()).toFixed(4));
+    return addDecimals(material.quantity, this.stockDifference());
   }
 
   stockValueChange(): number {
-    return Math.abs(this.stockDifference()) * (this.stockOperationMaterial()?.averageUnitCost ?? 0);
+    return multiplyDecimals(
+      Math.abs(this.stockDifference()),
+      this.stockOperationMaterial()?.averageUnitCost ?? 0,
+    );
   }
 
   hasWriteOffShortage(): boolean {
@@ -399,12 +403,12 @@ export class RawMaterialsComponent implements OnInit {
 
   initialStockValue(): number {
     const { quantity, initialUnitCost } = this.form.getRawValue();
-    return quantity * (initialUnitCost ?? 0);
+    return multiplyDecimals(quantity, initialUnitCost ?? 0);
   }
 
   receiptValue(): number {
     const { receivedQuantity, unitPurchaseCost } = this.receiptForm.getRawValue();
-    return (receivedQuantity ?? 0) * (unitPurchaseCost ?? 0);
+    return multiplyDecimals(receivedQuantity ?? 0, unitPurchaseCost ?? 0);
   }
 
   imageUrl(item: RawMaterial): string {

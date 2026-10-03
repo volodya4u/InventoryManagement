@@ -12,36 +12,49 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./dashboard/dashboard.component').then((module) => module.DashboardComponent)
+        loadComponent: () =>
+          import('./dashboard/dashboard.component').then((module) => module.DashboardComponent),
       },
       {
         path: 'raw-materials',
-        loadComponent: () => import('./raw-materials/raw-materials.component').then((module) => module.RawMaterialsComponent)
+        loadComponent: () =>
+          import('./raw-materials/raw-materials.component').then(
+            (module) => module.RawMaterialsComponent,
+          ),
       },
       {
         path: 'products',
-        loadComponent: () => import('./products/products.component').then((module) => module.ProductsComponent)
+        loadComponent: () =>
+          import('./products/products.component').then((module) => module.ProductsComponent),
       },
       {
         path: 'sales',
-        loadComponent: () => import('./sales/sales.component').then((module) => module.SalesComponent)
+        loadComponent: () =>
+          import('./sales/sales.component').then((module) => module.SalesComponent),
       },
       {
         path: 'stock-movements',
-        loadComponent: () => import('./stock-movements/stock-movements.component')
-          .then((module) => module.StockMovementsComponent)
+        loadComponent: () =>
+          import('./stock-movements/stock-movements.component').then(
+            (module) => module.StockMovementsComponent,
+          ),
       },
       {
         path: 'reports/monthly-sales',
-        loadComponent: () => import('./reports/monthly-sales/monthly-sales-report.component')
-          .then((module) => module.MonthlySalesReportComponent)
+        loadComponent: () =>
+          import('./reports/monthly-sales/monthly-sales-report.component').then(
+            (module) => module.MonthlySalesReportComponent,
+          ),
       },
       {
         path: 'change-password',
-        loadComponent: () => import('./change-password/change-password.component').then((module) => module.ChangePasswordComponent)
+        loadComponent: () =>
+          import('./change-password/change-password.component').then(
+            (module) => module.ChangePasswordComponent,
+          ),
       },
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
-    ]
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+    ],
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'dashboard' },
 ];
