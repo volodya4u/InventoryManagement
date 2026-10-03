@@ -44,7 +44,40 @@ test("a missing Reviewer verdict section fails", () => {
 });
 
 test("a verdict without APPROVE fails", () => {
-  assert.match(checkPrDescription(body(table, "Review: CHANGES REQUESTED"))[0], /does not say APPROVE/);
+  assert.match(checkPrDescription(body(table, "Review: CHANGES REQUESTED"))[0], /does not end on APPROVE/);
+});
+
+// What the tools print, pasted as the template asks: both start with their own "## " heading.
+const dodOutput = [
+  "## Definition of done: green",
+  "",
+  "HEAD 3bb187c, 2026-10-03T23:47:38.328Z, Node v24.15.0",
+  "",
+  table,
+].join("\n");
+const review = (verdict) =>
+  [`## Review: ${verdict}`, "", "### Blocking", "- None.", "", "### Non-blocking", "- A nit.", "", "### Checked", "- Tests."].join("\n");
+
+test("pasted dod.mjs output with its own heading counts as evidence", () => {
+  assert.deepEqual(checkPrDescription(body(dodOutput, review("APPROVE"))), []);
+});
+
+test("a pasted reviewer report that requests changes fails", () => {
+  assert.match(checkPrDescription(body(dodOutput, review("CHANGES REQUESTED")))[0], /does not end on APPROVE/);
+});
+
+test("earlier rounds may request changes when the final review approves", () => {
+  const rounds = `Round 1: CHANGES REQUESTED, the four-place rounding; fixed in 8ed22c8.\n\n${review("APPROVE")}`;
+  assert.deepEqual(checkPrDescription(body(dodOutput, rounds)), []);
+});
+
+test("the template's format line is not a verdict", () => {
+  assert.match(checkPrDescription(body(table, "APPROVE | CHANGES REQUESTED"))[0], /does not end on APPROVE/);
+});
+
+test("APPROVE in another section does not fill the verdict", () => {
+  const problems = checkPrDescription(body(table, "Pending.").replace("None.", "Will APPROVE later."));
+  assert.match(problems[0], /does not end on APPROVE/);
 });
 
 test("only HTML comments count as empty", () => {

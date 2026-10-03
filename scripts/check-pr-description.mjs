@@ -1,17 +1,21 @@
 #!/usr/bin/env node
 // Checks that a pull request description fills in the two required sections of .github/pull_request_template.md:
 //   ## Evidence (`dod.mjs`)  -> not empty, and holds the dod.mjs table (or at least names dod.mjs)
-//   ## Reviewer verdict      -> not empty, and says APPROVE
+//   ## Reviewer verdict      -> not empty, and its last verdict keyword is APPROVE (not CHANGES REQUESTED)
+// A section runs until the next heading of the template, so pasted output with its own "## ..." lines
+// (dod.mjs prints "## Definition of done", the reviewer "## Review: APPROVE") stays inside it.
 // HTML comments (the template's hints) do not count as content.
 // Run by .github/workflows/pr-description.yml, which skips Dependabot pull requests.
 // Usage: PR_BODY="..." node scripts/check-pr-description.mjs   (exit code 0 = complete, 1 = something is missing)
 import { pathToFileURL } from "node:url";
 
+const TEMPLATE_HEADINGS = "Summary|Why|Evidence|Reviewer verdict|Boundaries touched|Notes";
+
 function section(body, title) {
   const heading = new RegExp(`^##[ \\t]+${title}\\b.*$`, "im").exec(body);
   if (!heading) return null;
   const rest = body.slice(heading.index + heading[0].length);
-  const next = /^##[ \t]/m.exec(rest);
+  const next = new RegExp(`^##[ \\t]+(${TEMPLATE_HEADINGS})\\b`, "im").exec(rest);
   return (next ? rest.slice(0, next.index) : rest).trim();
 }
 
@@ -31,8 +35,8 @@ export function checkPrDescription(rawBody) {
   const verdict = section(body, "Reviewer verdict");
   if (verdict === null) problems.push('Missing the "## Reviewer verdict" section.');
   else if (!verdict) problems.push("The Reviewer verdict section is empty: give the reviewer subagent's verdict.");
-  else if (!/\bAPPROVE\b/.test(verdict)) {
-    problems.push("The Reviewer verdict section does not say APPROVE: fix or answer the blocking findings first.");
+  else if ([...verdict.matchAll(/\b(APPROVE|CHANGES REQUESTED)\b/g)].at(-1)?.[1] !== "APPROVE") {
+    problems.push("The Reviewer verdict section does not end on APPROVE: fix or answer the blocking findings first.");
   }
 
   return problems;
