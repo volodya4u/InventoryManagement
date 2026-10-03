@@ -37,6 +37,10 @@ for (const [tool, file, expect] of [
   ["Read", join(tmp, ".Env.Local"), 2],
   ["Edit", join(tmp, ".env.example"), 0],
   ["Read", join(tmp, ".ENV.EXAMPLE"), 0],
+  ["Read", join(tmp, ".env."), 2],
+  ["Read", join(tmp, ".env "), 2],
+  ["Read", join(tmp, ".env::$DATA"), 2],
+  ["Read", join(tmp, ".env.example."), 0],
   ["Read", join(tmp, "src", "main", "resources", "application.yml"), 0],
 ]) {
   const r = run("protect-env.mjs", { ...base, hook_event_name: "PreToolUse", tool_name: tool, tool_input: { file_path: file } });
@@ -55,6 +59,7 @@ for (const [toolInput, expect] of [
   [{ pattern: "KEY", path: join(tmp, "frontend", ".env.local") }, 2],
   [{ pattern: "KEY", path: ".env.example" }, 0],
   [{ pattern: "KEY", path: "frontend/.ENV" }, 2],
+  [{ pattern: "KEY", path: ".env::$DATA" }, 2],
   [{ pattern: "\\.env", path: "src" }, 0],
   [{ pattern: "KEY" }, 0],
   [{ pattern: "KEY", glob: "*.ts" }, 0],

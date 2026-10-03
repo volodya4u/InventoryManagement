@@ -32,8 +32,11 @@ const block = (reason) => {
   process.stderr.write(`Blocked by hook: ${reason} Use .env.example instead and ask the user to update .env manually.\n`);
   process.exit(2);
 };
-// Case-insensitive: Windows opens .env for .ENV or .Env.Local.
-const isSecret = (name) => /^\.env(\..+)?$/i.test(name) && name.toLowerCase() !== ".env.example";
+// Windows opens .env for .ENV, .env. or ".env " (it drops trailing dots and spaces) and .env::$DATA (a stream).
+const isSecret = (name) => {
+  const file = name.replace(/:.*$/, "").replace(/[. ]+$/, "").toLowerCase();
+  return /^\.env(\..+)?$/.test(file) && file !== ".env.example";
+};
 const baseName = (p) => String(p).replace(/\\/g, "/").replace(/\/+$/, "").split("/").pop() ?? "";
 
 // Common dotenv names to test a glob against.
