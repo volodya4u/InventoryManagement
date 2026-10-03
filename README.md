@@ -182,13 +182,14 @@ The development frontend will be available at `http://localhost:4200`.
 
 ## Agent Harness
 
-The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js 20+ on `PATH`; the Node that Maven installs into `target/frontend-tooling` is not on `PATH`.
+The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js on `PATH`: 20+ for the hooks and scripts, 24.15+ (the version Maven pins) for the Angular CLI MCP server. The Node that Maven installs into `target/frontend-tooling` is not on `PATH`.
 
 - `AGENTS.md` and `CLAUDE.md`: project rules, commands, definition of done, and boundaries for coding agents.
 - `.claude/settings.json`: trust level 1 (`defaultMode: default`), allow/ask/deny rules, and hooks.
 - `.claude/hooks/protect-env.mjs`: blocks agents from reading or editing `.env*` files.
 - `.claude/hooks/log-action.mjs`: appends every proposed and executed tool call to `.agent-log/actions.jsonl`.
 - `.agents/skills/agent-log-report`: skill that reports the agent log; `node scripts/skills-sync.mjs` copies it to `.claude/skills/`.
+- `.mcp.json`: documentation servers for agents, so they look up the library versions Dependabot keeps updating instead of relying on model memory. `context7` covers Spring Boot and other libraries; `angular-cli` (`ng mcp --read-only`) searches the Angular documentation for the version installed in `frontend/`.
 
 Run from the project root:
 
@@ -198,3 +199,16 @@ node scripts/agent-log-summary.mjs     # summarize what the agent did
 ```
 
 Check the active hooks with `/hooks` in Claude Code; restart Claude Code if they are missing after a change to `.claude/settings.json`.
+
+To use the MCP servers:
+
+1. Get a free Context7 API key at https://context7.com/dashboard and store it in your user environment, then open a new terminal. Never commit the key; `.mcp.json` only references the variable.
+
+   ```powershell
+   setx CONTEXT7_API_KEY "<your-key>"
+   ```
+
+2. Install the frontend dependencies once (`mvn package`, or `pnpm install` in `frontend`); the `angular-cli` server runs from `frontend/node_modules`.
+3. Start Claude Code in the project root, trust the folder and approve the project servers, then check `/mcp`.
+
+In Claude Code cloud sessions, allow `mcp.context7.com` and `*.algolia.net` (Angular documentation search) in the environment's network access settings and add `CONTEXT7_API_KEY` as an environment variable.

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${CONTEXT7_API_KEY}"
+      }
+    },
+    "angular-cli": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["frontend/node_modules/@angular/cli/bin/ng.js", "mcp", "--read-only"]
+    }
+  }
+}

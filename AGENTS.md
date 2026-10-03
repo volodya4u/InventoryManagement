@@ -11,6 +11,8 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 - Dev: `mvn "-Dskip.frontend=true" spring-boot:run` (http://localhost:8081) + `cd frontend && pnpm start`
   (http://localhost:4200). Never start a second instance of either.
 - `node scripts/agent-log-summary.mjs` — summary of `.agent-log/actions.jsonl`: what you actually did this session.
+- Docs: Dependabot moves versions monthly, so when unsure about an API, look it up — `angular-cli` MCP
+  (`list_projects`, then `search_documentation` with that version) for Angular, `context7` for Spring Boot and other libraries.
 
 ## Definition of done
 
@@ -33,7 +35,7 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 ## Boundaries
 
 - Ask before: adding a dependency, editing `pom.xml`, `frontend/package.json`, `application*.yml`,
-  `SecurityConfig` or `auth/`, CI workflows, `.claude/settings.json`.
+  `SecurityConfig` or `auth/`, CI workflows, `.claude/settings.json`, `.mcp.json`.
 - Never: touch `.env*` (a hook blocks it anyway), write a real password (`APP_ADMIN_INITIAL_PASSWORD`)
   anywhere in the repo, commit `*.db` files, delete tests to get green, `git push --force`, `rm -rf`.
 

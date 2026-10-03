@@ -16,7 +16,9 @@
       "Bash(node .claude/skills/agent-log-report/scripts/report.mjs *)",
       "Bash(git status *)",
       "Bash(git diff *)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "mcp__context7",
+      "mcp__angular-cli"
     ],
     "ask": [
       "Bash(git push *)",
@@ -34,7 +36,8 @@
       "Edit(./frontend/pnpm-lock.yaml)",
       "Edit(./frontend/pnpm-workspace.yaml)",
       "Edit(./.github/**)",
-      "Edit(./.claude/settings.json)"
+      "Edit(./.claude/settings.json)",
+      "Edit(./.mcp.json)"
     ],
     "deny": [
       "Read(./.env)",
@@ -96,5 +99,6 @@
         ]
       }
     ]
-  }
+  },
+  "enabledMcpjsonServers": ["context7", "angular-cli"]
 }
