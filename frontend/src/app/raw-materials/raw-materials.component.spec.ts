@@ -52,6 +52,19 @@ describe('RawMaterialsComponent amounts', () => {
     expect(component.stockValueChange()).toBe(3.3);
   });
 
+  it('keeps a stock adjustment finer than four decimal places', () => {
+    component.openStockOperation(
+      rawMaterial({ unit: 'KILOGRAM', quantity: 1.00004, averageUnitCost: 3 }),
+      'ADJUSTMENT',
+    );
+    component.stockOperationForm.controls.quantity.setValue(1);
+
+    expect(component.stockDifference()).toBe(-0.00004);
+    expect(component.projectedStock()).toBe(1);
+    expect(component.hasNoAdjustmentChange()).toBe(false);
+    expect(component.stockValueChange()).toBe(0.00012);
+  });
+
   it('values initial stock without floating-point drift', () => {
     component.openCreate();
     component.form.patchValue({ unit: 'KILOGRAM', quantity: 1.5, initialUnitCost: 0.4 });
