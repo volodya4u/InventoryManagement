@@ -2,7 +2,8 @@
 // Self-test for the Claude Code hooks in .claude/hooks/ — no agent needed.
 // Pipes realistic hook payloads through both scripts against a TEMP project dir and checks:
 //   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files;
-//      it also blocks Grep on a .env path or with a glob that can match one
+//      it also blocks Grep on a .env path or with a glob that can match one, and Bash routes that read .env without
+//      naming it (shell globs, git diff/grep --no-index, recursive grep or diff)
 //   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
 //   4. scripts/reviewer-bash-guard.mjs is wired in settings and lets the reviewer subagent run only read-only git
@@ -42,7 +43,7 @@ const settings = JSON.parse(readFileSync(join(here, ".claude", "settings.json"),
 const envMatcher = (settings.hooks?.PreToolUse ?? []).find((entry) =>
   entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/.claude/hooks/protect-env.mjs"))),
 )?.matcher;
-check("protect-env is wired for Grep in .claude/settings.json", envMatcher?.split("|").includes("Grep"), envMatcher);
+check("protect-env is wired for Grep and Bash in .claude/settings.json", ["Grep", "Bash"].every((t) => envMatcher?.split("|").includes(t)), envMatcher);
 // Grep: the path, and globs (a ripgrep glob searches files .gitignore hides)
 const guardEnv = (tool, toolInput) =>
   run("protect-env.mjs", { ...base, hook_event_name: "PreToolUse", tool_name: tool, tool_input: toolInput }).status;
@@ -69,6 +70,55 @@ for (const [toolInput, expect] of [
 ]) {
   const status = guardEnv("Grep", toolInput);
   check(`protect-env Grep ${JSON.stringify(toolInput)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
+}
+// Bash: routes that read .env without naming it (a named .env is left to the deny rules)
+for (const [command, expect] of [
+  ["git diff main...HEAD", 0],
+  ["git diff --stat", 0],
+  ["git log --oneline main..HEAD", 0],
+  ["git grep -n TODO", 0],
+  ["cat '.e*'", 0],
+  ["wc -l *.md", 0],
+  ["ls src/**/*.ts", 0],
+  ["grep -n TODO README.md", 0],
+  ["diff a.txt b.txt", 0],
+  ["mvn -B -ntp verify", 0],
+  [`git diff --stat -- ${join(tmp, "README.md").replace(/\\/g, "/")}`, 0],
+  [`git diff --stat -- ${tmp.replace(/\\/g, "/")}-other/x README.md`, 2],
+  [`cd "${tmp}" && git diff --stat`, 0],
+  ["cd frontend && git diff --stat", 0],
+  ["cd .. && git diff a b", 2],
+  ["grep -rn TODO src/app --include=*.ts", 0],
+  ["grep -r --include '*.java' x src", 0],
+  ["grep -r --include=* x .", 2],
+  ["grep -r --include=*.ts --include=.env* x .", 2],
+  ["git commit -F - <<'EOF'\nKeep .env and .e* out of reach\nEOF", 0],
+  ['git commit -m "$(cat <<\'EOF\'\nBlock grep -r and .en? globs\nEOF\n)"', 0],
+  ["git diff --no-index docs .", 2],
+  ["git diff --no-index /dev/null .env", 2],
+  ["git -C . diff --no-index a b", 2],
+  ["git diff ../outside.txt README.md", 2],
+  ["git diff /dev/null README.md", 2],
+  ["git diff -- C:/Users/x/.env.local README.md", 2],
+  ["nice git diff --no-index a b", 2],
+  ["git grep --no-index -e KEY", 2],
+  ["git grep --no-ind KEY", 2],
+  ["git grep --untracked --no-exclude-standard KEY", 2],
+  ["cat .e*", 2],
+  ["head .en?", 2],
+  ["ls .*", 2],
+  ["cat {.env,README.md}", 2],
+  ["cat frontend/.env*", 2],
+  ["echo $(cat .e*)", 2],
+  ["grep -rn TODO src", 2],
+  ["grep -R x .", 2],
+  ["grep -d recurse x .", 2],
+  ["cd frontend && grep --recursive x .", 2],
+  ["git ls-files -o | xargs grep -r x", 2],
+  ["diff -r a b", 2],
+]) {
+  const status = guardEnv("Bash", { command });
+  check(`protect-env Bash ${JSON.stringify(command)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
 }
 
 // 2. logger: a proposed+executed Bash, a proposed+executed Edit, a proposed+failed Bash, a proposed-only Edit (blocked)
