@@ -118,6 +118,7 @@ describe('SalesComponent amounts', () => {
     component.returnItemControls[0].controls.quantity.setValue(3);
     component.returnItemControls[1].controls.quantity.setValue(1);
 
+    expect(component.returnLineRefund(component.returnItemControls[0])).toBe(0.3);
     expect(component.returnRefund()).toBe(0.6);
     expect(component.returnCost()).toBe(0.3);
     expect(component.returnProfitReversal()).toBe(0.3);

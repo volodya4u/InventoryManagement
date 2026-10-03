@@ -394,7 +394,7 @@
                         }
                       </td>
                       <td class="text-end">
-                        {{ (row.controls.quantity.value ?? 0) * item.unitPrice | currency:'UAH':'symbol-narrow':'1.2-2' }}
+                        {{ returnLineRefund(row) | currency:'UAH':'symbol-narrow':'1.2-2' }}
                       </td>
                     </tr>
                   }
