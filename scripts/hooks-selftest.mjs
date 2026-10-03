@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Self-test for the Claude Code hooks in .claude/hooks/ — no agent needed.
 // Pipes realistic hook payloads through both scripts against a TEMP project dir and checks:
-//   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files
+//   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files;
+//      it also blocks Grep on a .env path or with a glob that can match one, and Bash routes that read .env without
+//      naming it (shell globs, git diff/grep --no-index, recursive grep or diff)
 //   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
 //   4. scripts/reviewer-bash-guard.mjs is wired in settings and lets the reviewer subagent run only read-only git
@@ -9,12 +11,13 @@
 //   5. scripts/session-start.mjs does nothing outside Claude Code cloud sessions
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const here = process.cwd();
 const tmp = mkdtempSync(join(tmpdir(), "hooks-selftest-"));
+mkdirSync(join(tmp, ".git")); // the temp project is the git work tree protect-env resolves paths against
 const env = { ...process.env, CLAUDE_PROJECT_DIR: tmp };
 const run = (script, payload) =>
   spawnSync(process.execPath, [join(here, ".claude", "hooks", script)], { input: JSON.stringify(payload), env, encoding: "utf8" });
@@ -32,11 +35,168 @@ for (const [tool, file, expect] of [
   ["Edit", join(tmp, ".env"), 2],
   ["Write", join(tmp, ".env.local"), 2],
   ["Read", tmp + "\\.env.production", 2],
+  ["Read", join(tmp, ".ENV"), 2],
+  ["Read", join(tmp, ".Env.Local"), 2],
   ["Edit", join(tmp, ".env.example"), 0],
+  ["Read", join(tmp, ".ENV.EXAMPLE"), 0],
+  ["Read", join(tmp, ".env."), 2],
+  ["Read", join(tmp, ".env "), 2],
+  ["Read", join(tmp, ".env::$DATA"), 2],
+  ["Read", join(tmp, ".env.example."), 0],
   ["Read", join(tmp, "src", "main", "resources", "application.yml"), 0],
 ]) {
   const r = run("protect-env.mjs", { ...base, hook_event_name: "PreToolUse", tool_name: tool, tool_input: { file_path: file } });
   check(`protect-env ${tool} ${file.split(/[\\/]/).pop()} -> exit ${expect}`, r.status === expect, r.status === 2 ? r.stderr.trim() : "");
+}
+const settings = JSON.parse(readFileSync(join(here, ".claude", "settings.json"), "utf8"));
+const envMatcher = (settings.hooks?.PreToolUse ?? []).find((entry) =>
+  entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/.claude/hooks/protect-env.mjs"))),
+)?.matcher;
+check("protect-env is wired for Grep and Bash in .claude/settings.json", ["Grep", "Bash"].every((t) => envMatcher?.split("|").includes(t)), envMatcher);
+// Grep: the path, and globs (a ripgrep glob searches files .gitignore hides)
+const guardEnv = (tool, toolInput) =>
+  run("protect-env.mjs", { ...base, hook_event_name: "PreToolUse", tool_name: tool, tool_input: toolInput }).status;
+for (const [toolInput, expect] of [
+  [{ pattern: "KEY", path: ".env" }, 2],
+  [{ pattern: "KEY", path: join(tmp, "frontend", ".env.local") }, 2],
+  [{ pattern: "KEY", path: ".env.example" }, 0],
+  [{ pattern: "KEY", path: "frontend/.ENV" }, 2],
+  [{ pattern: "KEY", path: ".env::$DATA" }, 2],
+  [{ pattern: "\\.env", path: "src" }, 0],
+  [{ pattern: "KEY" }, 0],
+  [{ pattern: "KEY", glob: "*.ts" }, 0],
+  [{ pattern: "KEY", glob: "**/*.{ts,html}" }, 0],
+  [{ pattern: "KEY", glob: "!.env*" }, 0],
+  [{ pattern: "KEY", glob: ".env.example" }, 0],
+  [{ pattern: "KEY", glob: "*" }, 2],
+  [{ pattern: "KEY", glob: "**" }, 2],
+  [{ pattern: "KEY", glob: "*.*" }, 2],
+  [{ pattern: "KEY", glob: ".env*" }, 2],
+  [{ pattern: "KEY", glob: ".env.q*" }, 2],
+  [{ pattern: "KEY", glob: "*.local" }, 2],
+  [{ pattern: "KEY", glob: "*.{ts,env}" }, 2],
+  [{ pattern: "KEY", glob: "*.ts .env.production" }, 2],
+  [{ pattern: "KEY", glob: "*.ts,.env" }, 2],
+  [{ pattern: "KEY", path: "src", glob: "src/**" }, 2],
+  [{ pattern: "KEY", glob: ".en[]v]" }, 2],
+  [{ pattern: "KEY", glob: ".en[]v]*" }, 2],
+  [{ pattern: "KEY", glob: ".e?v.qa" }, 2],
+  [{ pattern: "KEY", glob: "*.{yml,json}" }, 0],
+]) {
+  const status = guardEnv("Grep", toolInput);
+  check(`protect-env Grep ${JSON.stringify(toolInput)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
+}
+// Bash: routes that read .env without naming it (a named .env is left to the deny rules)
+for (const [command, expect] of [
+  ["git diff main...HEAD", 0],
+  ["git diff --stat", 0],
+  ["git log --oneline main..HEAD", 0],
+  ["git grep -n TODO", 0],
+  ["cat '.e*'", 0],
+  ["wc -l *.md", 0],
+  ["ls src/**/*.ts", 0],
+  ["grep -n TODO README.md", 0],
+  ["diff a.txt b.txt", 0],
+  ["mvn -B -ntp verify", 0],
+  [`git diff --stat -- ${join(tmp, "README.md").replace(/\\/g, "/")}`, 0],
+  [`git diff --stat -- ${tmp.replace(/\\/g, "/")}-other/x README.md`, 2],
+  [`cd "${tmp}" && git diff --stat`, 0],
+  ["cd frontend && git diff --stat", 0],
+  ["cd .. && git diff a b", 2],
+  ["cd frontend && cd .. && git diff --stat", 0],
+  ["cd frontend && git diff -- ../README.md", 0],
+  ["git -C frontend diff -- ../README.md", 0],
+  ["git diff -- ../README.md", 2],
+  ["grep -rn TODO src/app --include=*.ts", 0],
+  ["grep -r --include '*.java' x src", 0],
+  ["grep -r --include=* x .", 2],
+  ["grep -r --include=*.ts --include=.env* x .", 2],
+  ["git commit -F - <<'EOF'\nKeep .env and .e* out of reach\nEOF", 0],
+  ['git commit -m "$(cat <<\'EOF\'\nBlock grep -r and .en? globs\nEOF\n)"', 0],
+  ["git diff --no-index docs .", 2],
+  ["git diff --no-index /dev/null .env", 2],
+  ["git -C . diff --no-index a b", 2],
+  ["git diff ../outside.txt README.md", 2],
+  ["git diff /dev/null README.md", 2],
+  ["git diff -- C:/Users/x/.env.local README.md", 2],
+  ["nice git diff --no-index a b", 2],
+  ["git grep --no-index -e KEY", 2],
+  ["git grep --no-ind KEY", 2],
+  ["git grep --untracked --no-exclude-standard KEY", 2],
+  ["cat .e*", 2],
+  ["head .en?", 2],
+  ["ls .*", 2],
+  ["cat {.env,README.md}", 2],
+  ["cat frontend/.env*", 2],
+  ["echo $(cat .e*)", 2],
+  ["grep -rn TODO src", 2],
+  ["grep -R x .", 2],
+  ["grep -d recurse x .", 2],
+  ["cd frontend && grep --recursive x .", 2],
+  ["ls | xargs grep -r x", 2],
+  ["diff -r a b", 2],
+  // redirection targets are not arguments, comments are not commands, plain heredoc text is not globbed
+  ["git diff --stat main...HEAD 2>/dev/null", 0],
+  ["git diff main...HEAD > /tmp/review.diff", 0],
+  ["git -C frontend diff --stat", 0],
+  ["cat <<EOF\nplain .e* text\nEOF", 0],
+  ["ls # .e*", 0],
+  ["grep -d skip x *.md", 0],
+  ["cat < .e*", 2],
+  // command substitutions run inside double quotes, backticks and unquoted heredocs
+  ['echo "$(cat .e*)"', 2],
+  ['git commit -m "$(cat .e*)"', 2],
+  ["echo `cat .e*`", 2],
+  ["cat <<EOF\n$(cat .e*)\nEOF", 2],
+  ["echo '<<X'\nls .e*\nX", 2],
+  ['echo "a \\" b" .e*', 2],
+  ["git \\\ndiff --no-index a b", 2],
+  // git run outside the project
+  ["git -C / diff a b", 2],
+  ["git -C .. diff a b", 2],
+  ["git --work-tree=/ diff a b", 2],
+  ["git -C / -c grep.fallbackToNoIndex=true grep KEY", 2],
+  ["cd -P / && git diff a b", 2],
+  // GNU long-option prefixes
+  ["grep --recur KEY .", 2],
+  ["grep --directories recurse KEY .", 2],
+  ["grep -d rec KEY .", 2],
+  ["grep --dir=rec KEY .", 2],
+  ["diff --recur a b", 2],
+  ["grep -r --include=*.ts --inclu=.env x .", 2],
+  // rg honours .gitignore unless told not to
+  ["rg -n TODO src", 0],
+  ["rg -g '*.ts' TODO", 0],
+  ["rg --hidden TODO", 0],
+  ["rg -uu KEY", 2],
+  ["rg --no-ignore KEY", 2],
+  ["rg -g '*' KEY", 2],
+  ["rg --iglob=.ENV* KEY", 2],
+  // bracket expressions and brace sequences
+  ["cat .en[]v]", 2],
+  ["cat .en[[:alpha:]]", 2],
+  ["cat .e?v.qa", 2],
+  ["cat .en{u..w}", 2],
+  ["ls file{1..3}.txt", 0],
+  // a << in a comment, after \< or in a here-string starts no heredoc; a ) in quotes does not close $(
+  ["true # <<X\ncat .e*\nX", 2],
+  ["echo \\<<X\ncat .e*\nX", 2],
+  ["grep x <<<abc\ncat .e*\nabc", 2],
+  ['echo "$(echo ")"; cat .e*)"', 2],
+  ["git commit -m \"$(cat <<'EOF'\n1) first\n`grep -r` and .e* in a message\nEOF\n)\"", 0],
+  ["echo $((1+2)) && git diff --stat", 0],
+  // more ways out of the project
+  ["git diff '\\\\localhost\\C$\\x' e", 2],
+  ["GIT_DIR=x git diff e .", 2],
+  ["export GIT_DIR=x; git diff e .", 2],
+  ["git --git-dir=../x/.git diff a b", 2],
+  ["git --git-dir=.git diff a b", 2],
+  ["pushd / && git diff a b", 2],
+  ["rgrep x .", 2],
+  ["grep.exe -r x .", 2],
+]) {
+  const status = guardEnv("Bash", { command });
+  check(`protect-env Bash ${JSON.stringify(command)} -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
 }
 
 // 2. logger: a proposed+executed Bash, a proposed+executed Edit, a proposed+failed Bash, a proposed-only Edit (blocked)
@@ -68,7 +228,6 @@ const summary = spawnSync(process.execPath, [join(here, "scripts", "agent-log-su
 check("agent-log-summary reports 1 proposed but not executed", summary.status === 0 && /1 proposed but not executed/.test(summary.stdout));
 
 // 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
-const settings = JSON.parse(readFileSync(join(here, ".claude", "settings.json"), "utf8"));
 const guardWired = (settings.hooks?.PreToolUse ?? []).some(
   (entry) => entry.matcher === "Bash" && entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/scripts/reviewer-bash-guard.mjs"))),
 );

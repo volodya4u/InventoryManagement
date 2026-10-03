@@ -47,6 +47,8 @@
       "Read(./.env.*)",
       "Edit(./.env)",
       "Edit(./.env.*)",
+      "Bash(git diff *--no-index*)",
+      "Bash(git grep *--no-index*)",
       "Bash(rm -rf *)",
       "Bash(git push --force *)"
     ]
@@ -67,7 +69,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Read|Edit|Write|NotebookEdit",
+        "matcher": "Read|Edit|Write|NotebookEdit|Grep|Bash",
         "hooks": [
           {
             "type": "command",
