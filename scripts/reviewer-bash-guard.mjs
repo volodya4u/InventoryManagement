@@ -28,9 +28,13 @@ if (ev.agent_type !== "reviewer") process.exit(0);
 const cmd = String(ev.tool_input?.command ?? "").trim();
 if (!/^git (diff|log|show|status)(\s|$)/.test(cmd)) block(`"${cmd.slice(0, 80)}" is not a read-only git command.`);
 if (/[;&|<>`$\\\r\n]/.test(cmd)) block("shell operators, redirection and substitution are not allowed.");
-if (/(^|\s)--(output|ext-diff|no-index)\b/.test(cmd)) block("--output, --ext-diff and --no-index are not allowed.");
 if (/[*?[\]{}]/.test(cmd)) block("shell globs and braces are not allowed.");
 const unquoted = cmd.replace(/["']/g, "");
+// Git may accept an unambiguous abbreviation of a long option (--outp=f), so block every prefix of these.
+const forbidden = ["--output", "--ext-diff", "--no-index"];
+if (unquoted.split(/\s+/).some((arg) => /^--./.test(arg) && forbidden.some((option) => option.startsWith(arg.split("=")[0])))) {
+  block("--output, --ext-diff and --no-index are not allowed, nor their abbreviations.");
+}
 if (unquoted.split(/\s+/).some((arg) => /^(\/|~|[A-Za-z]:\/)/.test(arg) || arg.split("/").includes(".."))) {
   block("paths outside the work tree are not allowed.");
 }

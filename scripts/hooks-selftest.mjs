@@ -110,6 +110,10 @@ for (const [command, expect] of [
   ["git log --oneline main..HEAD -- src/../README.md", 2],
   ["git diff ./.. .", 2],
   ["git diff . .//..", 2],
+  ["git diff --outp=out.txt", 2],
+  ["git log --ext", 2],
+  ["git diff --no-ind README.md", 2],
+  ["git diff --stat --output-indicator-new=x", 0],
 ]) {
   const status = guard(command);
   check(`reviewer guard "${command}" -> exit ${expect}`, status === expect, status === expect ? "" : `got ${status}`);
