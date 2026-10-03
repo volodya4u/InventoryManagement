@@ -1,4 +1,4 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -10,7 +10,8 @@ import { TimedPasswordVisibility } from '../core/timed-password-visibility';
   selector: 'app-login',
   imports: [ReactiveFormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent implements OnDestroy {
   private readonly passwordVisibility = new TimedPasswordVisibility();
@@ -23,18 +24,18 @@ export class LoginComponent implements OnDestroy {
   readonly form = new FormGroup({
     username: new FormControl('admin', {
       nonNullable: true,
-      validators: [Validators.required]
+      validators: [Validators.required],
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required]
-    })
+      validators: [Validators.required],
+    }),
   });
 
   constructor(
     private readonly auth: AuthService,
     private readonly router: Router,
-    route: ActivatedRoute
+    route: ActivatedRoute,
   ) {
     if (route.snapshot.queryParamMap.get('passwordChanged') === 'true') {
       this.notice.set('Password changed successfully. Sign in with your new password.');
@@ -59,11 +60,12 @@ export class LoginComponent implements OnDestroy {
     this.error.set('');
     this.submitting.set(true);
     const { username, password } = this.form.getRawValue();
-    this.auth.login(username.trim(), password)
+    this.auth
+      .login(username.trim(), password)
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: () => this.router.navigateByUrl('/dashboard'),
-        error: (error) => this.error.set(apiErrorMessage(error))
+        error: (error) => this.error.set(apiErrorMessage(error)),
       });
   }
 }

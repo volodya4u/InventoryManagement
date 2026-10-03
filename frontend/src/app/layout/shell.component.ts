@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../core/auth.service';
@@ -7,7 +7,8 @@ import { AuthService } from '../core/auth.service';
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './shell.component.html',
-  styleUrl: './shell.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './shell.component.scss',
 })
 export class ShellComponent {
   readonly menuOpen = signal(false);
@@ -15,7 +16,7 @@ export class ShellComponent {
 
   constructor(
     readonly auth: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
   closeMenu(): void {
@@ -25,12 +26,12 @@ export class ShellComponent {
   logout(): void {
     if (this.loggingOut()) return;
     this.loggingOut.set(true);
-    this.auth.logout()
+    this.auth
+      .logout()
       .pipe(finalize(() => this.loggingOut.set(false)))
       .subscribe({
         next: () => this.router.navigateByUrl('/login'),
-        error: () => this.router.navigateByUrl('/login')
+        error: () => this.router.navigateByUrl('/login'),
       });
   }
 }
-

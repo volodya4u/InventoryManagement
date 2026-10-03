@@ -1,6 +1,13 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, computed, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -9,7 +16,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
@@ -57,12 +64,13 @@ function productFormValidator(control: AbstractControl): ValidationErrors | null
   selector: 'app-products',
   imports: [ReactiveFormsModule, CurrencyPipe],
   templateUrl: './products.component.html',
-  styleUrl: './products.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './products.component.scss',
 })
 export class ProductsComponent implements OnInit {
   readonly items = signal<Product[]>([]);
   readonly totalStockValue = computed(() =>
-    this.items().reduce((total, item) => total + item.stockValue, 0)
+    this.items().reduce((total, item) => total + item.stockValue, 0),
   );
   readonly rawMaterials = signal<RawMaterial[]>([]);
   readonly loading = signal(true);
@@ -88,59 +96,81 @@ export class ProductsComponent implements OnInit {
     { value: 'Unsellable', label: 'Unsellable' },
     { value: 'Lost', label: 'Lost' },
     { value: 'Quality Rejection', label: 'Quality Rejection' },
-    { value: 'Other', label: 'Other' }
+    { value: 'Other', label: 'Other' },
   ];
 
   readonly adjustmentReasons: ReasonOption[] = [
     { value: 'Physical Inventory Count', label: 'Physical Inventory Count' },
     { value: 'Data Entry Correction', label: 'Data Entry Correction' },
     { value: 'Opening Balance Correction', label: 'Opening Balance Correction' },
-    { value: 'Other', label: 'Other' }
+    { value: 'Other', label: 'Other' },
   ];
 
-  readonly form = new FormGroup({
-    sku: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
-    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
-    description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
-    quantity: new FormControl(0, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]
-    }),
-    initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)]),
-    advertisingCostPerUnit: new FormControl(0, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0)]
-    }),
-    markupPercentage: new FormControl(0, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0), Validators.max(999999.99)]
-    }),
-    recipe: new FormArray<RecipeFormGroup>([])
-  }, { validators: productFormValidator });
+  readonly form = new FormGroup(
+    {
+      sku: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(60)],
+      }),
+      name: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(120)],
+      }),
+      description: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.maxLength(1000)],
+      }),
+      quantity: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)],
+      }),
+      initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)]),
+      advertisingCostPerUnit: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(0)],
+      }),
+      markupPercentage: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(0), Validators.max(999999.99)],
+      }),
+      recipe: new FormArray<RecipeFormGroup>([]),
+    },
+    { validators: productFormValidator },
+  );
 
   readonly productionForm = new FormGroup({
-    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]),
-    productionDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
-    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
+    quantity: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(1),
+      Validators.pattern(/^\d+$/),
+    ]),
+    productionDate: new FormControl(this.today(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   readonly stockOperationForm = new FormGroup({
     quantity: new FormControl<number | null>(null, [
       Validators.required,
       Validators.min(1),
-      Validators.pattern(/^\d+$/)
+      Validators.pattern(/^\d+$/),
     ]),
-    operationDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    operationDate: new FormControl(this.today(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
     reason: new FormControl('Damaged', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(200)]
+      validators: [Validators.required, Validators.maxLength(200)],
     }),
-    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   constructor(
     private readonly http: HttpClient,
-    destroyRef: DestroyRef
+    destroyRef: DestroyRef,
   ) {
     this.form.controls.recipe.valueChanges
       .pipe(takeUntilDestroyed(destroyRef))
@@ -164,7 +194,7 @@ export class ProductsComponent implements OnInit {
     this.error.set('');
     forkJoin({
       products: this.http.get<Product[]>('/api/products'),
-      rawMaterials: this.http.get<RawMaterial[]>('/api/raw-materials')
+      rawMaterials: this.http.get<RawMaterial[]>('/api/raw-materials'),
     })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
@@ -172,7 +202,7 @@ export class ProductsComponent implements OnInit {
           this.items.set(products);
           this.rawMaterials.set(rawMaterials);
         },
-        error: (error) => this.error.set(apiErrorMessage(error))
+        error: (error) => this.error.set(apiErrorMessage(error)),
       });
   }
 
@@ -185,7 +215,7 @@ export class ProductsComponent implements OnInit {
       quantity: 0,
       initialUnitCost: null,
       advertisingCostPerUnit: 0,
-      markupPercentage: 0
+      markupPercentage: 0,
     });
     this.form.controls.recipe.clear();
     this.addRecipeItem();
@@ -205,14 +235,13 @@ export class ProductsComponent implements OnInit {
       quantity: item.quantity,
       initialUnitCost: item.averageUnitCost,
       advertisingCostPerUnit: item.advertisingCostPerUnit,
-      markupPercentage: item.markupPercentage
+      markupPercentage: item.markupPercentage,
     });
     this.form.controls.recipe.clear();
     for (const recipeItem of item.recipe) {
-      this.form.controls.recipe.push(this.createRecipeRow(
-        recipeItem.rawMaterialId,
-        recipeItem.quantityPerUnit
-      ));
+      this.form.controls.recipe.push(
+        this.createRecipeRow(recipeItem.rawMaterialId, recipeItem.quantityPerUnit),
+      );
     }
     if (item.recipe.length === 0) this.addRecipeItem();
     this.selectedFile.set(null);
@@ -237,8 +266,8 @@ export class ProductsComponent implements OnInit {
   }
 
   materialSelectedElsewhere(rawMaterialId: number, currentIndex: number): boolean {
-    return this.recipeControls.some((row, index) =>
-      index !== currentIndex && row.controls.rawMaterialId.value === rawMaterialId
+    return this.recipeControls.some(
+      (row, index) => index !== currentIndex && row.controls.rawMaterialId.value === rawMaterialId,
     );
   }
 
@@ -257,7 +286,7 @@ export class ProductsComponent implements OnInit {
     const value = this.form.getRawValue();
     const recipe = value.recipe.map((item) => ({
       rawMaterialId: item.rawMaterialId!,
-      quantityPerUnit: item.quantityPerUnit!
+      quantityPerUnit: item.quantityPerUnit!,
     }));
     const data = new FormData();
     data.append('sku', value.sku.trim());
@@ -265,7 +294,11 @@ export class ProductsComponent implements OnInit {
     data.append('description', value.description.trim());
     data.append('advertisingCostPerUnit', String(value.advertisingCostPerUnit));
     data.append('markupPercentage', String(value.markupPercentage));
-    data.append('recipe', new Blob([JSON.stringify(recipe)], { type: 'application/json' }), 'recipe.json');
+    data.append(
+      'recipe',
+      new Blob([JSON.stringify(recipe)], { type: 'application/json' }),
+      'recipe.json',
+    );
     if (!this.editing()) {
       data.append('quantity', String(value.quantity));
       if (value.initialUnitCost !== null) {
@@ -286,7 +319,7 @@ export class ProductsComponent implements OnInit {
         this.dialogOpen.set(false);
         this.load();
       },
-      error: (error) => this.saveError.set(apiErrorMessage(error))
+      error: (error) => this.saveError.set(apiErrorMessage(error)),
     });
   }
 
@@ -307,7 +340,9 @@ export class ProductsComponent implements OnInit {
     const quantity = this.productionForm.controls.quantity.value ?? 0;
     if (!product || quantity <= 0) return [];
     return product.recipe.map((recipeItem) => {
-      const material = this.rawMaterials().find((candidate) => candidate.id === recipeItem.rawMaterialId);
+      const material = this.rawMaterials().find(
+        (candidate) => candidate.id === recipeItem.rawMaterialId,
+      );
       const available = material?.quantity ?? recipeItem.availableQuantity;
       const required = multiplyDecimals(recipeItem.quantityPerUnit, quantity);
       return {
@@ -317,7 +352,7 @@ export class ProductsComponent implements OnInit {
         required,
         available,
         missing: Math.max(subtractDecimals(required, available), 0),
-        cost: required * (material?.averageUnitCost ?? recipeItem.averageUnitCost)
+        cost: required * (material?.averageUnitCost ?? recipeItem.averageUnitCost),
       };
     });
   }
@@ -329,10 +364,20 @@ export class ProductsComponent implements OnInit {
   maximumProducible(): number {
     const product = this.productionProduct();
     if (!product || product.recipe.length === 0) return 0;
-    return Math.max(0, Math.min(...product.recipe.map((recipeItem) => {
-      const material = this.rawMaterials().find((candidate) => candidate.id === recipeItem.rawMaterialId);
-      return wholeQuotient(material?.quantity ?? recipeItem.availableQuantity, recipeItem.quantityPerUnit);
-    })));
+    return Math.max(
+      0,
+      Math.min(
+        ...product.recipe.map((recipeItem) => {
+          const material = this.rawMaterials().find(
+            (candidate) => candidate.id === recipeItem.rawMaterialId,
+          );
+          return wholeQuotient(
+            material?.quantity ?? recipeItem.availableQuantity,
+            recipeItem.quantityPerUnit,
+          );
+        }),
+      ),
+    );
   }
 
   estimatedProductionCost(): number {
@@ -340,7 +385,10 @@ export class ProductsComponent implements OnInit {
   }
 
   estimatedMaterialsProductionCost(): number {
-    return this.productionRequirements().reduce((total, requirement) => total + requirement.cost, 0);
+    return this.productionRequirements().reduce(
+      (total, requirement) => total + requirement.cost,
+      0,
+    );
   }
 
   estimatedAdvertisingProductionCost(): number {
@@ -350,20 +398,26 @@ export class ProductsComponent implements OnInit {
 
   submitProduction(): void {
     const product = this.productionProduct();
-    if (!product || this.productionForm.invalid || this.hasProductionShortage() || this.producing()) {
+    if (
+      !product ||
+      this.productionForm.invalid ||
+      this.hasProductionShortage() ||
+      this.producing()
+    ) {
       this.productionForm.markAllAsTouched();
       return;
     }
     this.producing.set(true);
     this.productionError.set('');
-    this.http.post<Product>(`/api/products/${product.id}/production`, this.productionForm.getRawValue())
+    this.http
+      .post<Product>(`/api/products/${product.id}/production`, this.productionForm.getRawValue())
       .pipe(finalize(() => this.producing.set(false)))
       .subscribe({
         next: () => {
           this.productionDialogOpen.set(false);
           this.load();
         },
-        error: (error) => this.productionError.set(apiErrorMessage(error))
+        error: (error) => this.productionError.set(apiErrorMessage(error)),
       });
   }
 
@@ -374,13 +428,14 @@ export class ProductsComponent implements OnInit {
     quantityControl.setValidators([
       Validators.required,
       Validators.min(type === 'WRITE_OFF' ? 1 : 0),
-      Validators.pattern(/^\d+$/)
+      Validators.pattern(/^\d+$/),
     ]);
     this.stockOperationForm.reset({
       quantity: type === 'ADJUSTMENT' ? item.quantity : null,
       operationDate: this.today(),
-      reason: type === 'WRITE_OFF' ? this.writeOffReasons[0].value : this.adjustmentReasons[0].value,
-      notes: ''
+      reason:
+        type === 'WRITE_OFF' ? this.writeOffReasons[0].value : this.adjustmentReasons[0].value,
+      notes: '',
     });
     quantityControl.updateValueAndValidity();
     this.stockOperationError.set('');
@@ -402,9 +457,7 @@ export class ProductsComponent implements OnInit {
     const product = this.stockOperationProduct();
     const quantity = this.stockOperationForm.controls.quantity.value;
     if (!product || quantity === null) return 0;
-    return this.stockOperationType() === 'WRITE_OFF'
-      ? -quantity
-      : quantity - product.quantity;
+    return this.stockOperationType() === 'WRITE_OFF' ? -quantity : quantity - product.quantity;
   }
 
   projectedStock(): number {
@@ -429,8 +482,13 @@ export class ProductsComponent implements OnInit {
 
   submitStockOperation(): void {
     const product = this.stockOperationProduct();
-    if (!product || this.stockOperationForm.invalid || this.hasWriteOffShortage()
-        || this.hasNoAdjustmentChange() || this.stockOperationSaving()) {
+    if (
+      !product ||
+      this.stockOperationForm.invalid ||
+      this.hasWriteOffShortage() ||
+      this.hasNoAdjustmentChange() ||
+      this.stockOperationSaving()
+    ) {
       this.stockOperationForm.markAllAsTouched();
       return;
     }
@@ -443,25 +501,28 @@ export class ProductsComponent implements OnInit {
           quantity: value.quantity,
           operationDate: value.operationDate,
           reason: value.reason,
-          notes: value.notes.trim()
+          notes: value.notes.trim(),
         }
       : {
           actualQuantity: value.quantity,
           operationDate: value.operationDate,
           reason: value.reason,
-          notes: value.notes.trim()
+          notes: value.notes.trim(),
         };
 
     this.stockOperationSaving.set(true);
     this.stockOperationError.set('');
-    this.http.post<Product>(`/api/products/${product.id}/${endpoint}`, request)
+    this.http
+      .post<Product>(`/api/products/${product.id}/${endpoint}`, request)
       .pipe(finalize(() => this.stockOperationSaving.set(false)))
       .subscribe({
         next: (updated) => {
-          this.items.update((items) => items.map((item) => item.id === updated.id ? updated : item));
+          this.items.update((items) =>
+            items.map((item) => (item.id === updated.id ? updated : item)),
+          );
           this.stockOperationDialogOpen.set(false);
         },
-        error: (error) => this.stockOperationError.set(apiErrorMessage(error))
+        error: (error) => this.stockOperationError.set(apiErrorMessage(error)),
       });
   }
 
@@ -473,7 +534,7 @@ export class ProductsComponent implements OnInit {
   estimatedRecipeUnitCost(): number {
     return this.recipeControls.reduce((total, row) => {
       const material = this.rawMaterials().find(
-        (candidate) => candidate.id === row.controls.rawMaterialId.value
+        (candidate) => candidate.id === row.controls.rawMaterialId.value,
       );
       return total + (row.controls.quantityPerUnit.value ?? 0) * (material?.averageUnitCost ?? 0);
     }, 0);
@@ -499,7 +560,10 @@ export class ProductsComponent implements OnInit {
 
   recipeSummary(item: Product): string {
     return item.recipe
-      .map((recipeItem) => `${recipeItem.quantityPerUnit} ${this.unitLabel(recipeItem.unit)} ${recipeItem.rawMaterialName}`)
+      .map(
+        (recipeItem) =>
+          `${recipeItem.quantityPerUnit} ${this.unitLabel(recipeItem.unit)} ${recipeItem.rawMaterialName}`,
+      )
       .join(' · ');
   }
 
@@ -511,8 +575,9 @@ export class ProductsComponent implements OnInit {
     if (!window.confirm(`Delete product “${item.name}”?`)) return;
     this.error.set('');
     this.http.delete<void>(`/api/products/${item.id}`).subscribe({
-      next: () => this.items.update((items) => items.filter((candidate) => candidate.id !== item.id)),
-      error: (error) => this.error.set(apiErrorMessage(error))
+      next: () =>
+        this.items.update((items) => items.filter((candidate) => candidate.id !== item.id)),
+      error: (error) => this.error.set(apiErrorMessage(error)),
     });
   }
 
@@ -520,10 +585,16 @@ export class ProductsComponent implements OnInit {
     return `/api/products/${item.id}/image?v=${encodeURIComponent(item.updatedAt)}`;
   }
 
-  private createRecipeRow(rawMaterialId: number | null = null, quantityPerUnit: number | null = null): RecipeFormGroup {
+  private createRecipeRow(
+    rawMaterialId: number | null = null,
+    quantityPerUnit: number | null = null,
+  ): RecipeFormGroup {
     return new FormGroup({
       rawMaterialId: new FormControl<number | null>(rawMaterialId, [Validators.required]),
-      quantityPerUnit: new FormControl<number | null>(quantityPerUnit, [Validators.required, Validators.min(0.0001)])
+      quantityPerUnit: new FormControl<number | null>(quantityPerUnit, [
+        Validators.required,
+        Validators.min(0.0001),
+      ]),
     });
   }
 

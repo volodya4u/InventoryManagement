@@ -8,6 +8,15 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "monthly"
+    # Angular packages must share one version, so update them together.
+    groups:
+      angular:
+        patterns:
+          - "@angular/*"
+    # Angular majors need migrations: run `ng update` instead.
+    ignore:
+      - dependency-name: "@angular/*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

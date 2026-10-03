@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
@@ -36,7 +36,8 @@ interface ReasonOption {
   selector: 'app-sales',
   imports: [ReactiveFormsModule, CurrencyPipe, DatePipe],
   templateUrl: './sales.component.html',
-  styleUrl: './sales.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './sales.component.scss',
 })
 export class SalesComponent implements OnInit {
   readonly sales = signal<Sale[]>([]);
@@ -57,19 +58,19 @@ export class SalesComponent implements OnInit {
   readonly cancellationSale = signal<Sale | null>(null);
 
   readonly totalRevenue = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.netRevenue, 0)
+    this.sales().reduce((total, sale) => total + sale.netRevenue, 0),
   );
   readonly totalCost = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.netCost, 0)
+    this.sales().reduce((total, sale) => total + sale.netCost, 0),
   );
   readonly totalGrossProfit = computed(() =>
-    this.sales().reduce((total, sale) => total + sale.netGrossProfit, 0)
+    this.sales().reduce((total, sale) => total + sale.netGrossProfit, 0),
   );
 
   readonly paymentMethods: PaymentMethodOption[] = [
     { value: 'CASH', label: 'Cash' },
     { value: 'CARD', label: 'Card' },
-    { value: 'BANK_TRANSFER', label: 'Bank Transfer' }
+    { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
   ];
 
   readonly returnReasons: ReasonOption[] = [
@@ -77,7 +78,7 @@ export class SalesComponent implements OnInit {
     { value: 'Product Defect', label: 'Product Defect' },
     { value: 'Incorrect Product', label: 'Incorrect Product' },
     { value: 'Order Error', label: 'Order Error' },
-    { value: 'Other', label: 'Other' }
+    { value: 'Other', label: 'Other' },
   ];
 
   readonly cancellationReasons: ReasonOption[] = [
@@ -85,41 +86,50 @@ export class SalesComponent implements OnInit {
     { value: 'Duplicate Sale', label: 'Duplicate Sale' },
     { value: 'Customer Cancelled', label: 'Customer Cancelled' },
     { value: 'Payment Failed', label: 'Payment Failed' },
-    { value: 'Other', label: 'Other' }
+    { value: 'Other', label: 'Other' },
   ];
 
   readonly form = new FormGroup({
-    saleDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    saleDate: new FormControl(this.today(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
     paymentMethod: new FormControl<PaymentMethod>('CASH', {
       nonNullable: true,
-      validators: [Validators.required]
+      validators: [Validators.required],
     }),
     notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
-    items: new FormArray<SaleItemFormGroup>([])
+    items: new FormArray<SaleItemFormGroup>([]),
   });
 
   readonly returnForm = new FormGroup({
-    returnDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    returnDate: new FormControl(this.today(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
     reason: new FormControl(this.returnReasons[0].value, {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(200)]
+      validators: [Validators.required, Validators.maxLength(200)],
     }),
     notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
-    items: new FormArray<ReturnItemFormGroup>([])
+    items: new FormArray<ReturnItemFormGroup>([]),
   });
 
   readonly cancellationForm = new FormGroup({
-    cancellationDate: new FormControl(this.today(), { nonNullable: true, validators: [Validators.required] }),
+    cancellationDate: new FormControl(this.today(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
     reason: new FormControl(this.cancellationReasons[0].value, {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(200)]
+      validators: [Validators.required, Validators.maxLength(200)],
     }),
-    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] })
+    notes: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
   constructor(
     private readonly http: HttpClient,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -139,7 +149,7 @@ export class SalesComponent implements OnInit {
     this.error.set('');
     forkJoin({
       sales: this.http.get<Sale[]>('/api/sales'),
-      products: this.http.get<Product[]>('/api/products')
+      products: this.http.get<Product[]>('/api/products'),
     })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
@@ -151,7 +161,7 @@ export class SalesComponent implements OnInit {
             this.detailSale.set(sales.find((sale) => sale.id === requestedSaleId) ?? null);
           }
         },
-        error: (error) => this.error.set(apiErrorMessage(error))
+        error: (error) => this.error.set(apiErrorMessage(error)),
       });
   }
 
@@ -186,8 +196,8 @@ export class SalesComponent implements OnInit {
   }
 
   productSelectedElsewhere(productId: number, currentIndex: number): boolean {
-    return this.itemControls.some((row, index) =>
-      index !== currentIndex && row.controls.productId.value === productId
+    return this.itemControls.some(
+      (row, index) => index !== currentIndex && row.controls.productId.value === productId,
     );
   }
 
@@ -238,7 +248,12 @@ export class SalesComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid || this.itemControls.length === 0 || this.hasShortage() || this.saving()) {
+    if (
+      this.form.invalid ||
+      this.itemControls.length === 0 ||
+      this.hasShortage() ||
+      this.saving()
+    ) {
       this.form.markAllAsTouched();
       return;
     }
@@ -250,20 +265,21 @@ export class SalesComponent implements OnInit {
       items: value.items.map((item) => ({
         productId: item.productId!,
         quantity: item.quantity!,
-        unitPrice: item.unitPrice!
-      }))
+        unitPrice: item.unitPrice!,
+      })),
     };
 
     this.saving.set(true);
     this.saleError.set('');
-    this.http.post<Sale>('/api/sales', request)
+    this.http
+      .post<Sale>('/api/sales', request)
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: () => {
           this.dialogOpen.set(false);
           this.load();
         },
-        error: (error) => this.saleError.set(apiErrorMessage(error))
+        error: (error) => this.saleError.set(apiErrorMessage(error)),
       });
   }
 
@@ -281,17 +297,19 @@ export class SalesComponent implements OnInit {
     this.returnForm.reset({
       returnDate: this.today(),
       reason: this.returnReasons[0].value,
-      notes: ''
+      notes: '',
     });
     this.returnForm.controls.items.clear();
     for (const item of sale.items.filter((candidate) => this.remainingReturnable(candidate) > 0)) {
-      this.returnForm.controls.items.push(new FormGroup({
-        saleItemId: new FormControl(item.id, { nonNullable: true }),
-        quantity: new FormControl<number | null>(null, [
-          Validators.min(0),
-          Validators.pattern(/^\d+$/)
-        ])
-      }));
+      this.returnForm.controls.items.push(
+        new FormGroup({
+          saleItemId: new FormControl(item.id, { nonNullable: true }),
+          quantity: new FormControl<number | null>(null, [
+            Validators.min(0),
+            Validators.pattern(/^\d+$/),
+          ]),
+        }),
+      );
     }
     this.returnError.set('');
     this.returnDialogOpen.set(true);
@@ -318,7 +336,7 @@ export class SalesComponent implements OnInit {
     return this.returnItemControls
       .map((row) => ({
         saleItemId: row.controls.saleItemId.value,
-        quantity: row.controls.quantity.value ?? 0
+        quantity: row.controls.quantity.value ?? 0,
       }))
       .filter((item) => item.quantity > 0);
   }
@@ -345,10 +363,16 @@ export class SalesComponent implements OnInit {
   submitReturn(): void {
     const sale = this.returnSale();
     const items = this.selectedReturnItems();
-    if (!sale || this.returnForm.invalid || items.length === 0
-        || this.hasReturnQuantityError() || this.returning()) {
+    if (
+      !sale ||
+      this.returnForm.invalid ||
+      items.length === 0 ||
+      this.hasReturnQuantityError() ||
+      this.returning()
+    ) {
       this.returnForm.markAllAsTouched();
-      if (items.length === 0) this.returnError.set('Enter a return quantity for at least one Product.');
+      if (items.length === 0)
+        this.returnError.set('Enter a return quantity for at least one Product.');
       return;
     }
     const value = this.returnForm.getRawValue();
@@ -356,11 +380,12 @@ export class SalesComponent implements OnInit {
       returnDate: value.returnDate,
       reason: value.reason,
       notes: value.notes.trim(),
-      items
+      items,
     };
     this.returning.set(true);
     this.returnError.set('');
-    this.http.post<Sale>(`/api/sales/${sale.id}/returns`, request)
+    this.http
+      .post<Sale>(`/api/sales/${sale.id}/returns`, request)
       .pipe(finalize(() => this.returning.set(false)))
       .subscribe({
         next: (updated) => {
@@ -368,7 +393,7 @@ export class SalesComponent implements OnInit {
           this.detailSale.set(updated);
           this.load();
         },
-        error: (error) => this.returnError.set(apiErrorMessage(error))
+        error: (error) => this.returnError.set(apiErrorMessage(error)),
       });
   }
 
@@ -378,7 +403,7 @@ export class SalesComponent implements OnInit {
     this.cancellationForm.reset({
       cancellationDate: this.today(),
       reason: this.cancellationReasons[0].value,
-      notes: ''
+      notes: '',
     });
     this.cancellationError.set('');
     this.cancellationDialogOpen.set(true);
@@ -397,11 +422,12 @@ export class SalesComponent implements OnInit {
     this.cancelling.set(true);
     this.cancellationError.set('');
     const value = this.cancellationForm.getRawValue();
-    this.http.post<Sale>(`/api/sales/${sale.id}/cancellation`, {
-      cancellationDate: value.cancellationDate,
-      reason: value.reason,
-      notes: value.notes.trim()
-    })
+    this.http
+      .post<Sale>(`/api/sales/${sale.id}/cancellation`, {
+        cancellationDate: value.cancellationDate,
+        reason: value.reason,
+        notes: value.notes.trim(),
+      })
       .pipe(finalize(() => this.cancelling.set(false)))
       .subscribe({
         next: (updated) => {
@@ -409,7 +435,7 @@ export class SalesComponent implements OnInit {
           this.detailSale.set(updated);
           this.load();
         },
-        error: (error) => this.cancellationError.set(apiErrorMessage(error))
+        error: (error) => this.cancellationError.set(apiErrorMessage(error)),
       });
   }
 
@@ -426,7 +452,7 @@ export class SalesComponent implements OnInit {
       COMPLETED: 'Completed',
       PARTIALLY_RETURNED: 'Partially Returned',
       RETURNED: 'Returned',
-      CANCELLED: 'Cancelled'
+      CANCELLED: 'Cancelled',
     };
     return labels[status];
   }
@@ -436,16 +462,14 @@ export class SalesComponent implements OnInit {
   }
 
   saleItemsSummary(sale: Sale): string {
-    return sale.items
-      .map((item) => `${item.quantity} × ${item.productName}`)
-      .join(' · ');
+    return sale.items.map((item) => `${item.quantity} × ${item.productName}`).join(' · ');
   }
 
   // Matches the server: a return reverses the item's share of the recorded line cost for all units
   // returned so far, minus what earlier returns reversed, so returning everything reverses it exactly.
   private returnLineCost(item: SaleItem, quantity: number): number {
     const reversedAfterReturn = roundMoney(
-      (item.lineCost * (item.returnedQuantity + quantity)) / item.quantity
+      (item.lineCost * (item.returnedQuantity + quantity)) / item.quantity,
     );
     return Math.max(roundMoney(reversedAfterReturn - item.returnedCost), 0);
   }
@@ -456,9 +480,9 @@ export class SalesComponent implements OnInit {
       quantity: new FormControl<number | null>(null, [
         Validators.required,
         Validators.min(1),
-        Validators.pattern(/^\d+$/)
+        Validators.pattern(/^\d+$/),
       ]),
-      unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)])
+      unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
     });
   }
 
