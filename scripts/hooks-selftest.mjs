@@ -245,6 +245,12 @@ const events = [
   { ...base, hook_event_name: "PreToolUse", tool_use_id: "t3", tool_name: "Bash", tool_input: { command: "mvn test" } },
   { ...base, hook_event_name: "PostToolUseFailure", tool_use_id: "t3", tool_name: "Bash", tool_input: { command: "mvn test" }, error: "Exit code 1\n[ERROR] Tests run: 1, Failures: 1", duration_ms: 900 },
   { ...base, hook_event_name: "PreToolUse", tool_use_id: "t4", tool_name: "Edit", tool_input: { file_path: join(tmp, ".env") } },
+  // t5: the main agent spawns the reviewer; t6: a call the reviewer subagent itself makes. Both executed (Pre+Post),
+  // so they do not change the proposed-but-not-executed count below.
+  { ...base, hook_event_name: "PreToolUse", tool_use_id: "t5", tool_name: "Agent", tool_input: { subagent_type: "reviewer", description: "review" } },
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t5", tool_name: "Agent", tool_input: { subagent_type: "reviewer", description: "review" }, duration_ms: 5000 },
+  { ...base, hook_event_name: "PreToolUse", tool_use_id: "t6", tool_name: "Bash", tool_input: { command: "git diff main...HEAD" }, agent_type: "reviewer" },
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t6", tool_name: "Bash", tool_input: { command: "git diff main...HEAD" }, agent_type: "reviewer", duration_ms: 20 },
 ];
 for (const e of events) {
   const r = run("log-action.mjs", e);
@@ -254,11 +260,13 @@ for (const e of events) {
 const pendingFile = join(tmp, ".agent-log", "pending.jsonl");
 check("log-action buffers in pending.jsonl, not actions.jsonl", existsSync(pendingFile) && !existsSync(join(tmp, ".agent-log", "actions.jsonl")));
 const lines = readFileSync(pendingFile, "utf8").trim().split("\n").map((l) => JSON.parse(l));
-check("log has 7 lines", lines.length === 7);
+check("log has 11 lines", lines.length === 11);
 check("PreToolUse line has no exit field", lines[0].event === "PreToolUse" && !("exit" in lines[0]) && lines[0].id === "t1");
 check("PostToolUse Bash keeps cmd and exit 0", lines[1].cmd === "mvn -B -ntp verify" && lines[1].exit === 0 && lines[1].ms === 4200);
 check("Edit line stores repo-relative path", lines[3].path === "src/main/java/com/flowershop/inventory/InventoryApplication.java", lines[3].path);
 check("failure line carries exit code 1", lines[5].exit === 1);
+check("Agent spawn line records subagent_type", lines.find((l) => l.id === "t5")?.subagent_type === "reviewer");
+check("a reviewer subagent call is tagged agent", lines.find((l) => l.id === "t6")?.agent === "reviewer");
 
 // 2b. log-action writes to the copy of the project the tool runs in: the cwd's git root with this hook, not the
 // session's CLAUDE_PROJECT_DIR. That is what a git worktree needs, where CLAUDE_PROJECT_DIR is the main checkout.
