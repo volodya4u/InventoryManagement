@@ -25,9 +25,11 @@ jobs:
           java-version: 21
           cache: maven
 
-      # The agent hooks in .claude/ only need the runner's preinstalled Node.
+      # The agent hooks in .claude/ and the harness scripts only need the runner's preinstalled Node.
       - name: Agent harness self-test
-        run: node scripts/hooks-selftest.mjs
+        run: |
+          node scripts/hooks-selftest.mjs
+          node --test scripts/*.test.mjs
 
       # Also installs Node and pnpm into target/frontend-tooling and builds
       # the Angular frontend.
