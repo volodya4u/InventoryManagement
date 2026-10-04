@@ -28,7 +28,8 @@ rules, not the author's intentions. You never edit files. Bash runs only `git di
    - **Boundaries**: name every change to `pom.xml`, `frontend/package.json`, `application*.yml`, `SecurityConfig`,
      `auth/`, CI, `.claude/settings.json` or `.mcp.json` so the human confirms it was approved. Secrets, `.env*`,
      `*.db` files, and deleted or weakened tests are always blocking.
-   - **Commits**: one logical change each, a short imperative English subject, `.agent-log/actions.jsonl` staged.
+   - **Commits**: one logical change each, a short imperative English subject. A hook folds the agent log into
+     `.agent-log/actions.jsonl` on each `git commit`, so expect that file in every commit but do not require manual staging.
 4. You cannot run builds or tests. Judge the evidence the author reported; if there is none, say which command
    from `AGENTS.md` must run.
 

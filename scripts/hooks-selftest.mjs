@@ -11,7 +11,7 @@
 //   5. scripts/session-start.mjs does nothing outside Claude Code cloud sessions
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -213,19 +213,64 @@ for (const e of events) {
   const r = run("log-action.mjs", e);
   check(`log-action ${e.hook_event_name} ${e.tool_name} exits 0 silently`, r.status === 0 && r.stdout === "");
 }
-const lines = readFileSync(join(tmp, ".agent-log", "actions.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
+// The buffer is pending.jsonl (gitignored); actions.jsonl is untouched until a `git commit` folds the buffer in.
+const pendingFile = join(tmp, ".agent-log", "pending.jsonl");
+check("log-action buffers in pending.jsonl, not actions.jsonl", existsSync(pendingFile) && !existsSync(join(tmp, ".agent-log", "actions.jsonl")));
+const lines = readFileSync(pendingFile, "utf8").trim().split("\n").map((l) => JSON.parse(l));
 check("log has 7 lines", lines.length === 7);
 check("PreToolUse line has no exit field", lines[0].event === "PreToolUse" && !("exit" in lines[0]) && lines[0].id === "t1");
 check("PostToolUse Bash keeps cmd and exit 0", lines[1].cmd === "mvn -B -ntp verify" && lines[1].exit === 0 && lines[1].ms === 4200);
 check("Edit line stores repo-relative path", lines[3].path === "src/main/java/com/flowershop/inventory/InventoryApplication.java", lines[3].path);
 check("failure line carries exit code 1", lines[5].exit === 1);
 
+// 2b. log-action writes to the copy of the project the tool runs in: the cwd's git root with this hook, not the
+// session's CLAUDE_PROJECT_DIR. That is what a git worktree needs, where CLAUDE_PROJECT_DIR is the main checkout.
+const worktree = mkdtempSync(join(tmpdir(), "hooks-selftest-wt-"));
+const mainCheckout = mkdtempSync(join(tmpdir(), "hooks-selftest-main-"));
+mkdirSync(join(worktree, ".claude", "hooks"), { recursive: true }); // the markers logRoot looks for
+writeFileSync(join(worktree, ".git"), "gitdir: /somewhere/.git/worktrees/wt\n"); // a worktree's .git is a file
+writeFileSync(join(worktree, ".claude", "hooks", "log-action.mjs"), "");
+spawnSync(process.execPath, [join(here, ".claude", "hooks", "log-action.mjs")], {
+  input: JSON.stringify({ ...base, cwd: worktree, hook_event_name: "PreToolUse", tool_use_id: "w1", tool_name: "Edit", tool_input: { file_path: join(worktree, "a.txt") } }),
+  env: { ...process.env, CLAUDE_PROJECT_DIR: mainCheckout },
+  encoding: "utf8",
+});
+check("log-action logs into the worktree, not CLAUDE_PROJECT_DIR", existsSync(join(worktree, ".agent-log", "pending.jsonl")) && !existsSync(join(mainCheckout, ".agent-log")));
+rmSync(worktree, { recursive: true, force: true });
+rmSync(mainCheckout, { recursive: true, force: true });
+
 // 3. summary pairs Pre/Post by id
 const executedIds = new Set(lines.filter((l) => l.event !== "PreToolUse").map((l) => l.id));
 const proposedOnly = lines.filter((l) => l.event === "PreToolUse" && !executedIds.has(l.id));
 check("exactly one proposed-but-not-executed action (.env edit)", proposedOnly.length === 1 && proposedOnly[0].path === ".env");
-const summary = spawnSync(process.execPath, [join(here, "scripts", "agent-log-summary.mjs"), join(tmp, ".agent-log", "actions.jsonl")], { encoding: "utf8" });
+const summary = spawnSync(process.execPath, [join(here, "scripts", "agent-log-summary.mjs"), pendingFile], { encoding: "utf8" });
 check("agent-log-summary reports 1 proposed but not executed", summary.status === 0 && /1 proposed but not executed/.test(summary.stdout));
+
+// 3b. agent-log-fold folds pending.jsonl into actions.jsonl and stages it on `git commit`, and leaves other commands alone.
+const repo = mkdtempSync(join(tmpdir(), "hooks-selftest-fold-"));
+spawnSync("git", ["init", "-q"], { cwd: repo });
+spawnSync("git", ["config", "user.email", "t@example.com"], { cwd: repo });
+spawnSync("git", ["config", "user.name", "Test"], { cwd: repo });
+mkdirSync(join(repo, ".agent-log"), { recursive: true });
+writeFileSync(join(repo, ".agent-log", "actions.jsonl"), '{"ts":"2026-01-01T00:00:00.000Z","event":"PostToolUse","id":"old","tool":"Edit"}\n');
+const foldPending = join(repo, ".agent-log", "pending.jsonl");
+const foldLine = '{"ts":"2026-01-01T00:01:00.000Z","event":"PostToolUse","id":"new","tool":"Bash"}';
+writeFileSync(foldPending, foldLine + "\n");
+const foldEnv = { ...process.env, CLAUDE_PROJECT_DIR: repo };
+const foldPayload = (command) => ({ input: JSON.stringify({ ...base, cwd: repo, hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command } }), env: foldEnv, encoding: "utf8" });
+const foldRun = (command) => spawnSync(process.execPath, [join(here, ".claude", "hooks", "agent-log-fold.mjs")], foldPayload(command));
+
+const nonCommit = foldRun("git status");
+check("agent-log-fold leaves pending.jsonl alone on a non-commit command", nonCommit.status === 0 && readFileSync(foldPending, "utf8").includes("new"));
+
+const folded = foldRun('git commit -m "x"');
+const foldedActions = readFileSync(join(repo, ".agent-log", "actions.jsonl"), "utf8");
+check("agent-log-fold exits 0 on git commit", folded.status === 0);
+check("agent-log-fold appends the buffered line to actions.jsonl", foldedActions.includes('"id":"old"') && foldedActions.includes('"id":"new"'));
+check("agent-log-fold empties the pending buffer", !existsSync(foldPending) || readFileSync(foldPending, "utf8").trim() === "");
+const staged = spawnSync("git", ["diff", "--cached", "--name-only"], { cwd: repo, encoding: "utf8" }).stdout;
+check("agent-log-fold stages actions.jsonl", /(^|\n)\.agent-log\/actions\.jsonl(\n|$)/.test(staged), staged.trim());
+rmSync(repo, { recursive: true, force: true });
 
 // 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
 const guardWired = (settings.hooks?.PreToolUse ?? []).some(
