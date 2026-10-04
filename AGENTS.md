@@ -21,7 +21,7 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 - `mvn -B -ntp verify`, the frontend tests and `pnpm exec prettier --check .` (in `frontend/`) are green.
 - New backend behaviour has a JUnit test under `src/test/java` in the same package (API flows go to
   `InventoryFlowIntegrationTest`); new frontend logic has a `*.spec.ts` next to the code.
-- Evidence, not claims: report the command you ran and its exit code / test count.
+- Evidence, not claims: commands with exit codes / test counts; a PR fills the template's Evidence and Reviewer verdict.
 - Before a PR, a fresh-context, read-only reviewer checks the diff (Claude Code: the `reviewer` subagent); fix or
   answer every blocking finding. Dependabot updates merged by the `dependabot-auto-merge` CI job skip it (CI is their
   checker); the ones that job leaves open are reviewed like any other change, and a human merges them.

@@ -24,14 +24,15 @@ Run the whole loop yourself; come back to the human only at the exits named belo
    - Frontend, in `frontend/`: `pnpm exec ng test --watch=false --include <path/to/file.spec.ts>`
    - Changing behaviour that has no test yet: first pin today's behaviour with a passing test, then write the failing one.
 3. **Green.** Make the smallest change that passes the test, then re-run the same command. Repeat.
-4. **Done.** Run `node scripts/dod.mjs` (self-test, `mvn -B -ntp verify`, Prettier, frontend tests; the same checks
-   as CI). If a check is red, go back to step 3 with its failure. For formatting, run
+4. **Done.** Run `node scripts/dod.mjs` (self-test, harness unit tests, `mvn -B -ntp verify`, Prettier, frontend
+   tests; the same checks as CI). If a check is red, go back to step 3 with its failure. For formatting, run
    `pnpm exec prettier --write <files>` in `frontend/`.
 5. **Review.** Claude Code: ask the `reviewer` subagent, passing only the base ref, the goal in one sentence and the
    spec path. Any other agent: get an equivalent fresh-context, read-only review. Fix each blocking finding and go back
    to step 4. Fix each non-blocking finding or say why not.
 6. **Report.** Give the red and green lines from steps 2 and 3, the table `dod.mjs` printed, the reviewer's verdict,
-   and anything left open. Commit one logical change at a time, with `.agent-log/actions.jsonl` staged.
+   and anything left open. Commit one logical change at a time; a hook folds the agent log into
+   `.agent-log/actions.jsonl` and stages it on each `git commit`, so you need not stage it yourself.
 
 ## Exits: stop and ask the human
 

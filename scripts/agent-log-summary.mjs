@@ -5,16 +5,20 @@
 //   blocked   = proposed lines with no matching executed line (same id) — denied by a hook, a rule or the human
 //   failed    = executed lines with a non-zero exit
 // Usage: node scripts/agent-log-summary.mjs [path/to/actions.jsonl]   (run from the repo root)
+// Reads the committed log and, next to it, the pending buffer the hooks fold in on `git commit`, so this session's
+// not-yet-committed actions show too.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const file = process.argv[2] ?? join(process.cwd(), ".agent-log", "actions.jsonl");
-if (!existsSync(file)) {
+const pending = join(process.cwd(), ".agent-log", "pending.jsonl");
+const sources = [file, ...(process.argv[2] ? [] : [pending])].filter(existsSync);
+if (!sources.length) {
   console.error(`No log at ${file}. Are the hooks in .claude/settings.json active? Run one Edit and check again.`);
   process.exit(2);
 }
-const lines = readFileSync(file, "utf8")
-  .split(/\r?\n/)
+const lines = sources
+  .flatMap((f) => readFileSync(f, "utf8").split(/\r?\n/))
   .filter(Boolean)
   .flatMap((l) => {
     try {
