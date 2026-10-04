@@ -11,8 +11,8 @@ import { pathToFileURL } from "node:url";
 
 export const TEMPLATE_HEADINGS = ["Summary", "Why", "Evidence", "Reviewer verdict", "Boundaries touched", "Notes"];
 
-// The reviewer's own "## Review: APPROVE | CHANGES REQUESTED" line decides when the report is pasted (the last one,
-// after earlier rounds); otherwise the last verdict keyword written in the section does.
+// The reviewer's own "## Review: APPROVE" or "## Review: CHANGES REQUESTED" line decides when the report is pasted
+// (the last one, after earlier rounds); otherwise the last verdict keyword written in the section does.
 function finalVerdict(text) {
   // The verdict must end the line, so the reviewer's unfilled format line "## Review: APPROVE | CHANGES REQUESTED"
   // is not a report line (and its last keyword is CHANGES REQUESTED).
