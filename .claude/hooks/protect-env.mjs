@@ -8,18 +8,20 @@
 //   that expand to one (.e*, .en?, .en[]v], {.env,x}, .en{u..w}), also inside $(...), backticks and unquoted
 //   heredocs; git diff --no-index or a path outside the work tree, and git diff or git grep run outside the project
 //   (cd, -C, --git-dir, --work-tree, GIT_DIR=...), where git works as with --no-index; git grep --no-index /
-//   --no-exclude-standard; recursive diff; recursive grep unless every --include glob keeps .env out; rg -u,
-//   --no-ignore and globs that can match .env. A .env named outright is left to the deny rules, so commit messages
-//   may mention it.
+//   --no-exclude-standard; recursive diff, except of two existing in-project paths (each a folder with no .env at
+//   its top, or a file; not the root; no -N or -P; no $, backtick or glob in the name); recursive grep unless every
+//   --include glob keeps .env out; rg -u, --no-ignore and globs that can match .env. A .env named outright is left
+//   to the deny rules, so commit messages may mention it.
 //   Glob is not matched on purpose: it returns names, never contents.
 // Text checks are not a sandbox. Still open: sh -c, variables, a script that opens the file itself, file names fed
 // through xargs or find -exec, other readers (findstr /s, tar, ag, ugrep), git aliases, git add -f, Windows 8.3
-// short names, and the PowerShell tool. Native Windows has no Claude Code sandbox, and a hook that crashes or times
-// out lets the call run.
+// short names, a .env pair deep inside both folders of a diff -r or a symlink to one under another name, a cd the
+// hook does not follow (inside ( … ), popd, env -C), and the PowerShell tool. Native Windows has no Claude Code
+// sandbox, and a hook that crashes or times out lets the call run.
 // Exit code 2 = the tool call is BLOCKED and stderr is fed back to the agent as the reason.
 // PreToolUse hooks run BEFORE the permission check, in EVERY permission mode (even bypassPermissions):
 // hooks enforce, AGENTS.md only advises. The permissions.deny rules in settings.json are the second line of defence.
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
 let raw = "";
@@ -313,6 +315,38 @@ const safeIncludes = (args) => {
   const globs = args.flatMap((arg, i) => (optionPrefix(arg, ["--include"]) ? [optionValue(arg, i, args, ["--include"]) ?? "*"] : []));
   return globs.length > 0 && !globs.some((glob) => globHitsSecret(glob));
 };
+// diff -r prints the differing lines of every file both folders hold, and with -N (or -P, its one-sided form) every
+// file only one of them holds. It may compare exactly two existing folders inside the project when neither is the
+// project root and neither holds a .env file at its top (only names are listed, never contents). A name with $, a
+// backtick or a glob is not what the shell passes on, and one that does not exist yet may be made by the same
+// command, so both count as unsafe. A .env pair deeper in both folders still gets through.
+const safeRecursiveDiff = (args, dir) => {
+  const operands = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "--") {
+      operands.push(...args.slice(i + 1));
+      break;
+    }
+    if (/^-[^-]*[NP]/.test(arg) || optionPrefix(arg, ["--new-file", "--unidirectional-new-file", "--from-file", "--to-file"])) return false;
+    if (!arg.startsWith("-") || arg === "-") operands.push(arg);
+    // options whose value is the next word: -x '*.o', --exclude '*.o', -I RE, --label L ...
+    else if (/^-[xXISLFD]$/.test(arg) || (!arg.includes("=") && optionPrefix(arg, ["--exclude", "--exclude-from", "--ignore-matching-lines", "--starting-file", "--label", "--show-function-line", "--ifdef"]))) i++;
+  }
+  return (
+    operands.length === 2 &&
+    operands.every((operand) => {
+      if (operand === "-" || /[$`*?[{]/.test(operand) || isSecret(baseName(operand)) || outsideWorkTree(operand, dir)) return false;
+      const folder = resolve(dir, native(operand));
+      if (norm(folder) === project) return false;
+      try {
+        return statSync(folder).isDirectory() ? !readdirSync(folder).some(isSecret) : true; // a file holds no folder
+      } catch {
+        return false; // not there yet: the same command may make it
+      }
+    })
+  );
+};
 
 const checkGit = (args, leftProject, dir) => {
   // Outside any repository, git diff of two paths runs as --no-index, and git grep may too (grep.fallbackToNoIndex).
@@ -381,7 +415,9 @@ const checkScript = (script) => {
     if (program === "git") checkGit(rest, lost || !inProject(dir), dir);
     else if (program === "rg") checkRipgrep(rest);
     else if (program === "diff") {
-      if (rest.some(recursive)) block("recursive diff prints every file, .env included. Use git diff.");
+      if (rest.some(recursive) && (lost || !safeRecursiveDiff(rest, dir))) {
+        block("recursive diff can print .env files: it may compare only two existing folders inside the project, named plainly (no $, backtick or glob), neither the root nor one holding a .env file, and without -N or -P. Otherwise use git diff.");
+      }
     } else if ((program === "rgrep" || rest.some(recursive)) && !safeIncludes(rest)) {
       block("recursive grep reads every file, .env included. Use the Grep tool (it skips .gitignore'd files) or limit grep with --include=*.ts.");
     }

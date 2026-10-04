@@ -11,13 +11,18 @@
 //   5. scripts/session-start.mjs does nothing outside Claude Code cloud sessions
 // Usage: node scripts/hooks-selftest.mjs   (run from the repo root)
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const here = process.cwd();
 const tmp = mkdtempSync(join(tmpdir(), "hooks-selftest-"));
 mkdirSync(join(tmp, ".git")); // the temp project is the git work tree protect-env resolves paths against
+// Folders for the diff -r rule: clean ones it may compare, and one with a (fake) secrets file at its top.
+for (const [folder, file] of [["docs", "README.md"], ["src/a", "x.txt"], ["src/b", "x.txt"], [".agents/skills", "s.md"], [".claude/skills", "s.md"], ["withenv", ".env.selftest"], ["a$b", "x.txt"]]) {
+  mkdirSync(join(tmp, folder), { recursive: true });
+  writeFileSync(join(tmp, folder, file), "FAKE=1\n");
+}
 const env = { ...process.env, CLAUDE_PROJECT_DIR: tmp };
 const run = (script, payload) =>
   spawnSync(process.execPath, [join(here, ".claude", "hooks", script)], { input: JSON.stringify(payload), env, encoding: "utf8" });
@@ -140,7 +145,33 @@ for (const [command, expect] of [
   ["grep -d recurse x .", 2],
   ["cd frontend && grep --recursive x .", 2],
   ["ls | xargs grep -r x", 2],
-  ["diff -r a b", 2],
+  // diff -r: two existing folders inside the project only, plainly named, neither the root nor holding a .env, no -N/-P
+  ["diff -r .agents/skills .claude/skills", 0],
+  ["node scripts/skills-sync.mjs && diff -rq .agents/skills .claude/skills", 0],
+  ["diff -r -x '*.o' src/a src/b", 0],
+  ["diff -r docs src/a", 0],
+  ["diff -rN .agents/skills .claude/skills", 2],
+  ["diff -r --new-file src/a src/b", 2],
+  ["diff -rP src/a src/b", 2],
+  ["diff -r --unidirectional-new-file src/a src/b", 2],
+  ["diff -r --from-file=docs src/a", 2],
+  ["diff -r -- -N src/b", 2],
+  ['diff -r "$HOME/a" "$HOME/b"', 2],
+  ['diff -r "$(echo src/a)" docs', 2],
+  ["diff -r src/* docs", 2],
+  ["diff -r src/a missing", 2],
+  // each of these is caught by a single rule, so it turns green if that rule is dropped
+  ["diff -r docs withenv/.env.selftest", 2], // isSecret on a file operand
+  ["diff -r docs src/a src/b", 2], // exactly two operands
+  ["diff -r --from-file=withenv src/a src/b", 2], // --from-file compares a third path
+  ["diff -r a$b docs", 2], // $ in a name that otherwise resolves to a real in-project folder
+  ["diff -r . docs", 2],
+  ["diff -r docs frontend/..", 2],
+  ["diff -r docs ../other", 2],
+  ["diff -r withenv docs", 2],
+  ["diff -r docs .env.local", 2],
+  ["diff -r a b c", 2],
+  ["cd ~ && diff -r a b", 2],
   // redirection targets are not arguments, comments are not commands, plain heredoc text is not globbed
   ["git diff --stat main...HEAD 2>/dev/null", 0],
   ["git diff main...HEAD > /tmp/review.diff", 0],
@@ -168,7 +199,7 @@ for (const [command, expect] of [
   ["grep --directories recurse KEY .", 2],
   ["grep -d rec KEY .", 2],
   ["grep --dir=rec KEY .", 2],
-  ["diff --recur a b", 2],
+  ["diff --recur . docs", 2],
   ["grep -r --include=*.ts --inclu=.env x .", 2],
   // rg honours .gitignore unless told not to
   ["rg -n TODO src", 0],
