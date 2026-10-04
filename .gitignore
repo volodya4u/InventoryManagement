@@ -11,7 +11,7 @@ frontend/dist/
 *.log
 
 # agent harness
-.agent-log/pending.jsonl
+.agent-log/pending.jsonl*
 .env
 .env.*
 !.env.example

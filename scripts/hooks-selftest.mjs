@@ -272,6 +272,12 @@ const staged = spawnSync("git", ["diff", "--cached", "--name-only"], { cwd: repo
 check("agent-log-fold stages actions.jsonl", /(^|\n)\.agent-log\/actions\.jsonl(\n|$)/.test(staged), staged.trim());
 rmSync(repo, { recursive: true, force: true });
 
+// 3c. .gitignore covers the buffer and the transient fold file, so a fold interrupted mid-write leaves no dirty path.
+for (const name of ["pending.jsonl", "pending.jsonl.123.folding"]) {
+  const ignored = spawnSync("git", ["check-ignore", "-q", `.agent-log/${name}`], { cwd: here }).status;
+  check(`.gitignore ignores .agent-log/${name}`, ignored === 0);
+}
+
 // 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
 const guardWired = (settings.hooks?.PreToolUse ?? []).some(
   (entry) => entry.matcher === "Bash" && entry.hooks.some((h) => (h.args ?? []).some((a) => a.endsWith("/scripts/reviewer-bash-guard.mjs"))),
