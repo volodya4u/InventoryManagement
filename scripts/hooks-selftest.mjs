@@ -13,7 +13,8 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { codeFingerprint, markerPath } from "./dod-fingerprint.mjs";
 
 const here = process.cwd();
 const tmp = mkdtempSync(join(tmpdir(), "hooks-selftest-"));
@@ -314,6 +315,44 @@ for (const name of ["pending.jsonl", "pending.jsonl.123.folding"]) {
   const ignored = spawnSync("git", ["check-ignore", "-q", `.agent-log/${name}`], { cwd: here }).status;
   check(`.gitignore ignores .agent-log/${name}`, ignored === 0);
 }
+
+// 3d. dod-fresh.mjs (Stop hook): reminds (exit 0, never blocks) when code changed since the last green dod marker.
+const fresh = mkdtempSync(join(tmpdir(), "hooks-selftest-fresh-"));
+mkdirSync(join(fresh, "src"), { recursive: true });
+mkdirSync(join(fresh, "docs"), { recursive: true });
+writeFileSync(join(fresh, "src", "App.java"), "class App {}\n");
+writeFileSync(join(fresh, "docs", "notes.md"), "# notes\n");
+spawnSync("git", ["-C", fresh, "init", "-q"]);
+spawnSync("git", ["-C", fresh, "add", "-A"]);
+spawnSync("git", ["-C", fresh, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init"]);
+const freshMarker = markerPath(fresh);
+mkdirSync(dirname(freshMarker), { recursive: true });
+const runFresh = (payload) =>
+  spawnSync(process.execPath, [join(here, ".claude", "hooks", "dod-fresh.mjs")], {
+    input: JSON.stringify({ session_id: "selftest", cwd: fresh, permission_mode: "default", hook_event_name: "Stop", ...payload }),
+    env: { ...process.env, CLAUDE_PROJECT_DIR: fresh },
+    encoding: "utf8",
+  });
+
+const noMarker = runFresh({});
+check("dod-fresh stays quiet when no green marker exists", noMarker.status === 0 && noMarker.stderr === "");
+
+writeFileSync(freshMarker, JSON.stringify({ fingerprint: "stale-fingerprint" }) + "\n");
+const changed = runFresh({});
+check("dod-fresh reminds (exit 0) when code changed since the marker", changed.status === 0 && /Re-run it before finishing/.test(changed.stderr));
+
+writeFileSync(freshMarker, JSON.stringify({ fingerprint: codeFingerprint(fresh) }) + "\n");
+const unchanged = runFresh({});
+check("dod-fresh stays quiet when the fingerprint still matches", unchanged.status === 0 && unchanged.stderr === "");
+
+writeFileSync(join(fresh, "docs", "notes.md"), "# changed, docs are not code\n");
+const docOnly = runFresh({});
+check("dod-fresh ignores a docs-only change", docOnly.status === 0 && docOnly.stderr === "");
+
+writeFileSync(freshMarker, JSON.stringify({ fingerprint: "stale-fingerprint" }) + "\n");
+const active = runFresh({ stop_hook_active: true });
+check("dod-fresh respects stop_hook_active (no loop)", active.status === 0 && active.stderr === "");
+rmSync(fresh, { recursive: true, force: true });
 
 // 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
 const guardWired = (settings.hooks?.PreToolUse ?? []).some(

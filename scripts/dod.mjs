@@ -20,6 +20,7 @@ import {
   selfTestVerdict,
   specFilePattern,
 } from "./dod-checks.mjs";
+import { codeFingerprint, markerPath } from "./dod-fingerprint.mjs";
 
 const root = process.cwd();
 const frontend = join(root, "frontend");
@@ -92,6 +93,14 @@ mkdirSync(logDir, { recursive: true });
 for (const [i, check] of checks.entries()) writeFileSync(join(logDir, `${i + 1}.log`), `${check.name}: not run\n`);
 const head = sh("git", ["rev-parse", "--short", "HEAD"]).stdout?.trim() || "unknown";
 const dirty = (sh("git", ["status", "--porcelain"]).stdout ?? "").split("\n").filter(Boolean).length;
+// Fingerprint the code at the start of the run: an edit made while the checks run is then an unverified change the
+// dod-fresh hook still flags, rather than one the marker silently blesses.
+let startFingerprint = null;
+try {
+  startFingerprint = codeFingerprint(root);
+} catch {
+  /* not a git work tree, or git missing: skip the freshness marker */
+}
 const rows = [];
 let exitCode = 0;
 for (const [i, check] of checks.entries()) {
@@ -120,4 +129,13 @@ console.log(`HEAD ${head}${dirty ? ` with ${dirty} uncommitted file(s)` : ""}, $
 console.log("| Check | Command | Exit | Time | Result |");
 console.log("| ----- | ------- | ---- | ---- | ------ |");
 for (const row of rows) console.log(row);
+
+// Record a green run so the dod-fresh Stop hook (.claude/hooks/dod-fresh.mjs) can tell when code changed since.
+if (exitCode === 0 && startFingerprint) {
+  try {
+    writeFileSync(markerPath(root), JSON.stringify({ head, fingerprint: startFingerprint, at: new Date().toISOString() }) + "\n");
+  } catch {
+    /* the marker is a convenience, never fail the run over it */
+  }
+}
 process.exit(exitCode);
