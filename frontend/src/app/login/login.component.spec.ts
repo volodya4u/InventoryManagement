@@ -62,6 +62,7 @@ describe('LoginComponent', () => {
     setup();
     component.form.setValue({ username: '  admin ', password: ' secret ' });
     component.submit();
+    component.submit();
     expect(component.submitting()).toBe(true);
 
     requests.expectOne('/api/auth/csrf').flush({});

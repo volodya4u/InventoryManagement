@@ -40,6 +40,7 @@ describe('ShellComponent', () => {
     (fixture.nativeElement.querySelector('nav a') as HTMLAnchorElement).click();
     fixture.detectChanges();
     expect(component.menuOpen()).toBe(false);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('signs out once and goes to the login page', () => {
