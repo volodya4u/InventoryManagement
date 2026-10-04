@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+// Checks that a pull request description fills in the two required sections of .github/pull_request_template.md:
+//   ## Evidence (`dod.mjs`)  -> not empty, and holds the dod.mjs table (or at least names dod.mjs)
+//   ## Reviewer verdict      -> not empty, and its final verdict is APPROVE (see finalVerdict)
+// A section runs until the next heading of the template, so pasted output with its own "## ..." lines
+// (dod.mjs prints "## Definition of done", the reviewer "## Review: APPROVE") stays inside it.
+// HTML comments (the template's hints) do not count as content.
+// Run by .github/workflows/pr-description.yml, which skips Dependabot pull requests.
+// Usage: PR_BODY="..." node scripts/check-pr-description.mjs   (exit code 0 = complete, 1 = something is missing)
+import { pathToFileURL } from "node:url";
+
+export const TEMPLATE_HEADINGS = ["Summary", "Why", "Evidence", "Reviewer verdict", "Boundaries touched", "Notes"];
+
+// The reviewer's own "## Review: APPROVE" or "## Review: CHANGES REQUESTED" line decides when the report is pasted
+// (the last one, after earlier rounds); otherwise the last verdict keyword written in the section does.
+function finalVerdict(text) {
+  // The verdict must end the line, so the reviewer's unfilled format line "## Review: APPROVE | CHANGES REQUESTED"
+  // is not a report line (and its last keyword is CHANGES REQUESTED).
+  const reportLines = [...text.matchAll(/^##[ \t]+Review:[ \t]*(APPROVE|CHANGES REQUESTED)[ \t]*$/gm)];
+  const keywords = reportLines.length ? reportLines : [...text.matchAll(/\b(APPROVE|CHANGES REQUESTED)\b/g)];
+  return keywords.at(-1)?.[1];
+}
+
+function section(body, title) {
+  const heading = new RegExp(`^##[ \\t]+${title}\\b.*$`, "im").exec(body);
+  if (!heading) return null;
+  const rest = body.slice(heading.index + heading[0].length);
+  const next = new RegExp(`^##[ \\t]+(${TEMPLATE_HEADINGS.join("|")})\\b`, "im").exec(rest);
+  return (next ? rest.slice(0, next.index) : rest).trim();
+}
+
+export function checkPrDescription(rawBody) {
+  const body = String(rawBody ?? "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/<!--[\s\S]*?-->/g, "");
+  const problems = [];
+
+  const evidence = section(body, "Evidence");
+  if (evidence === null) problems.push('Missing the "## Evidence (`dod.mjs`)" section.');
+  else if (!evidence) problems.push("The Evidence section is empty: paste the table `node scripts/dod.mjs` printed.");
+  else if (!/^\s*\|.*\|\s*$/m.test(evidence) && !/dod\.mjs/.test(evidence)) {
+    problems.push("The Evidence section has neither the dod.mjs table nor a dod.mjs result.");
+  }
+
+  const verdict = section(body, "Reviewer verdict");
+  if (verdict === null) problems.push('Missing the "## Reviewer verdict" section.');
+  else if (!verdict) problems.push("The Reviewer verdict section is empty: give the reviewer subagent's verdict.");
+  else if (finalVerdict(verdict) !== "APPROVE") {
+    problems.push(
+      'The final verdict in the Reviewer verdict section is not APPROVE (the last pasted "## Review:" line decides, ' +
+        "otherwise the last APPROVE / CHANGES REQUESTED): fix or answer the blocking findings first.",
+    );
+  }
+
+  return problems;
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  const problems = checkPrDescription(process.env.PR_BODY);
+  if (problems.length) {
+    console.error("The pull request description is incomplete (see .github/pull_request_template.md):");
+    for (const problem of problems) console.error(`- ${problem}`);
+    process.exit(1);
+  }
+  console.log("The pull request description has the Evidence and Reviewer verdict sections.");
+}
