@@ -6,10 +6,12 @@ import { join } from "node:path";
 import { after, test } from "node:test";
 import {
   backendVerdict,
+  checkExitCode,
+  expectedTestClasses,
   findFiles,
   frontendVerdict,
   nodeTestVerdict,
-  runnableTestClasses,
+  selfTestVerdict,
   specFilePattern,
   testClassPattern,
 } from "./dod-checks.mjs";
@@ -48,28 +50,35 @@ test("spec files and Surefire test classes are found on disk", () => {
   const app = join(tmp, "frontend", "src", "app");
   mkdirSync(join(app, "core"), { recursive: true });
   mkdirSync(join(tmp, "frontend", "node_modules", "lib"), { recursive: true });
-  for (const file of ["app.spec.ts", "app.ts", "core/decimal.spec.ts"]) writeFileSync(join(app, file), "");
+  // The Angular unit-test builder includes **/*.spec.ts and **/*.test.ts by default.
+  for (const file of ["app.spec.ts", "app.ts", "core/decimal.spec.ts", "core/money.test.ts"]) {
+    writeFileSync(join(app, file), "");
+  }
   writeFileSync(join(tmp, "frontend", "node_modules", "lib", "x.spec.ts"), "");
-  assert.equal(findFiles(join(tmp, "frontend"), specFilePattern).length, 2);
+  assert.equal(findFiles(join(tmp, "frontend"), specFilePattern).length, 3);
 
   const java = join(tmp, "src", "test", "java", "com", "example");
   mkdirSync(java, { recursive: true });
-  const tests = "class X { @Test void works() {} }";
+  const tests = (name) => `package com.example;\n\nclass ${name} { @Test void works() {} }`;
   const sources = {
-    "FlowTest.java": tests,
-    "DecimalsTests.java": "class X { @ParameterizedTest void works(int i) {} }",
-    "LegacyTestCase.java": tests,
-    "AbstractIntegrationTest.java": "abstract class AbstractIntegrationTest { @Test void shared() {} }",
-    "TestClock.java": "class TestClock { }",
-    "Fixtures.java": tests,
+    "FlowTest.java": tests("FlowTest"),
+    "DecimalsTests.java": "package com.example;\nclass DecimalsTests { @ParameterizedTest void works(int i) {} }",
+    "LegacyTestCase.java": tests("LegacyTestCase"),
+    // A nested abstract helper does not make the test class itself abstract.
+    "HelperTest.java": "package com.example;\nclass HelperTest { abstract static class Base {} @Test void works() {} }",
+    "AbstractIntegrationTest.java": "package com.example;\nabstract class AbstractIntegrationTest { @Test void shared() {} }",
+    "TestClock.java": "package com.example;\nclass TestClock { }",
+    "Fixtures.java": tests("Fixtures"),
   };
   for (const [file, source] of Object.entries(sources)) writeFileSync(join(java, file), source);
   const testDir = join(tmp, "src", "test", "java");
-  assert.equal(findFiles(testDir, testClassPattern).length, 5);
-  assert.deepEqual(
-    runnableTestClasses(testDir).map((file) => file.split(/[\\/]/).pop()).sort(),
-    ["DecimalsTests.java", "FlowTest.java", "LegacyTestCase.java"],
-  );
+  assert.equal(findFiles(testDir, testClassPattern).length, 6);
+  assert.deepEqual(expectedTestClasses(testDir), [
+    "com.example.DecimalsTests",
+    "com.example.FlowTest",
+    "com.example.HelperTest",
+    "com.example.LegacyTestCase",
+  ]);
 });
 
 function report(dir, name, tests, failures, mtime) {
@@ -78,7 +87,7 @@ function report(dir, name, tests, failures, mtime) {
   if (mtime) utimesSync(file, mtime / 1000, mtime / 1000);
 }
 
-test("Surefire reports from this run must cover every test class", () => {
+test("Surefire reports from this run must cover every test class by name", () => {
   const reports = join(tmp, "surefire-reports");
   mkdirSync(reports, { recursive: true });
   const since = Date.now() - 1_000;
@@ -86,19 +95,36 @@ test("Surefire reports from this run must cover every test class", () => {
   report(reports, "com.example.FlowTest$Nested", 2, 0);
   report(reports, "com.example.DecimalsTests", 3, 1);
   report(reports, "com.example.StaleTest", 5, 0, since - 60_000);
+  // A class that inherits all its tests reports too, but cannot stand in for a class that did not run.
+  report(reports, "com.example.InheritedTest", 4, 0);
 
-  assert.deepEqual(backendVerdict(reports, since, 2), {
+  assert.deepEqual(backendVerdict(reports, since, ["com.example.FlowTest", "com.example.DecimalsTests"]), {
     ok: true,
-    result: "2 of 2 test classes, 23 tests, 1 failed",
+    result: "2 of 2 test classes, 27 tests, 1 failed",
   });
-  assert.deepEqual(backendVerdict(reports, since, 3), {
-    ok: false,
-    result: "only 2 of 3 test classes, 23 tests, 1 failed",
-  });
+  assert.deepEqual(
+    backendVerdict(reports, since, ["com.example.FlowTest", "com.example.DecimalsTests", "com.example.StaleTest"]),
+    { ok: false, result: "only 2 of 3 test classes (missing StaleTest), 27 tests, 1 failed" },
+  );
 });
 
 test("node --test summaries from both reporters are read", () => {
   assert.deepEqual(nodeTestVerdict("ℹ tests 13\nℹ pass 13\nℹ fail 0\n"), { ok: true, result: "13 passed, 0 failed" });
   assert.deepEqual(nodeTestVerdict("# tests 3\n# pass 2\n# fail 1\n"), { ok: false, result: "2 passed, 1 failed" });
   assert.deepEqual(nodeTestVerdict("node: bad option\n"), { ok: false, result: "no node --test summary" });
+});
+
+test("the self-test needs at least one PASS line and no FAIL line", () => {
+  assert.deepEqual(selfTestVerdict("PASS a\nPASS b\n"), { ok: true, result: "2 checks passed, 0 failed" });
+  assert.deepEqual(selfTestVerdict("PASS a\nFAIL b\n"), { ok: false, result: "1 checks passed, 1 failed" });
+  assert.deepEqual(selfTestVerdict(""), { ok: false, result: "0 checks passed, 0 failed" });
+});
+
+test("a check fails on a non-zero exit, and on exit 0 with an incomplete run", () => {
+  assert.equal(checkExitCode(0, true), 0);
+  assert.equal(checkExitCode(0, false), 1);
+  assert.equal(checkExitCode(2, true), 2);
+  assert.equal(checkExitCode(2, false), 2);
+  // spawnSync reports null when the runner could not start or was killed.
+  assert.equal(checkExitCode(null, true), 1);
 });

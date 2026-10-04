@@ -15,17 +15,24 @@ export function findFiles(dir, pattern) {
   });
 }
 
-// Vitest spec files, and the test classes Maven Surefire picks up by default (Test*, *Test, *Tests, *TestCase).
-export const specFilePattern = /\.spec\.ts$/;
+// The test files the Angular unit-test builder includes by default (**/*.spec.ts, **/*.test.ts), and the test classes
+// Maven Surefire picks up by default (Test*, *Test, *Tests, *TestCase).
+export const specFilePattern = /\.(spec|test)\.ts$/;
 export const testClassPattern = /^(Test\w*|\w*Tests?|\w*TestCase)\.java$/;
 
-// Surefire writes no report for an abstract base class or a helper named like a test, so only classes that are not
-// abstract and hold JUnit test methods are expected to report.
-export function runnableTestClasses(testDir) {
-  return findFiles(testDir, testClassPattern).filter((file) => {
-    const source = readFileSync(file, "utf8");
-    return !/\babstract\s+class\b/.test(source) && /@(Test|ParameterizedTest|RepeatedTest|TestFactory|TestTemplate)\b/.test(source);
-  });
+// Fully qualified names of the test classes expected to report. Surefire writes no report for an abstract base class
+// or a helper named like a test, so only classes that are not abstract themselves and hold JUnit test methods count.
+export function expectedTestClasses(testDir) {
+  return findFiles(testDir, testClassPattern)
+    .flatMap((file) => {
+      const source = readFileSync(file, "utf8");
+      const name = basename(file, ".java");
+      const isAbstract = new RegExp(`\\babstract\\s+(?:\\w+\\s+)*class\\s+${name}\\b`).test(source);
+      const hasTests = /@(Test|ParameterizedTest|RepeatedTest|TestFactory|TestTemplate)\b/.test(source);
+      const pkg = /^\s*package\s+([\w.]+)\s*;/m.exec(source)?.[1];
+      return !isAbstract && hasTests ? [pkg ? `${pkg}.${name}` : name] : [];
+    })
+    .sort();
 }
 
 // The Vitest summary: " Test Files  1 failed | 7 passed (8)" -> 8 files ran; " Tests  91 passed (91)".
@@ -56,13 +63,25 @@ export function surefireSummary(reportDir, since) {
     tests += attr("tests");
     failed += attr("failures") + attr("errors");
   }
-  return { classes: classes.size, tests, failed };
+  return { classes, tests, failed };
 }
 
-export function backendVerdict(reportDir, since, testClasses) {
+// Compares names, so a report from a class nobody expected (one that inherits all its tests) cannot hide a missing one.
+export function backendVerdict(reportDir, since, expectedClasses) {
   const summary = surefireSummary(reportDir, since);
-  const result = `${summary.classes} of ${testClasses} test classes, ${summary.tests} tests, ${summary.failed} failed`;
-  return summary.classes < testClasses ? { ok: false, result: `only ${result}` } : { ok: true, result };
+  const missing = expectedClasses.filter((name) => !summary.classes.has(name));
+  const ran = expectedClasses.length - missing.length;
+  const counts = `${summary.tests} tests, ${summary.failed} failed`;
+  if (!missing.length) return { ok: true, result: `${ran} of ${expectedClasses.length} test classes, ${counts}` };
+  const names = missing.map((name) => name.split(".").pop()).join(", ");
+  return { ok: false, result: `only ${ran} of ${expectedClasses.length} test classes (missing ${names}), ${counts}` };
+}
+
+// scripts/hooks-selftest.mjs prints one "PASS <check>" or "FAIL <check>" line per check.
+export function selfTestVerdict(output) {
+  const passed = (output.match(/^PASS /gm) ?? []).length;
+  const failed = (output.match(/^FAIL /gm) ?? []).length;
+  return { ok: passed > 0 && failed === 0, result: `${passed} checks passed, ${failed} failed` };
 }
 
 // node --test prints "ℹ pass 8" (spec reporter) or "# pass 8" (TAP reporter, older Node without a TTY).
@@ -72,4 +91,11 @@ export function nodeTestVerdict(output) {
   const fail = count("fail");
   if (Number.isNaN(pass) || Number.isNaN(fail)) return { ok: false, result: "no node --test summary" };
   return { ok: pass > 0 && fail === 0, result: `${pass} passed, ${fail} failed` };
+}
+
+// A check fails on its runner's exit code, and also when the runner exited 0 but the verdict found the run incomplete.
+// spawnSync reports a null status when the runner could not start or was killed.
+export function checkExitCode(status, ok) {
+  if (status !== 0) return status ?? 1;
+  return ok ? 0 : 1;
 }

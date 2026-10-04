@@ -2,7 +2,8 @@
 // The Definition of done from AGENTS.md as one command, in CI order (.github/workflows/ci.yml). Stops at the first
 // failing check and prints a Markdown evidence table (check, command, exit code, time, result) to paste into a
 // report or a pull request. Each check's full output goes to target/dod/<n>.log; a failing check also prints its tail.
-// A test check also fails when its runner exits 0 without running every test file on disk (scripts/dod-checks.mjs).
+// A test check also fails when its runner exits 0 without running any test, and the backend and frontend checks
+// when not every test class or spec file on disk ran (scripts/dod-checks.mjs).
 // The frontend checks run with the Node that Maven pins (target/frontend-tooling) when it is installed.
 // Usage: node scripts/dod.mjs   (run from the repo root; exit code 0 = done, otherwise the failing check's code)
 import { spawnSync } from "node:child_process";
@@ -10,10 +11,12 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import {
   backendVerdict,
+  checkExitCode,
+  expectedTestClasses,
   findFiles,
   frontendVerdict,
   nodeTestVerdict,
-  runnableTestClasses,
+  selfTestVerdict,
   specFilePattern,
 } from "./dod-checks.mjs";
 
@@ -32,10 +35,7 @@ const checks = [
     name: "Agent harness self-test",
     label: "node scripts/hooks-selftest.mjs",
     run: () => spawnSync(process.execPath, [join(root, "scripts", "hooks-selftest.mjs")], { cwd: root, encoding: "utf8" }),
-    verdict: (out) => {
-      const failed = (out.match(/^FAIL /gm) ?? []).length;
-      return { ok: failed === 0, result: `${(out.match(/^PASS /gm) ?? []).length} checks passed, ${failed} failed` };
-    },
+    verdict: selfTestVerdict,
   },
   {
     name: "Harness unit tests",
@@ -52,11 +52,7 @@ const checks = [
     label: "mvn -B -ntp verify",
     run: () => sh("mvn", ["-B", "-ntp", "verify"]),
     verdict: (_, since) =>
-      backendVerdict(
-        join(root, "target", "surefire-reports"),
-        since,
-        runnableTestClasses(join(root, "src", "test", "java")).length,
-      ),
+      backendVerdict(join(root, "target", "surefire-reports"), since, expectedTestClasses(join(root, "src", "test", "java"))),
   },
   {
     name: "Frontend formatting",
@@ -100,7 +96,7 @@ for (const [i, check] of checks.entries()) {
   writeFileSync(join(logDir, `${i + 1}.log`), out);
   const { ok, result } = check.verdict(out, since);
   // A runner that exits 0 but ran only part of the suite still fails the check.
-  const code = r.status !== 0 ? (r.status ?? 1) : ok ? 0 : 1;
+  const code = checkExitCode(r.status, ok);
   rows.push(`| ${check.name} | \`${check.label}\` | ${code} | ${seconds} s | ${result} |`);
   if (code !== 0) {
     exitCode = code;
