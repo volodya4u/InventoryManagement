@@ -2,10 +2,12 @@
 // Summarize .agent-log/actions.jsonl -> Markdown (default) or JSON.
 // Lines: PreToolUse = proposed · PostToolUse / PostToolUseFailure = executed · a PreToolUse line whose id
 // has no executed line = proposed but not executed (blocked by a hook, a permission rule or the human).
+// Reads the committed log and, unless --file names one, the .agent-log/pending.jsonl buffer next to it that the
+// hooks fold in on `git commit`, so this session's not-yet-committed actions show too.
 // Usage: node scripts/report.mjs [--format table|json] [--since ISO] [--file PATH]
 // Exit codes: 0 ok · 2 log not found · 3 bad arguments
 import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 const args = process.argv.slice(2);
 const opt = (name, def) => {
@@ -35,22 +37,27 @@ if (!["table", "json"].includes(format)) {
   process.exit(3);
 }
 const since = opt("--since", null);
-const file = resolve(process.cwd(), opt("--file", ".agent-log/actions.jsonl"));
-if (!existsSync(file)) {
+const fileArg = opt("--file", null);
+const file = resolve(process.cwd(), fileArg ?? ".agent-log/actions.jsonl");
+const pending = resolve(dirname(file), "pending.jsonl");
+const sources = [file, ...(fileArg ? [] : [pending])].filter(existsSync);
+if (!sources.length) {
   console.error(`Error: log not found at ${file}. Are the hooks in .claude/settings.json active?`);
   process.exit(2);
 }
 
 const entries = [];
 let invalid = 0;
-for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
-  if (!line.trim()) continue;
-  try {
-    const e = JSON.parse(line);
-    if (since && e.ts && e.ts < since) continue;
-    entries.push(e);
-  } catch {
-    invalid++;
+for (const source of sources) {
+  for (const line of readFileSync(source, "utf8").split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    try {
+      const e = JSON.parse(line);
+      if (since && e.ts && e.ts < since) continue;
+      entries.push(e);
+    } catch {
+      invalid++;
+    }
   }
 }
 const executedIds = new Set(entries.filter((e) => e.event !== "PreToolUse" && e.id).map((e) => e.id));

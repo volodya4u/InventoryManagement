@@ -61,7 +61,9 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/scripts/session-start.mjs"],
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/scripts/session-start.mjs"
+            ],
             "timeout": 600
           }
         ]
@@ -74,7 +76,9 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/protect-env.mjs"],
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/protect-env.mjs"
+            ],
             "timeout": 10
           }
         ]
@@ -85,7 +89,9 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"],
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"
+            ],
             "timeout": 10
           }
         ]
@@ -96,7 +102,22 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/scripts/reviewer-bash-guard.mjs"],
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/agent-log-fold.mjs"
+            ],
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/scripts/reviewer-bash-guard.mjs"
+            ],
             "timeout": 10
           }
         ]
@@ -109,7 +130,9 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"],
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"
+            ],
             "timeout": 10
           }
         ]
@@ -122,12 +145,17 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"],
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/log-action.mjs"
+            ],
             "timeout": 10
           }
         ]
       }
     ]
   },
-  "enabledMcpjsonServers": ["context7", "angular-cli"]
+  "enabledMcpjsonServers": [
+    "context7",
+    "angular-cli"
+  ]
 }
