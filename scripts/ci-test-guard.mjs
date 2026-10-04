@@ -8,6 +8,7 @@
 //   node scripts/ci-test-guard.mjs frontend <ng-test-log>      # against the captured `ng test` output
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { backendVerdict, expectedTestClasses, findFiles, frontendVerdict, specFilePattern } from "./dod-checks.mjs";
 
 // since=0: in a clean CI checkout every Surefire report is from this run, so none is filtered out by mtime.
@@ -19,8 +20,8 @@ export function frontendGuard(vitestOutput, frontendSrc) {
   return frontendVerdict(vitestOutput, findFiles(frontendSrc, specFilePattern).length);
 }
 
-// Run only as a CLI, not when imported by the test.
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run only as a CLI, not when imported by the test (pathToFileURL handles Windows paths too).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const root = process.cwd();
   const mode = process.argv[2];
   let verdict;
