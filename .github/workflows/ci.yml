@@ -58,6 +58,21 @@ jobs:
       - name: Frontend test-run guard
         run: node scripts/ci-test-guard.mjs frontend target/frontend-test.log
 
+  # Confirm the fresh-context reviewer subagent actually ran on the branch (agent log vs main), not just that the
+  # description says APPROVE. Dependabot PRs skip it: CI is their checker, so they carry no reviewer run.
+  review-evidence:
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # need main's history to diff the agent log against it
+      - name: Reviewer ran on this branch
+        run: |
+          git fetch -q origin main
+          node scripts/check-review.mjs origin/main
+
   # Merge Dependabot's patch and minor updates once build-and-test has passed.
   # Docker image updates and minor Spring Boot parent updates are left for review.
   dependabot-auto-merge:
