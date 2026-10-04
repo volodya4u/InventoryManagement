@@ -98,7 +98,9 @@ describe('LoginComponent', () => {
     component.togglePasswordVisibility();
     expect(component.showPassword()).toBe(true);
 
-    vi.advanceTimersByTime(5_000);
+    vi.advanceTimersByTime(4_999);
+    expect(component.showPassword()).toBe(true);
+    vi.advanceTimersByTime(1);
     expect(component.showPassword()).toBe(false);
   });
 });

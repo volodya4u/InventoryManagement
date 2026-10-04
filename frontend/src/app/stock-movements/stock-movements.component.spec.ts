@@ -132,6 +132,24 @@ describe('StockMovementsComponent', () => {
     first.flush(history());
   });
 
+  it('ignores paging clicks while a page is loading', () => {
+    expectHistory().flush(history({ totalPages: 3 }));
+    component.nextPage();
+    component.nextPage();
+    const second = expectHistory();
+    expect(params(second)['page']).toBe('1');
+    second.flush(history({ page: 1, totalPages: 3 }));
+
+    component.nextPage();
+    expectHistory().flush(history({ page: 2, totalPages: 3 }));
+    component.previousPage();
+    component.previousPage();
+    const back = expectHistory();
+    expect(params(back)['page']).toBe('1');
+    back.flush(history({ page: 1, totalPages: 3 }));
+    expect(component.page()).toBe(1);
+  });
+
   it('clears the filters and the page on reset', () => {
     expectHistory().flush(history());
     component.filters.patchValue({ movementType: 'WRITE_OFF', query: 'moss', to: '2026-09-30' });
