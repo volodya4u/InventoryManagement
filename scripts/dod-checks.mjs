@@ -35,10 +35,15 @@ export function expectedTestClasses(testDir) {
     .sort();
 }
 
+// Vitest forces colour when it detects CI (even piped through tee), so the summary lines arrive wrapped in ANSI
+// escape sequences: strip them first, or the anchors below never match and a green run looks like it never ran.
+const ansiEscape = /\x1b\[[0-9;]*m/g;
+
 // The Vitest summary: " Test Files  1 failed | 7 passed (8)" -> 8 files ran; " Tests  91 passed (91)".
 export function vitestSummary(output) {
-  const files = /^\s*Test Files\s+.*\((\d+)\)\s*$/m.exec(output);
-  const tests = /^\s*Tests\s+(.+?)\s*$/m.exec(output);
+  const plain = output.replace(ansiEscape, "");
+  const files = /^\s*Test Files\s+.*\((\d+)\)\s*$/m.exec(plain);
+  const tests = /^\s*Tests\s+(.+?)\s*$/m.exec(plain);
   return files && tests ? { files: Number(files[1]), tests: tests[1] } : null;
 }
 

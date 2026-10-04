@@ -47,6 +47,18 @@ test("no Vitest summary is red", () => {
   });
 });
 
+test("the ANSI-coloured summary Vitest prints in CI is parsed, not mistaken for no run", () => {
+  // The exact escape sequences captured from the Actions log: colour on, "13 passed", colour reset, dim "(13)".
+  const e = "\x1b";
+  const colored =
+    `${e}[2m Test Files ${e}[22m ${e}[1m${e}[32m13 passed${e}[39m${e}[22m${e}[90m (13)${e}[39m\n` +
+    `${e}[2m      Tests ${e}[22m ${e}[1m${e}[32m114 passed${e}[39m${e}[22m${e}[90m (114)${e}[39m\n`;
+  assert.deepEqual(frontendVerdict(colored, 13), {
+    ok: true,
+    result: "13 of 13 spec files, 114 passed (114)",
+  });
+});
+
 test("spec files and Surefire test classes are found on disk", () => {
   const app = join(tmp, "frontend", "src", "app");
   mkdirSync(join(app, "core"), { recursive: true });
