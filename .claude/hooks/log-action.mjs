@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 // Claude Code hook for PreToolUse, PostToolUse and PostToolUseFailure.
-// Appends ONE JSON line per event to .agent-log/actions.jsonl:
+// Appends ONE JSON line per event to .agent-log/pending.jsonl (gitignored):
 //   PreToolUse         -> { ts, event, id, session, mode, tool, path | cmd | pattern | url }   = "agent proposed"
 //   PostToolUse        -> { ..., exit: 0, ms }                                                  = "agent did"
 //   PostToolUseFailure -> { ..., exit: N | "error" | "interrupted", ms }                        = "agent tried, it failed"
 // A PreToolUse line without a matching Post line (same id) = proposed but never executed (blocked or denied).
+// agent-log-fold.mjs moves the buffered lines to the committed .agent-log/actions.jsonl on `git commit`, so the
+// working tree stays clean between commits and the lines land in the copy of the project the agent works in (a
+// worktree included): see agent-log-lib.mjs for how the root is resolved.
 // The hook never blocks the agent: any error -> exit 0 silently.
 import { appendFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname } from "node:path";
+import { logRoot, pendingLog } from "./agent-log-lib.mjs";
 
 let raw = "";
 process.stdin.setEncoding("utf8");
@@ -20,7 +24,7 @@ try {
   process.exit(0);
 }
 
-const root = process.env.CLAUDE_PROJECT_DIR || ev.cwd || process.cwd();
+const root = logRoot(ev.cwd, process.env.CLAUDE_PROJECT_DIR);
 const event = ev.hook_event_name ?? "unknown";
 const ti = ev.tool_input ?? {};
 const tool = ev.tool_name ?? "unknown";
@@ -63,9 +67,9 @@ if (event === "PostToolUse") {
 if (typeof ev.duration_ms === "number") entry.ms = ev.duration_ms;
 
 try {
-  const dir = join(root, ".agent-log");
-  mkdirSync(dir, { recursive: true });
-  appendFileSync(join(dir, "actions.jsonl"), JSON.stringify(entry) + "\n");
+  const pending = pendingLog(root);
+  mkdirSync(dirname(pending), { recursive: true });
+  appendFileSync(pending, JSON.stringify(entry) + "\n");
 } catch {
   /* logging must never fail the session */
 }
