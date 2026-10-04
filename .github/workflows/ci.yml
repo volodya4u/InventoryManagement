@@ -36,6 +36,10 @@ jobs:
       - name: Build and test
         run: mvn -B -ntp verify
 
+      # mvn verify fails on a failing test, but not when a whole test class silently never ran; this does.
+      - name: Backend test-run guard
+        run: node scripts/ci-test-guard.mjs backend
+
       # pnpm-lock.yaml is excluded in frontend/.prettierignore.
       - name: Frontend formatting
         working-directory: frontend
@@ -43,11 +47,16 @@ jobs:
           export PATH="$GITHUB_WORKSPACE/target/frontend-tooling/node:$PATH"
           pnpm exec prettier --check .
 
+      # The default bash shell runs with `-o pipefail`, so a failing `ng test` still fails the step through the tee.
       - name: Frontend unit tests
         working-directory: frontend
         run: |
           export PATH="$GITHUB_WORKSPACE/target/frontend-tooling/node:$PATH"
-          pnpm exec ng test --watch=false
+          pnpm exec ng test --watch=false 2>&1 | tee "$GITHUB_WORKSPACE/target/frontend-test.log"
+
+      # Like the backend guard: fail when Vitest exited 0 but ran fewer spec files than exist on disk.
+      - name: Frontend test-run guard
+        run: node scripts/ci-test-guard.mjs frontend target/frontend-test.log
 
   # Confirm the fresh-context reviewer subagent actually ran on the branch (agent log vs main), not just that the
   # description says APPROVE. Dependabot PRs skip it: CI is their checker, so they carry no reviewer run.
