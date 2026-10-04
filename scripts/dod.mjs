@@ -12,6 +12,7 @@ import { join } from "node:path";
 import {
   backendVerdict,
   checkExitCode,
+  exitColumn,
   expectedTestClasses,
   findFiles,
   frontendVerdict,
@@ -43,12 +44,13 @@ const checks = [
   {
     name: "Harness unit tests",
     label: "node --test scripts/*.test.mjs",
-    // Without file arguments node --test would search the whole repository, so an empty list runs nothing.
+    // Without file arguments node --test would search the whole repository, so an empty list runs nothing and fails,
+    // like the unmatched glob in CI.
     run: () =>
       harnessTests.length
         ? spawnSync(process.execPath, ["--test", ...harnessTests], { cwd: root, encoding: "utf8" })
         : { status: 0, stdout: "" },
-    verdict: (out) => (harnessTests.length ? nodeTestVerdict(out) : { ok: true, result: "no harness unit tests" }),
+    verdict: (out) => (harnessTests.length ? nodeTestVerdict(out) : { ok: false, result: "no scripts/*.test.mjs files" }),
   },
   {
     name: "Backend build and tests",
@@ -101,7 +103,7 @@ for (const [i, check] of checks.entries()) {
   const { ok, result } = check.verdict(out, since);
   // A runner that exits 0 but ran only part of the suite still fails the check.
   const code = checkExitCode(r.status, ok);
-  rows.push(`| ${check.name} | \`${check.label}\` | ${code} | ${seconds} s | ${result} |`);
+  rows.push(`| ${check.name} | \`${check.label}\` | ${exitColumn(r.status, code)} | ${seconds} s | ${result} |`);
   if (code !== 0) {
     exitCode = code;
     const why = r.status === 0 ? `the runner exited 0, but ${result}` : `exit ${code}`;

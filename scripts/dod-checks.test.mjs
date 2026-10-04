@@ -7,6 +7,7 @@ import { after, test } from "node:test";
 import {
   backendVerdict,
   checkExitCode,
+  exitColumn,
   expectedTestClasses,
   findFiles,
   frontendVerdict,
@@ -106,6 +107,14 @@ test("Surefire reports from this run must cover every test class by name", () =>
     backendVerdict(reports, since, ["com.example.FlowTest", "com.example.DecimalsTests", "com.example.StaleTest"]),
     { ok: false, result: "only 2 of 3 test classes (missing StaleTest), 27 tests, 1 failed" },
   );
+  // A class whose tests all sit in nested classes reports only as TEST-Outer$Inner.xml.
+  const nested = join(tmp, "nested-reports");
+  mkdirSync(nested);
+  report(nested, "com.example.OuterTest$Inner", 2, 0);
+  assert.deepEqual(backendVerdict(nested, since, ["com.example.OuterTest"]), {
+    ok: true,
+    result: "1 of 1 test classes, 2 tests, 0 failed",
+  });
   // With no test class on disk and no report, nothing ran: red, not "0 of 0".
   assert.deepEqual(backendVerdict(join(tmp, "no-reports"), since, []), {
     ok: false,
@@ -132,4 +141,11 @@ test("a check fails on a non-zero exit, and on exit 0 with an incomplete run", (
   assert.equal(checkExitCode(2, false), 2);
   // spawnSync reports null when the runner could not start or was killed.
   assert.equal(checkExitCode(null, true), 1);
+});
+
+test("the Exit column keeps the runner's own exit code when the verdict overrides it", () => {
+  assert.equal(exitColumn(0, 0), "0");
+  assert.equal(exitColumn(2, 2), "2");
+  assert.equal(exitColumn(0, 1), "1 (runner exited 0)");
+  assert.equal(exitColumn(null, 1), "1 (no exit code)");
 });

@@ -100,3 +100,9 @@ export function checkExitCode(status, ok) {
   if (status !== 0) return status ?? 1;
   return ok ? 0 : 1;
 }
+
+// What the evidence table shows: the check's code, plus the runner's own exit code when the verdict overrode it.
+export function exitColumn(status, code) {
+  if (status === code) return `${code}`;
+  return status === null || status === undefined ? `${code} (no exit code)` : `${code} (runner exited ${status})`;
+}
