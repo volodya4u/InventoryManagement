@@ -20,6 +20,7 @@ import {
   selfTestVerdict,
   specFilePattern,
 } from "./dod-checks.mjs";
+import { codeFingerprint, markerPath } from "./dod-fingerprint.mjs";
 
 const root = process.cwd();
 const frontend = join(root, "frontend");
@@ -120,4 +121,13 @@ console.log(`HEAD ${head}${dirty ? ` with ${dirty} uncommitted file(s)` : ""}, $
 console.log("| Check | Command | Exit | Time | Result |");
 console.log("| ----- | ------- | ---- | ---- | ------ |");
 for (const row of rows) console.log(row);
+
+// Record a green run so the dod-fresh Stop hook (.claude/hooks/dod-fresh.mjs) can tell when code changed since.
+if (exitCode === 0) {
+  try {
+    writeFileSync(markerPath(root), JSON.stringify({ head, fingerprint: codeFingerprint(root), at: new Date().toISOString() }) + "\n");
+  } catch {
+    /* the marker is a convenience, never fail the run over it */
+  }
+}
 process.exit(exitCode);
