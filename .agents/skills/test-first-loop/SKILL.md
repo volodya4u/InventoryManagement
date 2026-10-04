@@ -31,7 +31,8 @@ Run the whole loop yourself; come back to the human only at the exits named belo
    spec path. Any other agent: get an equivalent fresh-context, read-only review. Fix each blocking finding and go back
    to step 4. Fix each non-blocking finding or say why not.
 6. **Report.** Give the red and green lines from steps 2 and 3, the table `dod.mjs` printed, the reviewer's verdict,
-   and anything left open. Commit one logical change at a time, with `.agent-log/actions.jsonl` staged.
+   and anything left open. Commit one logical change at a time; a hook folds the agent log into
+   `.agent-log/actions.jsonl` and stages it on each `git commit`, so you need not stage it yourself.
 
 ## Exits: stop and ask the human
 

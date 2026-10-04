@@ -9,6 +9,6 @@
 - Review with the `reviewer` subagent, passing only the base ref, the goal and the spec path. Changes to `auth/`,
   `SecurityConfig`, `.claude/` or CI also get `/security-review`.
 - Do not edit `.agent-log/` or `.claude/hooks/` — they are the observability layer (a hook logs every tool call).
-- `.agent-log/actions.jsonl` is committed on purpose: stage it with every commit. Lines written by the commit command
-  itself land in the next commit.
+- `.agent-log/actions.jsonl` is committed on purpose; you need not stage it. A hook buffers each tool call in
+  `.agent-log/pending.jsonl` (gitignored) and folds the buffer into `actions.jsonl`, staged, on every `git commit`.
 - Project skills live in `.claude/skills/`; the canonical copy is `.agents/skills/` (sync with `node scripts/skills-sync.mjs`).

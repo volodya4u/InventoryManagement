@@ -1194,6 +1194,96 @@ class InventoryFlowIntegrationTest {
                 .doesNotContain("current-secret", "new-secret-value");
     }
 
+    @Test
+    void roundsSellingPricesHalfUpToCentsLikeThePricePreview() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        createRawMaterial(session, csrfCookie, "Rose", "PIECE", "10", "0.73");
+        createRawMaterial(session, csrfCookie, "Tulip", "PIECE", "10", "3.65");
+        createRawMaterial(session, csrfCookie, "Moss", "GRAM", "10", "0.61");
+        createRawMaterial(session, csrfCookie, "Fern", "PIECE", "10", "0.5");
+
+        // Exact prices 2.555, 4.015 and 2.135: the cases the products page previews in products.component.spec.ts.
+        assertSellingPrice(session, csrfCookie, "ROSE-PAIR", 1, "2", "75", 2.56);
+        assertSellingPrice(session, csrfCookie, "TULIP-ONE", 2, "1", "10", 4.02);
+        assertSellingPrice(session, csrfCookie, "MOSS-ONE", 3, "1", "250", 2.14);
+        // Exact price 0.545: half-even rounding would give 0.54.
+        assertSellingPrice(session, csrfCookie, "FERN-ONE", 4, "1", "9", 0.55);
+    }
+
+    @Test
+    void reversesReturnedCostWithHalfUpDivisionLikeTheReturnPreview() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (sku, name, description, quantity, price, markup_percentage, average_unit_cost)
+                VALUES ('ROSE-BOX-001', 'Rose Box', '', 2, 5, 0, 2.175),
+                       ('MOSS-BOX-001', 'Moss Box', '', 6, 1, 0, 0.0117),
+                       ('FERN-BOX-001', 'Fern Box', '', 2, 5, 0, 2.125)
+                """);
+        mockMvc.perform(post("/api/sales")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "saleDate": "2026-07-20",
+                                  "paymentMethod": "CASH",
+                                  "items": [
+                                    {"productId": 1, "quantity": 2, "unitPrice": 5},
+                                    {"productId": 2, "quantity": 6, "unitPrice": 1},
+                                    {"productId": 3, "quantity": 2, "unitPrice": 5}
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.items[0].lineCost").value(4.35))
+                .andExpect(jsonPath("$.items[1].lineCost").value(0.07))
+                .andExpect(jsonPath("$.items[2].lineCost").value(4.25));
+
+        // Exact shares 4.35 × 1/2 = 2.175 and 0.07 × 3/6 = 0.035: the cases the sales page previews (#41).
+        // 4.25 × 1/2 = 2.125: half-even rounding would give 2.12.
+        mockMvc.perform(post("/api/sales/1/returns")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "returnDate": "2026-07-21",
+                                  "reason": "Customer Return",
+                                  "items": [
+                                    {"saleItemId": 1, "quantity": 1},
+                                    {"saleItemId": 2, "quantity": 3},
+                                    {"saleItemId": 3, "quantity": 1}
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].returnedCost").value(2.18))
+                .andExpect(jsonPath("$.items[1].returnedCost").value(0.04))
+                .andExpect(jsonPath("$.items[2].returnedCost").value(2.13));
+
+        assertThat(jdbcTemplate.queryForList(
+                "SELECT line_cost FROM sale_return_item ORDER BY sale_item_id", BigDecimal.class))
+                .usingElementComparator(BigDecimal::compareTo)
+                .containsExactly(new BigDecimal("2.18"), new BigDecimal("0.04"), new BigDecimal("2.13"));
+    }
+
     private ResultActions login(String password) throws Exception {
         var csrfResponse = mockMvc.perform(get("/api/auth/csrf"))
                 .andExpect(status().isOk())
@@ -1227,6 +1317,34 @@ class InventoryFlowIntegrationTest {
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue()))
                 .andExpect(status().isCreated());
+    }
+
+    private void assertSellingPrice(
+            MockHttpSession session,
+            jakarta.servlet.http.Cookie csrfCookie,
+            String sku,
+            long rawMaterialId,
+            String quantityPerUnit,
+            String markupPercentage,
+            double expectedPrice) throws Exception {
+        var recipe = new MockMultipartFile(
+                "recipe",
+                "recipe.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                """
+                [{"rawMaterialId":%d,"quantityPerUnit":%s}]
+                """.formatted(rawMaterialId, quantityPerUnit).getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(multipart("/api/products")
+                        .file(recipe)
+                        .param("sku", sku)
+                        .param("name", sku)
+                        .param("quantity", "0")
+                        .param("markupPercentage", markupPercentage)
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.sellingPrice").value(expectedPrice));
     }
 
     private ResultActions updateRawMaterial(
