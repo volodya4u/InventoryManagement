@@ -2,13 +2,13 @@
 // The Definition of done from AGENTS.md as one command, in CI order (.github/workflows/ci.yml). Stops at the first
 // failing check and prints a Markdown evidence table (check, command, exit code, time, result) to paste into a
 // report or a pull request. Each check's full output goes to target/dod/<n>.log; a failing check also prints its tail.
-// A test check also fails when its runner exits 0 without running any test, and the backend and frontend checks
-// when not every test class or spec file on disk ran (scripts/dod-checks.mjs).
+// A test check also fails when its runner exits 0 but did not run every test class or spec file on disk (backend,
+// frontend) or ran no test at all (self-test, harness unit tests, backend); see scripts/dod-checks.mjs.
 // The frontend checks run with the Node that Maven pins (target/frontend-tooling) when it is installed.
 // Usage: node scripts/dod.mjs   (run from the repo root; exit code 0 = done, otherwise the failing check's code)
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   backendVerdict,
   checkExitCode,
@@ -25,7 +25,10 @@ const frontend = join(root, "frontend");
 const pinned = join(root, "target", "frontend-tooling", "node", process.platform === "win32" ? "node.exe" : "node");
 const ansi = /\x1b\[[0-9;]*m/g;
 const sh = (cmd, args) => spawnSync(cmd, args, { cwd: root, encoding: "utf8", shell: process.platform === "win32" });
-const harnessTests = findFiles(join(root, "scripts"), /\.test\.mjs$/).map((file) => relative(root, file));
+// The top level of scripts/ only, like the shell glob in the CI step.
+const harnessTests = readdirSync(join(root, "scripts"))
+  .filter((name) => name.endsWith(".test.mjs"))
+  .map((name) => join("scripts", name));
 
 // Resolved lazily: the frontend tools exist only after the Maven build has installed them.
 const frontendNode = () => (existsSync(pinned) ? pinned : process.execPath);
@@ -62,10 +65,11 @@ const checks = [
         cwd: frontend,
         encoding: "utf8",
       }),
-    verdict: (out) => {
-      const formatted = /All matched files use Prettier code style/.test(out);
-      return { ok: formatted, result: formatted ? "all files formatted" : "unformatted files" };
-    },
+    // Like CI, only the exit code decides; the message just fills the Result column.
+    verdict: (out) => ({
+      ok: true,
+      result: /All matched files use Prettier code style/.test(out) ? "all files formatted" : "unformatted files",
+    }),
   },
   {
     name: "Frontend unit tests",

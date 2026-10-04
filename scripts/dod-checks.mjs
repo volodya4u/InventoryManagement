@@ -67,12 +67,13 @@ export function surefireSummary(reportDir, since) {
 }
 
 // Compares names, so a report from a class nobody expected (one that inherits all its tests) cannot hide a missing one.
+// A run without a single test is red too.
 export function backendVerdict(reportDir, since, expectedClasses) {
   const summary = surefireSummary(reportDir, since);
   const missing = expectedClasses.filter((name) => !summary.classes.has(name));
   const ran = expectedClasses.length - missing.length;
   const counts = `${summary.tests} tests, ${summary.failed} failed`;
-  if (!missing.length) return { ok: true, result: `${ran} of ${expectedClasses.length} test classes, ${counts}` };
+  if (!missing.length) return { ok: summary.tests > 0, result: `${ran} of ${expectedClasses.length} test classes, ${counts}` };
   const names = missing.map((name) => name.split(".").pop()).join(", ");
   return { ok: false, result: `only ${ran} of ${expectedClasses.length} test classes (missing ${names}), ${counts}` };
 }

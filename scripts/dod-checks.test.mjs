@@ -106,6 +106,11 @@ test("Surefire reports from this run must cover every test class by name", () =>
     backendVerdict(reports, since, ["com.example.FlowTest", "com.example.DecimalsTests", "com.example.StaleTest"]),
     { ok: false, result: "only 2 of 3 test classes (missing StaleTest), 27 tests, 1 failed" },
   );
+  // With no test class on disk and no report, nothing ran: red, not "0 of 0".
+  assert.deepEqual(backendVerdict(join(tmp, "no-reports"), since, []), {
+    ok: false,
+    result: "0 of 0 test classes, 0 tests, 0 failed",
+  });
 });
 
 test("node --test summaries from both reporters are read", () => {
