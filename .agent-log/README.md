@@ -13,7 +13,12 @@ land in the copy of the project the agent is working in — a git worktree inclu
 - A PreToolUse line whose `id` never gets a Post line = proposed but not executed: blocked by a hook, a permission rule, or you.
 
 Fields: ts, event, id (tool_use_id), session (first 8 chars), mode (permission mode), tool, path | cmd | pattern | url, exit, ms.
-`agent` (the subagent that made the call, e.g. `reviewer`) and `subagent_type` (the subagent an `Agent` call spawns) appear only when a subagent is involved; `scripts/check-review.mjs` uses them to prove the reviewer ran on a branch.
+`agent` (the subagent that made the call, e.g. `reviewer`) and `subagent_type` (the subagent an `Agent` call spawns) appear only when a subagent is involved.
+The executed line that carries the `reviewer`'s report (its `SubagentHandback` call, or the `Agent` call's response
+when it runs in the foreground) also records `verdict` (`APPROVE` or `CHANGES REQUESTED`, from its last
+`## Review:` line), `blocking` (the number of blocking findings), `findings` (the first three, clipped) and `tree`
+(the fingerprint of the files it reviewed). `scripts/check-review.mjs` requires the last verdict on a branch to be
+`APPROVE` on the files as they are, so the review is the reviewer's record, not a line written by hand.
 
 Besides tool calls, the log carries records that the tools write themselves, through the same buffer
 (`scripts/loop-record.mjs`), so the evidence of a pull request is the tools' output rather than text pasted into it:

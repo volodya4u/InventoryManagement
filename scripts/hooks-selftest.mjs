@@ -4,7 +4,8 @@
 //   1. protect-env.mjs blocks Read/Edit/Write of .env, .env.local, .env.production (exit 2) and allows .env.example + normal files;
 //      it also blocks Grep on a .env path or with a glob that can match one, and Bash routes that read .env without
 //      naming it (shell globs, git diff/grep --no-index, recursive grep or diff)
-//   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths
+//   2. log-action.mjs appends one JSON line per event (PreToolUse = proposed, Post* = executed) with repo-relative paths,
+//      and records the reviewer subagent's verdict from the report it hands back
 //   3. a PreToolUse line without a Post line for the same id is reported as "proposed but not executed"
 //   4. scripts/reviewer-bash-guard.mjs is wired in settings and lets the reviewer subagent run only read-only git
 //      commands (others exit 2), while other agents pass untouched
@@ -252,6 +253,12 @@ const events = [
   { ...base, hook_event_name: "PostToolUse", tool_use_id: "t5", tool_name: "Agent", tool_input: { subagent_type: "reviewer", description: "review" }, duration_ms: 5000 },
   { ...base, hook_event_name: "PreToolUse", tool_use_id: "t6", tool_name: "Bash", tool_input: { command: "git diff main...HEAD" }, agent_type: "reviewer" },
   { ...base, hook_event_name: "PostToolUse", tool_use_id: "t6", tool_name: "Bash", tool_input: { command: "git diff main...HEAD" }, agent_type: "reviewer", duration_ms: 20 },
+  // t7-t10: the reviewer's report. A background reviewer hands it back through SubagentHandback; a foreground one
+  // returns it as the Agent call's response. Only the reviewer's verdict is recorded, and the last verdict line decides.
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t7", tool_name: "SubagentHandback", agent_type: "reviewer", tool_input: { message: "## Review: APPROVE\n\n### Blocking\n- None.\n\n### Non-blocking\n- `src/a.ts:1`: rename x\n\n### Checked\n- Tests: fine." } },
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t8", tool_name: "SubagentHandback", agent_type: "reviewer", tool_input: { message: "Round 1:\n## Review: APPROVE\n\nRound 2:\n## Review: CHANGES REQUESTED\n\n### Blocking\n- `A.java:3`: no test\n- `B.java:9`: weakened test\n\n### Non-blocking\n- None." } },
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t9", tool_name: "SubagentHandback", agent_type: "Explore", tool_input: { message: "## Review: APPROVE" } },
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t10", tool_name: "Agent", tool_input: { subagent_type: "reviewer" }, tool_response: { content: [{ type: "text", text: "## Review: APPROVE\r\n\r\n### Blocking\r\n- None.\r\n" }] } },
 ];
 for (const e of events) {
   const r = run("log-action.mjs", e);
@@ -261,13 +268,26 @@ for (const e of events) {
 const pendingFile = join(tmp, ".agent-log", "pending.jsonl");
 check("log-action buffers in pending.jsonl, not actions.jsonl", existsSync(pendingFile) && !existsSync(join(tmp, ".agent-log", "actions.jsonl")));
 const lines = readFileSync(pendingFile, "utf8").trim().split("\n").map((l) => JSON.parse(l));
-check("log has 11 lines", lines.length === 11);
+check("log has 15 lines", lines.length === 15);
 check("PreToolUse line has no exit field", lines[0].event === "PreToolUse" && !("exit" in lines[0]) && lines[0].id === "t1");
 check("PostToolUse Bash keeps cmd and exit 0", lines[1].cmd === "mvn -B -ntp verify" && lines[1].exit === 0 && lines[1].ms === 4200);
 check("Edit line stores repo-relative path", lines[3].path === "src/main/java/com/flowershop/inventory/InventoryApplication.java", lines[3].path);
 check("failure line carries exit code 1", lines[5].exit === 1);
 check("Agent spawn line records subagent_type", lines.find((l) => l.id === "t5")?.subagent_type === "reviewer");
 check("a reviewer subagent call is tagged agent", lines.find((l) => l.id === "t6")?.agent === "reviewer");
+const approved = lines.find((l) => l.id === "t7");
+check(
+  "the reviewer's hand-back records its verdict, blocking count and findings",
+  approved?.verdict === "APPROVE" && approved.blocking === 0 && approved.findings?.[0] === "N: `src/a.ts:1`: rename x",
+  JSON.stringify({ verdict: approved?.verdict, blocking: approved?.blocking, findings: approved?.findings }),
+);
+const requested = lines.find((l) => l.id === "t8");
+check(
+  "the last verdict line decides, and each blocking bullet counts",
+  requested?.verdict === "CHANGES REQUESTED" && requested.blocking === 2 && requested.findings?.[0] === "B: `A.java:3`: no test",
+);
+check("another subagent's hand-back records no verdict", lines.find((l) => l.id === "t9") && !("verdict" in lines.find((l) => l.id === "t9")));
+check("a foreground reviewer's response records its verdict", lines.find((l) => l.id === "t10")?.verdict === "APPROVE");
 
 // 2b. log-action writes to the copy of the project the tool runs in: the cwd's git root with this hook, not the
 // session's CLAUDE_PROJECT_DIR. That is what a git worktree needs, where CLAUDE_PROJECT_DIR is the main checkout.
@@ -347,7 +367,8 @@ check("dod-fresh stays quiet when no green marker exists", noMarker.status === 0
 
 writeFileSync(freshMarker, JSON.stringify({ fingerprint: "stale-fingerprint" }) + "\n");
 const changed = runFresh({});
-check("dod-fresh reminds (exit 0) when code changed since the marker", changed.status === 0 && /Re-run it before finishing/.test(changed.stderr));
+// The reminder is dynamic context the hook injects at the end of a turn; print it as an example of that output.
+check("dod-fresh reminds (exit 0) when code changed since the marker", changed.status === 0 && /Re-run it before finishing/.test(changed.stderr), changed.stderr.trim());
 
 writeFileSync(freshMarker, JSON.stringify({ fingerprint: codeFingerprint(fresh) }) + "\n");
 const unchanged = runFresh({});
