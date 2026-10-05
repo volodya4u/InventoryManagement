@@ -30,15 +30,14 @@ export function parseRun(run) {
   return { cli: run.claudeVersion, judgeModel: run.suite?.judgeModel, cases };
 }
 
-export function buildRecord({ model, runs, inputs }) {
-  const anyRun = Object.values(runs)[0] ?? {};
+export function buildRecord({ model, run, inputs }) {
   return {
     generatedAt: new Date().toISOString(),
     model: model || "default",
-    judgeModel: anyRun.judgeModel ?? "haiku",
-    cli: anyRun.cli,
+    judgeModel: run.judgeModel ?? "haiku",
+    cli: run.cli,
     inputs,
-    suites: Object.fromEntries(Object.entries(runs).map(([name, run]) => [name, { cases: run.cases }])),
+    cases: run.cases,
   };
 }
 
@@ -57,31 +56,31 @@ export function recordProblems(record, currentInputs) {
   return problems;
 }
 
-function runEval(root, args, model) {
+// One aggregate run over the whole suite covers every case: the reviewer cases single-arm, and each skill case with a
+// no-plugin baseline arm for the Δ (the skill resolves from the repo plugin). --runs 1 keeps the agent-run count low;
+// more runs multiply it and can exhaust the account's usage limit before the suite finishes.
+function runEval(root, model, runs) {
   const out = join(mkdtempSync(join(tmpdir(), "eval-record-")), "run.json");
-  const full = [...args, "--judge-model", "haiku", "--trust-plugin", "--no-publish", "--json", out, ...(model ? ["--model", model] : [])];
+  const full = ["--eval-dir", "evals", "--runs", String(runs), "--judge-model", "haiku", "--trust-plugin", "--no-publish", "--json", out, ...(model ? ["--model", model] : []), "."];
   console.error(`claude plugin eval ${full.join(" ")}`);
   const r = spawnSync("claude", ["plugin", "eval", ...full], { cwd: root, encoding: "utf8", stdio: ["ignore", "inherit", "inherit"], shell: process.platform === "win32", maxBuffer: 64 * 1024 * 1024 });
   if (!existsSync(out)) throw new Error(`claude plugin eval wrote no JSON (exit ${r.status}); is the CLI logged in?`);
-  const parsed = parseRun(JSON.parse(readFileSync(out, "utf8")));
+  const raw = JSON.parse(readFileSync(out, "utf8"));
   rmSync(join(out, ".."), { recursive: true, force: true });
-  return parsed;
+  // An arm that errored (a usage limit, a timeout) scores 0: that is not a real FAIL, so refuse to record it.
+  const errored = (raw.cases ?? []).filter((c) => [...(c.arms?.with ?? []), ...(c.arms?.baseline ?? []), ...(c.arms?.without ?? [])].some((a) => a.error));
+  if (errored.length) throw new Error(`${errored.length} case(s) had an errored arm (e.g. ${errored[0].name}: ${String([...(errored[0].arms?.with ?? []), ...(errored[0].arms?.baseline ?? [])].find((a) => a.error)?.error).slice(0, 80)}). Not recording a run with errors.`);
+  return parseRun(raw);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const model = process.argv.includes("--model") ? process.argv[process.argv.indexOf("--model") + 1] : null;
+  const runs = process.argv.includes("--runs") ? Number(process.argv[process.argv.indexOf("--runs") + 1]) : 1;
   const root = process.cwd();
-  const runs = {
-    reviewer: runEval(root, ["--eval-dir", "evals", "."], model),
-    "test-first-loop": runEval(root, [".agents/skills/test-first-loop"], model),
-    "agent-log-report": runEval(root, [".agents/skills/agent-log-report"], model),
-  };
-  const record = buildRecord({ model, runs, inputs: inputsFingerprint(root) });
+  const record = buildRecord({ model, run: runEval(root, model, runs), inputs: inputsFingerprint(root) });
   writeFileSync(join(root, RECORD_PATH), JSON.stringify(record, null, 2) + "\n");
   console.error(`\nWrote ${RECORD_PATH} (model ${record.model}, judge ${record.judgeModel}).`);
-  for (const [suite, { cases }] of Object.entries(record.suites)) {
-    for (const [name, s] of Object.entries(cases)) {
-      console.error(`  ${suite}/${name}: ${s.score}${s.delta !== undefined ? ` (Δ ${s.delta})` : ""}`);
-    }
+  for (const [name, s] of Object.entries(record.cases)) {
+    console.error(`  ${name}: ${s.score}${s.delta !== undefined ? ` (Δ ${s.delta})` : ""}`);
   }
 }

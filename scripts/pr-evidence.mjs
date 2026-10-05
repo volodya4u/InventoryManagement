@@ -136,10 +136,8 @@ export function report({ base, head, gates, dodRuns, testRuns, reviews, evals, h
     for (const r of testRuns) out.push(`| ${time(r.ts)} | ${cell(`${r.target} ${r.selector}`)} | ${r.kind === "pass" ? "✅ pass" : `❌ ${r.kind}`} | ${cell(r.firstFailure)} |`);
   } else out.push("No targeted test run recorded on this branch.");
   if (evals) {
-    out.push("", `### Evals (recorded ${time(evals.generatedAt)}, model ${evals.model}, judge ${evals.judgeModel})`, "", "| Suite / case | Score | Δ (skill vs baseline) |", "| --- | --- | --- |");
-    for (const [suite, { cases }] of Object.entries(evals.suites ?? {})) {
-      for (const [name, s] of Object.entries(cases)) out.push(`| ${suite} / ${name} | ${s.score} | ${s.delta ?? "—"} |`);
-    }
+    out.push("", `### Evals (recorded ${time(evals.generatedAt)}, model ${evals.model}, judge ${evals.judgeModel})`, "", "| Case | Score | Δ (skill vs baseline) |", "| --- | --- | --- |");
+    for (const [name, s] of Object.entries(evals.cases ?? {})) out.push(`| ${name} | ${s.score} | ${s.delta ?? "—"} |`);
   }
   out.push("", "### Review rounds (maker ≠ checker)", "");
   if (reviews.length) {

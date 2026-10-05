@@ -33,19 +33,20 @@ test("parseRun keeps each case's score and delta", () => {
   });
 });
 
-test("buildRecord stamps the model and the inputs fingerprint", () => {
+test("buildRecord stamps the model and the inputs fingerprint over the one aggregate run", () => {
   const inputs = { "AGENTS.md": "aaa", ".claude/agents/reviewer.md": "bbb" };
-  const record = buildRecord({ model: "claude-opus-4-8", runs: { reviewer: parseRun(reviewerRun), "test-first-loop": parseRun(skillRun) }, inputs });
+  const record = buildRecord({ model: "claude-opus-4-8", run: parseRun({ ...reviewerRun, cases: [...reviewerRun.cases, ...skillRun.cases] }), inputs });
   assert.equal(record.model, "claude-opus-4-8");
   assert.equal(record.judgeModel, "haiku");
   assert.deepEqual(record.inputs, inputs);
-  assert.equal(record.suites.reviewer.cases["jpa-not-jdbctemplate"].score, 1);
+  assert.equal(record.cases["jpa-not-jdbctemplate"].score, 1);
+  assert.equal(record.cases["bugfix-starts-red"].delta, 1);
   assert.match(record.generatedAt, /^\d{4}-\d{2}-\d{2}T/);
 });
 
 const record = buildRecord({
   model: "claude-opus-4-8",
-  runs: { reviewer: parseRun(reviewerRun) },
+  run: parseRun(reviewerRun),
   inputs: { "AGENTS.md": "aaa", ".claude/agents/reviewer.md": "bbb" },
 });
 
