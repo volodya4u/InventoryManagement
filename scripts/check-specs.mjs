@@ -27,7 +27,7 @@ const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const prose = (text) => text.replace(/<!--[\s\S]*?-->/g, "").replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
 
 // The cells of a table row; a | inside a code span does not split a cell.
-function cells(row) {
+export function tableCells(row) {
   const found = [];
   let cell = "";
   let code = false;
@@ -63,7 +63,7 @@ export function parseSpec(text) {
   const criteria = section
     .split("\n")
     .filter((line) => /^\s*\|/.test(line))
-    .map(cells)
+    .map(tableCells)
     .filter((c) => c.length >= 3 && /^\d+$/.test(c[0]))
     .map(([n, gwt, cell]) => ({
       n: Number(n),
