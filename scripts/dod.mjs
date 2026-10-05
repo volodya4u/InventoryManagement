@@ -5,6 +5,8 @@
 // A test check also fails when its runner exits 0 but did not run every test class or spec file on disk (backend,
 // frontend) or ran no test at all (self-test, harness unit tests, backend); see scripts/dod-checks.mjs.
 // The frontend checks run with the Node that Maven pins (target/frontend-tooling) when it is installed.
+// Every run, green or red, appends a DodRun record (each check's exit code and result, and the fingerprint of the code it
+// verified) to the agent log buffer (scripts/loop-record.mjs), so the loop's iterations are the tool's record.
 // Usage: node scripts/dod.mjs   (run from the repo root; exit code 0 = done, otherwise the failing check's code)
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
@@ -15,16 +17,19 @@ import {
   exitColumn,
   expectedTestClasses,
   findFiles,
+  frontendNode,
   frontendVerdict,
   nodeTestVerdict,
+  pinnedNodePath,
   selfTestVerdict,
   specFilePattern,
 } from "./dod-checks.mjs";
 import { codeFingerprint, markerPath } from "./dod-fingerprint.mjs";
+import { appendRecord } from "./loop-record.mjs";
 
 const root = process.cwd();
 const frontend = join(root, "frontend");
-const pinned = join(root, "target", "frontend-tooling", "node", process.platform === "win32" ? "node.exe" : "node");
+const pinned = pinnedNodePath(root);
 const ansi = /\x1b\[[0-9;]*m/g;
 const sh = (cmd, args) => spawnSync(cmd, args, { cwd: root, encoding: "utf8", shell: process.platform === "win32" });
 // The top level of scripts/ only, like the shell glob in the CI step.
@@ -32,8 +37,6 @@ const harnessTests = readdirSync(join(root, "scripts"))
   .filter((name) => name.endsWith(".test.mjs"))
   .map((name) => join("scripts", name));
 
-// Resolved lazily: the frontend tools exist only after the Maven build has installed them.
-const frontendNode = () => (existsSync(pinned) ? pinned : process.execPath);
 // Each check's verdict says whether the run is complete beyond its exit code, and what goes in the Result column.
 const checks = [
   {
@@ -64,7 +67,7 @@ const checks = [
     name: "Frontend formatting",
     label: "prettier --check . (in frontend/)",
     run: () =>
-      spawnSync(frontendNode(), [join(frontend, "node_modules", "prettier", "bin", "prettier.cjs"), "--check", "."], {
+      spawnSync(frontendNode(root), [join(frontend, "node_modules", "prettier", "bin", "prettier.cjs"), "--check", "."], {
         cwd: frontend,
         encoding: "utf8",
       }),
@@ -78,7 +81,7 @@ const checks = [
     name: "Frontend unit tests",
     label: "ng test --watch=false (in frontend/)",
     run: () =>
-      spawnSync(frontendNode(), [join(frontend, "node_modules", "@angular", "cli", "bin", "ng.js"), "test", "--watch=false"], {
+      spawnSync(frontendNode(root), [join(frontend, "node_modules", "@angular", "cli", "bin", "ng.js"), "test", "--watch=false"], {
         cwd: frontend,
         encoding: "utf8",
         env: { ...process.env, NG_CLI_ANALYTICS: "false" },
@@ -102,6 +105,7 @@ try {
   /* not a git work tree, or git missing: skip the freshness marker */
 }
 const rows = [];
+const ran = [];
 let exitCode = 0;
 for (const [i, check] of checks.entries()) {
   const since = Date.now();
@@ -113,6 +117,7 @@ for (const [i, check] of checks.entries()) {
   // A runner that exits 0 but ran only part of the suite still fails the check.
   const code = checkExitCode(r.status, ok);
   rows.push(`| ${check.name} | \`${check.label}\` | ${exitColumn(r.status, code)} | ${seconds} s | ${result} |`);
+  ran.push({ name: check.name, exit: code, result });
   if (code !== 0) {
     exitCode = code;
     const why = r.status === 0 ? `the runner exited 0, but ${result}` : `exit ${code}`;
@@ -137,5 +142,9 @@ if (exitCode === 0 && startFingerprint) {
   } catch {
     /* the marker is a convenience, never fail the run over it */
   }
+}
+// The loop's iteration, as the tool saw it: the next commit folds it into the agent log, where pr-evidence.mjs reads it.
+if (appendRecord(root, { event: "DodRun", exit: exitCode, head, dirty, code: startFingerprint, checks: ran })) {
+  console.log("\nRecorded in .agent-log/pending.jsonl (DodRun); the next commit folds it into the agent log.");
 }
 process.exit(exitCode);

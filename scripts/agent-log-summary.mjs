@@ -17,7 +17,7 @@ if (!sources.length) {
   console.error(`No log at ${file}. Are the hooks in .claude/settings.json active? Run one Edit and check again.`);
   process.exit(2);
 }
-const lines = sources
+const entries = sources
   .flatMap((f) => readFileSync(f, "utf8").split(/\r?\n/))
   .filter(Boolean)
   .flatMap((l) => {
@@ -27,6 +27,11 @@ const lines = sources
       return [];
     }
   });
+// Tool calls come from the hooks; the loop records (DodRun from dod.mjs, TestRun from test-run.mjs) and the reviewer's
+// verdict (SubagentStop) share the log but are not tool calls, so they are counted apart.
+const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
+const lines = entries.filter((e) => TOOL_EVENTS.has(e.event));
+const records = entries.filter((e) => !TOOL_EVENTS.has(e.event));
 
 const executedIds = new Set(lines.filter((e) => e.event !== "PreToolUse" && e.id).map((e) => e.id));
 const byTool = {};
@@ -59,6 +64,18 @@ const executedTotal = lines.filter((e) => e.event !== "PreToolUse").length;
 console.log(
   `Agent actions: ${executedTotal} executed, ${blocked.length} proposed but not executed, ${failed.length} failed — ${sessions.size} session(s), ${lines[0]?.ts ?? "-"} .. ${lines.at(-1)?.ts ?? "-"}`,
 );
+const modes = {};
+for (const e of lines) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
+console.log(`Permission modes: ${Object.entries(modes).map(([mode, n]) => `${mode} ${n}`).join(", ") || "-"}`);
+if (records.length) {
+  const dod = records.filter((e) => e.event === "DodRun");
+  const runs = records.filter((e) => e.event === "TestRun");
+  const verdicts = records.filter((e) => e.event === "SubagentStop" && e.verdict);
+  console.log(
+    `Loop records: ${dod.length} dod run(s), ${dod.filter((e) => e.exit === 0).length} green; ` +
+      `${runs.length} test run(s), ${runs.filter((e) => e.exit !== 0).length} red; ${verdicts.length} reviewer verdict(s)`,
+  );
+}
 console.table(rows);
 if (blocked.length) {
   console.log("Proposed but not executed (blocked by a hook, a rule or you):");

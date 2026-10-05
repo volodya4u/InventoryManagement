@@ -15,6 +15,16 @@ land in the copy of the project the agent is working in — a git worktree inclu
 Fields: ts, event, id (tool_use_id), session (first 8 chars), mode (permission mode), tool, path | cmd | pattern | url, exit, ms.
 `agent` (the subagent that made the call, e.g. `reviewer`) and `subagent_type` (the subagent an `Agent` call spawns) appear only when a subagent is involved; `scripts/check-review.mjs` uses them to prove the reviewer ran on a branch.
 
+Besides tool calls, the log carries records that the tools write themselves, through the same buffer
+(`scripts/loop-record.mjs`), so the evidence of a pull request is the tools' output rather than text pasted into it:
+
+- `DodRun` — one per `node scripts/dod.mjs`: `exit`, `checks` (each check's name, exit code and result), `head`,
+  `dirty` and `code`, the fingerprint of the code it verified (`scripts/dod-fingerprint.mjs`).
+- `TestRun` — one per `node scripts/test-run.mjs` (the test-first loop's red and green runs): `target`, `selector`,
+  `exit`, `tests`, `failed`, `kind` (`pass`, `assertion`, `compile`, `no-tests` or `error`), `firstFailure` and `code`.
+
+`scripts/pr-evidence.mjs` checks these records against the code of a pull request in CI.
+
 Read it with `node scripts/agent-log-summary.mjs` (per-tool proposed / executed / blocked / failed); it reads the
 committed `actions.jsonl` and the `pending.jsonl` buffer next to it, so this session's not-yet-committed actions show
 too. Verify the hooks without an agent: `node scripts/hooks-selftest.mjs`. Both need only Node 20+ on PATH and run

@@ -4,6 +4,11 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 
+// The Node that Maven pins into target/frontend-tooling (the Angular CLI refuses older releases), when it is installed.
+export const pinnedNodePath = (root) =>
+  join(root, "target", "frontend-tooling", "node", process.platform === "win32" ? "node.exe" : "node");
+export const frontendNode = (root) => (existsSync(pinnedNodePath(root)) ? pinnedNodePath(root) : process.execPath);
+
 // Files under dir whose name matches pattern, skipping node_modules and dot folders.
 export function findFiles(dir, pattern) {
   if (!existsSync(dir)) return [];

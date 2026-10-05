@@ -46,6 +46,9 @@ if (!sources.length) {
   process.exit(2);
 }
 
+// Tool calls only: the loop records (DodRun, TestRun) and the reviewer's verdict (SubagentStop) share the log but are
+// not tool calls, so they would otherwise count as executed actions without an exit code.
+const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
 const entries = [];
 let invalid = 0;
 for (const source of sources) {
@@ -54,6 +57,7 @@ for (const source of sources) {
     try {
       const e = JSON.parse(line);
       if (since && e.ts && e.ts < since) continue;
+      if (!TOOL_EVENTS.has(e.event)) continue;
       entries.push(e);
     } catch {
       invalid++;
