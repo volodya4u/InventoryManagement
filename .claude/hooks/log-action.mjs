@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Claude Code hook for PreToolUse, PostToolUse and PostToolUseFailure.
 // Appends ONE JSON line per event to .agent-log/pending.jsonl (gitignored):
-//   PreToolUse         -> { ts, event, id, session, mode, tool, path | cmd | pattern | url }   = "agent proposed"
+//   PreToolUse         -> { ts, event, id, session, mode, tool, path | cmd | pattern | url, agent?, subagent_type? }
+//                                                                                              = "agent proposed"
 //   PostToolUse        -> { ..., exit: 0, ms }                                                  = "agent did"
 //   PostToolUseFailure -> { ..., exit: N | "error" | "interrupted", ms }                        = "agent tried, it failed"
 // A PreToolUse line without a matching Post line (same id) = proposed but never executed (blocked or denied).
@@ -56,6 +57,10 @@ const entry = {
   ...(ti.command ? { cmd: String(ti.command).slice(0, 200) } : {}),
   ...(ti.pattern ? { pattern: ti.pattern } : {}),
   ...(ti.url ? { url: ti.url } : {}),
+  // Which subagent made the call (ev.agent_type), and which one an Agent/Task call is spawning (ti.subagent_type),
+  // so a reviewer run is provable from the committed log (scripts/check-review.mjs), not just claimed.
+  ...(ev.agent_type ? { agent: ev.agent_type } : {}),
+  ...(ti.subagent_type ? { subagent_type: ti.subagent_type } : {}),
 };
 
 if (event === "PostToolUse") {

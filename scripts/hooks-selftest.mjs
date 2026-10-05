@@ -13,7 +13,8 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { codeFingerprint, markerPath } from "./dod-fingerprint.mjs";
 
 const here = process.cwd();
 const tmp = mkdtempSync(join(tmpdir(), "hooks-selftest-"));
@@ -245,6 +246,12 @@ const events = [
   { ...base, hook_event_name: "PreToolUse", tool_use_id: "t3", tool_name: "Bash", tool_input: { command: "mvn test" } },
   { ...base, hook_event_name: "PostToolUseFailure", tool_use_id: "t3", tool_name: "Bash", tool_input: { command: "mvn test" }, error: "Exit code 1\n[ERROR] Tests run: 1, Failures: 1", duration_ms: 900 },
   { ...base, hook_event_name: "PreToolUse", tool_use_id: "t4", tool_name: "Edit", tool_input: { file_path: join(tmp, ".env") } },
+  // t5: the main agent spawns the reviewer; t6: a call the reviewer subagent itself makes. Both executed (Pre+Post),
+  // so they do not change the proposed-but-not-executed count below.
+  { ...base, hook_event_name: "PreToolUse", tool_use_id: "t5", tool_name: "Agent", tool_input: { subagent_type: "reviewer", description: "review" } },
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t5", tool_name: "Agent", tool_input: { subagent_type: "reviewer", description: "review" }, duration_ms: 5000 },
+  { ...base, hook_event_name: "PreToolUse", tool_use_id: "t6", tool_name: "Bash", tool_input: { command: "git diff main...HEAD" }, agent_type: "reviewer" },
+  { ...base, hook_event_name: "PostToolUse", tool_use_id: "t6", tool_name: "Bash", tool_input: { command: "git diff main...HEAD" }, agent_type: "reviewer", duration_ms: 20 },
 ];
 for (const e of events) {
   const r = run("log-action.mjs", e);
@@ -254,11 +261,13 @@ for (const e of events) {
 const pendingFile = join(tmp, ".agent-log", "pending.jsonl");
 check("log-action buffers in pending.jsonl, not actions.jsonl", existsSync(pendingFile) && !existsSync(join(tmp, ".agent-log", "actions.jsonl")));
 const lines = readFileSync(pendingFile, "utf8").trim().split("\n").map((l) => JSON.parse(l));
-check("log has 7 lines", lines.length === 7);
+check("log has 11 lines", lines.length === 11);
 check("PreToolUse line has no exit field", lines[0].event === "PreToolUse" && !("exit" in lines[0]) && lines[0].id === "t1");
 check("PostToolUse Bash keeps cmd and exit 0", lines[1].cmd === "mvn -B -ntp verify" && lines[1].exit === 0 && lines[1].ms === 4200);
 check("Edit line stores repo-relative path", lines[3].path === "src/main/java/com/flowershop/inventory/InventoryApplication.java", lines[3].path);
 check("failure line carries exit code 1", lines[5].exit === 1);
+check("Agent spawn line records subagent_type", lines.find((l) => l.id === "t5")?.subagent_type === "reviewer");
+check("a reviewer subagent call is tagged agent", lines.find((l) => l.id === "t6")?.agent === "reviewer");
 
 // 2b. log-action writes to the copy of the project the tool runs in: the cwd's git root with this hook, not the
 // session's CLAUDE_PROJECT_DIR. That is what a git worktree needs, where CLAUDE_PROJECT_DIR is the main checkout.
@@ -314,6 +323,44 @@ for (const name of ["pending.jsonl", "pending.jsonl.123.folding"]) {
   const ignored = spawnSync("git", ["check-ignore", "-q", `.agent-log/${name}`], { cwd: here }).status;
   check(`.gitignore ignores .agent-log/${name}`, ignored === 0);
 }
+
+// 3d. dod-fresh.mjs (Stop hook): reminds (exit 0, never blocks) when code changed since the last green dod marker.
+const fresh = mkdtempSync(join(tmpdir(), "hooks-selftest-fresh-"));
+mkdirSync(join(fresh, "src"), { recursive: true });
+mkdirSync(join(fresh, "docs"), { recursive: true });
+writeFileSync(join(fresh, "src", "App.java"), "class App {}\n");
+writeFileSync(join(fresh, "docs", "notes.md"), "# notes\n");
+spawnSync("git", ["-C", fresh, "init", "-q"]);
+spawnSync("git", ["-C", fresh, "add", "-A"]);
+spawnSync("git", ["-C", fresh, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init"]);
+const freshMarker = markerPath(fresh);
+mkdirSync(dirname(freshMarker), { recursive: true });
+const runFresh = (payload) =>
+  spawnSync(process.execPath, [join(here, ".claude", "hooks", "dod-fresh.mjs")], {
+    input: JSON.stringify({ session_id: "selftest", cwd: fresh, permission_mode: "default", hook_event_name: "Stop", ...payload }),
+    env: { ...process.env, CLAUDE_PROJECT_DIR: fresh },
+    encoding: "utf8",
+  });
+
+const noMarker = runFresh({});
+check("dod-fresh stays quiet when no green marker exists", noMarker.status === 0 && noMarker.stderr === "");
+
+writeFileSync(freshMarker, JSON.stringify({ fingerprint: "stale-fingerprint" }) + "\n");
+const changed = runFresh({});
+check("dod-fresh reminds (exit 0) when code changed since the marker", changed.status === 0 && /Re-run it before finishing/.test(changed.stderr));
+
+writeFileSync(freshMarker, JSON.stringify({ fingerprint: codeFingerprint(fresh) }) + "\n");
+const unchanged = runFresh({});
+check("dod-fresh stays quiet when the fingerprint still matches", unchanged.status === 0 && unchanged.stderr === "");
+
+writeFileSync(join(fresh, "docs", "notes.md"), "# changed, docs are not code\n");
+const docOnly = runFresh({});
+check("dod-fresh ignores a docs-only change", docOnly.status === 0 && docOnly.stderr === "");
+
+writeFileSync(freshMarker, JSON.stringify({ fingerprint: "stale-fingerprint" }) + "\n");
+const active = runFresh({ stop_hook_active: true });
+check("dod-fresh respects stop_hook_active (no loop)", active.status === 0 && active.stderr === "");
+rmSync(fresh, { recursive: true, force: true });
 
 // 4. reviewer guard (scripts/reviewer-bash-guard.mjs, wired in .claude/settings.json): read-only git for the reviewer
 const guardWired = (settings.hooks?.PreToolUse ?? []).some(

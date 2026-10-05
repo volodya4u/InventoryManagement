@@ -13,6 +13,7 @@ land in the copy of the project the agent is working in — a git worktree inclu
 - A PreToolUse line whose `id` never gets a Post line = proposed but not executed: blocked by a hook, a permission rule, or you.
 
 Fields: ts, event, id (tool_use_id), session (first 8 chars), mode (permission mode), tool, path | cmd | pattern | url, exit, ms.
+`agent` (the subagent that made the call, e.g. `reviewer`) and `subagent_type` (the subagent an `Agent` call spawns) appear only when a subagent is involved; `scripts/check-review.mjs` uses them to prove the reviewer ran on a branch.
 
 Read it with `node scripts/agent-log-summary.mjs` (per-tool proposed / executed / blocked / failed); it reads the
 committed `actions.jsonl` and the `pending.jsonl` buffer next to it, so this session's not-yet-committed actions show
