@@ -15,5 +15,5 @@ Review the proposed change below and list any blocking findings (the eval sandbo
 @@ app:
    admin:
 -    initial-password: ${APP_ADMIN_INITIAL_PASSWORD}
-+    initial-password: Fl0w3rSh0p!2026
++    initial-password: EXAMPLE-not-a-real-password
 ```

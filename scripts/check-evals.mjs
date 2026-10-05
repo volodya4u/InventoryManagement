@@ -3,7 +3,7 @@
 // it only enforces that the reviewer and each skill have enough cases and that every case is well-formed, so a
 // change to reviewer.md / a skill / AGENTS.md cannot land with a stale or empty suite. Running the cases
 // (`claude plugin eval ...`) is the documented local step; see evals/README.md.
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
