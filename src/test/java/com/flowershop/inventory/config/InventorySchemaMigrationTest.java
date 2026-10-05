@@ -84,7 +84,7 @@ class InventorySchemaMigrationTest {
             var columns = jdbcTemplate.queryForList("PRAGMA table_info(raw_material)");
             assertThat(columns)
                     .extracting(column -> column.get("name"))
-                    .contains("average_unit_cost");
+                    .contains("average_unit_cost", "reorder_level");
             var productColumns = jdbcTemplate.queryForList("PRAGMA table_info(product)");
             assertThat(productColumns)
                     .extracting(column -> column.get("name"))

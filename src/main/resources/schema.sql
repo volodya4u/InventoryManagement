@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS raw_material (
     unit TEXT NOT NULL,
     quantity NUMERIC NOT NULL DEFAULT 0 CHECK (quantity >= 0),
     average_unit_cost NUMERIC NOT NULL DEFAULT 0 CHECK (average_unit_cost >= 0),
+    reorder_level NUMERIC NOT NULL DEFAULT 0 CHECK (reorder_level >= 0),
     image BLOB,
     image_content_type TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

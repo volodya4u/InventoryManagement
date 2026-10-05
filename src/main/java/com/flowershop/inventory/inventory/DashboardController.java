@@ -29,13 +29,15 @@ public class DashboardController {
                 rawMaterialRepository.count(),
                 productRepository.count(),
                 productRepository.totalQuantity(),
-                saleRepository.count());
+                saleRepository.count(),
+                rawMaterialRepository.countLowStock());
     }
 
     public record DashboardSummary(
             long rawMaterialTypes,
             long productTypes,
             BigDecimal productUnits,
-            long salesCount) {
+            long salesCount,
+            long lowStockRawMaterials) {
     }
 }

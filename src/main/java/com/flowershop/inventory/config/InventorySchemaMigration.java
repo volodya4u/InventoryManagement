@@ -29,6 +29,14 @@ public class InventorySchemaMigration implements ApplicationRunner {
                     """);
         }
 
+        if (!hasColumn("raw_material", "reorder_level")) {
+            jdbcTemplate.execute("""
+                    ALTER TABLE raw_material
+                    ADD COLUMN reorder_level NUMERIC NOT NULL DEFAULT 0
+                        CHECK (reorder_level >= 0)
+                    """);
+        }
+
         if (!tableDefinitionContains("raw_material_stock_movement", "'ADJUSTMENT_DECREASE'")) {
             migrateRawMaterialStockMovement();
         }
