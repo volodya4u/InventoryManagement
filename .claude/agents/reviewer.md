@@ -69,3 +69,5 @@ Docker images and minor Spring Boot parent updates; `.github/dependabot.yml` ign
 
 Report only what you verified in the code. Skip formatting nits that Prettier fixes. Any blocking finding means
 `CHANGES REQUESTED`.
+
+When you change this file, run the reviewer evals (`evals/README.md`) and paste the scores into the PR.
