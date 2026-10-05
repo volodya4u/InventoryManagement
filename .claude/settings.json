@@ -15,6 +15,7 @@
       "Bash(node scripts/agent-log-summary.mjs *)",
       "Bash(node scripts/hooks-selftest.mjs)",
       "Bash(node scripts/dod.mjs)",
+      "Bash(node scripts/test-run.mjs *)",
       "Bash(node .claude/skills/agent-log-report/scripts/report.mjs *)",
       "Bash(git status *)",
       "Bash(git diff *)",

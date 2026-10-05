@@ -4,6 +4,11 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 
+// The Node that Maven pins into target/frontend-tooling (the Angular CLI refuses older releases), when it is installed.
+export const pinnedNodePath = (root) =>
+  join(root, "target", "frontend-tooling", "node", process.platform === "win32" ? "node.exe" : "node");
+export const frontendNode = (root) => (existsSync(pinnedNodePath(root)) ? pinnedNodePath(root) : process.execPath);
+
 // Files under dir whose name matches pattern, skipping node_modules and dot folders.
 export function findFiles(dir, pattern) {
   if (!existsSync(dir)) return [];
@@ -97,6 +102,12 @@ export function nodeTestVerdict(output) {
   const fail = count("fail");
   if (Number.isNaN(pass) || Number.isNaN(fail)) return { ok: false, result: "no node --test summary" };
   return { ok: pass > 0 && fail === 0, result: `${pass} passed, ${fail} failed` };
+}
+
+// scripts/mcp-smoke.mjs ends with "MCP smoke: <server> answered list_projects in <n> s (<project>, Angular <v>)".
+export function mcpSmokeVerdict(output) {
+  const line = /^MCP smoke: (.+)$/m.exec(output)?.[1];
+  return line ? { ok: true, result: line } : { ok: false, result: "the angular-cli MCP server gave no list_projects answer" };
 }
 
 // A check fails on its runner's exit code, and also when the runner exited 0 but the verdict found the run incomplete.

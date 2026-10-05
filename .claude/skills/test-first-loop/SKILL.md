@@ -18,27 +18,29 @@ Run the whole loop yourself; come back to the human only at the exits named belo
 1. **Criteria.** Take the acceptance criteria from `docs/specs/<feature>.md`, or restate the request as one to five
    Given / When / Then lines. A feature that changes the schema, an API and a page together gets a spec first
    (`docs/specs/TEMPLATE.md`), approved by the human.
-2. **Red.** Write the test where `AGENTS.md` puts it and run only that test. It must fail on an assertion about the
-   new behaviour, not on a compile error. Keep the command and the failure line for the report.
-   - Backend: `mvn -Dskip.frontend=true test -Dtest=<TestClass>#<method>`
-   - Frontend, in `frontend/`: `pnpm exec ng test --watch=false --include <path/to/file.spec.ts>`
+2. **Red.** Write the test where `AGENTS.md` puts it and run only that test through `scripts/test-run.mjs`, which
+   records the run (exit code, counts, first failure line) in the agent log. It must fail on an assertion about the new
+   behaviour, not on a compile error (the record says which).
+   - Backend: `node scripts/test-run.mjs backend <TestClass>#<method>`
+   - Frontend: `node scripts/test-run.mjs frontend <path/to/file.spec.ts>`
+   - Harness scripts: `node scripts/test-run.mjs harness scripts/<name>.test.mjs`
    - Changing behaviour that has no test yet: first pin today's behaviour with a passing test, then write the failing one.
-3. **Green.** Make the smallest change that passes the test, then re-run the same command. Repeat.
+3. **Green.** Make the smallest change that passes the test, then re-run the same `test-run.mjs` command. Repeat.
 4. **Done.** Run `node scripts/dod.mjs` (self-test, harness unit tests, `mvn -B -ntp verify`, Prettier, frontend
-   tests; the same checks as CI). If a check is red, go back to step 3 with its failure. For formatting, run
-   `pnpm exec prettier --write <files>` in `frontend/`.
-5. **Review.** Claude Code: ask the `reviewer` subagent, passing only the base ref, the goal in one sentence and the
-   spec path. Any other agent: get an equivalent fresh-context, read-only review. Fix each blocking finding and go back
-   to step 4. Fix each non-blocking finding or say why not.
-6. **Report and record the review.** Give the red and green lines from steps 2 and 3, the table `dod.mjs` printed,
-   the reviewer's verdict, and anything left open. Commit one logical change at a time; a hook folds the agent log into
-   `.agent-log/actions.jsonl` and stages it on each `git commit`, so you need not stage it yourself.
-   - **The review only becomes evidence once a commit folds it in.** The `reviewer` runs (step 5) after your code
-     commits, so its log lines sit in `pending.jsonl` until the next `git commit`. Make one more commit after the
-     review — log-only is fine: `git commit -m "Record the reviewer run"`.
-   - **Verify before you push:** `node scripts/check-review.mjs <base>` (default `origin/main`) must print
-     "Reviewer evidence: …". If it does not, you have not folded the review — commit, then push. CI's `review-evidence`
-     job checks the same thing, so catching it here saves a red build.
+   tests, the angular-cli MCP smoke test; the same checks as CI). It records each run. If a check is red, go back to
+   step 3 with its failure. For formatting, run `pnpm exec prettier --write <files>` in `frontend/`.
+5. **Review.** Finish every change first, the autonomy-log row included: the reviewer's verdict counts only for the
+   files it saw. Claude Code: ask the `reviewer` subagent, passing only the base ref, the goal in one sentence and the
+   spec path; a hook records its verdict. Any other agent: get an equivalent fresh-context, read-only review. Fix each
+   blocking finding and go back to step 4. Fix each non-blocking finding or say why not.
+6. **Record and report.** Commit one logical change at a time; a hook folds the agent log (tool calls, the `DodRun` and
+   `TestRun` records, the reviewer's verdict) into `.agent-log/actions.jsonl` and stages it on each `git commit`.
+   - **The records only count once a commit folds them in.** The reviewer runs (step 5) after your code commits, so
+     make one more commit after the review — log-only is fine: `git commit -m "Record the reviewer run"`.
+   - **Verify before you push:** `node scripts/pr-evidence.mjs <base> HEAD` (base usually `origin/main`) must show
+     every gate ✅: the review on these files, a green dod run on this code, the specs, red → green for a new spec, the
+     autonomy-log row. CI's `pr-evidence` job runs the same check and puts the report in its summary, so you need not
+     paste red and green lines or the dod table by hand; report anything left open.
 
 ## Exits: stop and ask the human
 

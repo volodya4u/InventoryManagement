@@ -1,26 +1,64 @@
 #!/usr/bin/env node
-// Proof of review, not just a claim: the pull-request-description check only sees the word "APPROVE" in the body.
-// This confirms the fresh-context `reviewer` subagent actually ran on this branch, from the committed agent log.
-// log-action.mjs tags each line with `agent` (the subagent that made the call) and records `subagent_type` on the
-// Agent spawn line; this looks for either naming the reviewer among the log lines this branch added over its base.
+// Proof of review, not a claim. log-action.mjs records the `reviewer` subagent's own verdict from the report it hands
+// back (its "## Review: APPROVE | CHANGES REQUESTED" line, the blocking count, the first findings, and `tree`, the
+// fingerprint of the files it saw). This checks the agent-log lines this branch added over its base: the last recorded
+// verdict must be APPROVE, and it must cover the files as they are now, so a review of an earlier diff or a hand-written
+// line naming the reviewer (the PR #52 bypass) does not pass.
 // Usage (from the repo root): node scripts/check-review.mjs [base-ref]   (base-ref default: origin/main)
+// scripts/pr-evidence.mjs runs the same check in CI against the head commit of the pull request.
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { treeFingerprint } from "./dod-fingerprint.mjs";
 
+const parse = (line) => {
+  try {
+    return [JSON.parse(line)];
+  } catch {
+    return [];
+  }
+};
+
+// Any line from or about the reviewer: it was at least started on this branch.
 export function reviewerRan(lines) {
-  return lines.some((line) => {
-    try {
-      const e = JSON.parse(line);
-      return e.agent === "reviewer" || e.subagent_type === "reviewer";
-    } catch {
-      return false;
-    }
-  });
+  return lines.flatMap(parse).some((e) => e.agent === "reviewer" || e.subagent_type === "reviewer");
+}
+
+// The reviewer's recorded verdicts, oldest first. Only executed lines count (a PreToolUse line is a proposal).
+export function reviewVerdicts(lines) {
+  return lines
+    .flatMap(parse)
+    .filter((e) => e.event === "PostToolUse" && (e.verdict === "APPROVE" || e.verdict === "CHANGES REQUESTED"))
+    .sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
+}
+
+// What is missing for the review to count, given the fingerprint of the files under review now; [] when nothing is.
+export function reviewProblems(lines, tree) {
+  const verdicts = reviewVerdicts(lines);
+  if (!verdicts.length) {
+    return [
+      reviewerRan(lines)
+        ? "The reviewer ran on this branch, but no verdict was recorded: its report must end in a `## Review: APPROVE` " +
+          "or `## Review: CHANGES REQUESTED` line (.claude/agents/reviewer.md). Run it again on the final diff."
+        : "No reviewer verdict in the agent log added on this branch. Run the `reviewer` subagent on the final diff " +
+          "(AGENTS.md), then commit so the log folds in.",
+    ];
+  }
+  const last = verdicts.at(-1);
+  if (last.verdict !== "APPROVE") {
+    return [
+      `The reviewer's last verdict is CHANGES REQUESTED (${last.blocking ?? "?"} blocking): fix or answer the ` +
+        "blocking findings, then run the reviewer again.",
+    ];
+  }
+  if (!last.tree || last.tree !== tree) {
+    return ["Files changed after the reviewer's last APPROVE (its recorded tree differs): run the reviewer again on the final diff, then commit."];
+  }
+  return [];
 }
 
 // The agent-log lines this branch added over its base: the `+` side of the diff, minus the `+++` file header.
-export function addedLogLines(base) {
-  const diff = execFileSync("git", ["diff", `${base}...HEAD`, "--", ".agent-log/actions.jsonl"], { encoding: "utf8" });
+export function addedLogLines(base, head = "HEAD") {
+  const diff = execFileSync("git", ["diff", `${base}...${head}`, "--", ".agent-log/actions.jsonl"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
   return diff.split("\n").filter((l) => l.startsWith("+") && !l.startsWith("+++")).map((l) => l.slice(1));
 }
 
@@ -33,14 +71,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.error(`Could not diff .agent-log/actions.jsonl against ${base}: ${error.message}`);
     process.exit(2);
   }
-  if (reviewerRan(lines)) {
-    console.log(`Reviewer evidence: the \`reviewer\` subagent ran on this branch (agent log vs ${base}).`);
+  const problems = reviewProblems(lines, treeFingerprint(process.cwd()));
+  if (!problems.length) {
+    const rounds = reviewVerdicts(lines).length;
+    console.log(`Reviewer evidence: the \`reviewer\` subagent's last verdict is APPROVE on these files (${rounds} round(s) recorded on this branch vs ${base}).`);
     process.exit(0);
   }
-  console.error(
-    `No reviewer evidence in the agent log added over ${base}. The fresh-context \`reviewer\` subagent must run ` +
-      "before a pull request (AGENTS.md), and the log is committed, so its run should appear. Run the reviewer, " +
-      "then commit the log.",
-  );
+  for (const problem of problems) console.error(problem);
   process.exit(1);
 }

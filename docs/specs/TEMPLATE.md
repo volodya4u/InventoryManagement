@@ -5,7 +5,7 @@
      saved here before any code, and the reviewer subagent gets this path. Keep it to one screen: the code and the
      tests hold the details. Delete these comments. -->
 
-Status: Draft | Approved by <who> on <date> | Done in <PR link>
+Status: Draft | Approved by <who> on <date>
 
 ## Goal
 
@@ -17,7 +17,10 @@ Status: Draft | Approved by <who> on <date> | Done in <PR link>
 
 ## Acceptance criteria
 
-<!-- Each criterion becomes at least one test; name it here and keep the name when the test is written. -->
+<!-- Each criterion becomes at least one test; name it here and keep the name when the test is written.
+     Text in "double quotes" is exact UI or API copy: the named test must contain it verbatim.
+     scripts/check-specs.mjs checks in CI that the Status is approved, that no <placeholder> is left, that each named
+     test exists and that it holds the quoted text, so the spec cannot drift from the code unnoticed. -->
 
 | # | Given / When / Then | Test |
 | - | ------------------- | ---- |
@@ -31,6 +34,11 @@ Status: Draft | Approved by <who> on <date> | Done in <PR link>
 - **API**: method, path, request and response records, error statuses.
 - **UI**: page, route (`app.routes.ts`, `SpaController` and its forwarding test), dialogs.
 - **Boundaries**: anything on the "Ask before" list in `AGENTS.md`; each needs a human yes.
+
+## Changed after approval
+
+- <!-- When the code has to differ from the approved spec, change the spec in the same pull request and say here
+     what changed, why, and who decided. Delete the section if nothing changed. -->
 
 ## Risks and open questions
 
