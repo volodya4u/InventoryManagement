@@ -58,6 +58,12 @@ jobs:
       - name: Frontend test-run guard
         run: node scripts/ci-test-guard.mjs frontend target/frontend-test.log
 
+      # Dynamic context: the angular-cli MCP server that .mcp.json starts for agents answers list_projects, and the
+      # answer goes to the job summary. A broken server fails the build, Dependabot auto-merge included (a human
+      # decision, docs/autonomy-log.md), instead of silently leaving agents on stale model memory.
+      - name: Dynamic context (angular-cli MCP)
+        run: node scripts/mcp-smoke.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+
   # Confirm the fresh-context reviewer subagent actually ran on the branch (agent log vs main), not just that the
   # description says APPROVE. Dependabot PRs skip it: CI is their checker, so they carry no reviewer run.
   review-evidence:

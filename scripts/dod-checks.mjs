@@ -104,6 +104,12 @@ export function nodeTestVerdict(output) {
   return { ok: pass > 0 && fail === 0, result: `${pass} passed, ${fail} failed` };
 }
 
+// scripts/mcp-smoke.mjs ends with "MCP smoke: <server> answered list_projects in <n> s (<project>, Angular <v>)".
+export function mcpSmokeVerdict(output) {
+  const line = /^MCP smoke: (.+)$/m.exec(output)?.[1];
+  return line ? { ok: true, result: line } : { ok: false, result: "the angular-cli MCP server gave no list_projects answer" };
+}
+
 // A check fails on its runner's exit code, and also when the runner exited 0 but the verdict found the run incomplete.
 // spawnSync reports a null status when the runner could not start or was killed.
 export function checkExitCode(status, ok) {

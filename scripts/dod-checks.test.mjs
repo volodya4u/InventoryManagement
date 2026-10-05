@@ -11,6 +11,7 @@ import {
   expectedTestClasses,
   findFiles,
   frontendVerdict,
+  mcpSmokeVerdict,
   nodeTestVerdict,
   selfTestVerdict,
   specFilePattern,
@@ -138,6 +139,12 @@ test("node --test summaries from both reporters are read", () => {
   assert.deepEqual(nodeTestVerdict("ℹ tests 13\nℹ pass 13\nℹ fail 0\n"), { ok: true, result: "13 passed, 0 failed" });
   assert.deepEqual(nodeTestVerdict("# tests 3\n# pass 2\n# fail 1\n"), { ok: false, result: "2 passed, 1 failed" });
   assert.deepEqual(nodeTestVerdict("node: bad option\n"), { ok: false, result: "no node --test summary" });
+});
+
+test("the MCP smoke check needs the server's list_projects answer", () => {
+  const out = "## Dynamic context: angular-cli MCP\n\nMCP smoke: angular-cli-server 22.2.1 answered list_projects in 3.3 s (frontend, Angular 22)\n";
+  assert.deepEqual(mcpSmokeVerdict(out), { ok: true, result: "angular-cli-server 22.2.1 answered list_projects in 3.3 s (frontend, Angular 22)" });
+  assert.equal(mcpSmokeVerdict("MCP smoke failed: the angular-cli MCP server (scripts/ng-mcp.mjs) no answer within 120 s").ok, false);
 });
 
 test("the self-test needs at least one PASS line and no FAIL line", () => {

@@ -19,6 +19,7 @@ import {
   findFiles,
   frontendNode,
   frontendVerdict,
+  mcpSmokeVerdict,
   nodeTestVerdict,
   pinnedNodePath,
   selfTestVerdict,
@@ -87,6 +88,13 @@ const checks = [
         env: { ...process.env, NG_CLI_ANALYTICS: "false" },
       }),
     verdict: (out) => frontendVerdict(out, findFiles(join(frontend, "src"), specFilePattern).length),
+  },
+  {
+    // Dynamic context: the angular-cli MCP server agents use answers list_projects (scripts/mcp-smoke.mjs).
+    name: "Dynamic context (angular-cli MCP)",
+    label: "node scripts/mcp-smoke.mjs",
+    run: () => spawnSync(process.execPath, [join(root, "scripts", "mcp-smoke.mjs")], { cwd: root, encoding: "utf8" }),
+    verdict: mcpSmokeVerdict,
   },
 ];
 
