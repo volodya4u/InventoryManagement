@@ -29,3 +29,5 @@ Produce a human-readable report of everything the agent did in this repo, from `
 - If the file is missing or empty, say so and suggest checking the hooks in `.claude/settings.json` (`node scripts/hooks-selftest.mjs`); do not create the log.
 - Lines that are not valid JSON are counted as `invalid` and never crash the report.
 - The `tool` column is whatever the hook wrote: `Read`, `Edit`, `Write`, `Bash`, `Glob`, `Grep`, MCP tools such as `mcp__context7__query-docs`.
+
+When you change this skill, run its evals in `evals/` next to it (`claude plugin eval .agents/skills/agent-log-report`; see `evals/README.md`).

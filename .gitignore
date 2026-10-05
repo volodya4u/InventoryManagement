@@ -17,3 +17,8 @@ frontend/dist/
 !.env.example
 CLAUDE.local.md
 .claude/settings.local.json
+
+# eval run outputs (local gate; see evals/README.md)
+evals/results/
+.agents/skills/*/evals/results/
+.claude/skills/*/evals/results/
