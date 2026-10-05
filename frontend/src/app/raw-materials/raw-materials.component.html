@@ -49,6 +49,9 @@
               </td>
               <td class="name-column">
                 <strong>{{ item.name }}</strong>
+                @if (item.belowReorderLevel) {
+                  <span class="badge text-bg-danger low-stock-badge">Low stock</span>
+                }
                 @if (item.description) {
                   <div class="description">{{ item.description }}</div>
                 }
@@ -222,6 +225,25 @@
                   }}</strong>
                 </div>
               </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="raw-reorder-level">Reorder Level (minimum stock)</label>
+            <input
+              id="raw-reorder-level"
+              class="form-control"
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="reorderLevel"
+            />
+            <div class="file-hint mt-1">
+              Flags this material as low stock when its quantity falls to this level or below. 0
+              means it is not tracked.
+            </div>
+            @if (form.controls.reorderLevel.touched && form.controls.reorderLevel.invalid) {
+              <div class="invalid-feedback d-block">Reorder level cannot be negative.</div>
             }
           </div>
 

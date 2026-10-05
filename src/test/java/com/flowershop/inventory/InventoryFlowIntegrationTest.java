@@ -1067,6 +1067,65 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void recordsRawMaterialReorderLevelAndLowStockFlag() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        // Quantity 3 at a reorder level of 5 is below the level.
+        createRawMaterialWithReorderLevel(session, csrfCookie, "Rose", "3", "5")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.reorderLevel").value(5))
+                .andExpect(jsonPath("$.belowReorderLevel").value(true));
+
+        // A reorder level of 0 means "not tracked", so a low quantity is still not flagged.
+        createRawMaterialWithReorderLevel(session, csrfCookie, "Ribbon", "2", "0")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.reorderLevel").value(0))
+                .andExpect(jsonPath("$.belowReorderLevel").value(false));
+
+        // Editing the level down to 2 (below the quantity 3) clears the flag and persists the new level.
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/raw-materials/1")
+                        .param("name", "Rose")
+                        .param("unit", "PIECE")
+                        .param("reorderLevel", "2")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reorderLevel").value(2))
+                .andExpect(jsonPath("$.belowReorderLevel").value(false));
+    }
+
+    @Test
+    void dashboardCountsLowStockRawMaterials() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        createRawMaterialWithReorderLevel(session, csrfCookie, "Below", "3", "5")
+                .andExpect(status().isCreated()); // 3 <= 5 -> low
+        createRawMaterialWithReorderLevel(session, csrfCookie, "Boundary", "5", "5")
+                .andExpect(status().isCreated()); // 5 <= 5 -> low (boundary counts)
+        createRawMaterialWithReorderLevel(session, csrfCookie, "Untracked", "1", "0")
+                .andExpect(status().isCreated()); // reorder 0 -> not tracked
+        createRawMaterialWithReorderLevel(session, csrfCookie, "Above", "10", "5")
+                .andExpect(status().isCreated()); // 10 > 5 -> not low
+
+        mockMvc.perform(get("/api/dashboard").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lowStockRawMaterials").value(2));
+    }
+
+    @Test
     void reportsTheActualSessionTimeoutWithoutCreatingAnonymousSessions() throws Exception {
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())
@@ -1317,6 +1376,24 @@ class InventoryFlowIntegrationTest {
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue()))
                 .andExpect(status().isCreated());
+    }
+
+    private ResultActions createRawMaterialWithReorderLevel(
+            MockHttpSession session,
+            jakarta.servlet.http.Cookie csrfCookie,
+            String name,
+            String quantity,
+            String reorderLevel) throws Exception {
+        return mockMvc.perform(multipart("/api/raw-materials")
+                .param("name", name)
+                .param("description", "")
+                .param("unit", "PIECE")
+                .param("quantity", quantity)
+                .param("initialUnitCost", "1")
+                .param("reorderLevel", reorderLevel)
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue()));
     }
 
     private void assertSellingPrice(

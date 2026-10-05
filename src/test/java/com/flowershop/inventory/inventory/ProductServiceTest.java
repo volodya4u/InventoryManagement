@@ -242,6 +242,8 @@ class ProductServiceTest {
                 stockQuantity,
                 unitCost,
                 stockQuantity.multiply(unitCost),
+                BigDecimal.ZERO,
+                false,
                 false,
                 false,
                 "created",

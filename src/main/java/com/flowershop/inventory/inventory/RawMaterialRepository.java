@@ -21,6 +21,8 @@ public class RawMaterialRepository {
     private static final String SUMMARY_COLUMNS = """
             id, name, description, unit, quantity,
             average_unit_cost,
+            reorder_level,
+            reorder_level > 0 AND quantity <= reorder_level AS below_reorder_level,
             image IS NOT NULL AS has_image,
             quantity = 0
                 AND NOT EXISTS (
@@ -59,14 +61,16 @@ public class RawMaterialRepository {
             MeasurementUnit unit,
             BigDecimal quantity,
             BigDecimal averageUnitCost,
+            BigDecimal reorderLevel,
             ImagePayload image) {
         var keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             var statement = connection.prepareStatement(
                     """
                     INSERT INTO raw_material
-                        (name, description, unit, quantity, average_unit_cost, image, image_content_type)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                        (name, description, unit, quantity, average_unit_cost, reorder_level,
+                         image, image_content_type)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, name);
@@ -74,8 +78,9 @@ public class RawMaterialRepository {
             statement.setString(3, unit.name());
             statement.setBigDecimal(4, quantity);
             statement.setBigDecimal(5, averageUnitCost);
-            statement.setBytes(6, image == null ? null : image.bytes());
-            statement.setString(7, image == null ? null : image.contentType());
+            statement.setBigDecimal(6, reorderLevel);
+            statement.setBytes(7, image == null ? null : image.bytes());
+            statement.setString(8, image == null ? null : image.contentType());
             return statement;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -86,30 +91,33 @@ public class RawMaterialRepository {
             String name,
             String description,
             MeasurementUnit unit,
+            BigDecimal reorderLevel,
             ImagePayload image) {
         if (image == null) {
             return jdbcTemplate.update(
                     """
                     UPDATE raw_material
-                    SET name = ?, description = ?, unit = ?,
+                    SET name = ?, description = ?, unit = ?, reorder_level = ?,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                     """,
                     name,
                     description,
                     unit.name(),
+                    reorderLevel,
                     id);
         }
         return jdbcTemplate.update(
                 """
                 UPDATE raw_material
-                SET name = ?, description = ?, unit = ?,
+                SET name = ?, description = ?, unit = ?, reorder_level = ?,
                     image = ?, image_content_type = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """,
                 name,
                 description,
                 unit.name(),
+                reorderLevel,
                 image.bytes(),
                 image.contentType(),
                 id);
@@ -194,9 +202,17 @@ public class RawMaterialRepository {
         return value == null ? 0L : value;
     }
 
+    public long countLowStock() {
+        Long value = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM raw_material WHERE reorder_level > 0 AND quantity <= reorder_level",
+                Long.class);
+        return value == null ? 0L : value;
+    }
+
     private RawMaterialDto map(java.sql.ResultSet rs) throws java.sql.SQLException {
         var quantity = SqliteDecimals.read(rs, "quantity");
         var averageUnitCost = SqliteDecimals.read(rs, "average_unit_cost");
+        var reorderLevel = SqliteDecimals.read(rs, "reorder_level");
         return new RawMaterialDto(
                 rs.getLong("id"),
                 rs.getString("name"),
@@ -205,6 +221,8 @@ public class RawMaterialRepository {
                 quantity,
                 averageUnitCost,
                 quantity.multiply(averageUnitCost).setScale(2, RoundingMode.HALF_UP),
+                reorderLevel,
+                rs.getBoolean("below_reorder_level"),
                 rs.getBoolean("has_image"),
                 rs.getBoolean("unit_changeable"),
                 rs.getString("created_at"),

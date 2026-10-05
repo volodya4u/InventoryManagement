@@ -49,8 +49,9 @@ public class RawMaterialController {
             @RequestParam @NotBlank String unit,
             @RequestParam @DecimalMin("0.0") BigDecimal quantity,
             @RequestParam(required = false) @DecimalMin("0.0") BigDecimal initialUnitCost,
+            @RequestParam(required = false) @DecimalMin("0.0") BigDecimal reorderLevel,
             @RequestParam(required = false) MultipartFile image) {
-        return service.create(name, description, unit, quantity, initialUnitCost, image);
+        return service.create(name, description, unit, quantity, initialUnitCost, reorderLevel, image);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -59,8 +60,9 @@ public class RawMaterialController {
             @RequestParam @NotBlank @Size(max = 120) String name,
             @RequestParam(defaultValue = "") @Size(max = 1000) String description,
             @RequestParam @NotBlank String unit,
+            @RequestParam(required = false) @DecimalMin("0.0") BigDecimal reorderLevel,
             @RequestParam(required = false) MultipartFile image) {
-        return service.update(id, name, description, unit, image);
+        return service.update(id, name, description, unit, reorderLevel, image);
     }
 
     @PostMapping("/{id}/receipts")

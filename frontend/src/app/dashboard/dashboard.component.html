@@ -35,6 +35,11 @@
     <strong>{{ summary()?.salesCount ?? '—' }}</strong>
     <a routerLink="/sales">Go to Sales</a>
   </article>
+  <article class="stat-card stat-card--rose low-stock-card">
+    <span class="stat-card__label">Low Stock</span>
+    <strong>{{ summary()?.lowStockRawMaterials ?? '—' }}</strong>
+    <a routerLink="/raw-materials">Review Raw Materials</a>
+  </article>
 </div>
 
 <section class="surface-card getting-started">

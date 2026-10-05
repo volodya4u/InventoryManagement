@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { RawMaterial } from '../core/models';
 import { RawMaterialsComponent } from './raw-materials.component';
@@ -23,6 +23,8 @@ describe('RawMaterialsComponent amounts', () => {
       quantity: 100,
       averageUnitCost: 0,
       stockValue: 0,
+      reorderLevel: 0,
+      belowReorderLevel: false,
       hasImage: false,
       unitChangeable: false,
       createdAt: '2026-10-01T09:00:00Z',
@@ -86,5 +88,60 @@ describe('RawMaterialsComponent amounts', () => {
     ]);
 
     expect(component.totalStockValue()).toBe(0.3);
+  });
+});
+
+describe('RawMaterialsComponent low-stock badge', () => {
+  let requests: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    requests = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    requests.verify();
+    TestBed.resetTestingModule();
+  });
+
+  function rawMaterial(overrides: Partial<RawMaterial>): RawMaterial {
+    return {
+      id: 1,
+      name: 'Red Rose',
+      description: '',
+      unit: 'PIECE',
+      quantity: 100,
+      averageUnitCost: 0,
+      stockValue: 0,
+      reorderLevel: 0,
+      belowReorderLevel: false,
+      hasImage: false,
+      unitChangeable: false,
+      createdAt: '2026-10-01T09:00:00Z',
+      updatedAt: '2026-10-01T09:00:00Z',
+      ...overrides,
+    };
+  }
+
+  it('marks a raw material below its reorder level', () => {
+    const fixture = TestBed.createComponent(RawMaterialsComponent);
+    fixture.detectChanges();
+    requests.expectOne('/api/raw-materials').flush([
+      rawMaterial({ id: 1, name: 'Low', quantity: 2, reorderLevel: 5, belowReorderLevel: true }),
+      rawMaterial({
+        id: 2,
+        name: 'Fine',
+        quantity: 50,
+        reorderLevel: 5,
+        belowReorderLevel: false,
+      }),
+    ]);
+    fixture.detectChanges();
+
+    const badges = fixture.nativeElement.querySelectorAll('.low-stock-badge');
+    expect(badges.length).toBe(1);
+    expect(badges[0].textContent).toContain('Low stock');
   });
 });

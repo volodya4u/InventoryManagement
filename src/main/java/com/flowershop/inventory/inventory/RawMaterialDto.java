@@ -10,6 +10,8 @@ public record RawMaterialDto(
         BigDecimal quantity,
         BigDecimal averageUnitCost,
         BigDecimal stockValue,
+        BigDecimal reorderLevel,
+        boolean belowReorderLevel,
         boolean hasImage,
         boolean unitChangeable,
         String createdAt,

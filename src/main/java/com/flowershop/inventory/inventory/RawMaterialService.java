@@ -38,6 +38,7 @@ public class RawMaterialService {
             String unit,
             BigDecimal quantity,
             BigDecimal initialUnitCost,
+            BigDecimal reorderLevel,
             MultipartFile image) {
         var normalizedUnitCost = normalizeInitialUnitCost(quantity, initialUnitCost);
         long id = repository.insert(
@@ -46,6 +47,7 @@ public class RawMaterialService {
                 MeasurementUnit.from(unit),
                 quantity,
                 normalizedUnitCost,
+                normalizeReorderLevel(reorderLevel),
                 imageValidator.validate(image));
         if (quantity.signum() > 0) {
             repository.insertStockMovement(
@@ -66,6 +68,7 @@ public class RawMaterialService {
             String name,
             String description,
             String unit,
+            BigDecimal reorderLevel,
             MultipartFile image) {
         var material = findById(id);
         var measurementUnit = MeasurementUnit.from(unit);
@@ -79,6 +82,7 @@ public class RawMaterialService {
                 name.trim(),
                 normalizeDescription(description),
                 measurementUnit,
+                normalizeReorderLevel(reorderLevel),
                 imageValidator.validate(image));
         if (changed == 0) {
             throw notFound(id);
@@ -218,6 +222,10 @@ public class RawMaterialService {
                 requiredQuantity,
                 material.quantity(),
                 requiredQuantity.subtract(material.quantity()).max(BigDecimal.ZERO))));
+    }
+
+    private BigDecimal normalizeReorderLevel(BigDecimal reorderLevel) {
+        return reorderLevel == null ? BigDecimal.ZERO : reorderLevel;
     }
 
     private BigDecimal normalizeInitialUnitCost(BigDecimal quantity, BigDecimal initialUnitCost) {

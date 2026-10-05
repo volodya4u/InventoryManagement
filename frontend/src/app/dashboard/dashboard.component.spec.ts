@@ -26,16 +26,20 @@ describe('DashboardComponent', () => {
 
   it('shows the inventory summary', () => {
     expect(component.loading()).toBe(true);
-    requests
-      .expectOne('/api/dashboard')
-      .flush({ rawMaterialTypes: 3, productTypes: 2, productUnits: 12.5, salesCount: 7 });
+    requests.expectOne('/api/dashboard').flush({
+      rawMaterialTypes: 3,
+      productTypes: 2,
+      productUnits: 12.5,
+      salesCount: 7,
+      lowStockRawMaterials: 1,
+    });
     fixture.detectChanges();
 
     expect(component.loading()).toBe(false);
     const values = [...fixture.nativeElement.querySelectorAll('strong')].map((element) =>
       element.textContent.trim(),
     );
-    expect(values).toEqual(['3', '2', '12.5', '7']);
+    expect(values).toEqual(['3', '2', '12.5', '7', '1']);
   });
 
   it('shows the API error instead of the numbers', () => {
@@ -50,7 +54,7 @@ describe('DashboardComponent', () => {
     const values = [...fixture.nativeElement.querySelectorAll('strong')].map((element) =>
       element.textContent.trim(),
     );
-    expect(values).toEqual(['—', '—', '—', '—']);
+    expect(values).toEqual(['—', '—', '—', '—', '—']);
   });
 
   it('loads again on demand and clears the previous error', () => {
@@ -59,9 +63,29 @@ describe('DashboardComponent', () => {
 
     component.load();
     expect(component.error()).toBe('');
-    requests
-      .expectOne('/api/dashboard')
-      .flush({ rawMaterialTypes: 1, productTypes: 1, productUnits: 1, salesCount: 0 });
+    requests.expectOne('/api/dashboard').flush({
+      rawMaterialTypes: 1,
+      productTypes: 1,
+      productUnits: 1,
+      salesCount: 0,
+      lowStockRawMaterials: 0,
+    });
     expect(component.summary()?.salesCount).toBe(0);
+  });
+
+  it('shows the low-stock raw material count', () => {
+    requests.expectOne('/api/dashboard').flush({
+      rawMaterialTypes: 4,
+      productTypes: 2,
+      productUnits: 10,
+      salesCount: 3,
+      lowStockRawMaterials: 2,
+    });
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('.low-stock-card');
+    expect(card).not.toBeNull();
+    expect(card.textContent).toContain('Low Stock');
+    expect(card.querySelector('strong').textContent.trim()).toBe('2');
   });
 });

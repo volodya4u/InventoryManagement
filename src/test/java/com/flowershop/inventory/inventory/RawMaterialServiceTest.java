@@ -39,6 +39,7 @@ class RawMaterialServiceTest {
                         MeasurementUnit.PIECE,
                         new BigDecimal("2"),
                         new BigDecimal("1.2346"),
+                        new BigDecimal("5"),
                         payload))
                 .thenReturn(7L);
         when(repository.findById(7)).thenReturn(Optional.of(created));
@@ -50,6 +51,7 @@ class RawMaterialServiceTest {
                 "piece",
                 new BigDecimal("2"),
                 new BigDecimal("1.23456"),
+                new BigDecimal("5"),
                 image);
         var latestOpeningDate = LocalDate.now();
 
@@ -69,7 +71,7 @@ class RawMaterialServiceTest {
     @Test
     void requiresUnitCostWhenOpeningStockIsPositive() {
         assertThatThrownBy(() -> service.create(
-                        "Rose", null, "PIECE", BigDecimal.ONE, null, null))
+                        "Rose", null, "PIECE", BigDecimal.ONE, null, null, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Initial unit cost is required when initial stock is greater than zero");
 
@@ -154,6 +156,8 @@ class RawMaterialServiceTest {
                 stockQuantity,
                 unitCost,
                 stockQuantity.multiply(unitCost),
+                BigDecimal.ZERO,
+                false,
                 false,
                 unitChangeable,
                 "created",
