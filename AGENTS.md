@@ -21,7 +21,9 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 - `mvn -B -ntp verify`, the frontend tests and `pnpm exec prettier --check .` (in `frontend/`) are green.
 - New backend behaviour has a JUnit test under `src/test/java` in the same package (API flows go to
   `InventoryFlowIntegrationTest`); new frontend logic has a `*.spec.ts` next to the code.
-- Evidence, not claims: commands with exit codes / test counts; a PR fills the template's Evidence and Reviewer verdict.
+- Evidence is the tools' record, not typed text: `node scripts/dod.mjs` and `node scripts/test-run.mjs` (the loop's red
+  and green runs) record their results in the agent log, a hook records the reviewer's verdict, and the `pr-evidence`
+  CI job checks them against the pull request's head commit and reports them (`scripts/pr-evidence.mjs`).
 - Changing `.claude/agents/reviewer.md`, a skill under `.agents/skills/`, this file, or the model: run the matching
   evals (`evals/README.md`) and paste the scores. CI only checks the suite is present (`scripts/check-evals.mjs`).
 - Before a PR, a fresh-context, read-only reviewer checks the diff (Claude Code: the `reviewer` subagent); fix or
@@ -36,7 +38,9 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 - A schema change goes to `src/main/resources/schema.sql` (new databases) AND an idempotent step in
   `InventorySchemaMigration` (existing local databases) with a case in `InventorySchemaMigrationTest`.
 - A feature that changes the schema, an API and a page together starts with `docs/specs/<feature>.md` from
-  `docs/specs/TEMPLATE.md`, approved by a human; each acceptance criterion names its test.
+  `docs/specs/TEMPLATE.md`, approved by a human; each acceptance criterion names its test, and text in "double quotes"
+  is exact copy that the test holds verbatim (`scripts/check-specs.mjs` checks it in CI). When the code has to differ,
+  change the spec in the same pull request and say so under "Changed after approval".
 - Frontend: Prettier settings in `frontend/.prettierrc` (100 columns, single quotes).
 - English UI copy, code, comments and commit messages. Commit subject: one short imperative sentence
   ("Prevent changing a raw material's unit once quantities use it"), one logical change per commit.

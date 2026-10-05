@@ -8,9 +8,11 @@
   before writing code.
 - Review with the `reviewer` subagent, passing only the base ref, the goal and the spec path. Changes to `auth/`,
   `SecurityConfig`, `.claude/` or CI also get `/security-review`.
-- The reviewer's run only counts once a commit folds the agent log into `actions.jsonl`, so make a commit after the
-  review (log-only is fine) and confirm with `node scripts/check-review.mjs origin/main` before pushing — the
-  `review-evidence` CI job enforces it.
+- The reviewer's verdict counts only for the files it saw, and only once a commit folds it into `actions.jsonl`. So
+  finish every change first (the autonomy-log row included), run `node scripts/dod.mjs`, then the reviewer, then
+  commit (log-only is fine), and confirm with `node scripts/pr-evidence.mjs origin/main HEAD` before pushing — the
+  `pr-evidence` CI job runs the same check.
+- Run the loop's red and green tests through `node scripts/test-run.mjs` so they are recorded, not pasted.
 - Changing `reviewer.md`, a skill or `AGENTS.md` (or the model): run the matching evals and paste the scores (`evals/README.md`).
 - Do not edit `.agent-log/` or `.claude/hooks/` — they are the observability layer (a hook logs every tool call).
 - `.agent-log/actions.jsonl` is committed on purpose; you need not stage it. A hook buffers each tool call in

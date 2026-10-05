@@ -7,8 +7,9 @@ Levels (Agentic Engineering Crash Course): 1 Assistant (the agent proposes, a hu
 (the agent proves the result with tests, a human reviews the outcome) · 3 Agent · 4 Agents (parallel subagents) ·
 5 Autonomous agents (harness only, human by exception).
 
-**What the levels mean here.** All cloud work ran in `auto` mode (every agent-log line carries `"mode":"auto"`): a
-classifier, not a human step by step, approved individual tool calls within the ask/deny rules and the hooks. So
+**What the levels mean here.** All work, cloud and local, ran in `auto` mode (every agent-log line carries
+`"mode":"auto"`, or `"plan"` while planning). A classifier, not a human step by step, approved individual tool calls
+within the ask/deny rules and the hooks. So
 "level 1" below means **the human chose the scope** (approved the plan in plan mode) **and merged the pull request
 after review**, not that they clicked "allow" on every action; "level 2" adds that the result is proven by tests. No
 session ran in `default` (manual) mode — a deliberate simplification, not the course's literal level 1.
@@ -22,7 +23,7 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 | 5 | Always ask before JetBrains IDE MCP tools (#26) | 1 | Agent spotted that `idea` tools bypass the `.env` hook; human chose an ask rule | Documented precedence: deny → ask → allow across all settings scopes | Permissions are a human decision |
 | 6 | Angular 22 with `ng update`, Dependabot grouping for `@angular/*` (#27) | 2 | Human chose the full upgrade; agent ran it, checked the migrations and opened the PR; human merged | 46 frontend tests, `mvn -B -ntp verify`; formatting-neutral diff shows only the migrations; locally `ng version` 22.2.1 | Reversible with git and proven by tests, but a dependency change, so a human merges |
 | 7 | Vitest 5 Dependabot PR (#28) | 1 | Agent reviewed (CI log on Vitest 5, `@angular/build` peer range); human merged | 46 tests on Vitest 5.0.2; auto-merge skipped the major update | Majors never auto-merge |
-| 8 | Verify the hooks on Windows (no change needed) | 1 | Human ran the diagnostics the agent asked for | Self-test PASS on Windows; a local session logged a `PreToolUse`/`PostToolUse` pair for `Read README.md` in `default` mode | The hooks are the evidence layer, so they need their own evidence |
+| 8 | Verify the hooks on Windows (no change needed) | 1 | Human ran the diagnostics the agent asked for | Self-test PASS on Windows; a local session logged a `PreToolUse`/`PostToolUse` pair for `Read README.md` in `default` mode (that local log was never committed: the committed log has no `default` line) | The hooks are the evidence layer, so they need their own evidence |
 | 9 | Path-scoped rule for Angular 22 frontend work (#29) | 1 | Human chose it from the day 1 gap list | Each Angular fact checked against `@angular/core` and `@angular/common` 22.2.1 typings | Static context is team policy |
 | 10 | `GET /api/health`, start script waits for it (#30) | 1 | Plan approved by a human (it touches `SecurityConfig`); agent wrote the test first | Test red (401) before the change, green after; `mvn -B -ntp verify` 25 tests | First task through the full loop: plan, failing test, change, evidence |
 | 11 | This log and `merge=union` for the agent log | 1 | Human chose it from the day 1 gap list | A merge of two branches that both appended to the log kept both lines without a conflict | Documentation of decisions belongs to the human |
@@ -41,7 +42,9 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 | 24 | `Stop` hook `dod-fresh.mjs`: reminds (never blocks) when code changed since the last green `dod.mjs` (#50) | 1 | Human approved the plan (touches hooks and `settings.json`); agent implemented | `dod-fingerprint.test.mjs` 4 cases; +5 self-test checks; the reviewer found the fingerprint was taken after the checks, fixed in 0076cb3 (snapshot at run start); `/security-review` no findings | Hooks and `settings.json` steer the agent; always level 1 |
 | 25 | Prove the reviewer actually ran, not just that the description says "APPROVE" (`check-review.mjs` + `review-evidence` CI job) (#51) | 1 | Human approved the plan (touches hooks and CI); agent implemented | `check-review.test.mjs` 4 cases (red before the script existed); live: while the reviewer reviewed this PR, 20 `agent:"reviewer"` and 2 `subagent_type:"reviewer"` lines landed, then `check-review.mjs origin/main` → exit 0; `/security-review` no findings | Hooks and CI are always level 1 |
 | 26 | Unit tests for all six backend services and `AuthService` (frontend), no production-code change (#52) | 2 | Codex (a different tool) wrote the tests; the human separately approved a test under the protected `auth/` and merged | `node scripts/dod.mjs`: 52 backend tests (10 of 10 classes), 119 frontend; branch `codex/service-unit-test-coverage`; no product code changed | Proven by tests and reversible, but it touches the `auth/` boundary, so the human consents and merges. **Review-evidence caveat — see "Downgrade" below** |
-| 27 | Raw material reorder level + dashboard low-stock count, the first feature taken end-to-end through the loop | 2 | Human approved the plan in plan mode (it changes the schema) and merges; the agent ran spec → red → green → review | Spec committed before the code (635f0ec); AC2 red (`No value at JSON path "$.reorderLevel"`) → green; frontend AC4/AC5 red (4 failed) → green; `node scripts/dod.mjs` green (54 backend, 121 frontend); reviewer APPROVE (one non-blocking fixed: assert the migrated default is 0) | Reversible with git and proven by tests, but a schema change, so plan mode first and a human merges; the migration defaults existing rows to 0, so live data is untouched until a level is set |
+| 27 | Raw material reorder level + dashboard low-stock count, the first feature taken end-to-end through the loop (#57) | 2 | Human approved the plan in plan mode (it changes the schema) and merges; the agent ran spec → red → green → review | Spec committed before the code (635f0ec); AC2 red (`No value at JSON path "$.reorderLevel"`) → green; frontend AC4/AC5 red (4 failed) → green; `node scripts/dod.mjs` green (54 backend, 121 frontend); reviewer APPROVE (one non-blocking fixed: assert the migrated default is 0) | Reversible with git and proven by tests, but a schema change, so plan mode first and a human merges; the migration defaults existing rows to 0, so live data is untouched until a level is set |
+| 28 | Make folding the reviewer run an explicit step in the loop (#56); this row was added in #58, after the fact | 1 | After #55's `review-evidence` job failed (the reviewer ran after the last commit, so its log never folded in), the human asked to make the step automatic rather than remembered; the agent implemented it | #55 red: https://github.com/volodya4u/InventoryManagement/actions/runs/37290263378, green after the log-only commit 51d6def; the rule in `CLAUDE.md` and step 6 of the skill (a6da312), `test-first-loop` evals 1.00; #57's `review-evidence` passed on its first and only push: https://github.com/volodya4u/InventoryManagement/actions/runs/37316807854 | `CLAUDE.md` and a skill steer the agent, so a human approves them; the rule still relied on the agent remembering it, which #58 replaces with a check |
+| 29 | Evidence recorded by the tools and checked in every pull request (#58): `DodRun` and `TestRun` records, the reviewer's verdict from its own report, `check-specs`, `pr-evidence`, the MCP smoke test, the evals record | 1 | The human rejected a docs-only fix ("we would be fitting the results by hand"), required everything to run in the PR, and chose local runs with machine records over an API key in CI, `pr-evidence` as a required check, the spec following the code for AC5, and a blocking MCP smoke test; the agent planned it in plan mode and implemented it | `check-specs` red on the real spec in CI (https://github.com/volodya4u/InventoryManagement/actions/runs/37326578533), green after the spec update 3c2502d (https://github.com/volodya4u/InventoryManagement/actions/runs/37326867192); MCP smoke green on Linux CI; the `pr-evidence` job summary of #58 (dod runs, red → green, review rounds) | CI, hooks and `settings.json` are always level 1; the change takes the agent's word out of the evidence, so a human decided each rule |
 
 ## Level changes
 
@@ -64,7 +67,15 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
   warned about ("a branch author could hand-write a fake reviewer line"). The human review stands; the machine proof
   does not. The level effectively fell from "2, proven by a maker ≠ checker pass" to "2, but the maker ≠ checker pass
   was replaced by a manual human review". CI let it through because `check-review` verifies the line exists, not where
-  it came from.
+  it came from. **Closed in #58:** `check-review.mjs` now needs the reviewer's own verdict on the files being merged.
+  The logging hook records that verdict from the report the reviewer hands back. A planted line like this one is a test
+  case that must fail (`check-review.test.mjs`).
+- **Row 5 — JetBrains `idea` MCP tools (#26).** Their file and terminal tools work outside the `protect-env` hook and
+  the `.env` deny rules. The human therefore moved them to an `ask` rule, and even after "always allow" they ask every
+  time. Trust in a tool went down because a way around the guard appeared, not because the tool misbehaved.
+- **Row 12 — the reviewer's own shell.** On 2026-10-03 at 17:11 the reviewer subagent still ran `ls`. The human chose
+  to limit the checker to read-only git, and from 17:20 `reviewer-bash-guard.mjs` blocked the same call (both are in
+  `.agent-log/actions.jsonl`). The checker keeps only what reviewing needs.
 
 ### Escalation deliberately not taken
 
@@ -76,10 +87,12 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 
 This section is the standing policy; the "Level changes" section above records the individual level moves it produced.
 
-- **Cloud sessions run in `auto` mode.** Their log lines say `"mode":"auto"`, so a classifier rather than a human approves
-  actions there; local sessions run in `default` (Manual). Ask and deny rules and the hooks still apply in the cloud: the
-  deny rule blocked an `rm -rf` on 2026-10-03. Cloud work therefore always lands as a pull request, so a human reviews it
-  before merge.
+- **Every logged session ran in `auto` or `plan`, local ones included.** The committed log has only `"mode":"auto"` and
+  `"mode":"plan"` lines, from the cloud sessions and the local desktop sessions alike. None ran in `default` (Manual),
+  which corrects an earlier line here. `node scripts/agent-log-summary.mjs` prints the modes, and the `pr-evidence` job
+  prints them per pull request. A classifier, not a human, approves single actions there, within the ask and deny rules
+  and the hooks: the deny rule blocked an `rm -rf` on 2026-10-03. All work therefore lands as a pull request a human
+  merges.
 - **Not escalated on purpose:** Dependabot auto-merges only patch and minor updates; Angular majors go through `ng update`
   with a human merging the PR.
 - **De-escalation by default:** any change to `.claude/settings.json`, `.mcp.json`, `pom.xml`, `frontend/package.json` or
@@ -90,18 +103,21 @@ This section is the standing policy; the "Level changes" section above records t
 
 ## What the agent proposed and did not do
 
-Numbers, not memory. `node scripts/agent-log-summary.mjs` (exit 0) over 8 sessions
-(2026-10-02 .. 2026-10-05, this branch): **1922 executed, 37 proposed-but-not-executed, 26 failed.** The totals grow
-with every commit (each fold adds lines), so treat them as a snapshot at this PR, not a fixed figure.
+The numbers come from the tools, not from this page. The `pr-evidence` job summary of each pull request lists its
+sessions, permission modes, executed and failed calls, and every proposal that never ran.
+`node scripts/agent-log-summary.mjs` gives the totals for the whole log. A snapshot copied by hand used to stand here,
+and it went stale with the next commit.
 
-Cases a rule — not I — stopped:
+Cases a rule, not the agent, stopped:
 
 - `rm -rf $S …` — blocked by the `Bash(rm -rf *)` deny rule (`.agent-log/actions.jsonl`, 2026-10-03 and 2026-10-04);
 - the reviewer's `ls` and `git diff /dev/null README.md` — blocked by `reviewer-bash-guard.mjs` (2026-10-03T17:20); at
-  17:11, before the guard moved into `settings.json`, the same `ls` still ran — the rule change is visible in the log.
+  17:11, before the guard moved into `settings.json`, the same `ls` still ran — the rule change is visible in the log;
+- a recursive `grep` over the eval results — blocked by `protect-env.mjs` during the audit on 2026-10-05, since it could
+  have read `.env`. The `pr-evidence` report of #58 lists it.
 
-Caveat on the "37": some are a fold-hook artifact (a `git commit … <<EOF` shows as a `PreToolUse` with no `Post`
-because the fold hook intercepts it), not a real block. The real blocks are the two examples above.
+A `git commit` whose result folds into the next commit can look unexecuted in the log. `pr-evidence` marks it as a
+commit instead of counting it as blocked.
 
 ## Eval run — 2026-10-05
 

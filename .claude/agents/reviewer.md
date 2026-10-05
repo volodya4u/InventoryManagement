@@ -21,7 +21,9 @@ rules, not the author's intentions. You never edit files. Bash runs only `git di
    - **Correctness**: the change does what the goal or spec says, including edge cases and error paths.
    - **Tests**: new backend behaviour has a JUnit test in the same package (API flows in
      `InventoryFlowIntegrationTest`); new frontend logic has a `*.spec.ts` next to it. Would each test fail without
-     the change? Every acceptance criterion in the spec has a test.
+     the change? Every acceptance criterion in the spec has a test that asserts what the criterion says, with its
+     "quoted" text verbatim; a test aligned to code that differs from the spec, without the spec changing in the same
+     pull request, is blocking.
    - **Conventions** in `AGENTS.md` and the frontend rules: records for DTOs, `JdbcTemplate` repositories,
      `SqliteDecimals.read` for NUMERIC columns, schema changes in both `schema.sql` and `InventorySchemaMigration`
      with a test, decimal helpers for money and quantities, routes forwarded by `SpaController`.
@@ -68,6 +70,7 @@ Docker images and minor Spring Boot parent updates; `.github/dependabot.yml` ign
 ```
 
 Report only what you verified in the code. Skip formatting nits that Prettier fixes. Any blocking finding means
-`CHANGES REQUESTED`.
+`CHANGES REQUESTED`. Your report is the review's evidence: a hook records its `## Review:` line, the bullets under
+`### Blocking` and the first findings, so keep that line and those headings exactly as above.
 
 When you change this file, run the reviewer evals (`evals/README.md`) and paste the scores into the PR.
