@@ -105,6 +105,10 @@ export class RawMaterialsComponent implements OnInit {
         validators: [Validators.required, Validators.min(0)],
       }),
       initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)]),
+      reorderLevel: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.min(0)],
+      }),
     },
     { validators: initialUnitCostValidator },
   );
@@ -164,6 +168,7 @@ export class RawMaterialsComponent implements OnInit {
       unit: 'PIECE',
       quantity: 0,
       initialUnitCost: null,
+      reorderLevel: 0,
     });
     this.form.controls.unit.enable();
     this.selectedFile.set(null);
@@ -181,6 +186,7 @@ export class RawMaterialsComponent implements OnInit {
       unit: item.unit,
       quantity: item.quantity,
       initialUnitCost: item.averageUnitCost,
+      reorderLevel: item.reorderLevel,
     });
     if (item.unitChangeable) {
       this.form.controls.unit.enable();
@@ -215,6 +221,7 @@ export class RawMaterialsComponent implements OnInit {
     data.append('name', value.name.trim());
     data.append('description', value.description.trim());
     data.append('unit', value.unit);
+    data.append('reorderLevel', String(value.reorderLevel));
     if (!this.editing()) {
       data.append('quantity', String(value.quantity));
       if (value.initialUnitCost !== null) {

@@ -14,6 +14,7 @@ export interface DashboardSummary {
   productTypes: number;
   productUnits: number;
   salesCount: number;
+  lowStockRawMaterials: number;
 }
 
 export interface RawMaterial {
@@ -24,6 +25,8 @@ export interface RawMaterial {
   quantity: number;
   averageUnitCost: number;
   stockValue: number;
+  reorderLevel: number;
+  belowReorderLevel: boolean;
   hasImage: boolean;
   unitChangeable: boolean;
   createdAt: string;
