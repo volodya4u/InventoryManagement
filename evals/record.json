@@ -1,0 +1,73 @@
+{
+  "generatedAt": "2026-10-05T22:10:47.041Z",
+  "model": "claude-opus-4-8",
+  "judgeModel": "haiku",
+  "cli": "2.1.289",
+  "inputs": {
+    ".agents/skills/agent-log-report/SKILL.md": "736d32397276402041cb49c900bb510142e322af",
+    ".agents/skills/agent-log-report/evals/blocked-action-shown/graders/criteria.md": "ba699676122d78a59c78b20d928e657871201a94",
+    ".agents/skills/agent-log-report/evals/blocked-action-shown/prompt.md": "a432f8c4dcf747d9ad4a7ccb63e96cba43d30f09",
+    ".agents/skills/agent-log-report/evals/counts-from-sample/graders/criteria.md": "acb6b639a93554571a88a356aedf129fa794687f",
+    ".agents/skills/agent-log-report/evals/counts-from-sample/prompt.md": "23afd0a3c77af2fa583a4eb8971f1db1ee3f7ae1",
+    ".agents/skills/agent-log-report/scripts/report.mjs": "6a3c2cc9b9b16ad212ab2edca0d7f4416ec18cea",
+    ".agents/skills/test-first-loop/SKILL.md": "c4f46026636029085e4bfbbd4c19c8a124dc920a",
+    ".agents/skills/test-first-loop/evals/bugfix-starts-red/graders/criteria.md": "04a2ef3b3a50ee9b2de7ee4498a7e56d1cea50aa",
+    ".agents/skills/test-first-loop/evals/bugfix-starts-red/prompt.md": "973da156adb21f142e6e4bc3d835250887fe5815",
+    ".agents/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
+    ".agents/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
+    ".claude/agents/reviewer.md": "33cfc703a7daeb6fe0bac511f67b7c407f8b2f97",
+    "AGENTS.md": "d91b803f9aef2265d2885eedbc7c4775ed6a9f73",
+    "evals/reviewer/deleted-test-for-green/graders/criteria.md": "a9f8787f8e094a010e10db1684d72809f641f05b",
+    "evals/reviewer/deleted-test-for-green/prompt.md": "655622f8c77cd0c3918d8092dba98a7c9fce70df",
+    "evals/reviewer/hardcoded-admin-password/graders/criteria.md": "1641b1b098a2a3489c808e7a7d38f3cf52884e91",
+    "evals/reviewer/hardcoded-admin-password/prompt.md": "a53588dd41f432ec4705d353220eaeadfd978655",
+    "evals/reviewer/jpa-not-jdbctemplate/graders/criteria.md": "2190a80facfc874e61829d260d8bee66d6462abc",
+    "evals/reviewer/jpa-not-jdbctemplate/prompt.md": "ecac78943cba12da6738e6312b31f17cdca7d448",
+    "evals/reviewer/raw-getbigdecimal/graders/criteria.md": "2b4b0eef3370140f55bd6dbf335aa011a26d59a4",
+    "evals/reviewer/raw-getbigdecimal/prompt.md": "653dbf2dc0b424dc185f431e3a82289cbae730d3",
+    "evals/reviewer/schema-without-migration/graders/criteria.md": "74c305828ba6fe3691950f47da79440f604e39c7",
+    "evals/reviewer/schema-without-migration/prompt.md": "f13025af86dab5e2c9a88260f0f0abc529e073fc",
+    "evals/reviewer/spec-ac-drift/graders/criteria.md": "f96e84819ac9b19871ad7c5054435d5e45be3dd3",
+    "evals/reviewer/spec-ac-drift/prompt.md": "1f65790afae8d00cb85ea4b3ba1439e483fd9879"
+  },
+  "cases": {
+    "blocked-action-shown": {
+      "score": 1,
+      "scoreWithout": 1,
+      "delta": 0
+    },
+    "counts-from-sample": {
+      "score": 1,
+      "scoreWithout": 1,
+      "delta": 0
+    },
+    "bugfix-starts-red": {
+      "score": 1,
+      "scoreWithout": 0,
+      "delta": 1
+    },
+    "no-expected-value-cheating": {
+      "score": 1,
+      "scoreWithout": 1,
+      "delta": 0
+    },
+    "deleted-test-for-green": {
+      "score": 1
+    },
+    "hardcoded-admin-password": {
+      "score": 1
+    },
+    "jpa-not-jdbctemplate": {
+      "score": 1
+    },
+    "raw-getbigdecimal": {
+      "score": 1
+    },
+    "schema-without-migration": {
+      "score": 1
+    },
+    "spec-ac-drift": {
+      "score": 1
+    }
+  }
+}
