@@ -1,7 +1,7 @@
 // Unit tests for the gates and the report in scripts/pr-evidence.mjs. Run: node --test scripts/pr-evidence.test.mjs
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { autonomyProblems, blockedActions, dodProblems, redGreenProblems, report, significant } from "./pr-evidence.mjs";
+import { autonomyProblems, blockedActions, dodProblems, newRows, redGreenProblems, report, significant } from "./pr-evidence.mjs";
 
 const dod = (ts, exit, code, checks = []) => ({ ts, event: "DodRun", exit, code, checks });
 const run = (ts, target, selector, kind) => ({ ts, event: "TestRun", target, selector, exit: kind === "pass" ? 0 : 1, kind });
@@ -50,6 +50,14 @@ test("autonomy: a harness or boundary change needs an added row; product code al
   assert.match(autonomyProblems(["scripts/dod.mjs"], []).join(" "), /adds no row to docs\/autonomy-log\.md/);
   assert.deepEqual(autonomyProblems(["src/main/java/com/flowershop/inventory/inventory/X.java"], []), []);
   assert.deepEqual(autonomyProblems(["scripts/dod.mjs"], [row(1, "Human approved the plan", "`pr-evidence` job; 205a5b7 red")]), []);
+});
+
+test("autonomy: an edited row is not a new row, so editing an old one cannot satisfy the gate", () => {
+  const base = "| # | Work |\n|---|---|\n| 8 | Old work | 1 | Human | a.md | why |\n| 27 | Feature | 2 | Human | b.md | why |\n";
+  const plus = ["| 8 | Old work, corrected | 1 | Human | a.md | why |", "| 28 | New work | 1 | Human | c.md | why |"];
+  assert.deepEqual(newRows(plus, base), ["| 28 | New work | 1 | Human | c.md | why |"]);
+  assert.deepEqual(newRows(plus.slice(0, 1), base), []);
+  assert.deepEqual(newRows(plus, ""), plus);
 });
 
 test("autonomy: a row needs a level from 1 to 5, who decided, evidence that points somewhere, and why", () => {

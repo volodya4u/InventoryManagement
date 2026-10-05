@@ -58,6 +58,14 @@ export function redGreenProblems(records, criteria) {
   });
 }
 
+// The rows the branch adds: '+' lines of the table whose number the base version does not have. An edited row keeps
+// its number, so correcting an old row never counts as recording new work.
+const rowNumber = (line) => /^\s*\|\s*(\d+)\s*\|/.exec(line)?.[1];
+export function newRows(plusLines, baseText) {
+  const before = new Set(String(baseText).split(/\r?\n/).map(rowNumber).filter(Boolean));
+  return plusLines.filter((line) => rowNumber(line) && !before.has(rowNumber(line)));
+}
+
 export function autonomyProblems(changedFiles, addedRows) {
   const touched = changedFiles.filter(significant);
   if (!touched.length) return [];
@@ -157,12 +165,20 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const records = entries.filter((e) => !TOOL_EVENTS.has(e.event));
   const headCode = codeFingerprintAt(root, head);
   const headTree = treeFingerprintAt(root, head);
-  const codeChanged = headCode !== codeFingerprintAt(root, git("merge-base", base, head));
+  const mergeBase = git("merge-base", base, head);
+  const codeChanged = headCode !== codeFingerprintAt(root, mergeBase);
   const changed = git("diff", "--name-only", `${base}...${head}`).split("\n").filter(Boolean);
-  const addedRows = git("diff", `${base}...${head}`, "--", "docs/autonomy-log.md")
+  let baseLog = "";
+  try {
+    baseLog = git("show", `${mergeBase}:docs/autonomy-log.md`);
+  } catch {
+    /* no autonomy log on the base yet */
+  }
+  const plusRows = git("diff", `${base}...${head}`, "--", "docs/autonomy-log.md")
     .split("\n")
     .filter((l) => /^\+\s*\|\s*\d+\s*\|/.test(l))
     .map((l) => l.slice(1));
+  const addedRows = newRows(plusRows, baseLog);
   const newSpecs = git("diff", "--name-only", "--diff-filter=A", `${base}...${head}`).split("\n").filter((p) => SPEC_PATH.test(p));
   const criteria = newSpecs.flatMap((spec) =>
     parseSpec(git("show", `${head}:${spec}`)).criteria.filter((c) => c.test).map((c) => ({ spec, n: c.n, test: c.test })),
