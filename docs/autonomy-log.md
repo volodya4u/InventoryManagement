@@ -123,10 +123,22 @@ What the run actually showed, not a clean story:
 
 - The reviewer catches all five injected defects (5/5) — the strongest maker ≠ checker evidence here.
 - **`bugfix-starts-red` fails (0.00), and reproducibly:** unanimous judge FAIL across both the aggregate run and the
-  dedicated skill-folder run, even with the skill loaded. The case asks the agent to *describe* the test-first steps
-  (no Bash needed), and the baseline Claude Code in the sandbox did not lead with a failing test. This matches the
-  documented limit in `evals/README.md`: the sandbox runs baseline Claude Code and does not exercise the skill the way
-  the real project does. **Not forced green.** Follow-up: either tighten the skill so baseline leads with the test, or
-  mark the case as needing the full project (a `scaffold_script`), then re-run.
+  dedicated skill-folder run, even with the skill loaded. First read as a skill/sandbox limit; on investigation (see
+  the follow-up below) it turned out to be a grading mismatch, not a skill defect. **Not forced green.**
 - Non-determinism is visible: `counts-from-sample`'s baseline arm scored 0.00 in the aggregate run and 1.00 in the
   dedicated run (hence the `+1.00 / 0.00` Δ). That is exactly why the evals are a local gate, not a CI check.
+
+### Follow-up — `bugfix-starts-red` fixed (2026-10-05)
+
+Diagnosed from the saved transcript: the skill arm already produced a textbook loop — failing test first, re-run to
+green, `node scripts/dod.mjs`, then the reviewer. So the answer was correct, yet the haiku judge failed it three times.
+A `--judge-model sonnet` probe on the same answer also failed it three times, which rules the judge model out as the
+cause. The real mismatch: the case asks the agent to *describe* the steps, but the grader demanded an actually-observed
+red/green result, so a correct *described* plan could never pass (the agent's "I haven't read the repo, so I'm
+guessing" opening made a literal-minded judge read "no test was written").
+
+Fix: the prompt now asks for a numbered plan and tells the agent not to caveat the missing checkout; the grader is an
+explicit **plan** grader — execution not required — that still fails a plan which changes code before the test, writes
+no test, or omits `node scripts/dod.mjs`. Re-run with the fix (haiku judge): `bugfix-starts-red` **with 1.00 / without
+0.50 (Δ +0.50)**, `no-expected-value-cheating` 1.00. The skill now shows a real positive Δ, and `check-evals` still
+validates the suite. This corrects the first read above: it was the grader, not the skill or the model.
