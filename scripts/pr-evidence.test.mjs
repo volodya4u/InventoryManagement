@@ -1,7 +1,7 @@
 // Unit tests for the gates and the report in scripts/pr-evidence.mjs. Run: node --test scripts/pr-evidence.test.mjs
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { autonomyProblems, blockedActions, dodProblems, newRows, redGreenProblems, report, significant } from "./pr-evidence.mjs";
+import { autonomyProblems, blockedActions, dodProblems, evalsProblems, newRows, redGreenProblems, report, significant } from "./pr-evidence.mjs";
 
 const dod = (ts, exit, code, checks = []) => ({ ts, event: "DodRun", exit, code, checks });
 const run = (ts, target, selector, kind) => ({ ts, event: "TestRun", target, selector, exit: kind === "pass" ? 0 : 1, kind });
@@ -66,6 +66,18 @@ test("autonomy: a row needs a level from 1 to 5, who decided, evidence that poin
   assert.match(text, /names no one who decided/);
   assert.match(text, /evidence points nowhere/);
   assert.match(text, /says nothing about why/);
+});
+
+test("evals: the gate fires only when an eval-relevant input changed on the branch", () => {
+  const record = { inputs: { "AGENTS.md": "aaa" } };
+  // No reviewer/skill/AGENTS/case change: no eval run needed, even without a record.
+  assert.deepEqual(evalsProblems(["src/main/java/com/x/Service.java", "README.md"], null, { "AGENTS.md": "aaa" }), []);
+  // AGENTS.md changed, record still matches: passes.
+  assert.deepEqual(evalsProblems(["AGENTS.md"], record, { "AGENTS.md": "aaa" }), []);
+  // reviewer.md changed, record stale: fails.
+  assert.match(evalsProblems([".claude/agents/reviewer.md"], record, { "AGENTS.md": "bbb" }).join(" "), /changed since|is no longer covered|is new/);
+  // A skill case changed, no record at all: fails.
+  assert.match(evalsProblems([".agents/skills/test-first-loop/evals/x/prompt.md"], null, { "AGENTS.md": "aaa" }).join(" "), /no evals\/record\.json/);
 });
 
 test("blocked actions: a proposal without a result, except the last commit, whose result folds into the next one", () => {

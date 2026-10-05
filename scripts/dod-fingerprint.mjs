@@ -61,6 +61,12 @@ function committedTree(root, rev, excluded) {
     .map(({ path, blob }) => [path, blob]);
 }
 
+// The blob id of every file under the given paths (files or folders), in the working tree or in a commit: the inputs
+// an evals record covers (scripts/eval-record.mjs, scripts/pr-evidence.mjs).
+const under = (paths) => new RegExp(`^(?!(${paths.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})(\\/|$))`);
+export const blobsOf = (root, paths) => Object.fromEntries(workingTree(root, under(paths)).sort(([a], [b]) => (a < b ? -1 : 1)));
+export const blobsAt = (root, rev, paths) => Object.fromEntries(committedTree(root, rev, under(paths)).sort(([a], [b]) => (a < b ? -1 : 1)));
+
 export const codeFingerprint = (root) => digest(workingTree(root, NOT_CODE));
 export const codeFingerprintAt = (root, rev) => digest(committedTree(root, rev, NOT_CODE));
 export const treeFingerprint = (root) => digest(workingTree(root, NOT_REVIEWED));

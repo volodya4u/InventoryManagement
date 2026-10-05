@@ -16,9 +16,12 @@
 // Usage: node scripts/pr-evidence.mjs <base-ref> <head-ref>   (exit 0 = every gate holds, 1 = a gate failed, 2 = usage)
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { addedLogLines, reviewProblems, reviewVerdicts } from "./check-review.mjs";
 import { parseSpec, prSpecProblems, tableCells, validateSpecs } from "./check-specs.mjs";
 import { codeFingerprintAt, treeFingerprintAt } from "./dod-fingerprint.mjs";
+import { INPUT_PATHS, RECORD_PATH, inputsFingerprint, recordProblems } from "./eval-record.mjs";
 
 const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
 const SPEC_PATH = /^docs\/specs\/(?!TEMPLATE\.md$)[^/]+\.md$/;
@@ -88,6 +91,13 @@ export function autonomyProblems(changedFiles, addedRows) {
   });
 }
 
+// Evals are checked only when the branch changes an input the scores depend on (the reviewer, a skill, AGENTS.md or a
+// case): then evals/record.json must be fresh for those inputs (scripts/eval-record.mjs). Most branches change none.
+export function evalsProblems(changedFiles, record, currentInputs) {
+  const relevant = changedFiles.some((path) => INPUT_PATHS.some((base) => path === base || path.startsWith(`${base}/`)));
+  return relevant ? recordProblems(record, currentInputs) : [];
+}
+
 // Proposals that never ran. A `git commit` is the exception that proves nothing: its own result folds into the next
 // commit, so the last commit of a branch always looks unexecuted.
 export function blockedActions(lines) {
@@ -100,7 +110,7 @@ export function blockedActions(lines) {
 const cell = (text) => String(text ?? "").replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
 const time = (ts) => String(ts ?? "").replace("T", " ").replace(/\.\d+Z$|Z$/, "");
 
-export function report({ base, head, gates, dodRuns, testRuns, reviews, headCode, headTree, activity }) {
+export function report({ base, head, gates, dodRuns, testRuns, reviews, evals, headCode, headTree, activity }) {
   const out = [
     "## Pull request evidence",
     "",
@@ -125,6 +135,12 @@ export function report({ base, head, gates, dodRuns, testRuns, reviews, headCode
     out.push("| Time (UTC) | Test | Result | First failure |", "| --- | --- | --- | --- |");
     for (const r of testRuns) out.push(`| ${time(r.ts)} | ${cell(`${r.target} ${r.selector}`)} | ${r.kind === "pass" ? "✅ pass" : `❌ ${r.kind}`} | ${cell(r.firstFailure)} |`);
   } else out.push("No targeted test run recorded on this branch.");
+  if (evals) {
+    out.push("", `### Evals (recorded ${time(evals.generatedAt)}, model ${evals.model}, judge ${evals.judgeModel})`, "", "| Suite / case | Score | Δ (skill vs baseline) |", "| --- | --- | --- |");
+    for (const [suite, { cases }] of Object.entries(evals.suites ?? {})) {
+      for (const [name, s] of Object.entries(cases)) out.push(`| ${suite} / ${name} | ${s.score} | ${s.delta ?? "—"} |`);
+    }
+  }
   out.push("", "### Review rounds (maker ≠ checker)", "");
   if (reviews.length) {
     out.push("| Time (UTC) | Verdict | Blocking | Findings | On the head commit's files |", "| --- | --- | --- | --- | --- |");
@@ -185,6 +201,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   );
   const { specs } = validateSpecs(root);
   const reviews = reviewVerdicts(lines);
+  const record = existsSync(join(root, RECORD_PATH)) ? JSON.parse(readFileSync(join(root, RECORD_PATH), "utf8")) : null;
+  const evalsRelevant = changed.some((path) => INPUT_PATHS.some((p) => path === p || path.startsWith(`${p}/`)));
   const sessions = new Set(tools.map((e) => e.session).filter(Boolean)).size;
   const modes = {};
   for (const e of tools) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
@@ -194,6 +212,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     { name: "Specs", problems: [...validateSpecs(root).problems, ...prSpecProblems(root, base, head)], ok: `${specs.length} spec(s) agree with the tests they name; spec-first order and the cross-layer rule hold` },
     { name: "Red → green", problems: redGreenProblems(records, criteria), ok: newSpecs.length ? `every criterion of ${newSpecs.join(", ")} went red, then green` : "no new spec on this branch" },
     { name: "Autonomy log", problems: autonomyProblems(changed, addedRows), ok: addedRows.length ? `${addedRows.length} row(s) added` : "no significant change, no row needed" },
+    { name: "Evals", problems: evalsProblems(changed, record, inputsFingerprint(root)), ok: evalsRelevant ? `evals/record.json is fresh (model ${record?.model})` : "no reviewer, skill, AGENTS.md or case change on this branch" },
   ];
   console.log(
     report({
@@ -203,6 +222,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       dodRuns: records.filter((r) => r.event === "DodRun").sort(byTime),
       testRuns: records.filter((r) => r.event === "TestRun").sort(byTime),
       reviews,
+      evals: evalsRelevant ? record : null,
       headCode,
       headTree,
       activity: {

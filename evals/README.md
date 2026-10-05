@@ -2,18 +2,28 @@
 
 Behaviour checks for the agent harness: does the `reviewer` catch real rule violations, and do the skills do their
 job? Unlike the tests under `src/` and `scripts/*.test.mjs` (which check code), these run an LLM against a prompt and
-score it with an LLM judge, so they cost money and are non-deterministic. They are a **local gate**, not part of CI:
-CI only checks the suite is present and well-formed (`scripts/check-evals.mjs`, run by `node --test`).
+score it with an LLM judge, so they cost money and are non-deterministic. CI never runs them. Two cheap checks run in
+CI instead: `scripts/check-evals.mjs` (via `node --test`) confirms the suite is present and well-formed, and the
+`pr-evidence` job fails the **Evals** gate when a branch changes an input the scores depend on but
+`evals/record.json` does not match it.
 
 ## When to run
 
-Run the relevant cases, and paste the scores into your PR, when you change:
+Run them, and commit `evals/record.json`, when you change `.claude/agents/reviewer.md`, a skill under
+`.agents/skills/<skill>/`, `AGENTS.md`, or an eval case. `scripts/eval-record.mjs` runs all three suites and writes
+the record: the model used, the judge model, the per-case scores (with / without the plugin and the delta), and the
+git-blob fingerprint of those inputs. `pr-evidence` recomputes that fingerprint for the head commit; if it differs,
+the scores are stale and the gate fails, so a reviewer or rules change cannot land on old numbers.
 
-- `.claude/agents/reviewer.md` → the reviewer cases;
-- a skill under `.agents/skills/<skill>/` → that skill's cases;
-- `AGENTS.md` (the rules the reviewer enforces) → the reviewer cases;
-- **the model** → all of them, to confirm the harness still behaves (a model swap is exactly when a silent
-  regression hides).
+```sh
+node scripts/eval-record.mjs                      # the CLI's logged-in model (recorded as "default")
+node scripts/eval-record.mjs --model claude-opus-5-5   # pin a model; it is recorded and shown in the PR report
+```
+
+The gate keys on the inputs, not the model, because the model can change under you (an editor or operator can switch
+it between commits), which would make a model-match check flaky. The record still stores the model, and the PR report
+prints it next to the scores, so a reviewer can see which model produced them. When you change the model deliberately,
+re-run `eval-record.mjs` to refresh the numbers — a model swap is exactly when a silent regression hides.
 
 ## How to run
 
