@@ -8,6 +8,7 @@
   before writing code.
 - Review with the `reviewer` subagent, passing only the base ref, the goal and the spec path. Changes to `auth/`,
   `SecurityConfig`, `.claude/` or CI also get `/security-review`.
+- Changing `reviewer.md`, a skill or `AGENTS.md` (or the model): run the matching evals and paste the scores (`evals/README.md`).
 - Do not edit `.agent-log/` or `.claude/hooks/` — they are the observability layer (a hook logs every tool call).
 - `.agent-log/actions.jsonl` is committed on purpose; you need not stage it. A hook buffers each tool call in
   `.agent-log/pending.jsonl` (gitignored) and folds the buffer into `actions.jsonl`, staged, on every `git commit`.

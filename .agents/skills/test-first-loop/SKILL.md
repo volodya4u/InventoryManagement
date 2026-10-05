@@ -47,3 +47,5 @@ Run the whole loop yourself; come back to the human only at the exits named belo
 - Run one dev server at most; the loop needs none, because the tests start what they need.
 - `dod.mjs` writes each check's full output to `target/dod/<n>.log`. Read the log rather than re-running a long build
   just to see its output.
+
+When you change this skill, run its evals in `evals/` next to it (`claude plugin eval .agents/skills/test-first-loop`; see `evals/README.md`).
