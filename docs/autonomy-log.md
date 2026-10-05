@@ -73,6 +73,8 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 
 ## Escalation and de-escalation
 
+This section is the standing policy; the "Level changes" section above records the individual level moves it produced.
+
 - **Cloud sessions run in `auto` mode.** Their log lines say `"mode":"auto"`, so a classifier rather than a human approves
   actions there; local sessions run in `default` (Manual). Ask and deny rules and the hooks still apply in the cloud: the
   deny rule blocked an `rm -rf` on 2026-10-03. Cloud work therefore always lands as a pull request, so a human reviews it
@@ -87,8 +89,9 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 
 ## What the agent proposed and did not do
 
-Numbers, not memory. `node scripts/agent-log-summary.mjs` over 7 sessions (2026-10-02 .. 2026-10-05):
-**1816 executed, 31 proposed-but-not-executed, 24 failed.**
+Numbers, not memory. `node scripts/agent-log-summary.mjs` (exit 0) over 8 sessions
+(2026-10-02 .. 2026-10-05, this branch): **1922 executed, 37 proposed-but-not-executed, 26 failed.** The totals grow
+with every commit (each fold adds lines), so treat them as a snapshot at this PR, not a fixed figure.
 
 Cases a rule — not I — stopped:
 
@@ -96,7 +99,7 @@ Cases a rule — not I — stopped:
 - the reviewer's `ls` and `git diff /dev/null README.md` — blocked by `reviewer-bash-guard.mjs` (2026-10-03T17:20); at
   17:11, before the guard moved into `settings.json`, the same `ls` still ran — the rule change is visible in the log.
 
-Caveat on the "31": some are a fold-hook artifact (a `git commit … <<EOF` shows as a `PreToolUse` with no `Post`
+Caveat on the "37": some are a fold-hook artifact (a `git commit … <<EOF` shows as a `PreToolUse` with no `Post`
 because the fold hook intercepts it), not a real block. The real blocks are the two examples above.
 
 ## Eval run — 2026-10-05
