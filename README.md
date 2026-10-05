@@ -185,6 +185,24 @@ The development frontend will be available at `http://localhost:4200`.
 
 The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js 20+ on `PATH`. The Node that Maven installs into `target/frontend-tooling` is not on `PATH`; `scripts/ng-mcp.mjs` starts the Angular CLI MCP server with it when it exists, because the Angular CLI refuses Node releases older than 22.22.3 or 24.15.
 
+### Static vs dynamic context
+
+The harness feeds agents two kinds of context:
+
+- **Static** — committed rules that load the same way every session: `AGENTS.md` (shared by every agent and tool),
+  `CLAUDE.md` (Claude Code only), and `.claude/rules/frontend.md`, which loads **only when the change touches
+  `frontend/`**. These encode team policy: conventions, boundaries, the Definition of done. A static rule that took
+  effect: in PR #37 the agent moved money and quantity math into `core/decimal.ts` because `frontend.md` requires it.
+- **Dynamic** — data assembled at request time: `scripts/session-start.mjs` (cloud only) installs the pinned toolchain
+  and prints a setup summary into the session's context; the MCP servers in `.mcp.json` — `context7` (Spring Boot and
+  other libraries) and `angular-cli` (the Angular version actually installed in `frontend/`) — answer version-specific
+  questions when asked, instead of relying on model memory that Dependabot keeps moving; the `dod-fresh` Stop hook
+  recomputes a code fingerprint at session end and injects a reminder only when the code changed since the last green
+  `dod.mjs`.
+
+Policy that must not drift lives in static files under review; facts that go stale (library versions, what ran this
+session) are fetched fresh so they are never wrong in the prompt.
+
 - `AGENTS.md` and `CLAUDE.md`: project rules, commands, definition of done, and boundaries for coding agents.
 - `.claude/settings.json`: trust level 1 (`defaultMode: default`), allow/ask/deny rules, and hooks.
 - `.claude/hooks/protect-env.mjs`: blocks agents from reading or editing `.env*` files, including through a Grep glob and through shell routes that never name the file (`cat .e*`, also inside `$(...)`; `git diff --no-index` or git run outside the project; `git grep --no-index`; recursive `grep` or `diff`; `rg -u`). Text checks are not a sandbox, and native Windows has none, so `sh -c`, a script that opens the file itself, names fed through `xargs` or `find -exec`, and other readers such as `findstr /s` or `tar` still get through; the hook's header lists them all.
