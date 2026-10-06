@@ -44,9 +44,10 @@ after review**, not that they clicked "allow" on every action; "level 2" adds th
 | 26 | Unit tests for all six backend services and `AuthService` (frontend), no production-code change (#52) | 2 | Codex (a different tool) wrote the tests; the human separately approved a test under the protected `auth/` and merged | `node scripts/dod.mjs`: 52 backend tests (10 of 10 classes), 119 frontend; branch `codex/service-unit-test-coverage`; no product code changed | Proven by tests and reversible, but it touches the `auth/` boundary, so the human consents and merges. **Review-evidence caveat — see "Downgrade" below** |
 | 27 | Raw material reorder level + dashboard low-stock count, the first feature taken end-to-end through the loop (#57) | 2 | Human approved the plan in plan mode (it changes the schema) and merges; the agent ran spec → red → green → review | Spec committed before the code (635f0ec); AC2 red (`No value at JSON path "$.reorderLevel"`) → green; frontend AC4/AC5 red (4 failed) → green; `node scripts/dod.mjs` green (54 backend, 121 frontend); reviewer APPROVE (one non-blocking fixed: assert the migrated default is 0) | Reversible with git and proven by tests, but a schema change, so plan mode first and a human merges; the migration defaults existing rows to 0, so live data is untouched until a level is set |
 | 28 | Make folding the reviewer run an explicit step in the loop (#56); this row was added in #58, after the fact | 1 | After #55's `review-evidence` job failed (the reviewer ran after the last commit, so its log never folded in), the human asked to make the step automatic rather than remembered; the agent implemented it | #55 red: https://github.com/volodya4u/InventoryManagement/actions/runs/37290263378, green after the log-only commit 51d6def; the rule in `CLAUDE.md` and step 6 of the skill (a6da312), `test-first-loop` evals 1.00; #57's `review-evidence` passed on its first and only push: https://github.com/volodya4u/InventoryManagement/actions/runs/37316807854 | `CLAUDE.md` and a skill steer the agent, so a human approves them; the rule still relied on the agent remembering it, which #58 replaces with a check |
-| 29 | Evidence recorded by the tools and checked in every pull request (#58): `DodRun` and `TestRun` records, the reviewer's verdict from its own report, `check-specs`, `pr-evidence`, the MCP smoke test, the evals record | 1 | The human rejected a docs-only fix ("we would be fitting the results by hand"), required everything to run in the PR, and chose local runs with machine records over an API key in CI, `pr-evidence` as a required check, the spec following the code for AC5, and a blocking MCP smoke test; the agent planned it in plan mode and implemented it | `check-specs` red on the real spec in CI (https://github.com/volodya4u/InventoryManagement/actions/runs/37326578533), green after the spec update 3c2502d (https://github.com/volodya4u/InventoryManagement/actions/runs/37326867192); MCP smoke green on Linux CI; the `pr-evidence` job summary of #58 (dod runs, red → green, review rounds) | CI, hooks and `settings.json` are always level 1; the change takes the agent's word out of the evidence, so a human decided each rule |
+| 29 | Evidence recorded by the tools and checked in every pull request (#58): `DodRun` and `TestRun` records, the reviewer's verdict from its own report, `check-specs`, `pr-evidence`, the MCP smoke test, the evals record | 1 | The human rejected a docs-only fix ("we would be fitting the results by hand"), required everything to run in the PR, and chose local runs with machine records over an API key in CI, `pr-evidence` as a required check, the spec following the code for AC5, and a blocking MCP smoke test; the agent planned it in plan mode and implemented it | `check-specs` red on the real spec in CI (https://github.com/volodya4u/InventoryManagement/actions/runs/37326578533), green after the spec update 3c2502d; MCP smoke green on Linux CI; the red → green, the dod runs and the review rounds are in the green `pr-evidence` job summary of #58 (https://github.com/volodya4u/InventoryManagement/actions/runs/37383612098/job/112011387970) | CI, hooks and `settings.json` are always level 1; the change takes the agent's word out of the evidence, so a human decided each rule |
 | 30 | Fix `agent-log-summary.mjs` printing the reviewer-verdict count as zero | 1 | The human asked for the fix after #58's own reviewer verdict flagged it as a non-blocking follow-up | Red before: `agent-log-summary.test.mjs` recorded a `TestRun` of kind `assertion` ("0 reviewer verdict(s)"); green after the one-line fix (the count now reads `lines`, where the hook records the verdict, not a `SubagentStop` record that never exists); the real committed log now reports `1 reviewer verdict(s)` | A harness script is always level 1; a one-line bug fix, reversible with git and proven by the test |
 | 31 | De-duplicate the reviewer verdict so one review counts once | 1 | The human spotted that `pr-evidence` reported "3 round(s)" for two reviews because a foreground review logs its verdict twice (its `SubagentHandback` line and the parent `Agent` completion), and that the summary fix would double-count too; the agent fixed the shared reader | `check-review.test.mjs` recorded a red `TestRun` (3 of 12 cases fail: the doubled pair and the kept-separate-rounds cases) then green, after collapsing verdicts by `(verdict, tree, blocking, findings)` in `reviewVerdicts`, keeping the last occurrence so a repeat never shadows a later verdict; on the real committed log `agent-log-summary.mjs` now reports `1 reviewer verdict(s)`, not 2, and `pr-evidence` counts rounds once. (Row 30 is PR #60, merged around the same time; numbered 31 to avoid a collision.) | A harness script is always level 1; reversible with git and proven by the tests; the hook that records the verdict twice is in `.claude/hooks/`, which CLAUDE.md says not to edit, so the fix collapses the duplicate in the reader |
+| 32 | Stop the autonomy log and `evals/README.md` from hand-restating numbers and CI status the tools already produce | 1 | The human asked to fix the flow after spotting a red CI run cited as "green", a stale eval count (`five`/`5/5` while six reviewer cases exist), and rows written after the fact | A `CLAUDE.md` convention ("point to `evals/record.json`, the `pr-evidence` Evals table, `agent-log-summary.mjs` or a specific green CI job, never a red run URL"); the stale eval score table replaced by a pointer; `evals/README.md` and the "5/5" line corrected to include `spec-ac-drift`; row 29's green link repointed to the green `pr-evidence` job of #58; no eval input touched, so the Evals gate stays green without a re-run; `node scripts/dod.mjs` reports no code changed; reviewer APPROVE | `CLAUDE.md` steers the agent and a documentation-discipline change is reversible with git; always level 1. The fix removes a drift surface rather than adding a gate that would false-positive on unrelated PRs |
 
 ## Level changes
 
@@ -104,6 +105,11 @@ This section is the standing policy; the "Level changes" section above records t
 - **Another tool's work is reviewed like our own.** Work a different tool or agent does in this repo (e.g. Codex in #52)
   is reviewed and merged on the same terms; the machine proof of that review must come from the hook, not a hand-written
   log line (see the #52 Downgrade above).
+- **Some early rows were written after the fact.** Rows 1–10 and 20–26 were added in dedicated documentation commits
+  (41884b2, cefb950), after the work they describe — the course template warns this shows, and it does. Since #58 the
+  `pr-evidence` **Autonomy log** gate requires a row in the same pull request as the significant change it describes
+  (the significant-path list in `scripts/pr-evidence.mjs`), so new rows now land with their work; the backfilled early
+  rows predate that gate.
 
 ## What the agent proposed and did not do
 
@@ -120,6 +126,11 @@ Cases a rule, not the agent, stopped:
 - a recursive `grep` over the eval results — blocked by `protect-env.mjs` during the audit on 2026-10-05, since it could
   have read `.env`. The `pr-evidence` report of #58 lists it.
 
+A case a human, not a rule, stopped: in #58 the agent first proposed a documentation-only fix for the evidence gates.
+The human rejected it — "we would be fitting the results by hand" — and required every gate to actually run in the pull
+request against the records the tools wrote. That decision is why #58 is machine checks instead of prose (row 29), and
+why this very change removes hand-typed numbers rather than adding another claim no gate checks.
+
 A `git commit` whose result folds into the next commit can look unexecuted in the log. `pr-evidence` marks it as a
 commit instead of counting it as blocked.
 
@@ -128,21 +139,12 @@ commit instead of counting it as blocked.
 The evals (row 19) run once for real: `claude plugin eval … --judge-model haiku --runs 1` (local gate; the
 `results/` dirs stay gitignored). ~6 min, ≈ $1.67 total. Δ = skill arm minus no-skill baseline.
 
-| Case | Suite | Score | Δ (skill vs baseline) |
-| ---- | ----- | ----- | --------------------- |
-| `jpa-not-jdbctemplate` | reviewer | 1.00 | — |
-| `raw-getbigdecimal` | reviewer | 1.00 | — |
-| `schema-without-migration` | reviewer | 1.00 | — |
-| `deleted-test-for-green` | reviewer | 1.00 | — |
-| `hardcoded-admin-password` | reviewer | 1.00 | — |
-| `blocked-action-shown` | agent-log-report | 1.00 | 0.00 |
-| `counts-from-sample` | agent-log-report | 1.00 | +1.00 / 0.00 * |
-| `no-expected-value-cheating` | test-first-loop | 1.00 | 0.00 |
-| `bugfix-starts-red` | test-first-loop | **0.00** | 0.00 |
+The per-case scores and Δ are the tools' record, not this page: `evals/record.json` (the run recorded that day) and
+the `pr-evidence` **Evals** table, which cover all ten cases (`spec-ac-drift` included). What the run showed beyond the
+numbers:
 
-What the run actually showed, not a clean story:
-
-- The reviewer catches all five injected defects (5/5) — the strongest maker ≠ checker evidence here.
+- The reviewer flags every injected defect it is given as blocking — the strongest maker ≠ checker evidence here
+  (per-case scores in `evals/record.json`).
 - **`bugfix-starts-red` fails (0.00), and reproducibly:** unanimous judge FAIL across both the aggregate run and the
   dedicated skill-folder run, even with the skill loaded. First read as a skill/sandbox limit; on investigation (see
   the follow-up below) it turned out to be a grading mismatch, not a skill defect. **Not forced green.**
@@ -160,6 +162,7 @@ guessing" opening made a literal-minded judge read "no test was written").
 
 Fix: the prompt now asks for a numbered plan and tells the agent not to caveat the missing checkout; the grader is an
 explicit **plan** grader — execution not required — that still fails a plan which changes code before the test, writes
-no test, or omits `node scripts/dod.mjs`. Re-run with the fix (haiku judge): `bugfix-starts-red` **with 1.00 / without
-0.50 (Δ +0.50)**, `no-expected-value-cheating` 1.00. The skill now shows a real positive Δ, and `check-evals` still
-validates the suite. This corrects the first read above: it was the grader, not the skill or the model.
+no test, or omits `node scripts/dod.mjs`. With the fix, `bugfix-starts-red` passes with the skill and shows a real
+positive Δ over the no-skill baseline, and `no-expected-value-cheating` passes; the per-case scores and Δ are in
+`evals/record.json`, not restated here, and `check-evals` still validates the suite. This corrects the first read
+above: it was the grader, not the skill or the model.
