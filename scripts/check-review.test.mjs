@@ -34,6 +34,28 @@ test("only executed lines carry a verdict: a proposed (PreToolUse) one does not 
   assert.deepEqual(reviewVerdicts([proposed]), []);
 });
 
+test("one review recorded twice (SubagentHandback + Agent) counts once", () => {
+  // A foreground reviewer logs the same verdict on its own SubagentHandback line and on the parent Agent completion.
+  const handback = line({ ts: "2026-10-06T10:43:45Z", event: "PostToolUse", tool: "SubagentHandback", agent: "reviewer", verdict: "APPROVE", blocking: 0, findings: [], tree: "tree-A" });
+  const agent = line({ ts: "2026-10-06T10:43:46Z", event: "PostToolUse", tool: "Agent", subagent_type: "reviewer", verdict: "APPROVE", blocking: 0, findings: [], tree: "tree-A" });
+  assert.equal(reviewVerdicts([handback, agent]).length, 1);
+  assert.deepEqual(reviewProblems([handback, agent], "tree-A"), []);
+});
+
+test("separate rounds are kept: a different tree or verdict is not a duplicate", () => {
+  const r1a = line({ ts: "2026-10-06T10:00:00Z", event: "PostToolUse", tool: "SubagentHandback", agent: "reviewer", verdict: "CHANGES REQUESTED", blocking: 1, findings: ["B: x"], tree: "tree-A" });
+  const r1b = line({ ts: "2026-10-06T10:00:01Z", event: "PostToolUse", tool: "Agent", subagent_type: "reviewer", verdict: "CHANGES REQUESTED", blocking: 1, findings: ["B: x"], tree: "tree-A" });
+  const r2 = line({ ts: "2026-10-06T10:05:00Z", event: "PostToolUse", tool: "SubagentHandback", agent: "reviewer", verdict: "APPROVE", blocking: 0, findings: [], tree: "tree-B" });
+  const v = reviewVerdicts([r1a, r1b, r2]);
+  assert.deepEqual(v.map((e) => e.verdict), ["CHANGES REQUESTED", "APPROVE"]); // two rounds, the doubled first collapsed
+  assert.deepEqual(reviewProblems([r1a, r1b, r2], "tree-B"), []);
+});
+
+test("reviewVerdicts accepts already-parsed entries, not only JSON strings", () => {
+  const entry = { event: "PostToolUse", verdict: "APPROVE", tree: "t", blocking: 0, findings: [] };
+  assert.equal(reviewVerdicts([entry, entry]).length, 1);
+});
+
 test("a line from the reviewer subagent counts", () => {
   assert.equal(reviewerRan([line({ event: "PreToolUse", tool: "Bash", agent: "reviewer" })]), true);
 });

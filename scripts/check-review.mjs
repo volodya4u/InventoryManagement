@@ -11,6 +11,7 @@ import { pathToFileURL } from "node:url";
 import { treeFingerprint } from "./dod-fingerprint.mjs";
 
 const parse = (line) => {
+  if (line && typeof line === "object") return [line]; // already-parsed entries are accepted too
   try {
     return [JSON.parse(line)];
   } catch {
@@ -23,12 +24,23 @@ export function reviewerRan(lines) {
   return lines.flatMap(parse).some((e) => e.agent === "reviewer" || e.subagent_type === "reviewer");
 }
 
-// The reviewer's recorded verdicts, oldest first. Only executed lines count (a PreToolUse line is a proposal).
+// The reviewer's recorded verdicts, oldest first, one per review. Only executed lines count (a PreToolUse line is a
+// proposal). One review's hand-back is recorded twice — on the reviewer's own `SubagentHandback` line and on the
+// parent `Agent` call's completion — with the same verdict, tree, blocking count and findings; a resumed reviewer
+// records once. Those duplicates are collapsed by content so each review counts once, while genuinely separate rounds
+// (a later review sees a different tree, or returns a different verdict) are kept.
 export function reviewVerdicts(lines) {
-  return lines
+  const sorted = lines
     .flatMap(parse)
     .filter((e) => e.event === "PostToolUse" && (e.verdict === "APPROVE" || e.verdict === "CHANGES REQUESTED"))
     .sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
+  const seen = new Set();
+  return sorted.filter((e) => {
+    const key = `${e.verdict}|${e.tree ?? ""}|${e.blocking ?? ""}|${JSON.stringify(e.findings ?? [])}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 // What is missing for the review to count, given the fingerprint of the files under review now; [] when nothing is.
