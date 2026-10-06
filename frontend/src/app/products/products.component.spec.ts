@@ -94,6 +94,23 @@ describe('ProductsComponent', () => {
     expect(component.form.hasError('initialUnitCostRequired')).toBe(true);
   });
 
+  it('rejects a markup or advertising cost with more than two decimals', () => {
+    // The server caps both at two decimals (@Digits(fraction = 2)) and returns 400 otherwise,
+    // so the form must reject the third decimal instead of letting the save fail.
+    setup([], [rawMaterial()]);
+    component.openCreate();
+
+    component.form.controls.markupPercentage.setValue(12.345);
+    expect(component.form.controls.markupPercentage.valid).toBe(false);
+    component.form.controls.markupPercentage.setValue(12.34);
+    expect(component.form.controls.markupPercentage.valid).toBe(true);
+
+    component.form.controls.advertisingCostPerUnit.setValue(1.239);
+    expect(component.form.controls.advertisingCostPerUnit.valid).toBe(false);
+    component.form.controls.advertisingCostPerUnit.setValue(1.23);
+    expect(component.form.controls.advertisingCostPerUnit.valid).toBe(true);
+  });
+
   it('prices a new product from its recipe, advertising cost and markup', () => {
     setup([], [rawMaterial(), rawMaterial({ id: 2, name: 'Ribbon', averageUnitCost: 0.4 })]);
     component.openCreate();

@@ -774,6 +774,49 @@ class InventoryFlowIntegrationTest {
     }
 
     @Test
+    void rejectsProductMarkupOrAdvertisingCostWithMoreThanTwoDecimals() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var csrfResponse = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+
+        var recipe = new MockMultipartFile(
+                "recipe",
+                "recipe.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                "[{\"rawMaterialId\":1,\"quantityPerUnit\":1}]".getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/products")
+                        .file(recipe)
+                        .param("sku", "ROSE-BOX-001")
+                        .param("name", "Rose Box")
+                        .param("quantity", "0")
+                        .param("advertisingCostPerUnit", "0")
+                        .param("markupPercentage", "12.345")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(multipart("/api/products")
+                        .file(recipe)
+                        .param("sku", "ROSE-BOX-001")
+                        .param("name", "Rose Box")
+                        .param("quantity", "0")
+                        .param("advertisingCostPerUnit", "1.239")
+                        .param("markupPercentage", "50")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isBadRequest());
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.class)).isZero();
+    }
+
+    @Test
     void producesAProductAtomicallyFromItsRawMaterialRecipe() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
         var session = (MockHttpSession) login.getRequest().getSession(false);

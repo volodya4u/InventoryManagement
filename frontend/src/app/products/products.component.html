@@ -380,7 +380,9 @@
                     form.controls.advertisingCostPerUnit.touched &&
                     form.controls.advertisingCostPerUnit.invalid
                   ) {
-                    <div class="invalid-feedback d-block">Advertising cost cannot be negative.</div>
+                    <div class="invalid-feedback d-block">
+                      Enter an advertising cost of 0 or more, with at most two decimals.
+                    </div>
                   }
                 </div>
                 <div class="col-sm-6">
@@ -411,7 +413,7 @@
                   form.controls.markupPercentage.touched && form.controls.markupPercentage.invalid
                 ) {
                   <div class="invalid-feedback d-block">
-                    Enter a markup percentage between 0 and 999999.99.
+                    Enter a markup percentage between 0 and 999999.99, with at most two decimals.
                   </div>
                 }
               </div>

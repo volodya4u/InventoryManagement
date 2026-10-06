@@ -133,11 +133,20 @@ export class ProductsComponent implements OnInit {
       initialUnitCost: new FormControl<number | null>(null, [Validators.min(0)]),
       advertisingCostPerUnit: new FormControl(0, {
         nonNullable: true,
-        validators: [Validators.required, Validators.min(0)],
+        validators: [
+          Validators.required,
+          Validators.min(0),
+          Validators.pattern(/^\d+(\.\d{1,2})?$/),
+        ],
       }),
       markupPercentage: new FormControl(0, {
         nonNullable: true,
-        validators: [Validators.required, Validators.min(0), Validators.max(999999.99)],
+        validators: [
+          Validators.required,
+          Validators.min(0),
+          Validators.max(999999.99),
+          Validators.pattern(/^\d+(\.\d{1,2})?$/),
+        ],
       }),
       recipe: new FormArray<RecipeFormGroup>([]),
     },
