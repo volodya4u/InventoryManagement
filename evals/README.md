@@ -53,9 +53,10 @@ numbers in `docs/autonomy-log.md`. This is a follow-up, not part of this suite.
 
 ## Cases
 
-- `evals/reviewer/` — five injected-defect reviews, one per `AGENTS.md` rule: JPA instead of `JdbcTemplate`,
-  `rs.getBigDecimal` instead of `SqliteDecimals.read`, a `schema.sql` change with no migration, a deleted test, and a
-  committed `APP_ADMIN_INITIAL_PASSWORD`. Each grader passes only if the review flags that specific defect as blocking.
+- `evals/reviewer/` — injected-defect reviews, one per `AGENTS.md` rule: JPA instead of `JdbcTemplate`,
+  `rs.getBigDecimal` instead of `SqliteDecimals.read`, a `schema.sql` change with no migration, a deleted test, a
+  committed `APP_ADMIN_INITIAL_PASSWORD`, and a spec whose acceptance criterion drifted from its test
+  (`spec-ac-drift`). Each grader passes only if the review flags that specific defect as blocking.
 - `.agents/skills/<skill>/evals/` — two cases per skill (synced into `.claude/skills/` by `scripts/skills-sync.mjs`).
 
 ## Known limit
