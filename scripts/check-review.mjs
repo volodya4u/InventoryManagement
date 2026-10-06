@@ -34,13 +34,18 @@ export function reviewVerdicts(lines) {
     .flatMap(parse)
     .filter((e) => e.event === "PostToolUse" && (e.verdict === "APPROVE" || e.verdict === "CHANGES REQUESTED"))
     .sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
+  // Collapse duplicates by content, keeping the LAST occurrence so a repeated verdict never shadows a later distinct
+  // one: reviewProblems decides on the final verdict, and keeping the last is the safe choice if a tuple ever recurs.
   const seen = new Set();
-  return sorted.filter((e) => {
+  const kept = [];
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    const e = sorted[i];
     const key = `${e.verdict}|${e.tree ?? ""}|${e.blocking ?? ""}|${JSON.stringify(e.findings ?? [])}`;
-    if (seen.has(key)) return false;
+    if (seen.has(key)) continue;
     seen.add(key);
-    return true;
-  });
+    kept.push(e);
+  }
+  return kept.reverse();
 }
 
 // What is missing for the review to count, given the fingerprint of the files under review now; [] when nothing is.
