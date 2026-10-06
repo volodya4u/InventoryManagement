@@ -9,6 +9,7 @@
 // not-yet-committed actions show too.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { reviewVerdicts } from "./check-review.mjs";
 
 const file = process.argv[2] ?? join(process.cwd(), ".agent-log", "actions.jsonl");
 const pending = join(process.cwd(), ".agent-log", "pending.jsonl");
@@ -29,8 +30,9 @@ const entries = sources
   });
 // Tool calls come from the hooks; the loop records (DodRun from dod.mjs, TestRun from test-run.mjs) share the log but
 // are not tool calls, so they are counted apart. The reviewer's verdict is not its own event: the hook records it on
-// the reviewer's PostToolUse line — its SubagentHandback hand-back, or the Agent call's response when it runs in the
-// foreground — which is a tool call, so it is read from `lines` below.
+// the reviewer's PostToolUse line — its SubagentHandback hand-back, or the Agent call's response in the foreground —
+// so it is counted with reviewVerdicts (which also collapses the one review a foreground run records twice), not as a
+// SubagentStop record.
 const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
 const lines = entries.filter((e) => TOOL_EVENTS.has(e.event));
 const records = entries.filter((e) => !TOOL_EVENTS.has(e.event));
@@ -71,7 +73,7 @@ for (const e of lines) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
 console.log(`Permission modes: ${Object.entries(modes).map(([mode, n]) => `${mode} ${n}`).join(", ") || "-"}`);
 const dod = records.filter((e) => e.event === "DodRun");
 const runs = records.filter((e) => e.event === "TestRun");
-const verdicts = lines.filter((e) => e.verdict === "APPROVE" || e.verdict === "CHANGES REQUESTED");
+const verdicts = reviewVerdicts(lines);
 if (dod.length || runs.length || verdicts.length) {
   console.log(
     `Loop records: ${dod.length} dod run(s), ${dod.filter((e) => e.exit === 0).length} green; ` +
