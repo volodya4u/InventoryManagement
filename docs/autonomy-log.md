@@ -7,12 +7,12 @@ Levels (Agentic Engineering Crash Course): 1 Assistant (the agent proposes, a hu
 (the agent proves the result with tests, a human reviews the outcome) · 3 Agent · 4 Agents (parallel subagents) ·
 5 Autonomous agents (harness only, human by exception).
 
-**What the levels mean here.** All work, cloud and local, ran in `auto` mode (every agent-log line carries
-`"mode":"auto"`, or `"plan"` while planning). A classifier, not a human step by step, approved individual tool calls
-within the ask/deny rules and the hooks. So
+**What the levels mean here.** Most work ran in `auto` mode (the agent-log line carries `"mode":"auto"`, or `"plan"`
+while planning): a classifier, not a human step by step, approved individual tool calls within the ask/deny rules and
+the hooks. Some local desktop sessions ran in `default` (Manual) mode instead, where a human approves each call; the
+log carries those `"mode":"default"` lines too (see the "Escalation and de-escalation" section). So
 "level 1" below means **the human chose the scope** (approved the plan in plan mode) **and merged the pull request
-after review**, not that they clicked "allow" on every action; "level 2" adds that the result is proven by tests. No
-session ran in `default` (manual) mode — a deliberate simplification, not the course's literal level 1.
+after review**, not that they clicked "allow" on every action; "level 2" adds that the result is proven by tests.
 
 | # | Work | Level | Who decided | Evidence | Why this level |
 |---|------|-------|-------------|----------|----------------|
@@ -87,12 +87,14 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 
 This section is the standing policy; the "Level changes" section above records the individual level moves it produced.
 
-- **Every logged session ran in `auto` or `plan`, local ones included.** The committed log has only `"mode":"auto"` and
-  `"mode":"plan"` lines, from the cloud sessions and the local desktop sessions alike. None ran in `default` (Manual),
-  which corrects an earlier line here. `node scripts/agent-log-summary.mjs` prints the modes, and the `pr-evidence` job
-  prints them per pull request. A classifier, not a human, approves single actions there, within the ask and deny rules
-  and the hooks: the deny rule blocked an `rm -rf` on 2026-10-03. All work therefore lands as a pull request a human
-  merges.
+- **Cloud sessions run in `auto`; some local sessions run in `default` (Manual).** The committed log carries all three
+  modes — `"mode":"auto"` and `"mode":"plan"` from the cloud and most local work, and `"mode":"default"` from the local
+  desktop sessions that finished and merged PR #58, where a human approved each call. (An earlier line here claimed the
+  log held no `default` lines; that drifted the moment a Manual session committed — exactly the kind of prose a gate
+  does not check — and this entry corrects it.) `node scripts/agent-log-summary.mjs` prints the live mode counts, and the
+  `pr-evidence` job prints them per pull request, so the number is read from the log, not from this page. In every
+  mode the ask and deny rules and the hooks still apply — the deny rule blocked an `rm -rf` on 2026-10-03 — and all
+  work lands as a pull request a human merges.
 - **Not escalated on purpose:** Dependabot auto-merges only patch and minor updates; Angular majors go through `ng update`
   with a human merging the PR.
 - **De-escalation by default:** any change to `.claude/settings.json`, `.mcp.json`, `pom.xml`, `frontend/package.json` or
