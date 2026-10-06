@@ -7,12 +7,12 @@ Levels (Agentic Engineering Crash Course): 1 Assistant (the agent proposes, a hu
 (the agent proves the result with tests, a human reviews the outcome) · 3 Agent · 4 Agents (parallel subagents) ·
 5 Autonomous agents (harness only, human by exception).
 
-**What the levels mean here.** All work, cloud and local, ran in `auto` mode (every agent-log line carries
-`"mode":"auto"`, or `"plan"` while planning). A classifier, not a human step by step, approved individual tool calls
-within the ask/deny rules and the hooks. So
+**What the levels mean here.** Most work ran in `auto` mode (the agent-log line carries `"mode":"auto"`, or `"plan"`
+while planning): a classifier, not a human step by step, approved individual tool calls within the ask/deny rules and
+the hooks. Some local desktop sessions ran in `default` (Manual) mode instead, where a human approves each call; the
+log carries those `"mode":"default"` lines too (see the "Escalation and de-escalation" section). So
 "level 1" below means **the human chose the scope** (approved the plan in plan mode) **and merged the pull request
-after review**, not that they clicked "allow" on every action; "level 2" adds that the result is proven by tests. No
-session ran in `default` (manual) mode — a deliberate simplification, not the course's literal level 1.
+after review**, not that they clicked "allow" on every action; "level 2" adds that the result is proven by tests.
 
 | # | Work | Level | Who decided | Evidence | Why this level |
 |---|------|-------|-------------|----------|----------------|
@@ -23,7 +23,7 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 | 5 | Always ask before JetBrains IDE MCP tools (#26) | 1 | Agent spotted that `idea` tools bypass the `.env` hook; human chose an ask rule | Documented precedence: deny → ask → allow across all settings scopes | Permissions are a human decision |
 | 6 | Angular 22 with `ng update`, Dependabot grouping for `@angular/*` (#27) | 2 | Human chose the full upgrade; agent ran it, checked the migrations and opened the PR; human merged | 46 frontend tests, `mvn -B -ntp verify`; formatting-neutral diff shows only the migrations; locally `ng version` 22.2.1 | Reversible with git and proven by tests, but a dependency change, so a human merges |
 | 7 | Vitest 5 Dependabot PR (#28) | 1 | Agent reviewed (CI log on Vitest 5, `@angular/build` peer range); human merged | 46 tests on Vitest 5.0.2; auto-merge skipped the major update | Majors never auto-merge |
-| 8 | Verify the hooks on Windows (no change needed) | 1 | Human ran the diagnostics the agent asked for | Self-test PASS on Windows; a local session logged a `PreToolUse`/`PostToolUse` pair for `Read README.md` in `default` mode (that local log was never committed: the committed log has no `default` line) | The hooks are the evidence layer, so they need their own evidence |
+| 8 | Verify the hooks on Windows (no change needed) | 1 | Human ran the diagnostics the agent asked for | Self-test PASS on Windows; a local session logged a `PreToolUse`/`PostToolUse` pair for `Read README.md` in `default` mode (that early diagnostic log was not committed at the time; `default`-mode lines did later enter the committed log, when the Manual sessions that merged PR #58 ran) | The hooks are the evidence layer, so they need their own evidence |
 | 9 | Path-scoped rule for Angular 22 frontend work (#29) | 1 | Human chose it from the day 1 gap list | Each Angular fact checked against `@angular/core` and `@angular/common` 22.2.1 typings | Static context is team policy |
 | 10 | `GET /api/health`, start script waits for it (#30) | 1 | Plan approved by a human (it touches `SecurityConfig`); agent wrote the test first | Test red (401) before the change, green after; `mvn -B -ntp verify` 25 tests | First task through the full loop: plan, failing test, change, evidence |
 | 11 | This log and `merge=union` for the agent log | 1 | Human chose it from the day 1 gap list | A merge of two branches that both appended to the log kept both lines without a conflict | Documentation of decisions belongs to the human |
@@ -88,12 +88,14 @@ session ran in `default` (manual) mode — a deliberate simplification, not the 
 
 This section is the standing policy; the "Level changes" section above records the individual level moves it produced.
 
-- **Every logged session ran in `auto` or `plan`, local ones included.** The committed log has only `"mode":"auto"` and
-  `"mode":"plan"` lines, from the cloud sessions and the local desktop sessions alike. None ran in `default` (Manual),
-  which corrects an earlier line here. `node scripts/agent-log-summary.mjs` prints the modes, and the `pr-evidence` job
-  prints them per pull request. A classifier, not a human, approves single actions there, within the ask and deny rules
-  and the hooks: the deny rule blocked an `rm -rf` on 2026-10-03. All work therefore lands as a pull request a human
-  merges.
+- **Cloud sessions run in `auto`; some local sessions run in `default` (Manual).** The committed log carries all three
+  modes — `"mode":"auto"` and `"mode":"plan"` from the cloud and most local work, and `"mode":"default"` from the local
+  desktop sessions that finished and merged PR #58, where a human approved each call. (An earlier line here claimed the
+  log held no `default` lines; that drifted the moment a Manual session committed — exactly the kind of prose a gate
+  does not check — and this entry corrects it.) `node scripts/agent-log-summary.mjs` prints the live mode counts, and the
+  `pr-evidence` job prints them per pull request, so the number is read from the log, not from this page. In every
+  mode the ask and deny rules and the hooks still apply — the deny rule blocked an `rm -rf` on 2026-10-03 — and all
+  work lands as a pull request a human merges.
 - **Not escalated on purpose:** Dependabot auto-merges only patch and minor updates; Angular majors go through `ng update`
   with a human merging the PR.
 - **De-escalation by default:** any change to `.claude/settings.json`, `.mcp.json`, `pom.xml`, `frontend/package.json` or
