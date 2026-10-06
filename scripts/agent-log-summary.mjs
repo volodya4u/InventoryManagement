@@ -29,7 +29,8 @@ const entries = sources
   });
 // Tool calls come from the hooks; the loop records (DodRun from dod.mjs, TestRun from test-run.mjs) share the log but
 // are not tool calls, so they are counted apart. The reviewer's verdict is not its own event: the hook records it on
-// the reviewer's PostToolUse (SubagentHandback) line, which is a tool call, so it is read from `lines` below.
+// the reviewer's PostToolUse line — its SubagentHandback hand-back, or the Agent call's response when it runs in the
+// foreground — which is a tool call, so it is read from `lines` below.
 const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
 const lines = entries.filter((e) => TOOL_EVENTS.has(e.event));
 const records = entries.filter((e) => !TOOL_EVENTS.has(e.event));
