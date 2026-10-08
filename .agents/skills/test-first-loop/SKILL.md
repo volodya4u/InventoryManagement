@@ -18,6 +18,12 @@ Run the whole loop yourself; come back to the human only at the exits named belo
 1. **Criteria.** Take the acceptance criteria from `docs/specs/<feature>.md`, or restate the request as one to five
    Given / When / Then lines. A feature that changes the schema, an API and a page together gets a spec first
    (`docs/specs/TEMPLATE.md`), approved by the human.
+
+   **Docs first.** If the change will add the first import of a package nothing on `main` imports yet (a Java package,
+   or an npm module or entry point such as `@angular/common/http`), look its API up for the installed version before
+   you write that code — `context7` (`resolve-library-id`, then `query-docs`), or the `angular-cli` MCP
+   (`search_documentation`) for `@angular/*`. The `pr-evidence` **Docs lookup** gate fails a branch that adds such an
+   import without a recorded lookup.
 2. **Red.** Write the test where `AGENTS.md` puts it and run only that test through `scripts/test-run.mjs`, which
    records the run (exit code, counts, first failure line) in the agent log. It must fail on an assertion about the new
    behaviour, not on a compile error (the record says which).
@@ -39,8 +45,9 @@ Run the whole loop yourself; come back to the human only at the exits named belo
      make one more commit after the review — log-only is fine: `git commit -m "Record the reviewer run"`.
    - **Verify before you push:** `node scripts/pr-evidence.mjs <base> HEAD` (base usually `origin/main`) must show
      every gate ✅: the review on these files, a green dod run on this code, the specs, red → green for a new spec, the
-     autonomy-log row. CI's `pr-evidence` job runs the same check and puts the report in its summary, so you need not
-     paste red and green lines or the dod table by hand; report anything left open.
+     autonomy-log row, a docs lookup for a new library. CI's `pr-evidence` job runs the same check and puts
+     the report in its summary, so you need not paste red and green lines or the dod table by hand; report anything
+     left open.
 
 ## Exits: stop and ask the human
 
