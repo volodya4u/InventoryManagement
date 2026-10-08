@@ -2,7 +2,7 @@
 // Running the evals themselves costs money and is non-deterministic, so only parsing and the freshness check are tested.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildRecord, parseRun, recordProblems } from "./eval-record.mjs";
+import { buildRecord, parseRun, recordProblems, stableInputs } from "./eval-record.mjs";
 
 // The shape `claude plugin eval --json` writes (trimmed to what the record keeps).
 const reviewerRun = {
@@ -63,4 +63,17 @@ test("recordProblems names an input that changed, was added or was removed", () 
 
 test("recordProblems reports a missing record", () => {
   assert.match(recordProblems(null, { "AGENTS.md": "aaa" }).join(" "), /no evals\/record\.json/);
+});
+
+test("stableInputs returns the fingerprint when nothing changed during the run", () => {
+  const before = { "AGENTS.md": "aaa", ".agents/skills/x/SKILL.md": "bbb" };
+  assert.deepEqual(stableInputs(before, { "AGENTS.md": "aaa", ".agents/skills/x/SKILL.md": "bbb" }), before);
+});
+
+test("stableInputs refuses the run and names an input that changed, was added or was removed mid-run", () => {
+  const before = { "AGENTS.md": "aaa", ".agents/skills/x/SKILL.md": "bbb" };
+  assert.throws(() => stableInputs(before, { "AGENTS.md": "ZZZ", ".agents/skills/x/SKILL.md": "bbb" }), /AGENTS\.md/);
+  assert.throws(() => stableInputs(before, { "AGENTS.md": "aaa" }), /SKILL\.md/);
+  assert.throws(() => stableInputs(before, { ...before, "evals/reviewer/new/prompt.md": "ccc" }), /prompt\.md/);
+  assert.throws(() => stableInputs(before, { "AGENTS.md": "ZZZ", ".agents/skills/x/SKILL.md": "bbb" }), /not recording/i);
 });

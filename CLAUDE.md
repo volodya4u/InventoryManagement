@@ -13,6 +13,9 @@
   commit (log-only is fine), and confirm with `node scripts/pr-evidence.mjs origin/main HEAD` before pushing — the
   `pr-evidence` CI job runs the same check.
 - Run the loop's red and green tests through `node scripts/test-run.mjs` so they are recorded, not pasted.
+- Run each evidence-producing command (`dod.mjs`, `test-run.mjs`, `eval-record.mjs`, `pr-evidence.mjs`) on its own,
+  not chained behind `&&`: the log hook clips each tool call's command line, so a command buried in a chain can be
+  recorded only in part (that once hid an `eval-record.mjs` re-run from a reviewer).
 - In `docs/autonomy-log.md` and `evals/README.md`, do not hand-restate a number or pass/fail a tool already produces
   (eval scores, mode/row counts, CI status). Point to the source instead: `evals/record.json` and the `pr-evidence` **Evals** table,
   `node scripts/agent-log-summary.mjs`, or a specific CI **job** URL (`…/runs/<id>/job/<id>`) — never a run URL whose
