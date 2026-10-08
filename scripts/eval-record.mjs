@@ -30,6 +30,17 @@ export function parseRun(run) {
   return { cli: run.claudeVersion, judgeModel: run.suite?.judgeModel, cases };
 }
 
+// The inputs fingerprint to record, or a refusal. Fingerprint the inputs before the run and again after; if an input
+// changed, was added or was removed while the eval ran, the scores are for the wrong text, so refuse to write — the
+// same spirit as the errored-arm guard in runEval. Returns `before` when the two agree.
+export function stableInputs(before, after) {
+  const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((path) => before[path] !== after[path]);
+  if (changed.length) {
+    throw new Error(`Inputs changed while the evals ran (${changed.join(", ")}); not recording — re-run \`node scripts/eval-record.mjs\` on a settled tree.`);
+  }
+  return before;
+}
+
 export function buildRecord({ model, run, inputs }) {
   return {
     generatedAt: new Date().toISOString(),
@@ -77,7 +88,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const model = process.argv.includes("--model") ? process.argv[process.argv.indexOf("--model") + 1] : null;
   const runs = process.argv.includes("--runs") ? Number(process.argv[process.argv.indexOf("--runs") + 1]) : 1;
   const root = process.cwd();
-  const record = buildRecord({ model, run: runEval(root, model, runs), inputs: inputsFingerprint(root) });
+  const before = inputsFingerprint(root);
+  const run = runEval(root, model, runs);
+  const record = buildRecord({ model, run, inputs: stableInputs(before, inputsFingerprint(root)) });
   writeFileSync(join(root, RECORD_PATH), JSON.stringify(record, null, 2) + "\n");
   console.error(`\nWrote ${RECORD_PATH} (model ${record.model}, judge ${record.judgeModel}).`);
   for (const [name, s] of Object.entries(record.cases)) {

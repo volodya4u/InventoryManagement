@@ -66,9 +66,10 @@ jobs:
 
   # The evidence of the pull request, from the records the tools wrote, checked against its head commit
   # (scripts/pr-evidence.mjs): the reviewer's last verdict, a green dod run on this code, specs against their tests,
-  # red -> green for a new spec's criteria, an autonomy-log row for significant work. The report goes to the job
-  # summary, so the description need not repeat it by hand. Dependabot PRs skip it: CI is their checker, so they carry
-  # no agent records.
+  # red -> green for a new spec's criteria, an autonomy-log row for significant work, a fresh evals record when the
+  # reviewer/skills/AGENTS.md change, and a docs lookup for an import of a library new to main. The report goes to the
+  # job summary, so the description need not repeat it by hand. Dependabot PRs skip it: CI is their checker, so they
+  # carry no agent records.
   pr-evidence:
     if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
