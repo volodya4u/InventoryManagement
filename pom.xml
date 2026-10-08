@@ -133,6 +133,27 @@
             </plugin>
 
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- defines ${org.mockito:mockito-core:jar}, the jar's path, for the Surefire argLine below -->
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Mockito as a Java agent instead of self-attaching, which JDK 21+ warns about (Mockito javadoc 0.3).
+                         No @{argLine}: nothing defines argLine here, and the unresolved token reaches java as an @argfile -->
+                    <argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
