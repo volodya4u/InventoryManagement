@@ -13,11 +13,11 @@ than one file or running anything that is not on the allow-list in `.claude/sett
 - `node scripts/dod.mjs` — the whole Definition of done in CI order; prints a Markdown evidence table. The
   `test-first-loop` skill drives a change from a failing test to this table and a review.
 - `node scripts/agent-log-summary.mjs` — summary of `.agent-log/actions.jsonl`: what you actually did this session.
-- Docs: Dependabot moves versions monthly, so look an API up for the version in `pom.xml` / `frontend/package.json`
-  when the change imports a third-party package the code does not use yet, touches code that calls a library a
-  Dependabot update has just moved, or changes the build or its config — `angular-cli` MCP (`list_projects`, then
-  `search_documentation`) for `@angular/*`, `context7` (`query-docs`) for Spring Boot and other libraries. The
-  **Docs lookup** gate of `scripts/pr-evidence.mjs` fails a branch that adds such an import without a recorded lookup.
+- Docs: Dependabot moves versions monthly, so look an API up before the first import of a package nothing on `main`
+  imports yet (a Java package, or an npm module or entry point such as `@angular/common/http`) — `angular-cli` MCP
+  (`list_projects`, then `search_documentation` with that version) for Angular, `context7` (`resolve-library-id`,
+  then `query-docs`) for Spring Boot and other libraries. The `pr-evidence` **Docs lookup** gate fails a branch that
+  adds such an import without a recorded lookup. When unsure about any other API, look it up too.
 
 ## Definition of done
 
