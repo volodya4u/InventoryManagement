@@ -1,7 +1,7 @@
 // Unit tests for the gates and the report in scripts/pr-evidence.mjs. Run: node --test scripts/pr-evidence.test.mjs
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { autonomyProblems, blockedActions, dodProblems, evalsProblems, newRows, redGreenProblems, report, significant } from "./pr-evidence.mjs";
+import { addedImports, autonomyProblems, blockedActions, docsLookupProblems, docsTool, dodProblems, evalsProblems, importGroup, newImports, newRows, redGreenProblems, report, significant } from "./pr-evidence.mjs";
 
 const dod = (ts, exit, code, checks = []) => ({ ts, event: "DodRun", exit, code, checks });
 const run = (ts, target, selector, kind) => ({ ts, event: "TestRun", target, selector, exit: kind === "pass" ? 0 : 1, kind });
@@ -78,6 +78,113 @@ test("evals: the gate fires only when an eval-relevant input changed on the bran
   assert.match(evalsProblems([".claude/agents/reviewer.md"], record, { "AGENTS.md": "bbb" }).join(" "), /changed since|is no longer covered|is new/);
   // A skill case changed, no record at all: fails.
   assert.match(evalsProblems([".agents/skills/test-first-loop/evals/x/prompt.md"], null, { "AGENTS.md": "aaa" }).join(" "), /no evals\/record\.json/);
+});
+
+test("docs lookup: a Java import's library is its first three package segments; JDK and first-party imports are none", () => {
+  assert.equal(importGroup("java", "import static org.mockito.Mockito.when;"), "org.mockito");
+  assert.equal(importGroup("java", "import org.mockito.*;"), "org.mockito");
+  assert.equal(importGroup("java", "import org.springframework.security.crypto.password.PasswordEncoder;"), "org.springframework.security");
+  assert.equal(importGroup("java", "import org.springframework.security.web.SecurityFilterChain.Builder;"), "org.springframework.security");
+  assert.equal(importGroup("java", "  import static org.junit.jupiter.api.Assertions.*;"), "org.junit.jupiter");
+  const jdk = ["import java.util.List;", "import javax.sql.DataSource;", "import jdk.jfr.Event;", "import org.w3c.dom.Document;", "import org.xml.sax.InputSource;"];
+  for (const line of [...jdk, "import com.flowershop.inventory.common.ConflictException;", "// import org.mockito.Mockito;", "return x;"]) {
+    assert.equal(importGroup("java", line), null, line);
+  }
+});
+
+test("docs lookup: a TS import's library is its package; relative imports are none", () => {
+  assert.equal(importGroup("ts", "import { FormBuilder } from '@angular/forms';"), "@angular/forms");
+  assert.equal(importGroup("ts", "import { TestBed } from '@angular/core/testing';"), "@angular/core");
+  assert.equal(importGroup("ts", 'import { map } from "rxjs/operators";'), "rxjs");
+  assert.equal(importGroup("ts", "} from '@ngrx/store';"), "@ngrx/store");
+  assert.equal(importGroup("ts", "import 'zone.js';"), "zone.js");
+  assert.equal(importGroup("ts", "import type { Chart } from 'chart.js';"), "chart.js");
+  assert.equal(importGroup("ts", "import { Product } from './product';"), null);
+  assert.equal(importGroup("ts", "import { decimal } from '../core/decimal';"), null);
+  assert.equal(importGroup("ts", "import { readFileSync } from 'node:fs';"), null);
+  assert.equal(importGroup("ts", "const label = 'from here';"), null);
+  assert.equal(importGroup("ts", `export const MSG = 'Move from "Main"';`), null);
+  assert.equal(importGroup("ts", "export { routes } from '@angular/router';"), "@angular/router");
+});
+
+const diff = [
+  "diff --git a/src/test/java/com/x/AServiceTest.java b/src/test/java/com/x/AServiceTest.java",
+  "--- /dev/null",
+  "+++ b/src/test/java/com/x/AServiceTest.java",
+  "@@ -0,0 +1,4 @@",
+  "+import static org.mockito.Mockito.when;",
+  "+import org.junit.jupiter.api.Test;",
+  "+import jakarta.validation.constraints.NotNull;",
+  "+import java.util.List;",
+  "diff --git a/src/test/java/com/x/BServiceTest.java b/src/test/java/com/x/BServiceTest.java",
+  "--- a/src/test/java/com/x/BServiceTest.java",
+  "+++ b/src/test/java/com/x/BServiceTest.java",
+  "@@ -1 +1,2 @@",
+  "-import org.mockito.Mock;",
+  "+import org.mockito.ArgumentCaptor;",
+  // Outside src/**/*.java and frontend/src/**/*.ts, and a deleted file: nothing to look up.
+  "diff --git a/scripts/tool.mjs b/scripts/tool.mjs",
+  "--- a/scripts/tool.mjs",
+  "+++ b/scripts/tool.mjs",
+  "@@ -1 +1 @@",
+  "+import { pad } from 'left-pad';",
+  "diff --git a/src/main/java/com/x/Gone.java b/src/main/java/com/x/Gone.java",
+  "--- a/src/main/java/com/x/Gone.java",
+  "+++ /dev/null",
+  "@@ -1 +0,0 @@",
+  "-import org.apache.commons.io.IOUtils;",
+  "diff --git a/frontend/src/app/a/a.component.ts b/frontend/src/app/a/a.component.ts",
+  "--- a/frontend/src/app/a/a.component.ts",
+  "+++ b/frontend/src/app/a/a.component.ts",
+  "@@ -1 +1,3 @@",
+  "+import { ReactiveFormsModule } from '@angular/forms';",
+  "+} from '@angular/core';",
+  "+import { Product } from './product';",
+].join("\n");
+
+test("docs lookup: the added imports, per file; only libraries the base does not use yet are new", () => {
+  const added = addedImports(diff);
+  assert.deepEqual(added, [
+    { group: "org.mockito", path: "src/test/java/com/x/AServiceTest.java" },
+    { group: "org.junit.jupiter", path: "src/test/java/com/x/AServiceTest.java" },
+    { group: "jakarta.validation.constraints", path: "src/test/java/com/x/AServiceTest.java" },
+    { group: "org.mockito", path: "src/test/java/com/x/BServiceTest.java" },
+    { group: "@angular/forms", path: "frontend/src/app/a/a.component.ts" },
+    { group: "@angular/core", path: "frontend/src/app/a/a.component.ts" },
+  ]);
+  // One entry per library, its first file; a library the base already imports (or a dotted parent of it) is not new.
+  assert.deepEqual(newImports(added, ["org.junit.jupiter", "jakarta.validation", "@angular/core"]), [
+    { group: "org.mockito", path: "src/test/java/com/x/AServiceTest.java" },
+    { group: "@angular/forms", path: "frontend/src/app/a/a.component.ts" },
+  ]);
+  assert.deepEqual(newImports([{ group: "org.mockito", path: "A.java" }], ["org.mockito.junit"]), []);
+  // The dotted-parent rule is for Java packages only: a TS package name with a dot is its own library.
+  assert.deepEqual(newImports([{ group: "chart.js", path: "frontend/src/app/a.ts" }], ["chart"]), [{ group: "chart.js", path: "frontend/src/app/a.ts" }]);
+  assert.deepEqual(newImports([{ group: "org.springframework.security", path: "A.java" }], ["org.springframework.boot"]).length, 1);
+});
+
+const call = (event, tool, exit = 0) => ({ ts: "t1", event, id: "x", tool, ...(event === "PreToolUse" ? {} : { exit }) });
+
+test("docs lookup: a new third-party import without a recorded lookup fails; with one it passes", () => {
+  const mockito = [{ group: "org.mockito", path: "src/test/java/com/x/AServiceTest.java" }];
+  assert.match(docsLookupProblems(mockito, []).join(" "), /org\.mockito \(AServiceTest\.java\).*no `mcp__context7__query-docs` lookup is recorded/);
+  assert.deepEqual(docsLookupProblems(mockito, [call("PreToolUse", "mcp__context7__query-docs"), call("PostToolUse", "mcp__context7__query-docs")]), []);
+  // A proposal that never ran, or a failed call, looked nothing up.
+  assert.equal(docsLookupProblems(mockito, [call("PreToolUse", "mcp__context7__query-docs")]).length, 1);
+  assert.equal(docsLookupProblems(mockito, [call("PostToolUseFailure", "mcp__context7__query-docs", 1)]).length, 1);
+  assert.equal(docsLookupProblems(mockito, [call("PostToolUse", "mcp__context7__resolve-library-id")]).length, 1);
+  assert.deepEqual(docsLookupProblems([], []), []);
+});
+
+test("docs lookup: an Angular package is looked up in the Angular docs, anything else in context7", () => {
+  assert.equal(docsTool("@angular/forms"), "mcp__angular-cli__search_documentation");
+  assert.equal(docsTool("rxjs"), "mcp__context7__query-docs");
+  const forms = [{ group: "@angular/forms", path: "frontend/src/app/a/a.component.ts" }];
+  assert.match(docsLookupProblems(forms, [call("PostToolUse", "mcp__context7__query-docs")]).join(" "), /mcp__angular-cli__search_documentation/);
+  assert.deepEqual(docsLookupProblems(forms, [call("PostToolUse", "mcp__angular-cli__search_documentation")]), []);
+  // Both kinds new: each needs its own lookup.
+  const both = [...forms, { group: "org.mockito", path: "A.java" }];
+  assert.equal(docsLookupProblems(both, [call("PostToolUse", "mcp__angular-cli__search_documentation")]).length, 1);
 });
 
 test("blocked actions: a proposal without a result, except the last commit, whose result folds into the next one", () => {

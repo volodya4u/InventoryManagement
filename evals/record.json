@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T22:10:47.041Z",
-  "model": "claude-opus-4-8",
+  "generatedAt": "2026-10-08T11:58:15.741Z",
+  "model": "claude-opus-5-5",
   "judgeModel": "haiku",
   "cli": "2.1.289",
   "inputs": {
@@ -10,13 +10,13 @@
     ".agents/skills/agent-log-report/evals/counts-from-sample/graders/criteria.md": "acb6b639a93554571a88a356aedf129fa794687f",
     ".agents/skills/agent-log-report/evals/counts-from-sample/prompt.md": "23afd0a3c77af2fa583a4eb8971f1db1ee3f7ae1",
     ".agents/skills/agent-log-report/scripts/report.mjs": "6a3c2cc9b9b16ad212ab2edca0d7f4416ec18cea",
-    ".agents/skills/test-first-loop/SKILL.md": "c4f46026636029085e4bfbbd4c19c8a124dc920a",
+    ".agents/skills/test-first-loop/SKILL.md": "0643f8e85ad24de3cc2028e9c8d4de6bcecabc8c",
     ".agents/skills/test-first-loop/evals/bugfix-starts-red/graders/criteria.md": "04a2ef3b3a50ee9b2de7ee4498a7e56d1cea50aa",
     ".agents/skills/test-first-loop/evals/bugfix-starts-red/prompt.md": "973da156adb21f142e6e4bc3d835250887fe5815",
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
     ".claude/agents/reviewer.md": "33cfc703a7daeb6fe0bac511f67b7c407f8b2f97",
-    "AGENTS.md": "d91b803f9aef2265d2885eedbc7c4775ed6a9f73",
+    "AGENTS.md": "6f9be2ec4479bb876bbaacc05353661359ad7c2d",
     "evals/reviewer/deleted-test-for-green/graders/criteria.md": "a9f8787f8e094a010e10db1684d72809f641f05b",
     "evals/reviewer/deleted-test-for-green/prompt.md": "655622f8c77cd0c3918d8092dba98a7c9fce70df",
     "evals/reviewer/hardcoded-admin-password/graders/criteria.md": "1641b1b098a2a3489c808e7a7d38f3cf52884e91",
@@ -43,8 +43,8 @@
     },
     "bugfix-starts-red": {
       "score": 1,
-      "scoreWithout": 0,
-      "delta": 1
+      "scoreWithout": 1,
+      "delta": 0
     },
     "no-expected-value-cheating": {
       "score": 1,

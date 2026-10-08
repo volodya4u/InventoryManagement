@@ -11,6 +11,8 @@
 //                       and a later one that passed (scripts/test-run.mjs)
 //   Autonomy log        a branch that changes the harness, CI, a boundary file or a spec adds a valid row to
 //                       docs/autonomy-log.md
+//   Docs lookup         a branch that imports a third-party library the base does not use yet (src/**/*.java,
+//                       frontend/src/**/*.ts) records a docs lookup: context7, or the Angular docs for @angular/*
 // The report also shows the loop as the records tell it: dod runs, targeted test runs, review rounds, and the agent's
 // sessions, permission modes and the proposals that never ran.
 // Usage: node scripts/pr-evidence.mjs <base-ref> <head-ref>   (exit 0 = every gate holds, 1 = a gate failed, 2 = usage)
@@ -96,6 +98,75 @@ export function autonomyProblems(changedFiles, addedRows) {
 export function evalsProblems(changedFiles, record, currentInputs) {
   const relevant = changedFiles.some((path) => INPUT_PATHS.some((base) => path === base || path.startsWith(`${base}/`)));
   return relevant ? recordProblems(record, currentInputs) : [];
+}
+
+// The library an import line pulls in, or null for no import, the JDK or a Node built-in, our own code or a relative
+// path. Java: the
+// first three package segments (org.mockito, org.springframework.security); class names, static members and `*` are
+// dropped. TS: the package (@angular/forms, rxjs), from a one-line import or the `} from '…'` line of a multi-line one.
+// Three segments is a trade-off: every org.springframework.boot.* module (or org.apache.commons.*) counts as one library,
+// while a first org.springframework.dao import counts as a new one. Not seen at all: a fully qualified name used without
+// an import, `import module …;` and a dynamic `import('…')`.
+const JAVA_IMPORT = /^\s*import\s+(?:static\s+)?([\w.]+?)(?:\.\*)?\s*;/;
+// The JDK's own packages: java.*, javax.*, jdk.* and the XML/GSS APIs it ships under org.*.
+const JDK = /^(java|javax|jdk|org\.w3c\.dom|org\.xml\.sax|org\.ietf\.jgss)\./;
+// No quote before `from`, so a string such as 'Move from "Main"' is not an import.
+const TS_IMPORT = /^\s*(?:(?:import|export)\b[^'"]*?\bfrom\s*|\}\s*from\s*|import\s*)['"]([^'"]+)['"]/;
+export function importGroup(lang, line) {
+  if (lang === "java") {
+    const name = JAVA_IMPORT.exec(line)?.[1];
+    if (!name || JDK.test(name) || name.startsWith("com.flowershop.")) return null;
+    const segments = name.split(".");
+    const upper = segments.findIndex((s) => /^[A-Z]/.test(s));
+    return segments.slice(0, upper < 0 ? segments.length : upper).slice(0, 3).join(".") || null;
+  }
+  const spec = TS_IMPORT.exec(line)?.[1];
+  if (!spec || /^([./]|node:)/.test(spec)) return null;
+  return spec.split("/").slice(0, spec.startsWith("@") ? 2 : 1).join("/");
+}
+
+const langOf = (path) => (/^src\/.*\.java$/.test(path) ? "java" : /^frontend\/src\/.*\.ts$/.test(path) ? "ts" : null);
+
+// The third-party imports on the `+` lines of a diff, with the file each one is in.
+export function addedImports(diffText) {
+  let path = null;
+  return String(diffText)
+    .split(/\r?\n/)
+    .flatMap((line) => {
+      if (line.startsWith("+++ ")) path = line.replace(/^\+\+\+ (b\/)?/, "");
+      if (!path || !langOf(path) || !line.startsWith("+") || line.startsWith("+++")) return [];
+      const group = importGroup(langOf(path), line.slice(1));
+      return group ? [{ group, path }] : [];
+    });
+}
+
+// One entry per library the base does not use yet, with the first file that imports it. A Java library the base
+// imports under a dotted parent or child package (jakarta.validation vs jakarta.validation.constraints) is the same
+// library; a TS package is only itself (chart.js is not chart).
+const sameLibrary = (java, a, b) => a === b || (java && (a.startsWith(`${b}.`) || b.startsWith(`${a}.`)));
+export function newImports(added, baseGroups) {
+  const seen = new Set();
+  return added.filter(({ group, path }) => {
+    if (seen.has(group) || baseGroups.some((b) => sameLibrary(path.endsWith(".java"), group, b))) return false;
+    seen.add(group);
+    return true;
+  });
+}
+
+// Where AGENTS.md says to look an API up: the Angular docs for @angular/*, context7 for everything else.
+export const docsTool = (group) => (group.startsWith("@angular/") ? "mcp__angular-cli__search_documentation" : "mcp__context7__query-docs");
+const basename = (path) => path.split("/").pop();
+
+// A new third-party library needs a lookup that ran (not a proposal, not a failure) in the agent log of the branch.
+export function docsLookupProblems(imports, tools) {
+  const ran = new Set(tools.filter((e) => e.event === "PostToolUse" && e.exit === 0).map((e) => e.tool));
+  const missing = new Map();
+  for (const i of imports.filter((i) => !ran.has(docsTool(i.group)))) missing.set(docsTool(i.group), [...(missing.get(docsTool(i.group)) ?? []), i]);
+  return [...missing].map(
+    ([tool, list]) =>
+      `This branch adds imports from ${list.map((i) => `${i.group} (${basename(i.path)})`).join(", ")}, new to the code, but no \`${tool}\` ` +
+      "lookup is recorded on it: look the API up for the version in pom.xml / frontend/package.json (AGENTS.md, Docs), then commit so the record folds in.",
+  );
 }
 
 // Proposals that never ran. A `git commit` is the exception that proves nothing: its own result folds into the next
@@ -201,6 +272,22 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const reviews = reviewVerdicts(lines);
   const record = existsSync(join(root, RECORD_PATH)) ? JSON.parse(readFileSync(join(root, RECORD_PATH), "utf8")) : null;
   const evalsRelevant = changed.some((path) => INPUT_PATHS.some((p) => path === p || path.startsWith(`${p}/`)));
+  const CODE = [":(glob)src/**/*.java", ":(glob)frontend/src/**/*.ts"];
+  const grepImports = (lang, pathspec) => {
+    try {
+      return git("grep", "-h", "-E", `^[[:space:]]*import[[:space:]]|from[[:space:]]*['"]`, mergeBase, "--", pathspec).split("\n").map((l) => importGroup(lang, l)).filter(Boolean);
+    } catch (error) {
+      if (error.status === 1) return []; // git grep exits 1 when nothing matches
+      throw error;
+    }
+  };
+  const baseGroups = [...new Set([...grepImports("java", CODE[0]), ...grepImports("ts", CODE[1])])];
+  const imports = newImports(addedImports(git("diff", "-U0", `${base}...${head}`, "--", ...CODE)), baseGroups);
+  const lookupCounts = {};
+  for (const e of tools) {
+    if (e.event === "PostToolUse" && e.exit === 0 && /^mcp__(context7__query-docs|angular-cli__search_documentation)$/.test(e.tool)) lookupCounts[e.tool] = (lookupCounts[e.tool] ?? 0) + 1;
+  }
+  const lookups = Object.entries(lookupCounts).map(([tool, n]) => `${n} × \`${tool}\``);
   const sessions = new Set(tools.map((e) => e.session).filter(Boolean)).size;
   const modes = {};
   for (const e of tools) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
@@ -211,6 +298,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     { name: "Red → green", problems: redGreenProblems(records, criteria), ok: newSpecs.length ? `every criterion of ${newSpecs.join(", ")} went red, then green` : "no new spec on this branch" },
     { name: "Autonomy log", problems: autonomyProblems(changed, addedRows), ok: addedRows.length ? `${addedRows.length} row(s) added` : "no significant change, no row needed" },
     { name: "Evals", problems: evalsProblems(changed, record, inputsFingerprint(root)), ok: evalsRelevant ? `evals/record.json is fresh (model ${record?.model})` : "no reviewer, skill, AGENTS.md or case change on this branch" },
+    {
+      name: "Docs lookup",
+      problems: docsLookupProblems(imports, tools),
+      ok: imports.length
+        ? `new third-party imports ${imports.map((i) => i.group).join(", ")}; looked up: ${lookups.join(", ")}`
+        : `no new third-party import on this branch (docs lookups recorded: ${lookups.join(", ") || "none"})`,
+    },
   ];
   console.log(
     report({

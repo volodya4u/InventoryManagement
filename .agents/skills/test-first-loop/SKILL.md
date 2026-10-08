@@ -25,6 +25,11 @@ Run the whole loop yourself; come back to the human only at the exits named belo
    - Frontend: `node scripts/test-run.mjs frontend <path/to/file.spec.ts>`
    - Harness scripts: `node scripts/test-run.mjs harness scripts/<name>.test.mjs`
    - Changing behaviour that has no test yet: first pin today's behaviour with a passing test, then write the failing one.
+   - A test or a change (step 3) that imports a third-party package the code does not use yet, touches code that
+     calls a library a Dependabot update has just moved, or changes the build or its config: look the API up for the
+     version in `pom.xml` / `frontend/package.json` first — `context7` (`query-docs`), or the `angular-cli` MCP's
+     `search_documentation` for `@angular/*`. The `pr-evidence` **Docs lookup** gate fails a new import without a
+     recorded lookup.
 3. **Green.** Make the smallest change that passes the test, then re-run the same `test-run.mjs` command. Repeat.
 4. **Done.** Run `node scripts/dod.mjs` (self-test, harness unit tests, `mvn -B -ntp verify`, Prettier, frontend
    tests, the angular-cli MCP smoke test; the same checks as CI). It records each run. If a check is red, go back to
@@ -39,8 +44,9 @@ Run the whole loop yourself; come back to the human only at the exits named belo
      make one more commit after the review — log-only is fine: `git commit -m "Record the reviewer run"`.
    - **Verify before you push:** `node scripts/pr-evidence.mjs <base> HEAD` (base usually `origin/main`) must show
      every gate ✅: the review on these files, a green dod run on this code, the specs, red → green for a new spec, the
-     autonomy-log row. CI's `pr-evidence` job runs the same check and puts the report in its summary, so you need not
-     paste red and green lines or the dod table by hand; report anything left open.
+     autonomy-log row, a docs lookup for a new third-party import. CI's `pr-evidence` job runs the same check and puts
+     the report in its summary, so you need not paste red and green lines or the dod table by hand; report anything
+     left open.
 
 ## Exits: stop and ask the human
 
