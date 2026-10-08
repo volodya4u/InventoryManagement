@@ -11,6 +11,8 @@
 //                       and a later one that passed (scripts/test-run.mjs)
 //   Autonomy log        a branch that changes the harness, CI, a boundary file or a spec adds a valid row to
 //                       docs/autonomy-log.md
+//   Docs lookup         a branch that adds an import of a package nothing on main imports yet (src/**/*.java,
+//                       frontend/src/**/*.ts) records a docs lookup: context7 or the Angular docs (check-docs-lookup.mjs)
 // The report also shows the loop as the records tell it: dod runs, targeted test runs, review rounds, and the agent's
 // sessions, permission modes and the proposals that never ran.
 // Usage: node scripts/pr-evidence.mjs <base-ref> <head-ref>   (exit 0 = every gate holds, 1 = a gate failed, 2 = usage)
@@ -19,6 +21,7 @@ import { pathToFileURL } from "node:url";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { addedLogLines, reviewProblems, reviewVerdicts } from "./check-review.mjs";
+import { docsLookupCount, docsLookupProblems, newImportKeys } from "./check-docs-lookup.mjs";
 import { parseSpec, prSpecProblems, tableCells, validateSpecs } from "./check-specs.mjs";
 import { codeFingerprintAt, treeFingerprintAt } from "./dod-fingerprint.mjs";
 import { INPUT_PATHS, RECORD_PATH, inputsFingerprint, recordProblems } from "./eval-record.mjs";
@@ -150,7 +153,7 @@ export function report({ base, head, gates, dodRuns, testRuns, reviews, evals, h
     "### Agent activity on this branch",
     "",
     `${activity.sessions} session(s); permission modes: ${modes}; ${activity.executed} tool calls executed, ${activity.failed} failed, ` +
-      `${activity.blocked.filter((b) => !b.commit).length} proposed but never executed.`,
+      `${activity.blocked.filter((b) => !b.commit).length} proposed but never executed; docs lookups: ${activity.docsLookups ?? 0}.`,
   );
   for (const b of activity.blocked) {
     out.push(`- ${time(b.ts)} ${b.tool}: \`${cell(b.cmd ?? b.path ?? b.pattern ?? "")}\`${b.commit ? " (a commit: its result folds into the next commit)" : ""}`);
@@ -201,6 +204,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const reviews = reviewVerdicts(lines);
   const record = existsSync(join(root, RECORD_PATH)) ? JSON.parse(readFileSync(join(root, RECORD_PATH), "utf8")) : null;
   const evalsRelevant = changed.some((path) => INPUT_PATHS.some((p) => path === p || path.startsWith(`${p}/`)));
+  // New library imports vs main's tip, and the docs lookups the branch recorded (shown even when none is required).
+  const newKeys = newImportKeys(root, base, head);
+  const docsLookups = docsLookupCount(tools);
   const sessions = new Set(tools.map((e) => e.session).filter(Boolean)).size;
   const modes = {};
   for (const e of tools) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
@@ -211,6 +217,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     { name: "Red → green", problems: redGreenProblems(records, criteria), ok: newSpecs.length ? `every criterion of ${newSpecs.join(", ")} went red, then green` : "no new spec on this branch" },
     { name: "Autonomy log", problems: autonomyProblems(changed, addedRows), ok: addedRows.length ? `${addedRows.length} row(s) added` : "no significant change, no row needed" },
     { name: "Evals", problems: evalsProblems(changed, record, inputsFingerprint(root)), ok: evalsRelevant ? `evals/record.json is fresh (model ${record?.model})` : "no reviewer, skill, AGENTS.md or case change on this branch" },
+    {
+      name: "Docs lookup",
+      problems: docsLookupProblems(newKeys, tools),
+      ok: newKeys.length
+        ? `${docsLookups} lookup(s) recorded for ${newKeys.map((k) => k.replace(/^(java|ts):/, "")).join(", ")}`
+        : "no new third-party import on this branch",
+    },
   ];
   console.log(
     report({
@@ -229,6 +242,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         executed: tools.filter((e) => e.event !== "PreToolUse").length,
         failed: tools.filter((e) => e.event !== "PreToolUse" && e.exit !== 0).length,
         blocked: blockedActions(tools),
+        docsLookups,
       },
     }),
   );
