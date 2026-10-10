@@ -1,0 +1,20 @@
+{
+  "slices": [
+    "app-shell-routing",
+    "authentication",
+    "dashboard",
+    "images",
+    "monthly-sales-report",
+    "product-stock",
+    "production",
+    "products",
+    "raw-material-stock",
+    "raw-materials",
+    "reorder-level",
+    "returns-cancellations",
+    "sales",
+    "schema-migration",
+    "session-lifetime",
+    "stock-history"
+  ]
+}

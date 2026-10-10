@@ -1,0 +1,18 @@
+{
+  "id": "COR-2",
+  "ts": "2026-10-10T22:48:01.667Z",
+  "utterance": "AUTO: waiver created (docs/qa/waivers/2026-10-11-baseline-NFR-18.md) — an evidence requirement was waived; record why and disposition this correction.",
+  "contradictedClaim": null,
+  "mappedReqIds": [],
+  "gateThatShouldHaveCaught": null,
+  "failureMode": "skipped-convention",
+  "failureModeSource": "detector",
+  "source": "auto-waiver",
+  "autoKey": "waiver-created:docs/qa/waivers/2026-10-11-baseline-NFR-18.md",
+  "disposition": {
+    "status": "waived",
+    "by": "volodya4u (confirmed in chat 2026-10-11 at baseline sign-off; recorded by claude)",
+    "ts": "2026-10-10T23:00:50.132Z",
+    "note": "historical-only brownfield baseline"
+  }
+}

@@ -1,0 +1,2729 @@
+{
+  "generatedBy": "scripts/check-traceability.mjs",
+  "requirements": {
+    "FR-1": "MVP",
+    "FR-2": "MVP",
+    "FR-3": "MVP",
+    "FR-4": "MVP",
+    "FR-5": "MVP",
+    "FR-6": "MVP",
+    "FR-7": "MVP",
+    "FR-8": "MVP",
+    "FR-9": "MVP",
+    "FR-10": "MVP",
+    "FR-11": "MVP",
+    "FR-12": "MVP",
+    "FR-13": "MVP",
+    "FR-14": "MVP",
+    "FR-15": "MVP",
+    "FR-16": "MVP",
+    "FR-17": "MVP",
+    "FR-18": "MVP",
+    "FR-19": "MVP",
+    "FR-20": "MVP",
+    "FR-21": "MVP",
+    "FR-22": "MVP",
+    "FR-23": "MVP",
+    "FR-24": "MVP",
+    "FR-25": "MVP",
+    "FR-26": "MVP",
+    "FR-27": "MVP",
+    "FR-28": "MVP",
+    "FR-29": "MVP",
+    "FR-30": "MVP",
+    "FR-31": "MVP",
+    "FR-32": "MVP",
+    "FR-33": "MVP",
+    "FR-34": "MVP",
+    "FR-35": "MVP",
+    "FR-36": "MVP",
+    "FR-37": "MVP",
+    "FR-38": "MVP",
+    "FR-39": "MVP",
+    "FR-40": "MVP",
+    "FR-41": "MVP",
+    "FR-42": "MVP",
+    "FR-43": "MVP",
+    "FR-44": "MVP",
+    "FR-45": "MVP",
+    "FR-46": "MVP",
+    "FR-47": "MVP",
+    "FR-48": "MVP",
+    "FR-49": "MVP",
+    "FR-50": "MVP",
+    "FR-51": "MVP",
+    "FR-52": "MVP",
+    "FR-53": "MVP",
+    "FR-54": "MVP",
+    "FR-55": "MVP",
+    "FR-56": "MVP",
+    "FR-57": "MVP",
+    "FR-58": "MVP",
+    "FR-59": "MVP",
+    "FR-60": "MVP",
+    "FR-61": "MVP",
+    "FR-62": "MVP",
+    "FR-63": "MVP",
+    "FR-64": "MVP",
+    "FR-65": "MVP",
+    "FR-66": "MVP",
+    "FR-67": "MVP",
+    "FR-68": "MVP",
+    "FR-69": "MVP",
+    "FR-70": "MVP",
+    "FR-71": "MVP",
+    "FR-72": "MVP",
+    "FR-73": "MVP",
+    "FR-74": "MVP",
+    "FR-75": "MVP",
+    "FR-76": "MVP",
+    "FR-77": "MVP",
+    "FR-78": "MVP",
+    "FR-79": "MVP",
+    "FR-80": "MVP",
+    "FR-81": "MVP",
+    "FR-82": "MVP",
+    "FR-83": "MVP",
+    "FR-84": "MVP",
+    "FR-85": "MVP",
+    "FR-86": "MVP",
+    "FR-87": "MVP",
+    "FR-88": "MVP",
+    "FR-89": "MVP",
+    "FR-90": "MVP",
+    "FR-91": "MVP",
+    "FR-92": "MVP",
+    "FR-93": "MVP",
+    "FR-94": "MVP",
+    "FR-95": "MVP",
+    "FR-96": "MVP",
+    "FR-97": "MVP",
+    "FR-98": "MVP",
+    "FR-99": "MVP",
+    "FR-100": "MVP",
+    "FR-101": "MVP",
+    "FR-102": "MVP",
+    "FR-103": "MVP",
+    "FR-104": "MVP",
+    "FR-105": "MVP",
+    "FR-106": "MVP",
+    "FR-107": "MVP",
+    "FR-108": "MVP",
+    "FR-109": "MVP",
+    "FR-110": "MVP",
+    "FR-111": "MVP",
+    "FR-112": "MVP",
+    "FR-113": "MVP",
+    "FR-114": "MVP",
+    "FR-115": "MVP",
+    "FR-116": "MVP",
+    "FR-117": "MVP",
+    "FR-118": "MVP",
+    "FR-119": "MVP",
+    "FR-120": "MVP",
+    "FR-121": "MVP",
+    "FR-122": "MVP",
+    "FR-123": "MVP",
+    "FR-124": "MVP",
+    "FR-125": "MVP",
+    "FR-126": "MVP",
+    "FR-127": "MVP",
+    "FR-128": "MVP",
+    "FR-129": "MVP",
+    "FR-130": "MVP",
+    "FR-131": "MVP",
+    "FR-132": "MVP",
+    "FR-133": "MVP",
+    "FR-134": "MVP",
+    "FR-135": "MVP",
+    "FR-136": "MVP",
+    "FR-137": "MVP",
+    "FR-138": "MVP",
+    "FR-139": "MVP",
+    "FR-140": "MVP",
+    "FR-141": "MVP",
+    "FR-142": "MVP",
+    "FR-143": "MVP",
+    "FR-144": "MVP",
+    "FR-145": "MVP",
+    "FR-146": "MVP",
+    "FR-147": "MVP",
+    "FR-148": "MVP",
+    "FR-149": "MVP",
+    "NFR-1": "MVP",
+    "NFR-2": "MVP",
+    "NFR-3": "MVP",
+    "NFR-4": "MVP",
+    "NFR-5": "MVP",
+    "NFR-6": "MVP",
+    "NFR-7": "MVP",
+    "NFR-8": "MVP",
+    "NFR-9": "MVP",
+    "NFR-10": "MVP",
+    "NFR-11": "MVP",
+    "NFR-12": "MVP",
+    "NFR-13": "MVP",
+    "NFR-14": "MVP",
+    "NFR-15": "MVP",
+    "NFR-16": "MVP",
+    "NFR-17": "MVP",
+    "NFR-18": "MVP",
+    "NFR-19": "MVP",
+    "NFR-20": "MVP",
+    "NFR-21": "MVP",
+    "NFR-22": "MVP",
+    "TC-1": "MVP",
+    "TC-2": "MVP",
+    "TC-3": "MVP",
+    "TC-4": "MVP",
+    "TC-5": "MVP",
+    "TC-6": "MVP",
+    "TC-7": "MVP",
+    "TC-8": "MVP",
+    "TC-9": "MVP",
+    "BC-1": "MVP",
+    "BC-2": "MVP",
+    "BC-3": "MVP",
+    "BC-4": "MVP",
+    "BC-5": "MVP",
+    "BC-6": "MVP"
+  },
+  "links": [
+    {
+      "id": "FR-1",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-2",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-3",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-4",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-5",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-6",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-7",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-8",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-9",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-10",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-11",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-12",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-13",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-14",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-15",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-16",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-17",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-18",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-19",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-20",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-21",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-22",
+      "specs": [
+        "openspec/specs/authentication/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-23",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-24",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-25",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-26",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-27",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-28",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-29",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-30",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-31",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-32",
+      "specs": [
+        "openspec/specs/session-lifetime/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-33",
+      "specs": [
+        "openspec/specs/app-shell-routing/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-34",
+      "specs": [
+        "openspec/specs/app-shell-routing/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-35",
+      "specs": [
+        "openspec/specs/app-shell-routing/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-36",
+      "specs": [
+        "openspec/specs/app-shell-routing/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-37",
+      "specs": [
+        "openspec/specs/dashboard/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-38",
+      "specs": [
+        "openspec/specs/dashboard/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-39",
+      "specs": [
+        "openspec/specs/dashboard/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-40",
+      "specs": [
+        "openspec/specs/dashboard/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-41",
+      "specs": [
+        "openspec/specs/dashboard/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-42",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-43",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-44",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-45",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-46",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-47",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-48",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-49",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-50",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-51",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-52",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-53",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-54",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-55",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-56",
+      "specs": [
+        "openspec/specs/raw-materials/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-57",
+      "specs": [
+        "openspec/specs/reorder-level/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-58",
+      "specs": [
+        "openspec/specs/reorder-level/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-59",
+      "specs": [
+        "openspec/specs/reorder-level/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-60",
+      "specs": [
+        "openspec/specs/reorder-level/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-61",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-62",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-63",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-64",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-65",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-66",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-67",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-68",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-69",
+      "specs": [
+        "openspec/specs/raw-material-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-70",
+      "specs": [
+        "openspec/specs/images/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-71",
+      "specs": [
+        "openspec/specs/images/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-72",
+      "specs": [
+        "openspec/specs/images/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-73",
+      "specs": [
+        "openspec/specs/images/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-74",
+      "specs": [
+        "openspec/specs/images/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-75",
+      "specs": [
+        "openspec/specs/images/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-76",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-77",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-78",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-79",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-80",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-81",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-82",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-83",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-84",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-85",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-86",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-87",
+      "specs": [
+        "openspec/specs/products/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-88",
+      "specs": [
+        "openspec/specs/production/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-89",
+      "specs": [
+        "openspec/specs/production/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-90",
+      "specs": [
+        "openspec/specs/production/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-91",
+      "specs": [
+        "openspec/specs/production/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-92",
+      "specs": [
+        "openspec/specs/production/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-93",
+      "specs": [
+        "openspec/specs/production/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-94",
+      "specs": [
+        "openspec/specs/production/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-95",
+      "specs": [
+        "openspec/specs/product-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-96",
+      "specs": [
+        "openspec/specs/product-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-97",
+      "specs": [
+        "openspec/specs/product-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-98",
+      "specs": [
+        "openspec/specs/product-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-99",
+      "specs": [
+        "openspec/specs/product-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-100",
+      "specs": [
+        "openspec/specs/product-stock/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-101",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-102",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-103",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-104",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-105",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-106",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-107",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-108",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-109",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-110",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-111",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-112",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-113",
+      "specs": [
+        "openspec/specs/sales/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-114",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-115",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-116",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-117",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-118",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-119",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-120",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-121",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-122",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-123",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-124",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-125",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-126",
+      "specs": [
+        "openspec/specs/returns-cancellations/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-127",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-128",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-129",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-130",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-131",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-132",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-133",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-134",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-135",
+      "specs": [
+        "openspec/specs/stock-history/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-136",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-137",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-138",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-139",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-140",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-141",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-142",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-143",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-144",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-145",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-146",
+      "specs": [
+        "openspec/specs/monthly-sales-report/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-147",
+      "specs": [
+        "openspec/specs/schema-migration/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-148",
+      "specs": [
+        "openspec/specs/schema-migration/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    },
+    {
+      "id": "FR-149",
+      "specs": [
+        "openspec/specs/schema-migration/spec.md"
+      ],
+      "planned": true,
+      "tests": [],
+      "recordings": []
+    }
+  ],
+  "failures": [],
+  "warnings": [
+    {
+      "check": "test-trace",
+      "msg": "FR-1 has no test annotated \"@trace FR-1\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-2 has no test annotated \"@trace FR-2\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-3 has no test annotated \"@trace FR-3\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-4 has no test annotated \"@trace FR-4\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-5 has no test annotated \"@trace FR-5\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-6 has no test annotated \"@trace FR-6\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-7 has no test annotated \"@trace FR-7\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-8 has no test annotated \"@trace FR-8\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-9 has no test annotated \"@trace FR-9\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-10 has no test annotated \"@trace FR-10\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-11 has no test annotated \"@trace FR-11\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-12 has no test annotated \"@trace FR-12\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-13 has no test annotated \"@trace FR-13\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-14 has no test annotated \"@trace FR-14\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-15 has no test annotated \"@trace FR-15\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-16 has no test annotated \"@trace FR-16\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-17 has no test annotated \"@trace FR-17\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-18 has no test annotated \"@trace FR-18\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-19 has no test annotated \"@trace FR-19\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-20 has no test annotated \"@trace FR-20\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-21 has no test annotated \"@trace FR-21\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-22 has no test annotated \"@trace FR-22\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-23 has no test annotated \"@trace FR-23\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-24 has no test annotated \"@trace FR-24\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-25 has no test annotated \"@trace FR-25\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-26 has no test annotated \"@trace FR-26\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-27 has no test annotated \"@trace FR-27\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-28 has no test annotated \"@trace FR-28\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-29 has no test annotated \"@trace FR-29\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-30 has no test annotated \"@trace FR-30\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-31 has no test annotated \"@trace FR-31\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-32 has no test annotated \"@trace FR-32\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-33 has no test annotated \"@trace FR-33\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-34 has no test annotated \"@trace FR-34\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-35 has no test annotated \"@trace FR-35\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-36 has no test annotated \"@trace FR-36\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-37 has no test annotated \"@trace FR-37\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-38 has no test annotated \"@trace FR-38\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-39 has no test annotated \"@trace FR-39\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-40 has no test annotated \"@trace FR-40\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-41 has no test annotated \"@trace FR-41\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-42 has no test annotated \"@trace FR-42\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-43 has no test annotated \"@trace FR-43\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-44 has no test annotated \"@trace FR-44\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-45 has no test annotated \"@trace FR-45\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-46 has no test annotated \"@trace FR-46\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-47 has no test annotated \"@trace FR-47\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-48 has no test annotated \"@trace FR-48\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-49 has no test annotated \"@trace FR-49\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-50 has no test annotated \"@trace FR-50\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-51 has no test annotated \"@trace FR-51\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-52 has no test annotated \"@trace FR-52\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-53 has no test annotated \"@trace FR-53\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-54 has no test annotated \"@trace FR-54\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-55 has no test annotated \"@trace FR-55\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-56 has no test annotated \"@trace FR-56\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-57 has no test annotated \"@trace FR-57\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-58 has no test annotated \"@trace FR-58\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-59 has no test annotated \"@trace FR-59\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-60 has no test annotated \"@trace FR-60\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-61 has no test annotated \"@trace FR-61\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-62 has no test annotated \"@trace FR-62\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-63 has no test annotated \"@trace FR-63\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-64 has no test annotated \"@trace FR-64\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-65 has no test annotated \"@trace FR-65\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-66 has no test annotated \"@trace FR-66\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-67 has no test annotated \"@trace FR-67\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-68 has no test annotated \"@trace FR-68\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-69 has no test annotated \"@trace FR-69\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-70 has no test annotated \"@trace FR-70\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-71 has no test annotated \"@trace FR-71\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-72 has no test annotated \"@trace FR-72\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-73 has no test annotated \"@trace FR-73\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-74 has no test annotated \"@trace FR-74\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-75 has no test annotated \"@trace FR-75\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-76 has no test annotated \"@trace FR-76\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-77 has no test annotated \"@trace FR-77\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-78 has no test annotated \"@trace FR-78\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-79 has no test annotated \"@trace FR-79\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-80 has no test annotated \"@trace FR-80\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-81 has no test annotated \"@trace FR-81\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-82 has no test annotated \"@trace FR-82\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-83 has no test annotated \"@trace FR-83\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-84 has no test annotated \"@trace FR-84\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-85 has no test annotated \"@trace FR-85\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-86 has no test annotated \"@trace FR-86\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-87 has no test annotated \"@trace FR-87\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-88 has no test annotated \"@trace FR-88\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-89 has no test annotated \"@trace FR-89\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-90 has no test annotated \"@trace FR-90\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-91 has no test annotated \"@trace FR-91\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-92 has no test annotated \"@trace FR-92\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-93 has no test annotated \"@trace FR-93\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-94 has no test annotated \"@trace FR-94\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-95 has no test annotated \"@trace FR-95\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-96 has no test annotated \"@trace FR-96\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-97 has no test annotated \"@trace FR-97\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-98 has no test annotated \"@trace FR-98\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-99 has no test annotated \"@trace FR-99\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-100 has no test annotated \"@trace FR-100\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-101 has no test annotated \"@trace FR-101\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-102 has no test annotated \"@trace FR-102\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-103 has no test annotated \"@trace FR-103\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-104 has no test annotated \"@trace FR-104\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-105 has no test annotated \"@trace FR-105\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-106 has no test annotated \"@trace FR-106\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-107 has no test annotated \"@trace FR-107\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-108 has no test annotated \"@trace FR-108\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-109 has no test annotated \"@trace FR-109\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-110 has no test annotated \"@trace FR-110\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-111 has no test annotated \"@trace FR-111\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-112 has no test annotated \"@trace FR-112\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-113 has no test annotated \"@trace FR-113\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-114 has no test annotated \"@trace FR-114\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-115 has no test annotated \"@trace FR-115\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-116 has no test annotated \"@trace FR-116\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-117 has no test annotated \"@trace FR-117\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-118 has no test annotated \"@trace FR-118\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-119 has no test annotated \"@trace FR-119\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-120 has no test annotated \"@trace FR-120\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-121 has no test annotated \"@trace FR-121\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-122 has no test annotated \"@trace FR-122\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-123 has no test annotated \"@trace FR-123\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-124 has no test annotated \"@trace FR-124\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-125 has no test annotated \"@trace FR-125\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-126 has no test annotated \"@trace FR-126\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-127 has no test annotated \"@trace FR-127\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-128 has no test annotated \"@trace FR-128\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-129 has no test annotated \"@trace FR-129\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-130 has no test annotated \"@trace FR-130\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-131 has no test annotated \"@trace FR-131\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-132 has no test annotated \"@trace FR-132\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-133 has no test annotated \"@trace FR-133\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-134 has no test annotated \"@trace FR-134\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-135 has no test annotated \"@trace FR-135\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-136 has no test annotated \"@trace FR-136\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-137 has no test annotated \"@trace FR-137\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-138 has no test annotated \"@trace FR-138\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-139 has no test annotated \"@trace FR-139\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-140 has no test annotated \"@trace FR-140\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-141 has no test annotated \"@trace FR-141\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-142 has no test annotated \"@trace FR-142\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-143 has no test annotated \"@trace FR-143\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-144 has no test annotated \"@trace FR-144\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-145 has no test annotated \"@trace FR-145\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-146 has no test annotated \"@trace FR-146\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-147 has no test annotated \"@trace FR-147\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-148 has no test annotated \"@trace FR-148\""
+    },
+    {
+      "check": "test-trace",
+      "msg": "FR-149 has no test annotated \"@trace FR-149\""
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-1 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-2 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-3 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-4 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-5 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-6 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-7 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-8 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-9 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-10 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-11 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-12 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-13 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-14 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-15 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-16 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-17 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-18 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-19 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-20 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-21 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-22 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-23 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-24 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-25 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-26 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-27 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-28 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-29 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-30 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-31 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-32 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-33 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-34 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-35 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-36 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-37 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-38 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-39 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-40 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-41 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-42 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-43 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-44 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-45 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-46 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-47 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-48 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-49 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-50 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-51 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-52 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-53 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-54 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-55 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-56 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-57 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-58 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-59 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-60 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-61 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-62 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-63 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-64 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-65 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-66 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-67 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-68 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-69 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-70 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-71 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-72 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-73 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-74 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-75 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-76 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-77 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-78 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-79 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-80 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-81 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-82 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-83 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-84 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-85 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-86 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-87 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-88 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-89 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-90 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-91 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-92 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-93 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-94 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-95 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-96 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-97 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-98 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-99 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-100 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-101 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-102 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-103 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-104 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-105 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-106 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-107 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-108 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-109 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-110 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-111 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-112 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-113 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-114 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-115 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-116 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-117 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-118 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-119 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-120 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-121 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-122 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-123 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-124 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-125 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-126 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-127 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-128 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-129 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-130 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-131 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-132 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-133 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-134 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-135 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-136 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-137 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-138 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-139 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-140 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-141 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-142 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-143 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-144 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-145 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-146 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-147 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-148 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "recording-evidence",
+      "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
+    }
+  ]
+}
