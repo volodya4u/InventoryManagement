@@ -130,7 +130,8 @@ A product that has any sale SHALL NOT be deleted (409 "Product “<name>” cann
 an unsold product SHALL be deleted with 204 and its recipe and movements removed with it (FR-85). The UI SHALL ask
 "Delete product “<name>”?" via a browser confirm before deleting (FR-86).
 
-> GAP: the cascade and the confirmation are not asserted (see docs/requirements.md OQ-5 / Coverage gaps, FR-85 and FR-86 rows).
+> GAP: the cascade is not asserted (see docs/requirements.md OQ-5 / Coverage gaps, FR-85 row).
+> Covered by slice `harden-frontend-specs`: `products.component.spec.ts` asserts the delete confirmation (FR-86).
 
 #### Scenario: Sold product
 - **GIVEN** a product with a sale

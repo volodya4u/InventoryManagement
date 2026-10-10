@@ -31,7 +31,7 @@ path in `SpaController` and a forwarding test (TC-5).
 The pages Dashboard, Raw Materials, Products, Sales, Stock History, Monthly Sales report and Change Password SHALL sit
 behind `authGuard` under the shell; `/` and any unknown path SHALL redirect to `/dashboard` (FR-34).
 
-> GAP: no test asserts the route table, guard coverage or default redirects (see docs/requirements.md Coverage gaps, FR-34 row).
+> Covered by slice `harden-frontend-specs`: `app.routes.spec.ts` asserts the route table, `authGuard` coverage and the default redirects.
 
 #### Scenario: Unknown path
 - **GIVEN** a signed-in user
@@ -105,7 +105,7 @@ The UI, messages and code SHALL be English only (`<html lang="en">`); amounts SH
 dates as ISO `YYYY-MM-DD`; stored names work in any alphabet (NFR-21). Stored amounts SHALL carry no currency code
 (NFR-22).
 
-> GAP: UAH display formatting and the display-only currency are not asserted (see docs/requirements.md OQ-14 / Coverage gaps, NFR-21 and NFR-22 rows).
+> Covered by slice `harden-frontend-specs`: `monthly-sales-report.component.spec.ts` asserts the UAH display (symbol shown, never the currency code; see docs/requirements.md OQ-14). NFR-21 and NFR-22 stay PARTIAL: no frontend spec asserts `<html lang="en">`, the ISO date display, or that the API sends amounts without a currency code.
 
 #### Scenario: Non-Latin search
 - **WHEN** a name stored in Cyrillic is searched in stock history

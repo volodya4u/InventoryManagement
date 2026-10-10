@@ -158,7 +158,7 @@ CASCADE`) (FR-54).
 
 The UI SHALL ask "Delete raw material “<name>”?" through a browser confirm before deleting (FR-55).
 
-> GAP: not asserted by any test (see docs/requirements.md Coverage gaps, FR-55 row).
+> Covered by slice `harden-frontend-specs`: `raw-materials.component.spec.ts` asserts the delete confirmation.
 
 #### Scenario: User cancels
 - **WHEN** the user declines the confirm
