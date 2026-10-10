@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RawMaterial } from '../core/models';
 import { RawMaterialsComponent } from './raw-materials.component';
 
@@ -143,5 +143,77 @@ describe('RawMaterialsComponent low-stock badge', () => {
     const badges = fixture.nativeElement.querySelectorAll('.low-stock-badge');
     expect(badges.length).toBe(1);
     expect(badges[0].textContent).toContain('Low stock');
+  });
+});
+
+describe('RawMaterialsComponent delete confirmation', () => {
+  let requests: HttpTestingController;
+  let fixture: ComponentFixture<RawMaterialsComponent>;
+  let confirm: ReturnType<typeof vi.spyOn>;
+
+  function rawMaterial(overrides: Partial<RawMaterial>): RawMaterial {
+    return {
+      id: 1,
+      name: 'Red Rose',
+      description: '',
+      unit: 'PIECE',
+      quantity: 100,
+      averageUnitCost: 0,
+      stockValue: 0,
+      reorderLevel: 0,
+      belowReorderLevel: false,
+      hasImage: false,
+      unitChangeable: false,
+      createdAt: '2026-10-01T09:00:00Z',
+      updatedAt: '2026-10-01T09:00:00Z',
+      ...overrides,
+    };
+  }
+
+  function clickDelete(): void {
+    const button = Array.from<HTMLButtonElement>(
+      fixture.nativeElement.querySelectorAll('button'),
+    ).find((candidate) => candidate.textContent?.trim() === 'Delete');
+    button?.click();
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    requests = TestBed.inject(HttpTestingController);
+    confirm = vi.spyOn(window, 'confirm');
+    fixture = TestBed.createComponent(RawMaterialsComponent);
+    fixture.detectChanges();
+    requests.expectOne('/api/raw-materials').flush([rawMaterial({})]);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    requests.verify();
+    TestBed.resetTestingModule();
+    vi.restoreAllMocks();
+  });
+
+  // @trace FR-55, NFR-19
+  it('asks before deleting and sends nothing when the answer is no', () => {
+    confirm.mockReturnValue(false);
+
+    clickDelete();
+
+    expect(confirm).toHaveBeenCalledWith('Delete raw material “Red Rose”?');
+    requests.expectNone({ method: 'DELETE', url: '/api/raw-materials/1' });
+    expect(fixture.nativeElement.textContent).toContain('Red Rose');
+  });
+
+  // @trace FR-55, NFR-19
+  it('deletes the raw material and drops its row when the answer is yes', () => {
+    confirm.mockReturnValue(true);
+
+    clickDelete();
+
+    requests.expectOne({ method: 'DELETE', url: '/api/raw-materials/1' }).flush(null);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Red Rose');
   });
 });

@@ -129,7 +129,7 @@ SHALL be exported for a month with no sales and no returns; amount headers say "
 
 A sale number in the report SHALL link to the full document on the Sales page (FR-146).
 
-> GAP: no spec asserts the link (see docs/requirements.md Coverage gaps, FR-146 row).
+> Covered by slice `harden-frontend-specs`: `monthly-sales-report.component.spec.ts` asserts the sale-number link.
 
 #### Scenario: Follow a link
 - **WHEN** the user follows a sale number

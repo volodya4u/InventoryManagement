@@ -492,7 +492,13 @@
         "openspec/specs/app-shell-routing/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "frontend/src/app/app.routes.spec.ts",
+        "frontend/src/app/app.routes.spec.ts",
+        "frontend/src/app/app.routes.spec.ts",
+        "frontend/src/app/app.routes.spec.ts",
+        "frontend/src/app/app.routes.spec.ts"
+      ],
       "recordings": []
     },
     {
@@ -681,7 +687,10 @@
         "openspec/specs/raw-materials/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
+        "frontend/src/app/raw-materials/raw-materials.component.spec.ts"
+      ],
       "recordings": []
     },
     {
@@ -861,7 +870,12 @@
         "openspec/specs/images/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "frontend/src/app/core/image-file.spec.ts",
+        "frontend/src/app/core/image-file.spec.ts",
+        "frontend/src/app/core/image-file.spec.ts",
+        "frontend/src/app/core/image-file.spec.ts"
+      ],
       "recordings": []
     },
     {
@@ -960,7 +974,10 @@
         "openspec/specs/products/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "frontend/src/app/products/products.component.spec.ts",
+        "frontend/src/app/products/products.component.spec.ts"
+      ],
       "recordings": []
     },
     {
@@ -1500,7 +1517,9 @@
         "openspec/specs/monthly-sales-report/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts"
+      ],
       "recordings": []
     },
     {
@@ -1667,10 +1686,6 @@
     },
     {
       "check": "test-trace",
-      "msg": "FR-34 has no test annotated \"@trace FR-34\""
-    },
-    {
-      "check": "test-trace",
       "msg": "FR-35 has no test annotated \"@trace FR-35\""
     },
     {
@@ -1751,10 +1766,6 @@
     },
     {
       "check": "test-trace",
-      "msg": "FR-55 has no test annotated \"@trace FR-55\""
-    },
-    {
-      "check": "test-trace",
       "msg": "FR-56 has no test annotated \"@trace FR-56\""
     },
     {
@@ -1831,10 +1842,6 @@
     },
     {
       "check": "test-trace",
-      "msg": "FR-75 has no test annotated \"@trace FR-75\""
-    },
-    {
-      "check": "test-trace",
       "msg": "FR-76 has no test annotated \"@trace FR-76\""
     },
     {
@@ -1872,10 +1879,6 @@
     {
       "check": "test-trace",
       "msg": "FR-85 has no test annotated \"@trace FR-85\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-86 has no test annotated \"@trace FR-86\""
     },
     {
       "check": "test-trace",
@@ -2112,10 +2115,6 @@
     {
       "check": "test-trace",
       "msg": "FR-145 has no test annotated \"@trace FR-145\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-146 has no test annotated \"@trace FR-146\""
     },
     {
       "check": "test-trace",
@@ -2724,6 +2723,10 @@
     {
       "check": "recording-evidence",
       "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"harden-frontend-specs\" is not archived"
     }
   ]
 }

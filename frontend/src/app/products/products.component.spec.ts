@@ -75,6 +75,7 @@ describe('ProductsComponent', () => {
   }
 
   afterEach(() => {
+    vi.restoreAllMocks();
     requests.verify();
     TestBed.resetTestingModule();
   });
@@ -238,6 +239,36 @@ describe('ProductsComponent', () => {
     request.flush(product());
     flushLoad([product()], [rawMaterial()]);
     expect(component.dialogOpen()).toBe(false);
+  });
+
+  function clickDelete(): void {
+    const button = Array.from<HTMLButtonElement>(
+      fixture.nativeElement.querySelectorAll('button'),
+    ).find((candidate) => candidate.textContent?.trim() === 'Delete');
+    button?.click();
+  }
+
+  // @trace FR-86, NFR-19
+  it('asks before deleting a product and sends nothing when the answer is no', () => {
+    setup([product()], [rawMaterial()]);
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    clickDelete();
+
+    expect(confirm).toHaveBeenCalledWith('Delete product “Rose Box”?');
+    requests.expectNone({ method: 'DELETE', url: '/api/products/1' });
+    expect(component.items()).toHaveLength(1);
+  });
+
+  // @trace FR-86, NFR-19
+  it('deletes the product and drops its row when the answer is yes', () => {
+    setup([product()], [rawMaterial()]);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    clickDelete();
+
+    requests.expectOne({ method: 'DELETE', url: '/api/products/1' }).flush(null);
+    expect(component.items()).toHaveLength(0);
   });
 });
 

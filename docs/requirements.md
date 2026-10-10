@@ -91,7 +91,7 @@ Source references are given as file paths under `src/main/java/com/flowershop/in
 | ID | Phase | Area | Description | Verification |
 |---|---|---|---|---|
 | FR-33 | MVP | Shell | ASSUMPTION: The server forwards browser reloads of `/`, `/login`, `/dashboard`, `/raw-materials`, `/products`, `/sales`, `/stock-movements`, `/change-password` and `/reports/**` to `/index.html`. Source `…/config/SpaController.java`. Evidence: PARTIAL (IT›forwardsNestedReportRoutesToTheAngularApplication and IT›forwardsTheStockHistoryRouteToTheAngularApplication cover two of the nine). | local-verifiable |
-| FR-34 | MVP | Shell | ASSUMPTION: The pages Dashboard, Raw Materials, Products, Sales, Stock History, Monthly Sales report and Change Password sit behind `authGuard` under the shell; `/` and any unknown path redirect to `/dashboard`. Source `frontend/src/app/app.routes.ts`. Evidence: GAP. | local-verifiable |
+| FR-34 | MVP | Shell | ASSUMPTION: The pages Dashboard, Raw Materials, Products, Sales, Stock History, Monthly Sales report and Change Password sit behind `authGuard` under the shell; `/` and any unknown path redirect to `/dashboard`. Source `frontend/src/app/app.routes.ts`. Evidence: frontend `app.routes.spec.ts` (route table, `authGuard`, redirects). | local-verifiable |
 | FR-35 | MVP | Shell | ASSUMPTION: The navigation menu opens from the toggle and closes when a link is chosen. Evidence: FE:layout/shell.component.spec.ts "opens the menu from the toggle and closes it from a link". | local-verifiable |
 | FR-36 | MVP | Health | ASSUMPTION: `GET /api/health` is public, returns `{"status":"UP"}`, and creates no session. Evidence: IT›reportsHealthWithoutSigningInOrCreatingASession. | local-verifiable |
 
@@ -122,7 +122,7 @@ Source references are given as file paths under `src/main/java/com/flowershop/in
 | FR-52 | MVP | Raw materials | ASSUMPTION: Deleting a raw material that appears in a product recipe is rejected with 409 "Raw material “<name>” is used in the recipe of <product names>. Remove it from the recipe before deleting it." Evidence: IT›rejectsDuplicateSkusAndDeletingRecordsThatAreInUse; RMS›refusesToDeleteMaterialUsedByARecipe. | local-verifiable |
 | FR-53 | MVP | Raw materials | ASSUMPTION: Deleting a raw material consumed by any production batch is rejected with 409 "Raw material “<name>” cannot be deleted because production batches have consumed it." Evidence: IT›rejectsDuplicateSkusAndDeletingRecordsThatAreInUse. | local-verifiable |
 | FR-54 | MVP | Raw materials | ASSUMPTION: Deleting an unused raw material returns 204; its stock movements are removed with it (`ON DELETE CASCADE`). Evidence: PARTIAL (IT›rejectsDuplicateSkusAndDeletingRecordsThatAreInUse asserts 204; the movement cascade is not asserted). | local-verifiable |
-| FR-55 | MVP | Raw materials | ASSUMPTION: The UI asks "Delete raw material “<name>”?" via a browser confirm before deleting. Source `frontend/src/app/raw-materials/raw-materials.component.ts`. Evidence: GAP. | local-verifiable |
+| FR-55 | MVP | Raw materials | ASSUMPTION: The UI asks "Delete raw material “<name>”?" via a browser confirm before deleting. Source `frontend/src/app/raw-materials/raw-materials.component.ts`. Evidence: frontend `raw-materials.component.spec.ts` (delete confirmation). | local-verifiable |
 | FR-56 | MVP | Raw materials | ASSUMPTION: Raw material names are not required to be unique (the schema has no unique constraint on `raw_material.name`). Evidence: GAP; see Open question OQ-3. | local-verifiable |
 
 ### 2.6 Reorder level and low stock
@@ -157,7 +157,7 @@ Source references are given as file paths under `src/main/java/com/flowershop/in
 | FR-72 | MVP | Images | ASSUMPTION: A multipart request above the Spring limits (`max-file-size` 2MB, `max-request-size` 3MB) gives 413 "File too large" with detail "The maximum image size is 2 MB". Source `application.yml`, `…/common/ApiExceptionHandler.java`. Evidence: GAP. | local-verifiable |
 | FR-73 | MVP | Images | ASSUMPTION: The image is stored as a BLOB with its content type and served by `GET /api/raw-materials/{id}/image` and `GET /api/products/{id}/image` with that content type and `Cache-Control: no-store`; 404 "Record not found" when none exists. Evidence: IT›authenticatesAdminAndStoresValidatedPngAsBlob (raw material, bytes and content type round-trip). `no-store`, the product endpoint and the 404: PARTIAL. | local-verifiable |
 | FR-74 | MVP | Images | ASSUMPTION: Updating without a new image keeps the stored one; there is no way to remove an image once set. Evidence: GAP; see Open question OQ-11. | local-verifiable |
-| FR-75 | MVP | Images | ASSUMPTION: The browser applies the same rules before upload (extension, MIME type, 2 MB) and shows "Select a JPG, JPEG, or PNG file." or "The image size cannot exceed 2 MB." Source `frontend/src/app/core/image-file.ts`. Evidence: GAP (no spec for `image-file.ts`). | local-verifiable |
+| FR-75 | MVP | Images | ASSUMPTION: The browser applies the same rules before upload (extension, MIME type, 2 MB) and shows "Select a JPG, JPEG, or PNG file." or "The image size cannot exceed 2 MB." Source `frontend/src/app/core/image-file.ts`. Evidence: frontend `core/image-file.spec.ts`. | local-verifiable |
 
 ### 2.9 Product catalog and recipes
 
@@ -173,7 +173,7 @@ Source references are given as file paths under `src/main/java/com/flowershop/in
 | FR-83 | MVP | Products | ASSUMPTION: `PUT /api/products/{id}` updates SKU, name, description, advertising cost, markup, recipe (fully replaced) and optionally the image. It cannot change quantity or average unit cost, and an unknown id gives 404. Evidence: IT›rejectsDuplicateSkusAndDeletingRecordsThatAreInUse (successful update); FE:products/products.component.spec.ts "edits a product without resending its quantity or initial unit cost". The 404: PARTIAL. | local-verifiable |
 | FR-84 | MVP | Products | ASSUMPTION: The product list exposes `quantity`, `averageUnitCost`, `stockValue` (quantity × average, 2 decimals), `sellingPrice`, `markupPercentage`, `advertisingCostPerUnit` and the `recipe`. Evidence: IT›producesAProductAtomicallyFromItsRawMaterialRecipe. | local-verifiable |
 | FR-85 | MVP | Products | ASSUMPTION: A product that has any sale cannot be deleted (409 "Product “<name>” cannot be deleted because it has been sold."); an unsold product is deleted with 204 and its recipe and movements are removed with it. Evidence: IT›rejectsDuplicateSkusAndDeletingRecordsThatAreInUse; PS›refusesToDeleteProductsThatHaveSales. The cascade: PARTIAL. | local-verifiable |
-| FR-86 | MVP | Products | ASSUMPTION: The UI asks "Delete product “<name>”?" via a browser confirm before deleting. Evidence: GAP. | local-verifiable |
+| FR-86 | MVP | Products | ASSUMPTION: The UI asks "Delete product “<name>”?" via a browser confirm before deleting. Evidence: frontend `products.component.spec.ts` (delete confirmation). | local-verifiable |
 | FR-87 | MVP | Products | ASSUMPTION: Creating a product from the UI posts opening stock, initial unit cost and recipe. Evidence: FE:products/products.component.spec.ts "creates a product with its opening stock, initial unit cost and recipe". | local-verifiable |
 
 ### 2.10 Production
@@ -263,7 +263,7 @@ Source references are given as file paths under `src/main/java/com/flowershop/in
 | FR-143 | MVP | Reports | ASSUMPTION: `dailySummaries` combines sales and reversals on the dates they were recorded, ordered by date; `productSummaries` combines them per product, ordered by net revenue descending then product name; `sales` and `returns` list the month's documents. Evidence: IT›reportsMonthlySalesWithoutMixingOtherMonths (2 days, product quantity 3, profit 280, 2 sales); IT›returnsAndCancelsSalesWhileRestoringStockAndMonthlyResults (3 returns). Ordering: PARTIAL. | local-verifiable |
 | FR-144 | MVP | Reports | ASSUMPTION: The report page loads the current month on open, reloads when another month is picked, ignores a cleared month picker, and shows the API error while dropping the previous report. Evidence: FE:reports/monthly-sales/monthly-sales-report.component.spec.ts "loads the current month on open", "reloads for another month and ignores a cleared month picker", "shows the API error and drops the previous report". | local-verifiable |
 | FR-145 | MVP | Reports | ASSUMPTION: Export CSV downloads `monthly-sales-<YYYY-MM>.csv` as UTF-8 with a byte order mark and CRLF line breaks, every cell quoted with embedded quotes doubled, in three blocks (sales, returns and cancellations, monthly net totals); nothing is exported for a month with no sales and no returns. Amount headers say "(UAH)". Evidence: FE:reports/monthly-sales/monthly-sales-report.component.spec.ts "exports sales and returns as a UTF-8 CSV with escaped quotes", "does not export a month without sales or returns". | local-verifiable |
-| FR-146 | MVP | Reports | ASSUMPTION: A sale number in the report links to the full document on the Sales page. Evidence: GAP (no spec asserts the link). | local-verifiable |
+| FR-146 | MVP | Reports | ASSUMPTION: A sale number in the report links to the full document on the Sales page. Evidence: frontend `monthly-sales-report.component.spec.ts` (sale-number link). | local-verifiable |
 
 ### 2.16 Data model and migration
 
@@ -298,10 +298,10 @@ local, so nothing is deploy-gated today (see OQ-9 and OQ-10 for budgets and avai
 | NFR-16 | Availability | ASSUMPTION: No availability target exists. The system is a single local process started by the owner; `Start OnlineStore.cmd` waits for `GET /api/health` before opening the browser. There is no backup, restore or export of the SQLite file in the application. Evidence: PARTIAL (IT›reportsHealthWithoutSigningInOrCreatingASession covers health only); see OQ-10. | local-verifiable |
 | NFR-17 | Compatibility | ASSUMPTION: No supported browser list is declared (there is no browserslist; Angular 22 defaults apply). Evidence: none; see OQ-8. | e2e |
 | NFR-18 | Compatibility | ASSUMPTION: The layout is responsive: CSS breakpoints exist at 480, 575.98, 620, 767.98, 820, 980 and 1100 px, and the shell has a toggled mobile menu (FR-35). No target device list is declared. Evidence: FE:layout/shell.component.spec.ts covers the menu toggle only; the layout itself is unverified. | vision-verify |
-| NFR-19 | Usability | ASSUMPTION: Destructive deletes ask for confirmation; API errors are shown in the UI through `apiErrorMessage`; forms validate before sending (required fields, maximum lengths, minimums, decimal patterns). Evidence: PARTIAL (FE specs of the pages, see FR-69, FR-82, FR-94, FR-112, FR-126; the delete confirmations are not asserted). | local-verifiable |
+| NFR-19 | Usability | ASSUMPTION: Destructive deletes ask for confirmation; API errors are shown in the UI through `apiErrorMessage`; forms validate before sending (required fields, maximum lengths, minimums, decimal patterns). Evidence: PARTIAL (FE specs of the pages, see FR-69, FR-82, FR-94, FR-112, FR-126; the delete confirmations are asserted by the raw materials and products component specs, FR-55 and FR-86; error display and field validation are asserted page by page, not for every form). | local-verifiable |
 | NFR-20 | Usability | ASSUMPTION: Accessibility: the templates carry ARIA attributes and labels, but no accessibility target or automated gate exists. Evidence: none; see OQ-15. | a11y |
-| NFR-21 | Localization | ASSUMPTION: The UI, messages and code are English only (`<html lang="en">`); there is no translation framework. Amounts are shown as UAH with 2 decimals (`currency:'UAH':'symbol-narrow'`); dates are ISO `YYYY-MM-DD`. Searching and stored names work in any alphabet. Evidence: PARTIAL (IT›searchesStockHistoryByNameOrSkuIgnoringCaseInAnyAlphabet covers the alphabet part; the currency formatting is not asserted). | local-verifiable |
-| NFR-22 | Localization | ASSUMPTION: Stored amounts carry no currency code; UAH is a display assumption of the local profile (README). Evidence: GAP; see OQ-14. | local-verifiable |
+| NFR-21 | Localization | ASSUMPTION: The UI, messages and code are English only (`<html lang="en">`); there is no translation framework. Amounts are shown as UAH with 2 decimals (`currency:'UAH':'symbol-narrow'`); dates are ISO `YYYY-MM-DD`. Searching and stored names work in any alphabet. Evidence: PARTIAL (IT›searchesStockHistoryByNameOrSkuIgnoringCaseInAnyAlphabet covers the alphabet part; the currency formatting is asserted by `monthly-sales-report.component.spec.ts`; no frontend spec asserts `<html lang="en">` or the ISO date display). | local-verifiable |
+| NFR-22 | Localization | ASSUMPTION: Stored amounts carry no currency code; UAH is a display assumption of the local profile (README). Evidence: PARTIAL (`monthly-sales-report.component.spec.ts` asserts the display: the symbol is shown, never the currency code; that the API stores and sends amounts without a currency code is not asserted); see OQ-14. | local-verifiable |
 
 ## 4 Constraints
 
@@ -391,7 +391,7 @@ Each has a recommended default; answering "use defaults" ratifies all of them.
 
 Candidate work: behaviors this baseline records that no existing test asserts (GAP) or asserts only in part (PARTIAL).
 Each is tagged `local-verifiable`, so a test should be written before the baseline is trusted. Test names are not
-invented here; this lists what is missing. Total: 71 requirements (29 GAP, 42 PARTIAL).
+invented here; this lists what is missing. Total: 66 requirements (23 GAP, 43 PARTIAL). Slice `harden-frontend-specs` closed five rows and narrowed NFR-19, NFR-21 and NFR-22.
 
 | Requirement | Type | What is missing |
 |---|---|---|
@@ -403,7 +403,6 @@ invented here; this lists what is missing. Total: 71 requirements (29 GAP, 42 PA
 | `FR-12` | PARTIAL | Server-side rejection of a mismatched confirmation |
 | `FR-13` | GAP | New password equal to the current one is rejected |
 | `FR-33` | PARTIAL | Seven of nine SPA routes are not covered by a forwarding test |
-| `FR-34` | GAP | Route table, guard coverage and default redirects |
 | `FR-37` | GAP | Raw material count, product count, product units |
 | `FR-38` | PARTIAL | Cancelled sales are excluded from the sales count |
 | `FR-42` | PARTIAL | Name and description length limits; negative quantity rejection |
@@ -412,7 +411,6 @@ invented here; this lists what is missing. Total: 71 requirements (29 GAP, 42 PA
 | `FR-48` | GAP | List is ordered by name, case-insensitive |
 | `FR-49` | PARTIAL | Update of an unknown raw material gives 404 |
 | `FR-54` | PARTIAL | Movements are removed with the deleted raw material |
-| `FR-55` | GAP | Delete confirmation in the UI |
 | `FR-56` | GAP | Duplicate raw material names are accepted |
 | `FR-60` | GAP | Reorder level changes no stock or valuation |
 | `FR-61` | PARTIAL | Receipt validation rejections (quantity, cost, date, notes length) |
@@ -421,13 +419,11 @@ invented here; this lists what is missing. Total: 71 requirements (29 GAP, 42 PA
 | `FR-72` | GAP | Oversized multipart request gives 413 |
 | `FR-73` | PARTIAL | `no-store`, the product image endpoint, the 404 |
 | `FR-74` | GAP | Update without image keeps the stored image |
-| `FR-75` | GAP | Client-side image check (`core/image-file.ts`) has no spec |
 | `FR-76` | PARTIAL | Product field length limits; fractional quantity rejection |
 | `FR-79` | PARTIAL | Backend recipe validation (empty, duplicate, non-positive, unknown material) |
 | `FR-80` | PARTIAL | Server-side rejection of a missing initial unit cost for positive opening stock |
 | `FR-83` | PARTIAL | Update of an unknown product gives 404 |
 | `FR-85` | PARTIAL | Recipe and movements removed with a deleted product |
-| `FR-86` | GAP | Delete confirmation in the UI |
 | `FR-88` | PARTIAL | Production of a product with no recipe is rejected |
 | `FR-93` | GAP | A recipe edit does not change past batches |
 | `FR-97` | PARTIAL | Fractional product adjustment is rejected |
@@ -448,7 +444,6 @@ invented here; this lists what is missing. Total: 71 requirements (29 GAP, 42 PA
 | `FR-134` | GAP | Movement reference fields at the API level |
 | `FR-141` | PARTIAL | Average sale value is 0.00 when there are no sales |
 | `FR-143` | PARTIAL | Ordering of daily and product summaries |
-| `FR-146` | GAP | Sale number link in the report |
 | `FR-149` | PARTIAL | CHECK and foreign-key rules other than the duplicate SKU |
 | `NFR-1` | PARTIAL | Difference rule and bootstrap password check |
 | `NFR-2` | PARTIAL | bcrypt cost factor 12 |
@@ -463,9 +458,9 @@ invented here; this lists what is missing. Total: 71 requirements (29 GAP, 42 PA
 | `NFR-13` | GAP | Concurrent deduction cannot go negative |
 | `NFR-15` | GAP | No performance test exists |
 | `NFR-16` | PARTIAL | Only health is tested; no availability or backup behavior |
-| `NFR-19` | PARTIAL | Delete confirmations |
-| `NFR-21` | PARTIAL | UAH display formatting |
-| `NFR-22` | GAP | Currency is display-only; nothing asserts it |
+| `NFR-19` | PARTIAL | Delete confirmations are now asserted (FR-55, FR-86); error display and field validation are asserted page by page, not for every form |
+| `NFR-21` | PARTIAL | Currency formatting is now asserted; `<html lang="en">` and the ISO date display are not asserted by a frontend spec |
+| `NFR-22` | PARTIAL | The display is asserted (symbol shown, no currency code); that the API stores and sends amounts without a currency code is not asserted |
 
 Rows with a non-`local-verifiable` tag and no automated mechanism (NFR-17 `e2e`, NFR-18 `vision-verify`, NFR-20 `a11y`)
 are not counted above. They will fail the acceptance-method gate at G3 until a mechanism exists or the owner answers

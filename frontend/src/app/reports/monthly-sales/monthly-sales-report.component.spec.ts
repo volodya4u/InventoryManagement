@@ -172,4 +172,44 @@ describe('MonthlySalesReportComponent', () => {
     component.exportCsv();
     expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
+
+  // @trace FR-146
+  it('links a sale number to that sale on the Sales page', () => {
+    expectReport('2026-01').flush(report());
+    fixture.detectChanges();
+
+    function saleLink(heading: string): HTMLAnchorElement | null {
+      const section = Array.from<HTMLElement>(
+        fixture.nativeElement.querySelectorAll('section'),
+      ).find((candidate) => candidate.querySelector('h2')?.textContent?.trim() === heading);
+      return section?.querySelector('a.sale-link') ?? null;
+    }
+
+    for (const heading of ['Sales Documents', 'Returns & Cancellations']) {
+      const link = saleLink(heading);
+      expect(link?.textContent?.trim()).toBe('S-0007');
+      expect(link?.getAttribute('href')).toBe('/sales?saleId=7');
+    }
+  });
+
+  // @trace NFR-21
+  it('shows amounts as UAH with two decimals', () => {
+    expectReport('2026-01').flush(report({ grossProfit: 53.3, totalCost: 6.1 }));
+    fixture.detectChanges();
+
+    const shown: string = fixture.nativeElement.textContent;
+    expect(shown).toContain('₴60.00');
+    expect(shown).toContain('₴53.30');
+    expect(shown).toContain('₴6.10');
+  });
+
+  // @trace NFR-22
+  it('shows the currency symbol on display, never the currency code', () => {
+    expectReport('2026-01').flush(report());
+    fixture.detectChanges();
+
+    const shown: string = fixture.nativeElement.textContent;
+    expect(shown).toContain('₴');
+    expect(shown).not.toContain('UAH');
+  });
 });

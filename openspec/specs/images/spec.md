@@ -78,7 +78,7 @@ Updating without a new image SHALL keep the stored one; there SHALL be no way to
 The browser SHALL apply the same rules before upload (extension, MIME type, 2 MB) and show "Select a JPG, JPEG, or PNG
 file." or "The image size cannot exceed 2 MB." (FR-75).
 
-> GAP: `frontend/src/app/core/image-file.ts` has no spec (see docs/requirements.md Coverage gaps, FR-75 row).
+> Covered by slice `harden-frontend-specs`: `frontend/src/app/core/image-file.spec.ts` asserts the client-side image check.
 
 #### Scenario: Wrong type chosen
 - **WHEN** the user selects a `.gif` file
