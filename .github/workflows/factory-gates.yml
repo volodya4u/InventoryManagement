@@ -34,6 +34,10 @@ jobs:
       - name: Acceptance methods exist
         run: node scripts/check-acceptance-methods.mjs --mode=existence
 
+      # Every requirement must have its evidence: a test tagged "@trace <id>" or an open waiver in docs/qa/waivers/.
+      - name: Acceptance artifacts exist
+        run: node scripts/check-acceptance-methods.mjs --mode=artifact
+
       - name: No open corrections
         run: node scripts/correct.mjs --check
 
