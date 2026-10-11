@@ -2786,6 +2786,41 @@ class InventoryFlowIntegrationTest {
                 """)).isInstanceOf(DataIntegrityViolationException.class);
     }
 
+    // @trace FR-81, FR-91
+    @Test
+    void keepsAProductsStoredPriceWhenARawMaterialCostChangesAndUsesTheNewCostOnTheNextSaveAndBatch() throws Exception {
+        // OQ-1, answered by the owner: the price is fixed when the product is saved from the costs of that moment; a later
+        // receipt does not move it, and the new cost reaches the next batch and the next save of the product.
+        insertRawMaterial(1, "Rose", "PIECE", "10", "10");
+        var session = signedInSession();
+        var recipe = "[{\"rawMaterialId\":1,\"quantityPerUnit\":2}]";
+        postProduct(session, recipe)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.sellingPrice").value(30));
+
+        // Ten more roses at 20 move the average cost from 10 to 15.
+        postJson(session, "/api/raw-materials/1/receipts", """
+                {"receivedQuantity": 10, "unitPurchaseCost": 20, "receiptDate": "2026-07-21"}""")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.averageUnitCost").value(15));
+        mockMvc.perform(get("/api/products").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].sellingPrice").value(30));
+
+        // The next batch is costed at the new average: 2 roses at 15.
+        postJson(session, "/api/products/1/production", "{\"quantity\":1,\"productionDate\":\"2026-07-22\"}")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.averageUnitCost").value(30))
+                .andExpect(jsonPath("$.sellingPrice").value(30));
+
+        // Saving the product again prices it at the new cost: 2 roses at 15, markup 50 percent.
+        putProduct(session, 1, recipe)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sellingPrice").value(45));
+        mockMvc.perform(get("/api/products").session(session))
+                .andExpect(jsonPath("$[0].sellingPrice").value(45));
+    }
+
     private ResultActions login(String password) throws Exception {
         return login("admin", password);
     }

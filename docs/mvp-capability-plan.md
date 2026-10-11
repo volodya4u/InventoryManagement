@@ -7,7 +7,7 @@
 ## 1. Slicing principles
 
 1. The new work is derived from the 71 rows of `docs/requirements.md` › Coverage gaps (GAP and PARTIAL): behavior the baseline records but no test asserts. No feature is invented.
-2. Every slice is **test-only**: new or extended tests that pin today's behavior. Production code under `src/main` and `frontend/src` (non-spec files) is not changed. If a test exposes behavior that looks wrong (for example OQ-1, the stale selling price), the slice stops and reports it; fixing it is a separate behavior slice the user approves.
+2. Every slice is **test-only**: new or extended tests that pin today's behavior. Production code under `src/main` and `frontend/src` (non-spec files) is not changed. If a test exposes behavior that looks wrong (OQ-1, the stored selling price, looked like this until the owner stated on 2026-10-11 that it is intended), the slice stops and reports it; fixing it is a separate behavior slice the user approves.
 3. One slice per cohesive area, sized to design, build, test and archive as a unit. Naming: kebab-case `harden-<area>` under `openspec/changes/`.
 4. Each gap row is hardened by exactly one slice (or explicitly deferred, section 6). Each baseline FR keeps one retrofit owner.
 5. Backend slices extend the shared `InventoryFlowIntegrationTest`, so they are `serialize`. The frontend slice touches only `*.spec.ts` files and is `parallel-safe`.

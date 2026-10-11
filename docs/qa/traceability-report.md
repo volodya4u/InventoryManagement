@@ -88,7 +88,7 @@ Result: PASS, 155 warning(s)
 | FR-78 | yes | yes | 2 | - |
 | FR-79 | yes | yes | 1 | - |
 | FR-80 | yes | yes | 1 | - |
-| FR-81 | yes | yes | 3 | - |
+| FR-81 | yes | yes | 4 | - |
 | FR-82 | yes | yes | 4 | - |
 | FR-83 | yes | yes | 1 | - |
 | FR-84 | yes | yes | 1 | - |
@@ -98,7 +98,7 @@ Result: PASS, 155 warning(s)
 | FR-88 | yes | yes | 1 | - |
 | FR-89 | yes | yes | 2 | - |
 | FR-90 | yes | yes | 1 | - |
-| FR-91 | yes | yes | 2 | - |
+| FR-91 | yes | yes | 3 | - |
 | FR-92 | yes | yes | 2 | - |
 | FR-93 | yes | yes | 1 | - |
 | FR-94 | yes | yes | 3 | - |
