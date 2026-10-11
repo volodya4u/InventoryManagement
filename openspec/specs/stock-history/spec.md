@@ -15,7 +15,7 @@ raw materials, `OPENING_BALANCE`, `RECEIPT`, `ADJUSTMENT_INCREASE`; for products
 `ADJUSTMENT_INCREASE`, `SALE_RETURN`, `SALE_CANCELLATION`; everything else SHALL be outgoing. Each movement SHALL have
 `signedQuantity` and `signedTotalCost`, negative when outgoing (FR-127).
 
-> GAP: the full direction mapping is not asserted; a sale (-1) and a receipt (+50) are (see docs/requirements.md Coverage gaps, FR-127 row).
+> Covered by slice `harden-sales-reports-history-tests`: `InventoryFlowIntegrationTest` › `marksEveryMovementTypeAsIncomingOrOutgoingWithMatchingSigns` asserts the direction and signs of every raw material and product movement type.
 
 #### Scenario: Directions
 - **WHEN** a `SALE` movement of 1 unit and a `RECEIPT` of total 50 are listed
@@ -58,7 +58,7 @@ characters SHALL give 400 "Search text cannot exceed 120 characters"; a null que
 Results SHALL be paged: `page` is 0-based (default 0, at least 0), `size` defaults to 25 and SHALL be 1 to 100; the
 response SHALL carry `totalElements`, `totalPages` and the page's movements (FR-131).
 
-> GAP: the default of 25 and the size bounds are not asserted (see docs/requirements.md Coverage gaps, FR-131 row).
+> Covered by slice `harden-sales-reports-history-tests`: `pagesStockHistoryWithADefaultOf25AndBoundedSizes` asserts the default page size, the second page and the size and page bounds.
 
 #### Scenario: Size 2
 - **GIVEN** 4 movements
@@ -67,10 +67,10 @@ response SHALL carry `totalElements`, `totalPages` and the page's movements (FR-
 
 ### Requirement: Ordering
 
-Movements SHALL be ordered newest first by `occurred_at`, then `created_at`, then inventory type, then movement id,
-descending (FR-132).
+Movements SHALL be ordered by `occurred_at` descending, then `created_at` descending, then inventory type ascending
+(PRODUCT before RAW_MATERIAL), then movement id descending (FR-132).
 
-> GAP: only that the newest is first is asserted (see docs/requirements.md Coverage gaps, FR-132 row).
+> Covered by slice `harden-sales-reports-history-tests`: `ordersStockHistoryByDateThenCreationTimeThenInventoryTypeThenNewestId` asserts the full ordering.
 
 #### Scenario: Newest first
 - **WHEN** the list is read
@@ -96,7 +96,7 @@ Product movements SHALL carry a reference: a return or cancellation points to th
 `SALE_RETURN`, the sale id), a sale to the sale number (`SALE`), and a production to "Batch #<id>" (`PRODUCTION_BATCH`)
 (FR-134).
 
-> GAP: not asserted at API level (see docs/requirements.md Coverage gaps, FR-134 row).
+> Covered by slice `harden-sales-reports-history-tests`: `referencesTheSaleTheReturnAndTheProductionBatchOnProductMovements` asserts the sale, return, cancellation and production batch references.
 
 #### Scenario: Production reference
 - **WHEN** a `PRODUCTION` movement is listed

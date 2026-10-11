@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +17,7 @@ import com.flowershop.inventory.auth.UserRepository;
 import jakarta.servlet.http.Cookie;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -1495,6 +1497,425 @@ class InventoryFlowIntegrationTest {
         assertThat(sessionTimeout).isEqualTo("8h");
     }
 
+    // @trace FR-37
+    @Test
+    void countsRawMaterialsProductsAndProductUnitsOnTheDashboard() throws Exception {
+        jdbcTemplate.update("""
+                INSERT INTO raw_material (id, name, description, unit, quantity, average_unit_cost)
+                VALUES (1, 'Rose', '', 'PIECE', 8, 5), (2, 'Ribbon', '', 'METER', 3, 1)
+                """);
+        insertProduct(1, "BOX-1", "Box one", 4, "40", "20");
+        insertProduct(2, "BOX-2", "Box two", 3, "50", "25");
+        insertProduct(3, "BOX-3", "Box three", 0, "60", "30");
+
+        mockMvc.perform(get("/api/dashboard").session(signedInSession()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rawMaterialTypes").value(2))
+                .andExpect(jsonPath("$.productTypes").value(3))
+                .andExpect(jsonPath("$.productUnits").value(7));
+    }
+
+    // @trace FR-38
+    @Test
+    void countsEverySaleExceptCancelledOnesOnTheDashboard() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        var session = signedInSession();
+        createSale(session, "2026-07-01", 1, 1, "40");
+        var cancelled = createSale(session, "2026-07-02", 1, 1, "40");
+        var partlyReturned = createSale(session, "2026-07-03", 1, 2, "40");
+        var returned = createSale(session, "2026-07-04", 1, 1, "40");
+        cancelSale(session, cancelled, "2026-07-05").andExpect(status().isOk());
+        postReturn(session, partlyReturned, "2026-07-05", "Damaged", returnItem(firstItemId(partlyReturned), "1"))
+                .andExpect(status().isOk());
+        postReturn(session, returned, "2026-07-05", "Damaged", returnItem(firstItemId(returned), "1"))
+                .andExpect(status().isOk());
+
+        assertThat(jdbcTemplate.queryForList("SELECT status FROM sale ORDER BY id", String.class))
+                .containsExactly("COMPLETED", "CANCELLED", "PARTIALLY_RETURNED", "RETURNED");
+        mockMvc.perform(get("/api/dashboard").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.salesCount").value(3));
+    }
+
+    // @trace FR-102
+    @Test
+    void rejectsInvalidSaleItemsAndRecordsNothing() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 5, "40", "20");
+        var session = signedInSession();
+
+        postSale(session, "2026-07-21", saleItem(999, "1", "40"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Record not found"))
+                .andExpect(jsonPath("$.detail").value("Product with id 999 not found"));
+        postSale(session, "2026-07-21", saleItem(1, "1", "40") + "," + saleItem(1, "2", "40"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Each product can appear only once in a sale"));
+        for (var invalid : List.of(
+                saleItem(1, "1.5", "40"),
+                saleItem(1, "1234567890123", "40"),
+                saleItem(1, "0", "40"),
+                saleItem(1, "1", "-1"),
+                saleItem(1, "1", "1.005"))) {
+            postSale(session, "2026-07-21", invalid)
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Bad Request"));
+        }
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sale", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("5");
+    }
+
+    // @trace FR-103
+    @Test
+    void numbersSalesWithinTheirOwnDate() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        var session = signedInSession();
+
+        postSale(session, "2026-07-21", saleItem(1, "1", "40"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.saleNumber").value("SALE-20260721-0001"));
+        postSale(session, "2026-07-21", saleItem(1, "1", "40"))
+                .andExpect(jsonPath("$.saleNumber").value("SALE-20260721-0002"));
+        postSale(session, "2026-07-22", saleItem(1, "1", "40"))
+                .andExpect(jsonPath("$.saleNumber").value("SALE-20260722-0001"));
+    }
+
+    // @trace FR-107
+    @Test
+    void recordsANegativeGrossProfitWhenAProductIsSoldBelowItsCost() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 5, "250", "150");
+        var session = signedInSession();
+
+        postSale(session, "2026-07-21", saleItem(1, "2", "100"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalRevenue").value(200))
+                .andExpect(jsonPath("$.totalCost").value(300))
+                .andExpect(jsonPath("$.grossProfit").value(-100))
+                .andExpect(jsonPath("$.items[0].lineProfit").value(-100));
+    }
+
+    // @trace FR-109
+    @Test
+    void listsSalesNewestFirstAndAnswers404ForAnUnknownSale() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        var session = signedInSession();
+        var first = createSale(session, "2026-07-20", 1, 1, "40");
+        var second = createSale(session, "2026-07-22", 1, 1, "40");
+        var third = createSale(session, "2026-07-22", 1, 1, "40");
+
+        mockMvc.perform(get("/api/sales").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].id").value(third))
+                .andExpect(jsonPath("$[1].id").value(second))
+                .andExpect(jsonPath("$[2].id").value(first));
+        mockMvc.perform(get("/api/sales/999").session(session))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Record not found"))
+                .andExpect(jsonPath("$.detail").value("Sale with id 999 not found"));
+    }
+
+    // @trace FR-110
+    @Test
+    void offersNoWayToEditOrDeleteASale() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 5, "40", "20");
+        var session = signedInSession();
+        var sale = createSale(session, "2026-07-21", 1, 1, "40");
+
+        for (var method : List.of(HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE)) {
+            var csrfCookie = csrfCookie(session);
+            mockMvc.perform(request(method, "/api/sales/" + sale)
+                            .session(session)
+                            .cookie(csrfCookie)
+                            .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}"))
+                    .andExpect(status().isMethodNotAllowed());
+        }
+
+        mockMvc.perform(get("/api/sales/" + sale).session(session)).andExpect(status().isOk());
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sale", Integer.class)).isEqualTo(1);
+    }
+
+    // @trace FR-114
+    @Test
+    void rejectsReturnsWithDuplicateForeignOrBlankInput() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        insertProduct(2, "BOX-2", "Box two", 10, "50", "25");
+        var session = signedInSession();
+        var saleA = createSale(session, "2026-07-01", 1, 2, "40");
+        var saleB = createSale(session, "2026-07-01", 2, 2, "50");
+        var itemA = firstItemId(saleA);
+        var itemB = firstItemId(saleB);
+
+        postReturn(session, saleA, "2026-07-02", "Damaged", returnItem(itemA, "1") + "," + returnItem(itemA, "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Each sale item can appear only once in a return"));
+        postReturn(session, saleA, "2026-07-02", "Damaged", returnItem(itemB, "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail")
+                        .value("Sale item with id %d does not belong to this sale".formatted(itemB)));
+        postReturn(session, saleA, "2026-07-02", " ", returnItem(itemA, "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sale_return", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("8");
+    }
+
+    // @trace FR-116
+    @Test
+    void acceptsNoReturnOnACancelledOrFullyReturnedSale() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        var session = signedInSession();
+        var cancelled = createSale(session, "2026-07-01", 1, 1, "40");
+        cancelSale(session, cancelled, "2026-07-02").andExpect(status().isOk());
+        var returned = createSale(session, "2026-07-01", 1, 1, "40");
+        postReturn(session, returned, "2026-07-02", "Damaged", returnItem(firstItemId(returned), "1"))
+                .andExpect(status().isOk());
+
+        postReturn(session, cancelled, "2026-07-03", "Late", returnItem(firstItemId(cancelled), "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("A cancelled sale cannot receive Product returns"));
+        postReturn(session, returned, "2026-07-03", "Late", returnItem(firstItemId(returned), "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("All Products from this sale have already been returned"));
+    }
+
+    // @trace FR-117
+    @Test
+    void rejectsAReturnOrCancellationDatedBeforeTheSale() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        var session = signedInSession();
+        var sale = createSale(session, "2026-07-10", 1, 2, "40");
+        var item = firstItemId(sale);
+
+        postReturn(session, sale, "2026-07-09", "Damaged", returnItem(item, "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Return date cannot be earlier than the sale date"));
+        cancelSale(session, sale, "2026-07-09")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Cancellation date cannot be earlier than the sale date"));
+
+        postReturn(session, sale, "2026-07-10", "Damaged", returnItem(item, "1")).andExpect(status().isOk());
+    }
+
+    // @trace FR-118
+    @Test
+    void numbersReversalsWithinTheirOwnDate() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        var session = signedInSession();
+        var sale = createSale(session, "2026-07-01", 1, 3, "40");
+        var item = firstItemId(sale);
+
+        postReturn(session, sale, "2026-08-02", "Damaged", returnItem(item, "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.returns[0].returnNumber").value("RET-20260802-0001"));
+        postReturn(session, sale, "2026-08-02", "Damaged", returnItem(item, "1"))
+                .andExpect(jsonPath("$.returns[1].returnNumber").value("RET-20260802-0002"));
+        postReturn(session, sale, "2026-08-03", "Damaged", returnItem(item, "1"))
+                .andExpect(jsonPath("$.returns[2].returnNumber").value("RET-20260803-0001"));
+    }
+
+    // @trace FR-127
+    @Test
+    void marksEveryMovementTypeAsIncomingOrOutgoingWithMatchingSigns() throws Exception {
+        jdbcTemplate.update("""
+                INSERT INTO raw_material (id, name, description, unit, quantity, average_unit_cost)
+                VALUES (1, 'Rose', '', 'PIECE', 8, 5)
+                """);
+        insertProduct(1, "BOX-1", "Box one", 5, "40", "20");
+        var rawTypes = List.of("OPENING_BALANCE", "RECEIPT", "PRODUCTION_CONSUMPTION", "WRITE_OFF",
+                "ADJUSTMENT_INCREASE", "ADJUSTMENT_DECREASE");
+        var productTypes = List.of("OPENING_BALANCE", "PRODUCTION", "SALE", "WRITE_OFF", "ADJUSTMENT_INCREASE",
+                "ADJUSTMENT_DECREASE", "SALE_RETURN", "SALE_CANCELLATION");
+        for (var type : rawTypes) {
+            jdbcTemplate.update("""
+                    INSERT INTO raw_material_stock_movement
+                        (raw_material_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                    VALUES (1, '%s', 2, 5, 10, '2026-07-01')
+                    """.formatted(type));
+        }
+        for (var type : productTypes) {
+            jdbcTemplate.update("""
+                    INSERT INTO product_stock_movement
+                        (product_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                    VALUES (1, '%s', 2, 5, 10, '2026-07-01')
+                    """.formatted(type));
+        }
+        var incoming = List.of(
+                "RAW_MATERIAL/OPENING_BALANCE", "RAW_MATERIAL/RECEIPT", "RAW_MATERIAL/ADJUSTMENT_INCREASE",
+                "PRODUCT/OPENING_BALANCE", "PRODUCT/PRODUCTION", "PRODUCT/ADJUSTMENT_INCREASE",
+                "PRODUCT/SALE_RETURN", "PRODUCT/SALE_CANCELLATION");
+
+        var result = mockMvc.perform(get("/api/stock-movements").param("size", "100").session(signedInSession()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(rawTypes.size() + productTypes.size()));
+        var all = new ArrayList<String>();
+        rawTypes.forEach(type -> all.add("RAW_MATERIAL/" + type));
+        productTypes.forEach(type -> all.add("PRODUCT/" + type));
+        for (var key : all) {
+            var parts = key.split("/");
+            var in = incoming.contains(key);
+            var filter = "$.movements[?(@.inventoryType=='%s' && @.movementType=='%s')]"
+                    .formatted(parts[0], parts[1]);
+            result.andExpect(jsonPath(filter + ".direction").value(in ? "IN" : "OUT"));
+            result.andExpect(jsonPath(filter + ".signedQuantity").value(in ? 2 : -2));
+            result.andExpect(jsonPath(filter + ".signedTotalCost").value(in ? 10.0 : -10.0));
+        }
+    }
+
+    // @trace FR-131
+    @Test
+    void pagesStockHistoryWithADefaultOf25AndBoundedSizes() throws Exception {
+        jdbcTemplate.update("""
+                INSERT INTO raw_material (id, name, description, unit, quantity, average_unit_cost)
+                VALUES (1, 'Rose', '', 'PIECE', 8, 5)
+                """);
+        for (var day = 1; day <= 30; day++) {
+            jdbcTemplate.update("""
+                    INSERT INTO raw_material_stock_movement
+                        (raw_material_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                    VALUES (1, 'RECEIPT', 1, 5, 5, '2026-07-%02d')
+                    """.formatted(day));
+        }
+        var session = signedInSession();
+
+        mockMvc.perform(get("/api/stock-movements").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(25))
+                .andExpect(jsonPath("$.totalElements").value(30))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.movements.length()").value(25));
+        mockMvc.perform(get("/api/stock-movements").param("page", "1").session(session))
+                .andExpect(jsonPath("$.movements.length()").value(5));
+        mockMvc.perform(get("/api/stock-movements").param("size", "100").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.movements.length()").value(30));
+        for (var invalid : List.of(
+                new String[] {"size", "0"}, new String[] {"size", "101"}, new String[] {"page", "-1"})) {
+            mockMvc.perform(get("/api/stock-movements").param(invalid[0], invalid[1]).session(session))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    // @trace FR-132
+    @Test
+    void ordersStockHistoryByDateThenCreationTimeThenInventoryTypeThenNewestId() throws Exception {
+        jdbcTemplate.update("""
+                INSERT INTO raw_material (id, name, description, unit, quantity, average_unit_cost)
+                VALUES (1, 'Rose', '', 'PIECE', 8, 5)
+                """);
+        insertProduct(1, "BOX-1", "Box one", 5, "40", "20");
+        jdbcTemplate.update("""
+                INSERT INTO raw_material_stock_movement
+                    (raw_material_id, movement_type, quantity, unit_cost, total_cost, occurred_at, notes, created_at)
+                VALUES
+                    (1, 'RECEIPT', 1, 5, 5, '2026-07-05', 'raw first', '2026-07-05 10:00:00'),
+                    (1, 'RECEIPT', 1, 5, 5, '2026-07-05', 'raw second', '2026-07-05 10:00:00'),
+                    (1, 'RECEIPT', 1, 5, 5, '2026-07-04', 'older day', '2026-07-04 12:00:00')
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product_stock_movement
+                    (product_id, movement_type, quantity, unit_cost, total_cost, occurred_at, notes, created_at)
+                VALUES
+                    (1, 'PRODUCTION', 1, 20, 20, '2026-07-05', 'product first', '2026-07-05 10:00:00'),
+                    (1, 'PRODUCTION', 1, 20, 20, '2026-07-05', 'product later', '2026-07-05 11:00:00')
+                """);
+
+        mockMvc.perform(get("/api/stock-movements").session(signedInSession()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.movements[0].notes").value("product later"))
+                .andExpect(jsonPath("$.movements[1].notes").value("product first"))
+                .andExpect(jsonPath("$.movements[2].notes").value("raw second"))
+                .andExpect(jsonPath("$.movements[3].notes").value("raw first"))
+                .andExpect(jsonPath("$.movements[4].notes").value("older day"));
+    }
+
+    // @trace FR-134
+    @Test
+    void referencesTheSaleTheReturnAndTheProductionBatchOnProductMovements() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
+        jdbcTemplate.update("""
+                INSERT INTO production_batch (id, product_id, quantity, unit_cost, total_cost, produced_at)
+                VALUES (1, 1, 3, 20, 60, '2026-06-30')
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product_stock_movement
+                    (product_id, production_batch_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                VALUES (1, 1, 'PRODUCTION', 3, 20, 60, '2026-06-30')
+                """);
+        var session = signedInSession();
+        var returnedSale = createSale(session, "2026-07-01", 1, 2, "40");
+        postReturn(session, returnedSale, "2026-07-02", "Damaged", returnItem(firstItemId(returnedSale), "1"))
+                .andExpect(status().isOk());
+        var cancelledSale = createSale(session, "2026-07-02", 1, 1, "40");
+        cancelSale(session, cancelledSale, "2026-07-03").andExpect(status().isOk());
+
+        var result = mockMvc.perform(get("/api/stock-movements")
+                        .param("inventoryType", "PRODUCT")
+                        .param("size", "100")
+                        .session(session))
+                .andExpect(status().isOk());
+        var sale = "$.movements[?(@.movementType=='SALE' && @.referenceNumber=='SALE-20260701-0001')]";
+        result.andExpect(jsonPath(sale + ".referenceType").value("SALE"));
+        result.andExpect(jsonPath(sale + ".referenceId").value((int) returnedSale));
+        var saleReturn = "$.movements[?(@.movementType=='SALE_RETURN')]";
+        result.andExpect(jsonPath(saleReturn + ".referenceType").value("SALE_RETURN"));
+        result.andExpect(jsonPath(saleReturn + ".referenceNumber").value("RET-20260702-0001"));
+        result.andExpect(jsonPath(saleReturn + ".referenceId").value((int) returnedSale));
+        var cancellation = "$.movements[?(@.movementType=='SALE_CANCELLATION')]";
+        result.andExpect(jsonPath(cancellation + ".referenceType").value("SALE_RETURN"));
+        result.andExpect(jsonPath(cancellation + ".referenceNumber").value("RET-20260703-0001"));
+        result.andExpect(jsonPath(cancellation + ".referenceId").value((int) cancelledSale));
+        var production = "$.movements[?(@.movementType=='PRODUCTION')]";
+        result.andExpect(jsonPath(production + ".referenceType").value("PRODUCTION_BATCH"));
+        result.andExpect(jsonPath(production + ".referenceNumber").value("Batch #1"));
+        result.andExpect(jsonPath(production + ".referenceId").value(1));
+    }
+
+    // @trace FR-141
+    @Test
+    void reportsAnAverageSaleValueOfZeroWhenAMonthHasNoSales() throws Exception {
+        mockMvc.perform(get("/api/reports/monthly-sales").param("month", "2026-07").session(signedInSession()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.salesCount").value(0))
+                .andExpect(jsonPath("$.grossRevenue").value(0))
+                .andExpect(jsonPath("$.averageSaleValue").value(0.0));
+    }
+
+    // @trace FR-143
+    @Test
+    void ordersDailyAndProductSummariesByDateAndByNetRevenueThenName() throws Exception {
+        insertProduct(1, "ALPHA", "Alpha", 5, "100", "10");
+        insertProduct(2, "BRAVO", "Bravo", 5, "100", "10");
+        insertProduct(3, "CHARLIE", "Charlie", 5, "300", "10");
+        insertProduct(4, "DELTA", "Delta", 5, "100", "10");
+        var session = signedInSession();
+        var bravoSale = createSale(session, "2026-07-10", 2, 1, "100");
+        createSale(session, "2026-07-03", 1, 1, "100");
+        createSale(session, "2026-07-20", 3, 1, "300");
+        createSale(session, "2026-07-12", 4, 1, "100");
+        postReturn(session, bravoSale, "2026-07-15", "Changed mind", returnItem(firstItemId(bravoSale), "1"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/reports/monthly-sales").param("month", "2026-07").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dailySummaries.length()").value(5))
+                .andExpect(jsonPath("$.dailySummaries[0].saleDate").value("2026-07-03"))
+                .andExpect(jsonPath("$.dailySummaries[1].saleDate").value("2026-07-10"))
+                .andExpect(jsonPath("$.dailySummaries[2].saleDate").value("2026-07-12"))
+                .andExpect(jsonPath("$.dailySummaries[3].saleDate").value("2026-07-15"))
+                .andExpect(jsonPath("$.dailySummaries[4].saleDate").value("2026-07-20"))
+                .andExpect(jsonPath("$.productSummaries[0].productName").value("Charlie"))
+                .andExpect(jsonPath("$.productSummaries[1].productName").value("Alpha"))
+                .andExpect(jsonPath("$.productSummaries[2].productName").value("Delta"))
+                .andExpect(jsonPath("$.productSummaries[3].productName").value("Bravo"));
+    }
+
     @Test
     void masksPasswordsInAuthenticationRequestLogs() {
         var loginRequest = new AuthController.LoginRequest("admin", "login-secret");
@@ -1627,6 +2048,70 @@ class InventoryFlowIntegrationTest {
             request.session(session);
         }
         return mockMvc.perform(request);
+    }
+
+    private void insertProduct(
+            long id, String sku, String name, int quantity, String price, String averageUnitCost) {
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (id, sku, name, description, quantity, price, average_unit_cost)
+                VALUES (%d, '%s', '%s', '', %d, %s, %s)
+                """.formatted(id, sku, name, quantity, price, averageUnitCost));
+    }
+
+    private ResultActions postJson(MockHttpSession session, String path, String json) throws Exception {
+        var csrfCookie = csrfCookie(session);
+        return mockMvc.perform(post(path)
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+    }
+
+    private static String saleItem(long productId, String quantity, String unitPrice) {
+        return """
+                {"productId":%d,"quantity":%s,"unitPrice":%s}""".formatted(productId, quantity, unitPrice);
+    }
+
+    private static String returnItem(long saleItemId, String quantity) {
+        return """
+                {"saleItemId":%d,"quantity":%s}""".formatted(saleItemId, quantity);
+    }
+
+    private ResultActions postSale(MockHttpSession session, String saleDate, String items) throws Exception {
+        return postJson(session, "/api/sales", """
+                {"saleDate":"%s","paymentMethod":"CASH","items":[%s]}
+                """.formatted(saleDate, items));
+    }
+
+    private long createSale(MockHttpSession session, String saleDate, long productId, int quantity, String unitPrice)
+            throws Exception {
+        var body = postSale(session, saleDate, saleItem(productId, String.valueOf(quantity), unitPrice))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return Long.parseLong(body.replaceFirst("(?s).*?\"id\":(\\d+).*", "$1"));
+    }
+
+    private long firstItemId(long saleId) {
+        return jdbcTemplate.queryForObject("SELECT MIN(id) FROM sale_item WHERE sale_id = ?", Long.class, saleId);
+    }
+
+    private ResultActions postReturn(
+            MockHttpSession session, long saleId, String returnDate, String reason, String items)
+            throws Exception {
+        return postJson(session, "/api/sales/%d/returns".formatted(saleId), """
+                {"returnDate":"%s","reason":"%s","items":[%s]}
+                """.formatted(returnDate, reason, items));
+    }
+
+    private ResultActions cancelSale(MockHttpSession session, long saleId, String cancellationDate)
+            throws Exception {
+        return postJson(session, "/api/sales/%d/cancellation".formatted(saleId), """
+                {"cancellationDate":"%s","reason":"Mistake"}
+                """.formatted(cancellationDate));
     }
 
     private MockHttpSession signedInSession() throws Exception {

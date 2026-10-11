@@ -70,7 +70,7 @@ refunds, `totalCost` = sale cost - returned cost, `returnedCost` the reversed co
 `averageSaleValue` SHALL equal gross revenue / number of sale documents, 2 decimals half-up, and 0.00 when there are no
 sales (FR-141).
 
-> GAP: the no-sales case is not asserted (see docs/requirements.md Coverage gaps, FR-141 row).
+> Covered by slice `harden-sales-reports-history-tests`: `InventoryFlowIntegrationTest` › `reportsAnAverageSaleValueOfZeroWhenAMonthHasNoSales` asserts the no-sales case.
 
 #### Scenario: Two sales
 - **GIVEN** two sales with gross revenue 730
@@ -95,7 +95,7 @@ methods; each combines the month's sales and reversals for that payment method (
 SHALL combine them per product, ordered by net revenue descending then product name; `sales` and `returns` SHALL list the
 month's documents (FR-143).
 
-> GAP: ordering of the daily and product summaries is not asserted (see docs/requirements.md Coverage gaps, FR-143 row).
+> Covered by slice `harden-sales-reports-history-tests`: `ordersDailyAndProductSummariesByDateAndByNetRevenueThenName` asserts the daily and product orderings.
 
 #### Scenario: Two sale days
 - **GIVEN** sales on two different dates
