@@ -114,7 +114,7 @@ after review**, not that they clicked "allow" on every action; "level 2" adds th
 - After ~30 green `dod.mjs` runs and a long APPROVE streak it is tempting to move to level 3 (the agent reaches the
   goal and skips the pre-PR review). Not taken: [#52](https://github.com/volodya4u/InventoryManagement/pull/52) just showed that "a good week" does not prove the gates cannot be
   bypassed.
-- **Rows 38, 42, 43, 44, 46 and 51 — kept at level 1.** Rows 14, 16, 26, 27 and 33 ran at level 2 (test-proven work,
+- **Rows 38, 42, 43, 44, 46 and 51 — kept at level 1.** Rows 6, 14, 16, 26, 27 and 33 ran at level 2 (test-proven work,
   reversible with git, a human reviews and merges), and from row 37 on every row says level 1. Asked whether to align
   them, the human chose to keep the original levels, so these six rows stay at 1 and each row's own "Why this level"
   stands. No downgrade is claimed here, and no reason beyond the human's decision is recorded.
