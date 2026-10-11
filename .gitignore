@@ -18,6 +18,9 @@ frontend/dist/
 CLAUDE.local.md
 .claude/settings.local.json
 
+# written by a manual run of scripts/check-acceptance-methods.mjs; nothing checks or refreshes it (ADR-0003)
+trace/acceptance-contracts.json
+
 # eval run outputs (local gate; see evals/README.md)
 evals/results/
 .agents/skills/*/evals/results/

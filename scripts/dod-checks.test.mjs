@@ -11,6 +11,7 @@ import {
   expectedTestClasses,
   findFiles,
   frontendVerdict,
+  generatedReportsVerdict,
   mcpSmokeVerdict,
   nodeTestVerdict,
   selfTestVerdict,
@@ -167,4 +168,37 @@ test("the Exit column keeps the runner's own exit code when the verdict override
   assert.equal(exitColumn(2, 2), "2");
   assert.equal(exitColumn(0, 1), "1 (runner exited 0)");
   assert.equal(exitColumn(null, 1), "1 (no exit code)");
+});
+
+test("regenerating the hook-owned reports is green when every generator exits 0", () => {
+  assert.deepEqual(
+    generatedReportsVerdict([
+      { script: "scripts/check-traceability.mjs", status: 0 },
+      { script: "scripts/check-trajectory.mjs", status: 0 },
+    ]),
+    { ok: true, result: "regenerated: traceability, trajectory" },
+  );
+});
+
+test("regenerating the reports fails when a generator fails, naming it and its exit code", () => {
+  assert.deepEqual(
+    generatedReportsVerdict([
+      { script: "scripts/check-traceability.mjs", status: 0 },
+      { script: "scripts/check-trajectory.mjs", status: 1 },
+    ]),
+    { ok: false, result: "trajectory failed (exit 1)" },
+  );
+  assert.deepEqual(generatedReportsVerdict([{ script: "scripts/check-traceability.mjs", status: 2 }]), {
+    ok: false,
+    result: "traceability failed (exit 2)",
+  });
+});
+
+test("a generator that could not start, or no generator at all, is a failure", () => {
+  // spawnSync reports a null status when the script could not start or was killed.
+  assert.deepEqual(generatedReportsVerdict([{ script: "scripts/check-traceability.mjs", status: null }]), {
+    ok: false,
+    result: "traceability failed (no exit code)",
+  });
+  assert.deepEqual(generatedReportsVerdict([]), { ok: false, result: "no report generator ran" });
 });

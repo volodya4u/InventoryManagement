@@ -110,6 +110,20 @@ export function mcpSmokeVerdict(output) {
   return line ? { ok: true, result: line } : { ok: false, result: "the angular-cli MCP server gave no list_projects answer" };
 }
 
+// The generated reports the pre-commit hook rewrites (scripts/hooks-pre-commit.mjs), regenerated before the code is
+// fingerprinted. Each run is { script, status } as spawnSync reports it.
+export function generatedReportsVerdict(runs) {
+  if (!runs.length) return { ok: false, result: "no report generator ran" };
+  // scripts/check-traceability.mjs -> "traceability"
+  const nameOf = ({ script }) => script.replace(/^.*[\\/]/, "").replace(/^check-/, "").replace(/\.mjs$/, "");
+  const failed = runs.find(({ status }) => status !== 0);
+  if (failed) {
+    const how = failed.status === null || failed.status === undefined ? "no exit code" : `exit ${failed.status}`;
+    return { ok: false, result: `${nameOf(failed)} failed (${how})` };
+  }
+  return { ok: true, result: `regenerated: ${runs.map(nameOf).join(", ")}` };
+}
+
 // A check fails on its runner's exit code, and also when the runner exited 0 but the verdict found the run incomplete.
 // spawnSync reports a null status when the runner could not start or was killed.
 export function checkExitCode(status, ok) {
