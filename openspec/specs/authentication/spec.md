@@ -24,20 +24,19 @@ with role `ADMIN` (FR-1).
 
 Username matching SHALL be case-insensitive because `app_user.username` is `COLLATE NOCASE` and unique (FR-2).
 
-> GAP: no test asserts case-insensitive matching (see docs/requirements.md Coverage gaps, FR-2 row).
+> Covered by slice `harden-security-tests`: `InventoryFlowIntegrationTest` › `matchesUsernamesRegardlessOfCase` signs in as `ADMIN` and shows that a second user differing only in case is refused.
 
 #### Scenario: Username differing only by case
 - **GIVEN** an administrator named `admin`
 - **WHEN** a client signs in as `ADMIN` with the correct password
-- **THEN** the schema collation resolves it to the same user row (code-level behavior, not test-verified)
+- **THEN** the same user row is found, because both the column collation and the lookup query compare case-insensitively
 
 ### Requirement: Single failure message for rejected credentials
 
 A wrong password, an unknown username or a disabled user SHALL be rejected with HTTP 401 and the single message
 "Invalid username or password" (FR-3).
 
-> GAP: the message text and the disabled-user branch are not asserted by any test; only the 401 for an old password is
-> asserted (see docs/requirements.md Coverage gaps, FR-3 row).
+> Covered by slice `harden-security-tests`: `answersEveryFailedSignInWithTheSameMessage` asserts the one message for a wrong password, an unknown user and a disabled user.
 
 #### Scenario: Wrong password
 - **GIVEN** an administrator exists
@@ -50,7 +49,7 @@ A wrong password, an unknown username or a disabled user SHALL be rejected with 
 Every `/api/**` path except `/api/auth/login`, `/api/auth/csrf`, `/api/health` and `/error` SHALL require role `ADMIN`
 (FR-4).
 
-> GAP: the 403 path and the JSON bodies are not asserted; only the 401 status is (see docs/requirements.md Coverage gaps, FR-4 row).
+> Covered by slice `harden-security-tests`: `answersWithJsonMessagesWhenAuthenticationOrTheAdminRoleIsMissing` asserts the 401 and 403 bodies and the open endpoints.
 
 #### Scenario: Unauthenticated call
 - **GIVEN** no session
@@ -81,7 +80,7 @@ header `X-XSRF-TOKEN` (FR-5). CSRF protection SHALL use that cookie token and he
 
 A state-changing request without a valid CSRF token SHALL be rejected with 403 (FR-6).
 
-> GAP: only the positive path is exercised; no test sends a write without the token (see docs/requirements.md Coverage gaps, FR-6 and NFR-5 rows).
+> Covered by slice `harden-security-tests`: `rejectsStateChangingRequestsWithoutAMatchingCsrfToken` asserts a write is refused with no token and with a wrong token, signed in or not.
 
 #### Scenario: Write without token
 - **GIVEN** a signed-in session
@@ -102,7 +101,7 @@ A state-changing request without a valid CSRF token SHALL be rejected with 403 (
 
 `POST /api/auth/logout` SHALL return 204 and invalidate the server session (FR-8).
 
-> GAP: no backend test covers logout (see docs/requirements.md Coverage gaps, FR-8 row).
+> Covered by slice `harden-security-tests`: `logsOutWithNoContentAndEndsTheServerSession` asserts 204 and that the session is no longer valid.
 
 #### Scenario: Logout ends the session
 - **GIVEN** a signed-in session
@@ -131,8 +130,7 @@ a new password outside 10 to 64 characters with 400 "New password must be betwee
 confirmation that differs from the new password with 400 "New password confirmation does not match" (FR-12), and a new
 password equal to the current one with 400 "New password must be different from current password" (FR-13).
 
-> GAP: the server-side mismatched-confirmation rejection is covered only by a client test, and the "must be different"
-> rule has no test (see docs/requirements.md Coverage gaps, FR-12 and FR-13 rows).
+> Covered by slice `harden-security-tests`: `rejectsANewPasswordWhoseConfirmationDiffers` and `rejectsANewPasswordEqualToTheCurrentOne` assert both server-side rejections.
 
 #### Scenario: Wrong current password
 - **WHEN** the current password sent is wrong
@@ -155,7 +153,7 @@ password equal to the current one with 400 "New password must be different from 
 The policy for a changed password SHALL be length 10 to 64 and different from the current password, with no complexity
 classes, no reuse history and no breach check; the bootstrap password is not checked against the policy (NFR-1).
 
-> GAP: the difference rule and the bootstrap-password exemption are not asserted (see docs/requirements.md OQ-7 / Coverage gaps).
+> Covered by slice `harden-security-tests`: `rejectsANewPasswordEqualToTheCurrentOne` asserts the difference rule and `LocalAdminInitializerTest` › `acceptsABootstrapPasswordShorterThanThePasswordPolicy` the bootstrap-password exemption (OQ-7).
 
 #### Scenario: Policy has no complexity rule
 - **WHEN** a new password of 10 characters that is all lowercase letters is sent with a correct current password
@@ -168,7 +166,7 @@ calls on those sessions with 401 "Your session has ended. Please sign in again."
 sign in afterwards (FR-14). A new session identifier SHALL be issued at login and a password change SHALL expire all
 sessions of the user (NFR-7).
 
-> GAP: the identifier change at login is not asserted (see docs/requirements.md Coverage gaps, NFR-7 row).
+> Covered by slice `harden-security-tests`: `issuesANewSessionIdentifierAtSignIn` asserts the identifier differs after login.
 
 #### Scenario: Other browser session is ended
 - **GIVEN** two signed-in sessions of the administrator
@@ -197,7 +195,7 @@ Passwords SHALL be stored only as bcrypt hashes with cost factor 12 (`BCryptPass
 and the repository holds no default password (NFR-2). The `toString()` of the login and change-password requests SHALL
 print `[PROTECTED]` instead of the password (NFR-8).
 
-> GAP: the cost factor 12 is not asserted; the unit test uses a mock encoder (see docs/requirements.md Coverage gaps, NFR-2 row).
+> Covered by slice `harden-security-tests`: `SecurityConfigTest` › `hashesPasswordsWithBcryptAtCostTwelve` asserts the real encoder and its cost.
 
 #### Scenario: Password masked in request logging
 - **WHEN** a login or change-password request object is converted to a string
@@ -209,7 +207,7 @@ The system SHALL NOT throttle logins, lock accounts or offer multi-factor sign-i
 expiring links (no password reset, no invitations) (NFR-10). Authorization SHALL have the single role `ADMIN` and allow
 unlimited concurrent sessions per user (NFR-11).
 
-> GAP: these are absences with no guard test (see docs/requirements.md OQ-6 / Coverage gaps, NFR-10 and NFR-11 rows).
+> Covered by slice `harden-security-tests`: `doesNotLockTheAccountAfterRepeatedFailedSignIns` pins the absence of lockout (OQ-6), and `allowsOnlyTheAdminRoleAndKeepsEveryConcurrentSessionValid` pins the single role and unlimited sessions.
 
 #### Scenario: Repeated failed logins
 - **WHEN** a client sends many wrong passwords in a row

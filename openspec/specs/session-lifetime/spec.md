@@ -16,7 +16,7 @@ to the session's max inactive interval; responses without a session SHALL carry 
 be created (FR-23). The server session inactivity timeout SHALL be 8 hours (`server.servlet.session.timeout: 8h`),
 enforced by the server and mirrored in the browser from that header (NFR-3).
 
-> GAP: no test pins the 8h value; the header following the session's interval is asserted (see docs/requirements.md Coverage gaps, NFR-3 row).
+> Covered by slice `harden-security-tests`: `InventoryFlowIntegrationTest` › `keepsSessionsForEightHoursOfInactivity` pins the configured 8h value; MockMvc has no servlet container, so the container's enforcement of it is not exercised.
 
 #### Scenario: Header follows the session interval
 - **GIVEN** a signed-in session with a known max inactive interval
@@ -33,7 +33,7 @@ enforced by the server and mirrored in the browser from that header (NFR-3).
 The session cookie SHALL be `HttpOnly` and `SameSite=Strict`; the `Secure` flag SHALL NOT be set because the app is
 served over plain HTTP on localhost (NFR-4).
 
-> GAP: the cookie flags are not asserted by any test (see docs/requirements.md OQ-13 / Coverage gaps, NFR-4 row).
+> Covered by slice `harden-security-tests`: `SessionCookieHttpTest` makes a real HTTP exchange and asserts the session cookie is `HttpOnly` and `SameSite=Strict` without `Secure` (OQ-13).
 
 #### Scenario: Cookie attributes
 - **WHEN** a login response sets the session cookie

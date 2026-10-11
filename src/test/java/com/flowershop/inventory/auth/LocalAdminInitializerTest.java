@@ -60,4 +60,17 @@ class LocalAdminInitializerTest {
         verify(passwordEncoder).encode("secret");
         verify(userRepository).insertAdmin("admin", "encoded-secret");
     }
+
+    // @trace NFR-1
+    @Test
+    void acceptsABootstrapPasswordShorterThanThePasswordPolicy() {
+        when(userRepository.findByUsername("admin")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("short")).thenReturn("encoded-short");
+        var initializer = new LocalAdminInitializer(
+                userRepository, passwordEncoder, "admin", "short");
+
+        initializer.run(arguments);
+
+        verify(userRepository).insertAdmin("admin", "encoded-short");
+    }
 }

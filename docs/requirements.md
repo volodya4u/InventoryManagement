@@ -49,18 +49,18 @@ Source references are given as file paths under `src/main/java/com/flowershop/in
 | ID | Phase | Area | Description | Verification |
 |---|---|---|---|---|
 | FR-1 | MVP | Auth | ASSUMPTION: `POST /api/auth/login` with non-blank `username` and `password` signs the user in and returns `{username, role}` with role `ADMIN`. Source `…/auth/AuthController.java`. Evidence: IT›authenticatesAdminAndStoresValidatedPngAsBlob. | local-verifiable |
-| FR-2 | MVP | Auth | ASSUMPTION: Username matching is case-insensitive (`app_user.username` is `COLLATE NOCASE` and unique). Source `schema.sql`. Evidence: GAP. | local-verifiable |
-| FR-3 | MVP | Auth | ASSUMPTION: A wrong password, unknown username, or disabled user is rejected with HTTP 401 and the single message "Invalid username or password". Evidence: PARTIAL (IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions asserts 401 for the old password only; message text and the disabled-user branch are not asserted). | local-verifiable |
-| FR-4 | MVP | Auth | ASSUMPTION: Every `/api/**` path except `/api/auth/login`, `/api/auth/csrf`, `/api/health` and `/error` requires role `ADMIN`. An unauthenticated call gets 401 `{"message":"Authentication required"}`; an authenticated call without the role gets 403 `{"message":"Access denied"}`. Source `…/config/SecurityConfig.java`. Evidence: PARTIAL (IT›authenticatesAdminAndStoresValidatedPngAsBlob asserts 401 status only; no test for the 403 path or the JSON bodies). | local-verifiable |
+| FR-2 | MVP | Auth | ASSUMPTION: Username matching is case-insensitive in two layers: `app_user.username` is `COLLATE NOCASE` and unique (so a second user differing only in case is refused), and `UserRepository.findByUsername` compares `COLLATE NOCASE` as well. Source `schema.sql`, `UserRepository.java`. Evidence: IT›matchesUsernamesRegardlessOfCase. | local-verifiable |
+| FR-3 | MVP | Auth | ASSUMPTION: A wrong password, unknown username, or disabled user is rejected with HTTP 401 and the single message "Invalid username or password". Evidence: IT›answersEveryFailedSignInWithTheSameMessage (message and the disabled-user branch). | local-verifiable |
+| FR-4 | MVP | Auth | ASSUMPTION: Every `/api/**` path except `/api/auth/login`, `/api/auth/csrf`, `/api/health` and `/error` requires role `ADMIN`. An unauthenticated call gets 401 `{"message":"Authentication required"}`; an authenticated call without the role gets 403 `{"message":"Access denied"}`. Source `…/config/SecurityConfig.java`. Evidence: IT›answersWithJsonMessagesWhenAuthenticationOrTheAdminRoleIsMissing (401 and 403 bodies, open endpoints). | local-verifiable |
 | FR-5 | MVP | Auth | ASSUMPTION: `GET /api/auth/csrf` returns `{token, headerName}` and sets the `XSRF-TOKEN` cookie that the client echoes in header `X-XSRF-TOKEN`. Evidence: IT (the `login` helper and every write test use it). | local-verifiable |
-| FR-6 | MVP | Auth | ASSUMPTION: A state-changing request without a valid CSRF token is rejected (403). Evidence: GAP (only the positive path is exercised). | local-verifiable |
+| FR-6 | MVP | Auth | ASSUMPTION: A state-changing request without a valid CSRF token is rejected (403). Evidence: IT›rejectsStateChangingRequestsWithoutAMatchingCsrfToken. | local-verifiable |
 | FR-7 | MVP | Auth | ASSUMPTION: `GET /api/auth/me` returns the signed-in user, or 401 when there is no session. Evidence: IT›reportsTheActualSessionTimeoutWithoutCreatingAnonymousSessions; FE:core/auth.service.spec.ts "loads the authenticated user and stores it in the session signal". | local-verifiable |
-| FR-8 | MVP | Auth | ASSUMPTION: `POST /api/auth/logout` returns 204 and invalidates the server session. Evidence: GAP (no backend test). | local-verifiable |
+| FR-8 | MVP | Auth | ASSUMPTION: `POST /api/auth/logout` returns 204 and invalidates the server session. Evidence: IT›logsOutWithNoContentAndEndsTheServerSession. | local-verifiable |
 | FR-9 | MVP | Auth | ASSUMPTION: The Sign out action in the shell calls logout once, clears local session state, and goes to `/login` even when the logout call fails. Evidence: FE:layout/shell.component.spec.ts "signs out once and goes to the login page", "still goes to the login page when signing out fails"; FE:core/auth.service.spec.ts "logs out and clears all local session state". | local-verifiable |
 | FR-10 | MVP | Auth | ASSUMPTION: `POST /api/auth/change-password` rejects a wrong current password with 400 "Current password is incorrect". Evidence: IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions. | local-verifiable |
 | FR-11 | MVP | Auth | ASSUMPTION: The new password must be 10 to 64 characters, otherwise 400 "New password must be between 10 and 64 characters". Evidence: IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions (9 and 65 characters); FE:change-password/change-password.component.spec.ts "requires a new password of 10 to 64 characters". | local-verifiable |
-| FR-12 | MVP | Auth | ASSUMPTION: A confirmation that differs from the new password is rejected with 400 "New password confirmation does not match". Evidence: PARTIAL (FE:change-password/change-password.component.spec.ts "does not send a confirmation that differs from the new password" covers the client only). | local-verifiable |
-| FR-13 | MVP | Auth | ASSUMPTION: A new password equal to the current one is rejected with 400 "New password must be different from current password". Evidence: GAP. | local-verifiable |
+| FR-12 | MVP | Auth | ASSUMPTION: A confirmation that differs from the new password is rejected with 400 "New password confirmation does not match". Evidence: IT›rejectsANewPasswordWhoseConfirmationDiffers (server side); FE:change-password/change-password.component.spec.ts covers the client. | local-verifiable |
+| FR-13 | MVP | Auth | ASSUMPTION: A new password equal to the current one is rejected with 400 "New password must be different from current password". Evidence: IT›rejectsANewPasswordEqualToTheCurrentOne. | local-verifiable |
 | FR-14 | MVP | Auth | ASSUMPTION: A successful password change returns 204, stores a new bcrypt hash, expires every session of that user (current and other browsers, which then get 401 "Your session has ended. Please sign in again."), and only the new password signs in afterwards. Evidence: IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions. | local-verifiable |
 | FR-15 | MVP | Auth | ASSUMPTION: After a successful change the UI ends the session and shows the login page with "Password changed successfully. Sign in with your new password." Evidence: FE:change-password/change-password.component.spec.ts "changes the password, ends the session and asks to sign in again"; FE:login/login.component.spec.ts "tells the user the password was changed". | local-verifiable |
 | FR-16 | MVP | Auth | ASSUMPTION: When the change fails, the UI shows the server error and keeps the session. Evidence: FE:change-password/change-password.component.spec.ts "shows the server error and keeps the session". | local-verifiable |
@@ -280,17 +280,17 @@ local, so nothing is deploy-gated today (see OQ-9 and OQ-10 for budgets and avai
 
 | ID | Category | Description | Verification |
 |---|---|---|---|
-| NFR-1 | Security | ASSUMPTION: Password policy for a changed password is length 10 to 64 and different from the current password. No complexity classes, no reuse history, no breach check. The bootstrap password (`APP_ADMIN_INITIAL_PASSWORD`) is not checked against the policy. Evidence: PARTIAL (IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions covers length; the difference rule and the bootstrap password are not asserted). | local-verifiable |
-| NFR-2 | Security | ASSUMPTION: Passwords are stored only as bcrypt hashes with cost factor 12 (`BCryptPasswordEncoder(12)`), never in plain text; the repo holds no default password. Evidence: PARTIAL (LAI asserts the encoder is used, with a mock; the cost factor is not asserted). | local-verifiable |
-| NFR-3 | Security | ASSUMPTION: Session inactivity timeout is 8 hours (`server.servlet.session.timeout: 8h`), enforced by the server and mirrored in the browser from the `X-Session-Timeout-Seconds` header. Evidence: PARTIAL (IT›reportsTheActualSessionTimeoutWithoutCreatingAnonymousSessions proves the header follows the session's interval; no test pins the 8h value). | local-verifiable |
-| NFR-4 | Security | ASSUMPTION: Session cookie is `HttpOnly` and `SameSite=Strict`; the `Secure` flag is not set (the app is served over plain HTTP on localhost; see OQ-13). Evidence: GAP. | local-verifiable |
-| NFR-5 | Security | ASSUMPTION: CSRF protection uses a cookie token (`XSRF-TOKEN`, readable by the SPA) and header `X-XSRF-TOKEN` on all state-changing requests. Evidence: PARTIAL (positive path in every write test; see FR-6). | local-verifiable |
-| NFR-6 | Security | ASSUMPTION: Every response sets a Content-Security-Policy: `default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'`. Evidence: GAP. | local-verifiable |
-| NFR-7 | Security | ASSUMPTION: A new session identifier is issued at login (session fixation protection), and a password change expires all sessions of the user. Evidence: PARTIAL (IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions covers the expiry; the identifier change is not asserted). | local-verifiable |
+| NFR-1 | Security | ASSUMPTION: Password policy for a changed password is length 10 to 64 and different from the current password. No complexity classes, no reuse history, no breach check. The bootstrap password (`APP_ADMIN_INITIAL_PASSWORD`) is not checked against the policy. Evidence: IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions (length), IT›rejectsANewPasswordEqualToTheCurrentOne (difference), LAI›acceptsABootstrapPasswordShorterThanThePasswordPolicy (bootstrap exempt, OQ-7). | local-verifiable |
+| NFR-2 | Security | ASSUMPTION: Passwords are stored only as bcrypt hashes with cost factor 12 (`BCryptPasswordEncoder(12)`), never in plain text; the repo holds no default password. Evidence: SecurityConfigTest›hashesPasswordsWithBcryptAtCostTwelve; LAI asserts the encoder is used with a mock. | local-verifiable |
+| NFR-3 | Security | ASSUMPTION: Session inactivity timeout is 8 hours (`server.servlet.session.timeout: 8h`), enforced by the server and mirrored in the browser from the `X-Session-Timeout-Seconds` header. Evidence: IT›reportsTheActualSessionTimeoutWithoutCreatingAnonymousSessions (the header follows the session), IT›keepsSessionsForEightHoursOfInactivity (the configured value; MockMvc has no container to enforce it). | local-verifiable |
+| NFR-4 | Security | ASSUMPTION: Session cookie is `HttpOnly` and `SameSite=Strict`; the `Secure` flag is not set (the app is served over plain HTTP on localhost; see OQ-13). Evidence: SessionCookieHttpTest›sendsTheSessionCookieAsHttpOnlyAndSameSiteStrictWithoutTheSecureFlag (a real HTTP exchange). | local-verifiable |
+| NFR-5 | Security | ASSUMPTION: CSRF protection uses a cookie token (`XSRF-TOKEN`, readable by the SPA) and header `X-XSRF-TOKEN` on all state-changing requests. Evidence: IT›rejectsStateChangingRequestsWithoutAMatchingCsrfToken (negative path); the positive path is in every write test. | local-verifiable |
+| NFR-6 | Security | ASSUMPTION: Every response sets a Content-Security-Policy: `default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'`. Evidence: IT›sendsTheContentSecurityPolicyOnEveryResponse. | local-verifiable |
+| NFR-7 | Security | ASSUMPTION: A new session identifier is issued at login (session fixation protection), and a password change expires all sessions of the user. Evidence: IT›issuesANewSessionIdentifierAtSignIn (identifier), IT›changesTheAuthenticatedAdminPasswordAndEndsAllSessions (expiry). | local-verifiable |
 | NFR-8 | Security | ASSUMPTION: Passwords are masked in request logging: `toString()` of the login and change-password requests prints `[PROTECTED]`. Evidence: IT›masksPasswordsInAuthenticationRequestLogs. | local-verifiable |
-| NFR-9 | Security | ASSUMPTION: Error responses do not expose stack traces or raw framework messages (`server.error.include-message: never`, `include-stacktrace: never`); controller errors use problem details (title and detail), while filter-level 401 and 403 use a small `{"message": …}` JSON. Evidence: PARTIAL (IT asserts `title` and `detail` for domain errors; the config switches are not asserted). | local-verifiable |
-| NFR-10 | Security | ASSUMPTION: No login throttling, account lockout or multi-factor sign-in exists. There are no emailed or expiring links (no password reset, no invitations), so there is no link-expiry requirement. Evidence: GAP (an absence; see OQ-6). | local-verifiable |
-| NFR-11 | Security | ASSUMPTION: Authorization has a single role, `ADMIN` (the schema CHECK allows no other role); concurrent sessions per user are unlimited. Evidence: GAP. | local-verifiable |
+| NFR-9 | Security | ASSUMPTION: Error responses do not expose stack traces or raw framework messages (`server.error.include-message: never`, `include-stacktrace: never`); controller errors use problem details (title and detail), while filter-level 401 and 403 use a small `{"message": …}` JSON. Evidence: IT›doesNotLeakStackTracesOrFrameworkMessagesInErrors (switches and bodies); IT asserts `title` and `detail` for domain errors. | local-verifiable |
+| NFR-10 | Security | ASSUMPTION: No login throttling, account lockout or multi-factor sign-in exists. There are no emailed or expiring links (no password reset, no invitations), so there is no link-expiry requirement. Evidence: IT›doesNotLockTheAccountAfterRepeatedFailedSignIns (pins the absence; see OQ-6). | local-verifiable |
+| NFR-11 | Security | ASSUMPTION: Authorization has a single role, `ADMIN` (the schema CHECK allows no other role); concurrent sessions per user are unlimited. Evidence: IT›allowsOnlyTheAdminRoleAndKeepsEveryConcurrentSessionValid. | local-verifiable |
 | NFR-12 | Data integrity | ASSUMPTION: Each business operation that touches several tables (create with opening movement, receipt, production, sale, return, cancellation, write-off, adjustment) runs in one database transaction, so a rejected operation changes nothing. Evidence: IT›sellsProductsAtomicallyAndKeepsFinancialSnapshots and IT›producesAProductAtomicallyFromItsRawMaterialRecipe (rejection leaves counts and quantities unchanged). | local-verifiable |
 | NFR-13 | Data integrity | ASSUMPTION: Stock deduction is a check-and-set against the value that was read, so concurrent writers cannot drive stock negative; the connection pool size is 1. Evidence: GAP. | local-verifiable |
 | NFR-14 | Data integrity | ASSUMPTION: Money and quantity values are exact decimals. Money is 2 decimals half-up, unit costs 4 decimals half-up, and values read from SQLite are normalized to 15 significant digits. The frontend uses `core/decimal.ts` and must match the server's rounding. Evidence: SDT; IT›roundsSellingPricesHalfUpToCentsLikeThePricePreview; IT›reversesReturnedCostWithHalfUpDivisionLikeTheReturnPreview; FE:core/decimal.spec.ts. | local-verifiable |
@@ -391,17 +391,10 @@ Each has a recommended default; answering "use defaults" ratifies all of them.
 
 Candidate work: behaviors this baseline records that no existing test asserts (GAP) or asserts only in part (PARTIAL).
 Each is tagged `local-verifiable`, so a test should be written before the baseline is trusted. Test names are not
-invented here; this lists what is missing. Total: 66 requirements (23 GAP, 43 PARTIAL). Slice `harden-frontend-specs` closed five rows and narrowed NFR-19, NFR-21 and NFR-22.
+invented here; this lists what is missing. Total: 49 requirements (15 GAP, 34 PARTIAL). Slice `harden-frontend-specs` closed five rows and narrowed NFR-19, NFR-21 and NFR-22. Slice `harden-security-tests` closed the authentication, session and header rows.
 
 | Requirement | Type | What is missing |
 |---|---|---|
-| `FR-2` | GAP | Username matches case-insensitively |
-| `FR-3` | PARTIAL | Message text "Invalid username or password"; disabled user |
-| `FR-4` | PARTIAL | 403 "Access denied" path; JSON body of the 401 |
-| `FR-6` | GAP | State-changing request without CSRF token is rejected |
-| `FR-8` | GAP | Backend logout returns 204 and invalidates the session |
-| `FR-12` | PARTIAL | Server-side rejection of a mismatched confirmation |
-| `FR-13` | GAP | New password equal to the current one is rejected |
 | `FR-33` | PARTIAL | Seven of nine SPA routes are not covered by a forwarding test |
 | `FR-37` | GAP | Raw material count, product count, product units |
 | `FR-38` | PARTIAL | Cancelled sales are excluded from the sales count |
@@ -445,16 +438,6 @@ invented here; this lists what is missing. Total: 66 requirements (23 GAP, 43 PA
 | `FR-141` | PARTIAL | Average sale value is 0.00 when there are no sales |
 | `FR-143` | PARTIAL | Ordering of daily and product summaries |
 | `FR-149` | PARTIAL | CHECK and foreign-key rules other than the duplicate SKU |
-| `NFR-1` | PARTIAL | Difference rule and bootstrap password check |
-| `NFR-2` | PARTIAL | bcrypt cost factor 12 |
-| `NFR-3` | PARTIAL | The 8h value is not pinned by a test |
-| `NFR-4` | GAP | Cookie flags HttpOnly and SameSite=Strict |
-| `NFR-5` | PARTIAL | Negative CSRF path |
-| `NFR-6` | GAP | Content-Security-Policy header |
-| `NFR-7` | PARTIAL | New session id at login |
-| `NFR-9` | PARTIAL | Error config switches (no message or stack trace leakage) |
-| `NFR-10` | GAP | No throttling or lockout (an absence; a guard test would pin it) |
-| `NFR-11` | GAP | Single role and unlimited concurrent sessions |
 | `NFR-13` | GAP | Concurrent deduction cannot go negative |
 | `NFR-15` | GAP | No performance test exists |
 | `NFR-16` | PARTIAL | Only health is tested; no availability or backup behavior |

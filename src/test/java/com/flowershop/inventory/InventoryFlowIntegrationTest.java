@@ -13,12 +13,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.flowershop.inventory.auth.AuthController;
 import com.flowershop.inventory.auth.UserRepository;
+import jakarta.servlet.http.Cookie;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
@@ -26,7 +29,11 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -50,6 +57,15 @@ class InventoryFlowIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Value("${server.servlet.session.timeout}")
+    private String sessionTimeout;
+
+    @Value("${server.error.include-message}")
+    private String errorIncludeMessage;
+
+    @Value("${server.error.include-stacktrace}")
+    private String errorIncludeStacktrace;
 
     @BeforeEach
     void resetDatabase() {
@@ -1280,6 +1296,205 @@ class InventoryFlowIntegrationTest {
         login(newPassword).andExpect(status().isOk());
     }
 
+    // @trace FR-2
+    @Test
+    void matchesUsernamesRegardlessOfCase() throws Exception {
+        login("ADMIN", testPassword).andExpect(status().isOk());
+
+        assertThatThrownBy(() -> userRepository.insertAdmin("Admin", passwordEncoder.encode("x")))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    // @trace FR-3
+    @Test
+    void answersEveryFailedSignInWithTheSameMessage() throws Exception {
+        login("wrong-" + testPassword)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").value("Invalid username or password"));
+        login("nobody", testPassword)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").value("Invalid username or password"));
+
+        jdbcTemplate.update("UPDATE app_user SET enabled = 0 WHERE username = 'admin'");
+        login(testPassword)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").value("Invalid username or password"));
+    }
+
+    // @trace FR-4
+    @Test
+    void answersWithJsonMessagesWhenAuthenticationOrTheAdminRoleIsMissing() throws Exception {
+        mockMvc.perform(get("/api/dashboard"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Authentication required"));
+
+        var clerk = new SecurityContextImpl(UsernamePasswordAuthenticationToken.authenticated(
+                "clerk", null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+        var clerkSession = new MockHttpSession();
+        clerkSession.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, clerk);
+        mockMvc.perform(get("/api/dashboard").session(clerkSession))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Access denied"));
+
+        mockMvc.perform(get("/api/health")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/auth/csrf")).andExpect(status().isOk());
+    }
+
+    // @trace FR-6, NFR-5
+    @Test
+    void rejectsStateChangingRequestsWithoutAMatchingCsrfToken() throws Exception {
+        var csrfCookie = mockMvc.perform(get("/api/auth/csrf"))
+                .andReturn()
+                .getResponse()
+                .getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+        var credentials = """
+                {"username":"admin","password":"%s"}
+                """.formatted(testPassword);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Access denied"));
+        mockMvc.perform(post("/api/auth/login")
+                        .cookie(csrfCookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/auth/login")
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", "not-the-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentials))
+                .andExpect(status().isForbidden());
+
+        var session = signedInSession();
+        mockMvc.perform(post("/api/auth/logout").session(session))
+                .andExpect(status().isForbidden());
+        assertThat(session.isInvalid()).isFalse();
+        mockMvc.perform(get("/api/auth/me").session(session)).andExpect(status().isOk());
+    }
+
+    // @trace FR-8
+    @Test
+    void logsOutWithNoContentAndEndsTheServerSession() throws Exception {
+        var session = signedInSession();
+        var csrfCookie = csrfCookie(session);
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent());
+
+        assertThat(session.isInvalid()).isTrue();
+        mockMvc.perform(get("/api/auth/me").session(session)).andExpect(status().isUnauthorized());
+    }
+
+    // @trace FR-12
+    @Test
+    void rejectsANewPasswordWhoseConfirmationDiffers() throws Exception {
+        var session = signedInSession();
+
+        changePassword(session, testPassword, "Changed-" + UUID.randomUUID(), "Other-" + UUID.randomUUID())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("New password confirmation does not match"));
+    }
+
+    // @trace FR-13, NFR-1
+    @Test
+    void rejectsANewPasswordEqualToTheCurrentOne() throws Exception {
+        var session = signedInSession();
+
+        changePassword(session, testPassword, testPassword, testPassword)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("New password must be different from current password"));
+        login(testPassword).andExpect(status().isOk());
+    }
+
+    // @trace NFR-6
+    @Test
+    void sendsTheContentSecurityPolicyOnEveryResponse() throws Exception {
+        var policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
+                + "script-src 'self'; connect-src 'self'";
+
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Security-Policy", policy));
+        mockMvc.perform(get("/api/dashboard"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("Content-Security-Policy", policy));
+    }
+
+    // @trace NFR-7
+    @Test
+    void issuesANewSessionIdentifierAtSignIn() throws Exception {
+        var beforeSignIn = new MockHttpSession();
+        var identifierBefore = beforeSignIn.getId();
+
+        var result = login("admin", testPassword, beforeSignIn)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result.getRequest().getSession(false).getId()).isNotEqualTo(identifierBefore);
+    }
+
+    // @trace NFR-9
+    @Test
+    void doesNotLeakStackTracesOrFrameworkMessagesInErrors() throws Exception {
+        assertThat(errorIncludeMessage).isEqualTo("never");
+        assertThat(errorIncludeStacktrace).isEqualTo("never");
+
+        var csrfCookie = mockMvc.perform(get("/api/auth/csrf"))
+                .andReturn()
+                .getResponse()
+                .getCookie("XSRF-TOKEN");
+        var malformed = mockMvc.perform(post("/api/auth/login")
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{not json"))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(malformed).doesNotContain("Exception", "at com.", "at org.", "stackTrace");
+
+        var errorPage = mockMvc.perform(get("/error")).andReturn().getResponse().getContentAsString();
+        assertThat(errorPage).doesNotContain("Exception", "at com.", "at org.", "trace");
+    }
+
+    // @trace NFR-10
+    @Test
+    void doesNotLockTheAccountAfterRepeatedFailedSignIns() throws Exception {
+        for (var attempt = 0; attempt < 6; attempt++) {
+            login("wrong-" + attempt).andExpect(status().isUnauthorized());
+        }
+
+        login(testPassword).andExpect(status().isOk());
+    }
+
+    // @trace NFR-11
+    @Test
+    void allowsOnlyTheAdminRoleAndKeepsEveryConcurrentSessionValid() throws Exception {
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                "INSERT INTO app_user (username, password_hash, role) VALUES ('clerk', 'x', 'MANAGER')"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+
+        var sessions = List.of(signedInSession(), signedInSession(), signedInSession());
+
+        for (var session : sessions) {
+            mockMvc.perform(get("/api/auth/me").session(session)).andExpect(status().isOk());
+        }
+    }
+
+    // @trace NFR-3
+    @Test
+    void keepsSessionsForEightHoursOfInactivity() {
+        assertThat(sessionTimeout).isEqualTo("8h");
+    }
+
     @Test
     void masksPasswordsInAuthenticationRequestLogs() {
         var loginRequest = new AuthController.LoginRequest("admin", "login-secret");
@@ -1387,19 +1602,67 @@ class InventoryFlowIntegrationTest {
     }
 
     private ResultActions login(String password) throws Exception {
+        return login("admin", password);
+    }
+
+    private ResultActions login(String username, String password) throws Exception {
+        return login(username, password, null);
+    }
+
+    private ResultActions login(String username, String password, MockHttpSession session) throws Exception {
         var csrfResponse = mockMvc.perform(get("/api/auth/csrf"))
                 .andExpect(status().isOk())
                 .andReturn();
         var csrfCookie = csrfResponse.getResponse().getCookie("XSRF-TOKEN");
         assertThat(csrfCookie).isNotNull();
 
-        return mockMvc.perform(post("/api/auth/login")
+        var request = post("/api/auth/login")
                 .cookie(csrfCookie)
                 .header("X-XSRF-TOKEN", csrfCookie.getValue())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"username":"admin","password":"%s"}
-                        """.formatted(password)));
+                        {"username":"%s","password":"%s"}
+                        """.formatted(username, password));
+        if (session != null) {
+            request.session(session);
+        }
+        return mockMvc.perform(request);
+    }
+
+    private MockHttpSession signedInSession() throws Exception {
+        return (MockHttpSession) login(testPassword)
+                .andExpect(status().isOk())
+                .andReturn()
+                .getRequest()
+                .getSession(false);
+    }
+
+    private Cookie csrfCookie(MockHttpSession session) throws Exception {
+        var csrfCookie = mockMvc.perform(get("/api/auth/csrf").session(session))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getCookie("XSRF-TOKEN");
+        assertThat(csrfCookie).isNotNull();
+        return csrfCookie;
+    }
+
+    private ResultActions changePassword(
+            MockHttpSession session, String currentPassword, String newPassword, String confirmation)
+            throws Exception {
+        var csrfCookie = csrfCookie(session);
+        return mockMvc.perform(post("/api/auth/change-password")
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "currentPassword":"%s",
+                          "newPassword":"%s",
+                          "newPasswordConfirmation":"%s"
+                        }
+                        """.formatted(currentPassword, newPassword, confirmation)));
     }
 
     private void createRawMaterial(

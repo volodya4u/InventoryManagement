@@ -69,8 +69,7 @@ Every response SHALL set a Content-Security-Policy of `default-src 'self'; img-s
 framework messages (`server.error.include-message: never`, `include-stacktrace: never`); controller errors use problem
 details (title and detail) while filter-level 401 and 403 use a small `{"message": ...}` JSON (NFR-9).
 
-> GAP: the CSP header and the error configuration switches are not asserted; tests assert `title` and `detail` for
-> domain errors only (see docs/requirements.md Coverage gaps, NFR-6 and NFR-9 rows).
+> Covered by slice `harden-security-tests`: `sendsTheContentSecurityPolicyOnEveryResponse` asserts the exact policy, and `doesNotLeakStackTracesOrFrameworkMessagesInErrors` the error switches and that error bodies carry no trace.
 
 #### Scenario: Domain error shape
 - **WHEN** a domain rule rejects a request
