@@ -20,13 +20,13 @@ tests; every requirement is an unratified assumption.
 - **WHEN** a signed-in client calls `/api/dashboard`
 - **THEN** `rawMaterialTypes` is 2, `productTypes` is 1 and `productUnits` is 5
 
-### Requirement: Sales count excludes only cancelled sales
+### Requirement: Sales count leaves out cancelled and fully returned sales
 
-`salesCount` SHALL count sales whose status is not `CANCELLED`, so `RETURNED` and `PARTIALLY_RETURNED` sales are counted
-(FR-38).
+`salesCount` SHALL count sales whose status is `COMPLETED` or `PARTIALLY_RETURNED`, so `CANCELLED` and `RETURNED`
+sales are not counted (FR-38).
 
-> Covered by slice `harden-sales-reports-history-tests`: `countsEverySaleExceptCancelledOnesOnTheDashboard` asserts the cancelled exclusion and that returned and partly returned sales are counted.
-> GAP: whether counting returned sales is intended is unclear (see docs/requirements.md OQ-2).
+> Stated by the owner on 2026-10-11 (docs/requirements.md OQ-2): the dashboard leaves out cancelled and fully returned sales; a partly returned sale still counts. Before that answer the count excluded only `CANCELLED` sales.
+> Covered by `InventoryFlowIntegrationTest` › `countsCompletedAndPartlyReturnedSalesOnTheDashboard`, which asserts both exclusions and that a partly returned sale is counted.
 
 #### Scenario: One completed sale
 - **GIVEN** one `COMPLETED` sale
@@ -37,6 +37,11 @@ tests; every requirement is an unratified assumption.
 - **GIVEN** a sale in status `CANCELLED`
 - **WHEN** the dashboard is requested
 - **THEN** that sale is not counted
+
+#### Scenario: Returned and partly returned sales
+- **GIVEN** one `COMPLETED` sale, one `PARTIALLY_RETURNED` sale and one `RETURNED` sale
+- **WHEN** the dashboard is requested
+- **THEN** `salesCount` is 2: the fully returned sale is not counted
 
 ### Requirement: Low-stock count
 

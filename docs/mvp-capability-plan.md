@@ -56,7 +56,7 @@ Common to all slices — **Definition of done:** the listed gap rows are asserte
 
 ### 4.4 H4 `harden-sales-reports-history-tests`
 - **Scope in:** FR-37, FR-38, FR-102, FR-103, FR-107, FR-109, FR-110, FR-114, FR-116, FR-117, FR-118, FR-127, FR-131, FR-132, FR-134, FR-141, FR-143.
-- **Scope out:** excluding returned sales from the dashboard count (OQ-2); date limits (OQ-4); changing the return average-cost blend (OQ-16).
+- **Scope out:** date limits (OQ-4); changing the return average-cost blend (OQ-16).
 
 ### 4.5 H5 `harden-infrastructure-tests`
 - **Scope in:** FR-33, FR-70, FR-72, FR-73, FR-74, FR-149, NFR-13.
@@ -231,7 +231,7 @@ Total: **149 MVP FRs across 16 retrofit baseline slices** (no gaps, no duplicate
 |---|---|
 | NFR-15 (performance), NFR-16 (availability, backup) | Budgets and targets are undeclared (OQ-9, OQ-10). A slice needs a ratified budget to assert, so ask the owner first. |
 | NFR-17 (`e2e`), NFR-18 (`vision-verify`), NFR-20 (`a11y`) | No tooling exists; waived at baseline (`docs/qa/waivers/`). Closing them needs Playwright or axe, i.e. a new dependency, which `AGENTS.md` says to ask about first. |
-| Behavior changes suggested by the open questions (OQ-1, 2, 5, 6, 7, 11, 13) | The owner ratified current behavior. Each would be its own behavior slice if the owner later asks. |
+| Behavior changes suggested by the open questions (OQ-5, 6, 7, 11, 13) | The owner ratified current behavior. Each would be its own behavior slice if the owner later asks. (OQ-1 was confirmed as intended; OQ-2 became its own behavior slice, `claude/dashboard-excludes-returned-sales`, after the owner asked for it.) |
 
 ## 7. Sequencing
 
