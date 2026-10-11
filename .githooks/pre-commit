@@ -1,0 +1,4 @@
+#!/bin/sh
+# Deterministic pre-commit checks (ADR-0002). Telemetry is off here: trace/ledger.jsonl is tracked, so a ledger line
+# per commit would leave the working tree dirty after every commit.
+FACTORY_TELEMETRY=off exec node scripts/hooks-pre-commit.mjs
