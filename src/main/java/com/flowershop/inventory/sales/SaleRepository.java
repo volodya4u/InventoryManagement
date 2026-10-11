@@ -176,7 +176,7 @@ public class SaleRepository {
 
     public long count() {
         Long value = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM sale WHERE status <> 'CANCELLED'",
+                "SELECT COUNT(*) FROM sale WHERE status = 'COMPLETED'",
                 Long.class);
         return value == null ? 0L : value;
     }
