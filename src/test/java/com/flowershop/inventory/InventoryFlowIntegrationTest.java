@@ -1538,7 +1538,7 @@ class InventoryFlowIntegrationTest {
 
     // @trace FR-38
     @Test
-    void countsOnlyCompletedSalesOnTheDashboard() throws Exception {
+    void countsCompletedAndPartlyReturnedSalesOnTheDashboard() throws Exception {
         insertProduct(1, "BOX-1", "Box one", 10, "40", "20");
         var session = signedInSession();
         createSale(session, "2026-07-01", 1, 1, "40");
@@ -1555,7 +1555,7 @@ class InventoryFlowIntegrationTest {
                 .containsExactly("COMPLETED", "CANCELLED", "PARTIALLY_RETURNED", "RETURNED");
         mockMvc.perform(get("/api/dashboard").session(session))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.salesCount").value(1));
+                .andExpect(jsonPath("$.salesCount").value(2));
     }
 
     // @trace FR-102
