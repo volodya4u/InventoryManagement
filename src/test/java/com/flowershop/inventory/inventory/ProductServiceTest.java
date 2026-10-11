@@ -32,6 +32,7 @@ class ProductServiceTest {
     private final ProductService service =
             new ProductService(repository, rawMaterialRepository, imageValidator);
 
+    // @trace FR-81
     @Test
     void createsProductWithCalculatedSellingPriceAndOpeningMovement() {
         var image = mock(MultipartFile.class);
@@ -83,6 +84,7 @@ class ProductServiceTest {
         assertThat(openingDate.getValue()).isIn(earliestOpeningDate, latestOpeningDate);
     }
 
+    // @trace FR-77
     @Test
     void rejectsDuplicateSkuBeforeValidatingRecipeOrImage() {
         when(repository.existsBySku("BOUQUET", 0)).thenReturn(true);
@@ -103,6 +105,7 @@ class ProductServiceTest {
         verifyNoInteractions(rawMaterialRepository, imageValidator);
     }
 
+    // @trace FR-89
     @Test
     void reportsEveryRawMaterialShortageBeforeStartingProduction() {
         var recipe = List.of(
@@ -149,6 +152,7 @@ class ProductServiceTest {
                 anyString());
     }
 
+    // @trace FR-91, FR-92
     @Test
     void producesStockAndUpdatesWeightedAverageCost() {
         var recipe = recipeDto();

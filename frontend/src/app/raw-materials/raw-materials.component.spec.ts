@@ -33,6 +33,7 @@ describe('RawMaterialsComponent amounts', () => {
     };
   }
 
+  // @trace FR-69
   it('values a write-off of a fractional quantity without floating-point drift', () => {
     component.openStockOperation(
       rawMaterial({ unit: 'KILOGRAM', quantity: 0.7, averageUnitCost: 3 }),
@@ -45,6 +46,7 @@ describe('RawMaterialsComponent amounts', () => {
     expect(component.stockValueChange()).toBe(0.9);
   });
 
+  // @trace FR-69
   it('values a stock adjustment without floating-point drift', () => {
     component.openStockOperation(rawMaterial({ quantity: 2, averageUnitCost: 1.1 }), 'ADJUSTMENT');
     component.stockOperationForm.controls.quantity.setValue(5);
@@ -54,6 +56,7 @@ describe('RawMaterialsComponent amounts', () => {
     expect(component.stockValueChange()).toBe(3.3);
   });
 
+  // @trace FR-69
   it('keeps a stock adjustment finer than four decimal places', () => {
     component.openStockOperation(
       rawMaterial({ unit: 'KILOGRAM', quantity: 1.00004, averageUnitCost: 3 }),
@@ -67,6 +70,7 @@ describe('RawMaterialsComponent amounts', () => {
     expect(component.stockValueChange()).toBe(0.00012);
   });
 
+  // @trace FR-69
   it('values initial stock without floating-point drift', () => {
     component.openCreate();
     component.form.patchValue({ unit: 'KILOGRAM', quantity: 1.5, initialUnitCost: 0.4 });
@@ -74,6 +78,7 @@ describe('RawMaterialsComponent amounts', () => {
     expect(component.initialStockValue()).toBe(0.6);
   });
 
+  // @trace FR-69
   it('totals a receipt without floating-point drift', () => {
     component.openReceipt(rawMaterial({ unit: 'KILOGRAM' }));
     component.receiptForm.patchValue({ receivedQuantity: 0.7, unitPurchaseCost: 3 });
@@ -81,6 +86,7 @@ describe('RawMaterialsComponent amounts', () => {
     expect(component.receiptValue()).toBe(2.1);
   });
 
+  // @trace FR-69
   it('totals the stock value of all raw materials without floating-point drift', () => {
     component.items.set([
       rawMaterial({ id: 1, stockValue: 0.1 }),
@@ -125,6 +131,7 @@ describe('RawMaterialsComponent low-stock badge', () => {
     };
   }
 
+  // @trace FR-59
   it('marks a raw material below its reorder level', () => {
     const fixture = TestBed.createComponent(RawMaterialsComponent);
     fixture.detectChanges();

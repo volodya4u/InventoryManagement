@@ -90,6 +90,7 @@ class InventoryFlowIntegrationTest {
         userRepository.insertAdmin("admin", passwordEncoder.encode(testPassword));
     }
 
+    // @trace FR-101, FR-104, FR-105, FR-106, NFR-12
     @Test
     void sellsProductsAtomicallyAndKeepsFinancialSnapshots() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -168,6 +169,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.salesCount").value(1));
     }
 
+    // @trace FR-108, FR-111, FR-115, FR-119, FR-121, FR-122, FR-123, FR-124, FR-137, FR-138, FR-139, FR-140
     @Test
     void returnsAndCancelsSalesWhileRestoringStockAndMonthlyResults() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -323,6 +325,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.returns.length()").value(3));
     }
 
+    // @trace FR-120
     @Test
     void reversesTheWholeRecordedCostWhenUnitsAreReturnedOneByOne() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -389,6 +392,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.grossProfit").value(0));
     }
 
+    // @trace FR-136, FR-137, FR-138, FR-142
     @Test
     void reportsMonthlySalesWithoutMixingOtherMonths() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -448,6 +452,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(forwardedUrl("/index.html"));
     }
 
+    // @trace FR-36
     @Test
     void reportsHealthWithoutSigningInOrCreatingASession() throws Exception {
         var result = mockMvc.perform(get("/api/health"))
@@ -457,6 +462,7 @@ class InventoryFlowIntegrationTest {
         assertThat(result.getRequest().getSession(false)).isNull();
     }
 
+    // @trace FR-64, FR-65, FR-66, FR-95, FR-96
     @Test
     void writesOffAndAdjustsRawMaterialAndProductStock() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -624,6 +630,7 @@ class InventoryFlowIntegrationTest {
                 Integer.class)).isEqualTo(2);
     }
 
+    // @trace FR-68
     @Test
     void readsAndConsumesFloatingPointDriftedStockAsExactDecimals() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -664,6 +671,7 @@ class InventoryFlowIntegrationTest {
         assertMaterialQuantity("Ribbon", "0");
     }
 
+    // @trace FR-52, FR-53, FR-77
     @Test
     void rejectsDuplicateSkusAndDeletingRecordsThatAreInUse() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -755,6 +763,7 @@ class InventoryFlowIntegrationTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
+    // @trace FR-50, FR-51
     @Test
     void keepsTheUnitOfRawMaterialsWhoseQuantitiesAreAlreadyRecorded() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -793,6 +802,7 @@ class InventoryFlowIntegrationTest {
                 .isEqualTo("KILOGRAM");
     }
 
+    // @trace FR-78
     @Test
     void rejectsProductMarkupOrAdvertisingCostWithMoreThanTwoDecimals() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -836,6 +846,7 @@ class InventoryFlowIntegrationTest {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.class)).isZero();
     }
 
+    // @trace FR-81, FR-84, FR-89, FR-90, FR-91, FR-92, NFR-12
     @Test
     void producesAProductAtomicallyFromItsRawMaterialRecipe() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -951,6 +962,7 @@ class InventoryFlowIntegrationTest {
                 Integer.class)).isEqualTo(3);
     }
 
+    // @trace FR-128, FR-130, FR-133
     @Test
     void listsAndFiltersUnifiedStockMovementHistory() throws Exception {
         jdbcTemplate.update("""
@@ -1018,6 +1030,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.detail").value("From date cannot be later than To date"));
     }
 
+    // @trace FR-129, FR-133
     @Test
     void searchesStockHistoryByNameOrSkuIgnoringCaseInAnyAlphabet() throws Exception {
         jdbcTemplate.update("""
@@ -1061,6 +1074,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.totals.netValueChange").value(0));
     }
 
+    // @trace FR-1, FR-45, FR-47, FR-62, FR-63
     @Test
     void authenticatesAdminAndStoresValidatedPngAsBlob() throws Exception {
         mockMvc.perform(get("/api/raw-materials"))
@@ -1129,6 +1143,7 @@ class InventoryFlowIntegrationTest {
         assertThat(movements).isEqualTo(2);
     }
 
+    // @trace FR-51, FR-57, FR-58
     @Test
     void recordsRawMaterialReorderLevelAndLowStockFlag() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -1164,6 +1179,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.belowReorderLevel").value(false));
     }
 
+    // @trace FR-39, FR-58
     @Test
     void dashboardCountsLowStockRawMaterials() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -1188,6 +1204,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.lowStockRawMaterials").value(2));
     }
 
+    // @trace FR-7, FR-23
     @Test
     void reportsTheActualSessionTimeoutWithoutCreatingAnonymousSessions() throws Exception {
         mockMvc.perform(get("/api/auth/me"))
@@ -1211,6 +1228,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(header().doesNotExist("X-Session-Timeout-Seconds"));
     }
 
+    // @trace FR-10, FR-11, FR-14
     @Test
     void changesTheAuthenticatedAdminPasswordAndEndsAllSessions() throws Exception {
         var login = login(testPassword)
@@ -1345,6 +1363,7 @@ class InventoryFlowIntegrationTest {
     }
 
     // @trace FR-6, NFR-5
+    // @trace FR-5
     @Test
     void rejectsStateChangingRequestsWithoutAMatchingCsrfToken() throws Exception {
         var csrfCookie = mockMvc.perform(get("/api/auth/csrf"))
@@ -1918,6 +1937,7 @@ class InventoryFlowIntegrationTest {
                 .andExpect(jsonPath("$.productSummaries[3].productName").value("Bravo"));
     }
 
+    // @trace NFR-8
     @Test
     void masksPasswordsInAuthenticationRequestLogs() {
         var loginRequest = new AuthController.LoginRequest("admin", "login-secret");
@@ -1934,6 +1954,7 @@ class InventoryFlowIntegrationTest {
                 .doesNotContain("current-secret", "new-secret-value");
     }
 
+    // @trace FR-81, NFR-14
     @Test
     void roundsSellingPricesHalfUpToCentsLikeThePricePreview() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();
@@ -1957,6 +1978,7 @@ class InventoryFlowIntegrationTest {
         assertSellingPrice(session, csrfCookie, "FERN-ONE", 4, "1", "9", 0.55);
     }
 
+    // @trace FR-120, NFR-14
     @Test
     void reversesReturnedCostWithHalfUpDivisionLikeTheReturnPreview() throws Exception {
         var login = login(testPassword).andExpect(status().isOk()).andReturn();

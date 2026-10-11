@@ -24,6 +24,7 @@ describe('DashboardComponent', () => {
     TestBed.resetTestingModule();
   });
 
+  // @trace FR-40
   it('shows the inventory summary', () => {
     expect(component.loading()).toBe(true);
     requests.expectOne('/api/dashboard').flush({
@@ -42,6 +43,7 @@ describe('DashboardComponent', () => {
     expect(values).toEqual(['3', '2', '12.5', '7', '1']);
   });
 
+  // @trace FR-41
   it('shows the API error instead of the numbers', () => {
     requests
       .expectOne('/api/dashboard')
@@ -57,6 +59,7 @@ describe('DashboardComponent', () => {
     expect(values).toEqual(['—', '—', '—', '—', '—']);
   });
 
+  // @trace FR-41
   it('loads again on demand and clears the previous error', () => {
     requests.expectOne('/api/dashboard').flush(null, { status: 500, statusText: 'Error' });
     expect(component.error()).not.toBe('');
@@ -73,6 +76,7 @@ describe('DashboardComponent', () => {
     expect(component.summary()?.salesCount).toBe(0);
   });
 
+  // @trace FR-40
   it('shows the low-stock raw material count', () => {
     requests.expectOne('/api/dashboard').flush({
       rawMaterialTypes: 4,

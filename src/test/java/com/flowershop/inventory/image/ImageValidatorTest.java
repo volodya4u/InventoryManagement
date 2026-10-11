@@ -35,6 +35,7 @@ class ImageValidatorTest {
                 .hasMessageContaining("do not match");
     }
 
+    // @trace FR-71
     @Test
     void rejectsFilesLargerThanTwoMegabytes() {
         var file = new MockMultipartFile(

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class SqliteDecimalsTest {
 
+    // @trace FR-68, NFR-14
     @Test
     void removesFloatingPointDriftFromDoubles() {
         assertThat(SqliteDecimals.normalize(new BigDecimal("0.19999999999999996")))
@@ -17,6 +18,7 @@ class SqliteDecimalsTest {
                 .isEqualTo(new BigDecimal("350"));
     }
 
+    // @trace FR-68, NFR-14
     @Test
     void keepsValuesThatAreAlreadyExact() {
         var value = new BigDecimal("116.6667");
@@ -26,6 +28,7 @@ class SqliteDecimalsTest {
         assertThat(SqliteDecimals.normalize(null)).isNull();
     }
 
+    // @trace FR-68, NFR-14
     @Test
     void neverUsesExponentNotationForLargeWholeNumbers() {
         assertThat(SqliteDecimals.normalize(new BigDecimal("12345678901234567")).toString())

@@ -101,6 +101,7 @@ describe('SalesComponent', () => {
     TestBed.resetTestingModule();
   });
 
+  // @trace FR-113
   it('loads sales and products and opens the sale named in ?saleId', () => {
     setup({ saleId: '8' });
     flushLoad([sale(), sale({ id: 8, saleNumber: 'S-0008' })], [product()]);
@@ -110,6 +111,7 @@ describe('SalesComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('S-0008');
   });
 
+  // @trace FR-113
   it('totals net revenue, cost and profit after returns', () => {
     setup();
     flushLoad(
@@ -125,6 +127,7 @@ describe('SalesComponent', () => {
     expect(component.totalGrossProfit()).toBeCloseTo(73.33, 10);
   });
 
+  // @trace FR-112
   it('fills the unit price from the product and starts at one unit', () => {
     setup();
     flushLoad([], [product()]);
@@ -140,6 +143,7 @@ describe('SalesComponent', () => {
     expect(component.lineProfit(row)).toBe(10);
   });
 
+  // @trace FR-112
   it('does not post a sale that needs more units than the stock holds', () => {
     setup();
     flushLoad([], [product({ quantity: 2 })]);
@@ -154,6 +158,7 @@ describe('SalesComponent', () => {
     requests.expectNone({ method: 'POST', url: '/api/sales' });
   });
 
+  // @trace FR-112
   it('posts the sale with trimmed notes, then closes the dialog and reloads', () => {
     setup();
     flushLoad([], [product()]);
@@ -177,6 +182,7 @@ describe('SalesComponent', () => {
     expect(component.dialogOpen()).toBe(false);
   });
 
+  // @trace FR-120
   it('reverses the recorded line cost in proportion, exactly on the last unit', () => {
     setup();
     const partlyReturned = sale({
@@ -194,6 +200,7 @@ describe('SalesComponent', () => {
     expect(component.returnRefund()).toBe(60);
   });
 
+  // @trace FR-126
   it('offers only items with units left and blocks returning more than that', () => {
     setup();
     const partlyReturned = sale({
@@ -213,6 +220,7 @@ describe('SalesComponent', () => {
     requests.expectNone({ method: 'POST', url: '/api/sales/7/returns' });
   });
 
+  // @trace FR-126
   it('asks for a quantity instead of posting an empty return', () => {
     setup();
     flushLoad([sale()], [product()]);
@@ -223,6 +231,7 @@ describe('SalesComponent', () => {
     requests.expectNone({ method: 'POST', url: '/api/sales/7/returns' });
   });
 
+  // @trace FR-126
   it('allows returns for completed and partly returned sales, cancellation only for completed', () => {
     setup();
     flushLoad([], []);
@@ -320,6 +329,7 @@ describe('SalesComponent amounts', () => {
     component.itemControls[1].setValue({ productId: 2, quantity: 3, unitPrice: 1.1 });
   }
 
+  // @trace FR-113
   it('prices each sale line without floating-point drift', () => {
     fillSaleForm();
     const [roses, tulips] = component.itemControls;
@@ -329,6 +339,7 @@ describe('SalesComponent amounts', () => {
     expect(component.lineProfit(roses)).toBe(0.3);
   });
 
+  // @trace FR-113
   it('totals the sale form without floating-point drift', () => {
     fillSaleForm();
 
@@ -337,6 +348,7 @@ describe('SalesComponent amounts', () => {
     expect(component.formGrossProfit()).toBe(3.3);
   });
 
+  // @trace FR-126
   it('totals a return without floating-point drift', () => {
     component.openReturn(
       sale({
@@ -382,6 +394,7 @@ describe('SalesComponent amounts', () => {
     },
   );
 
+  // @trace FR-113
   it('sums the net totals of all sales without floating-point drift', () => {
     component.sales.set([
       sale({ id: 1, netRevenue: 10.1, netCost: 10, netGrossProfit: 0.1 }),

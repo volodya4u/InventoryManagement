@@ -27,6 +27,7 @@ describe('AuthService', () => {
     localStorage.clear();
   });
 
+  // @trace FR-7
   it('loads the authenticated user and stores it in the session signal', () => {
     const received = vi.fn();
 
@@ -52,6 +53,7 @@ describe('AuthService', () => {
     expect(auth.user()).toEqual(user);
   });
 
+  // @trace FR-9
   it('logs out and clears all local session state', () => {
     auth.user.set(user);
     auth.recordActivity(60);

@@ -19,6 +19,7 @@ class StockMovementServiceTest {
     private final StockMovementRepository repository = mock(StockMovementRepository.class);
     private final StockMovementService service = new StockMovementService(repository);
 
+    // @trace FR-130
     @Test
     void rejectsFromDateLaterThanToDate() {
         assertThatThrownBy(() -> service.find(
@@ -35,6 +36,7 @@ class StockMovementServiceTest {
         verifyNoInteractions(repository);
     }
 
+    // @trace FR-130
     @Test
     void rejectsSearchTextLongerThan120Characters() {
         assertThatThrownBy(() -> service.find(
@@ -51,6 +53,7 @@ class StockMovementServiceTest {
         verifyNoInteractions(repository);
     }
 
+    // @trace FR-130
     @Test
     void trimsSearchTextAndForwardsTheCompleteFilter() {
         var expectedFilter = new StockMovementFilter(
@@ -77,6 +80,7 @@ class StockMovementServiceTest {
         verify(repository).find(expectedFilter);
     }
 
+    // @trace FR-130
     @Test
     void convertsNullSearchTextToAnEmptyString() {
         var expectedFilter = new StockMovementFilter(

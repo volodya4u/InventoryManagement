@@ -19,6 +19,7 @@ class LocalAdminInitializerTest {
     private final PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
     private final ApplicationArguments arguments = mock(ApplicationArguments.class);
 
+    // @trace FR-19
     @Test
     void leavesExistingAdministratorUnchanged() {
         when(userRepository.findByUsername("admin"))
@@ -32,6 +33,7 @@ class LocalAdminInitializerTest {
         verifyNoInteractions(passwordEncoder);
     }
 
+    // @trace FR-18
     @Test
     void requiresInitialPasswordWhenAdministratorDoesNotExist() {
         when(userRepository.findByUsername("admin")).thenReturn(Optional.empty());
@@ -48,6 +50,7 @@ class LocalAdminInitializerTest {
                 org.mockito.ArgumentMatchers.anyString());
     }
 
+    // @trace FR-17
     @Test
     void hashesAndInsertsMissingAdministrator() {
         when(userRepository.findByUsername("admin")).thenReturn(Optional.empty());

@@ -48,6 +48,7 @@ describe('session expiry', () => {
       .flush(user, { headers: { 'X-Session-Timeout-Seconds': '60' } });
   }
 
+  // @trace FR-24
   it('clears an idle view at the server timeout without sending keep-alive requests', () => {
     signIn(8 * 60 * 60);
     vi.advanceTimersByTime(8 * 60 * 60 * 1000 - 1);
@@ -61,6 +62,7 @@ describe('session expiry', () => {
     requests.expectNone(() => true);
   });
 
+  // @trace FR-25
   it('renews the deadline on API activity', () => {
     signIn();
     vi.advanceTimersByTime(30_000);
@@ -74,6 +76,7 @@ describe('session expiry', () => {
     expect(auth.user()).toBeNull();
   });
 
+  // @trace FR-26
   it('immediately clears authentication on a rejected protected request', () => {
     signIn();
     http.get('/api/products').subscribe({ error: () => {} });
@@ -102,6 +105,7 @@ describe('session expiry', () => {
     expect(auth.user()).toBeNull();
   });
 
+  // @trace FR-29
   it('checks authentication after a forbidden write and redirects if the session is gone', () => {
     signIn();
     http.post('/api/sales', {}).subscribe({ error: () => {} });
@@ -112,6 +116,7 @@ describe('session expiry', () => {
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 
+  // @trace FR-29
   it('keeps a valid session after a genuine permission or CSRF failure', () => {
     signIn();
     http.post('/api/sales', {}).subscribe({ error: () => {} });
@@ -124,6 +129,7 @@ describe('session expiry', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  // @trace FR-30
   it('does not treat wrong login credentials as expiry', () => {
     auth.login('admin', 'wrong').subscribe({ error: () => {} });
     requests.expectOne('/api/auth/csrf').flush({});
@@ -131,6 +137,7 @@ describe('session expiry', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  // @trace FR-30
   it('does not log out on network or server errors', () => {
     signIn();
     http.get('/api/products').subscribe({ error: () => {} });
@@ -139,6 +146,7 @@ describe('session expiry', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  // @trace FR-32
   it('cannot restore authentication from an in-flight response after expiry', () => {
     signIn();
     auth.ensureAuthenticated().subscribe();
@@ -149,6 +157,7 @@ describe('session expiry', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  // @trace FR-25
   it('uses activity from another tab even if its storage event was delayed', () => {
     signIn();
     vi.advanceTimersByTime(30_000);
@@ -159,6 +168,7 @@ describe('session expiry', () => {
     expect(auth.user()).toBeNull();
   });
 
+  // @trace FR-31
   it('clears a suspended view on focus when its deadline has passed', () => {
     signIn();
     vi.setSystemTime(Date.now() + 61_000);
@@ -166,6 +176,7 @@ describe('session expiry', () => {
     expect(auth.user()).toBeNull();
   });
 
+  // @trace FR-31
   it('clears the view when another tab signs out', () => {
     signIn();
     window.dispatchEvent(
@@ -175,6 +186,7 @@ describe('session expiry', () => {
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 
+  // @trace FR-27
   it('blocks Save before sending anything when the expiry timer has not run yet', () => {
     signIn();
     vi.setSystemTime(Date.now() + 61_000);
@@ -227,6 +239,7 @@ describe('session expiry', () => {
     expect(saved).toHaveBeenCalledWith({ id: 1 });
   });
 
+  // @trace FR-27
   it('closes the view without showing a form error if the session expires during Save', () => {
     signIn();
     const error = vi.fn();
