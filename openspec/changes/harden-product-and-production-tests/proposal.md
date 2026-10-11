@@ -16,7 +16,8 @@ changes. Recalculating a stored selling price after a raw material's cost change
 
 ## Impact
 - Affected specs: `products`, `production`, `product-stock`. Their requirements and scenarios are unchanged; only the
-  `> GAP:` notes become "Covered by slice" notes.
+  `> GAP:` notes become "Covered by slice" notes, and one scenario line (a fractional product quantity) loses its
+  "not test-verified" remark.
 - Affected code: `src/test/java` only. No `src/main` file in the final diff.
 - Observed while testing: constraint failures on the multipart product form (length limits, quantity digits, recipe
   items) come back as a 400 titled "Validation error" (the `ApiExceptionHandler` handler), while JSON request bodies
