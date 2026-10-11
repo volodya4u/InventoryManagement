@@ -4,6 +4,8 @@
 // report or a pull request. Each check's full output goes to target/dod/<n>.log; a failing check also prints its tail.
 // A test check also fails when its runner exits 0 but did not run every test class or spec file on disk (backend,
 // frontend) or ran no test at all (self-test, harness unit tests, backend); see scripts/dod-checks.mjs.
+// It first regenerates the reports the pre-commit hook rewrites (traceability, trajectory), so the run verifies the files
+// the commit will store; see docs/adr/0003-generated-files-and-dod.md.
 // The frontend checks run with the Node that Maven pins (target/frontend-tooling) when it is installed.
 // Every run, green or red, appends a DodRun record (each check's exit code and result, and the fingerprint of the code it
 // verified) to the agent log buffer (scripts/loop-record.mjs), so the loop's iterations are the tool's record.
@@ -19,6 +21,7 @@ import {
   findFiles,
   frontendNode,
   frontendVerdict,
+  generatedReportsVerdict,
   mcpSmokeVerdict,
   nodeTestVerdict,
   pinnedNodePath,
@@ -26,6 +29,7 @@ import {
   specFilePattern,
 } from "./dod-checks.mjs";
 import { codeFingerprint, markerPath } from "./dod-fingerprint.mjs";
+import { GENERATED } from "./hooks-pre-commit.mjs";
 import { appendRecord } from "./loop-record.mjs";
 
 const root = process.cwd();
@@ -102,6 +106,37 @@ const logDir = join(root, "target", "dod");
 mkdirSync(logDir, { recursive: true });
 // Every log starts as "not run", so a check skipped after a failure never shows an earlier run's output.
 for (const [i, check] of checks.entries()) writeFileSync(join(logDir, `${i + 1}.log`), `${check.name}: not run\n`);
+const rows = [];
+const ran = [];
+let exitCode = 0;
+
+// The pre-commit hook rewrites the traceability and trajectory reports at commit time, and trace/*.json counts as code.
+// Regenerate them first, with the hook's own list, so this run verifies (and the reviewer then reads) the files the
+// commit will store. A generator that fails would make the hook refuse the commit, so it fails the run here too.
+const generatedSince = Date.now();
+const generatedRuns = GENERATED.map(([script]) => {
+  const r = spawnSync(process.execPath, [join(root, script)], { cwd: root, encoding: "utf8" });
+  return { script, status: r.status, output: `${r.stdout ?? ""}${r.stderr ?? ""}${r.error ? String(r.error) : ""}` };
+});
+writeFileSync(
+  join(logDir, "0.log"),
+  generatedRuns.map((g) => `$ node ${g.script}\n${g.output}`).join("\n").replace(ansi, ""),
+);
+const generated = generatedReportsVerdict(generatedRuns);
+// The first generator that failed decides the exit column; a null status (it could not start) must stay null.
+const failedRun = generatedRuns.find(({ status }) => status !== 0);
+const generatedStatus = failedRun ? failedRun.status : 0;
+const generatedCode = checkExitCode(generatedStatus, generated.ok);
+rows.push(
+  `| Generated reports | \`${GENERATED.map(([script]) => `node ${script}`).join("; ")}\` | ${exitColumn(generatedStatus, generatedCode)} | ${((Date.now() - generatedSince) / 1000).toFixed(1)} s | ${generated.result} |`,
+);
+ran.push({ name: "Generated reports", exit: generatedCode, result: generated.result });
+if (generatedCode !== 0) {
+  exitCode = generatedCode;
+  console.error(`\nGenerated reports failed (${generated.result}). Last lines of target/dod/0.log:\n`);
+  console.error(generatedRuns.map((g) => g.output).join("\n").replace(ansi, "").trimEnd().split("\n").slice(-60).join("\n"));
+  for (const skipped of checks) rows.push(`| ${skipped.name} | \`${skipped.label}\` | – | – | not run |`);
+}
 const head = sh("git", ["rev-parse", "--short", "HEAD"]).stdout?.trim() || "unknown";
 const dirty = (sh("git", ["status", "--porcelain"]).stdout ?? "").split("\n").filter(Boolean).length;
 // Fingerprint the code at the start of the run: an edit made while the checks run is then an unverified change the
@@ -112,10 +147,8 @@ try {
 } catch {
   /* not a git work tree, or git missing: skip the freshness marker */
 }
-const rows = [];
-const ran = [];
-let exitCode = 0;
 for (const [i, check] of checks.entries()) {
+  if (exitCode !== 0) break; // the generators failed above and every check is already listed as not run
   const since = Date.now();
   const r = check.run();
   const seconds = ((Date.now() - since) / 1000).toFixed(1);

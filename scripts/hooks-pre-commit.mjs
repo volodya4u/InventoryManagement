@@ -30,7 +30,9 @@ export function isScannable(file) {
   return !file.startsWith(".agent-log/") && !/\.(png|webm|jpe?g|gif|pdf|ico|woff2?|db|jar|zip)$/i.test(file);
 }
 
-const GENERATED = [
+// The generators whose outputs the hook stages; scripts/dod.mjs runs the same list first, so a green dod run has already
+// verified the files the hook will commit.
+export const GENERATED = [
   ["scripts/check-traceability.mjs", ["docs/qa/traceability-report.md", "trace/trace.json"]],
   ["scripts/check-trajectory.mjs", ["docs/qa/trajectory-report.md", "trace/trajectory.json"]],
 ];

@@ -16,6 +16,7 @@
       "Bash(node scripts/hooks-selftest.mjs)",
       "Bash(node scripts/dod.mjs)",
       "Bash(node scripts/test-run.mjs *)",
+      "Bash(node scripts/push-branch.mjs)",
       "Bash(node .claude/skills/agent-log-report/scripts/report.mjs *)",
       "Bash(git status *)",
       "Bash(git diff *)",
@@ -41,6 +42,7 @@
       "Edit(./.github/**)",
       "Edit(./.claude/settings.json)",
       "Edit(./.mcp.json)",
+      "Edit(./scripts/push-branch.mjs)",
       "mcp__idea"
     ],
     "deny": [
