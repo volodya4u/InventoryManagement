@@ -16,7 +16,7 @@ unratified assumption.
 trimmed), `description` (at most 1000 characters, default empty, trimmed), `unit`, `quantity` (at least 0) and optional
 `initialUnitCost`, `reorderLevel` and `image` (FR-42).
 
-> GAP: the length limits and the negative-quantity rejection are not asserted; trimming is (see docs/requirements.md Coverage gaps, FR-42 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `rejectsRawMaterialsWithATooLongNameOrDescriptionOrANegativeQuantity` asserts the length limits (120 and 1000 characters) and the negative-quantity rejection.
 
 #### Scenario: Name is trimmed
 - **WHEN** a raw material is created with name "  Rose  "
@@ -32,7 +32,7 @@ The unit SHALL be one of PIECE, BUNCH, GRAM, KILOGRAM, METER, PACKAGE, matched c
 SHALL give 400 "Unsupported measurement unit" (FR-43). The unit list is fixed in code, and raw material quantities may
 be decimal (TC-8).
 
-> GAP: only acceptance of "piece" is asserted; the rejection is not (see docs/requirements.md Coverage gaps, FR-43 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `rejectsAnUnsupportedMeasurementUnitOnCreateAndOnUpdate` asserts the 400 on create and on update.
 
 #### Scenario: Case-insensitive unit
 - **WHEN** a raw material is created with unit "piece"
@@ -61,7 +61,7 @@ rounded to 4 decimals half-up and become the raw material's `averageUnitCost` (F
 Creating a raw material with initial quantity above zero SHALL record an `OPENING_BALANCE` movement with quantity, unit
 cost, total, note "Initial stock", dated today by the server clock; a zero quantity SHALL record none (FR-46).
 
-> GAP: the zero-quantity case is not asserted (see docs/requirements.md Coverage gaps, FR-46 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `recordsNoOpeningMovementForARawMaterialCreatedWithoutStock` asserts that a zero quantity records no movement.
 
 #### Scenario: Positive opening stock
 - **WHEN** a raw material is created with quantity 10 and unit cost 5
@@ -84,7 +84,7 @@ cost, total, note "Initial stock", dated today by the server clock; a zero quant
 
 `GET /api/raw-materials` SHALL list all raw materials ordered by name, case-insensitive (FR-48).
 
-> GAP: ordering is not asserted (see docs/requirements.md Coverage gaps, FR-48 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `listsRawMaterialsByNameIgnoringCase` asserts the case-insensitive name order.
 
 #### Scenario: Mixed-case names
 - **GIVEN** materials named "ribbon", "Rose" and "Baby's breath"
@@ -96,7 +96,7 @@ cost, total, note "Initial stock", dated today by the server clock; a zero quant
 `PUT /api/raw-materials/{id}` SHALL update name, description, unit, reorder level and optionally the image; it has no
 quantity or cost input, so the regular edit cannot change stock; an unknown id SHALL give 404 (FR-49).
 
-> GAP: the 404 is not asserted (see docs/requirements.md Coverage gaps, FR-49 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `answers404WhenUpdatingAnUnknownRawMaterial` asserts the 404 and its message.
 
 #### Scenario: Rename
 - **WHEN** a raw material is renamed through `PUT`
@@ -148,7 +148,7 @@ have consumed it." (FR-53).
 Deleting an unused raw material SHALL return 204, and its stock movements SHALL be removed with it (`ON DELETE
 CASCADE`) (FR-54).
 
-> GAP: the movement cascade is not asserted (see docs/requirements.md OQ-5 / Coverage gaps, FR-54 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `removesTheStockMovementsWithTheDeletedRawMaterial` asserts that the movements go with the material and another material's stay (OQ-5 stays ratified as-is).
 
 #### Scenario: Unused material
 - **WHEN** an unused raw material is deleted
@@ -168,7 +168,7 @@ The UI SHALL ask "Delete raw material “<name>”?" through a browser confirm b
 
 Raw material names SHALL NOT be required to be unique (FR-56).
 
-> GAP: duplicate acceptance is not asserted; whether this is intended is unclear (see docs/requirements.md OQ-3 / Coverage gaps, FR-56 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `acceptsRawMaterialsWithTheSameName` asserts that duplicate names are accepted today (OQ-3 stays ratified as-is).
 
 #### Scenario: Duplicate name
 - **GIVEN** a raw material named "Rose"

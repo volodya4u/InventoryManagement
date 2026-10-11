@@ -13,7 +13,7 @@ the shipped code and its tests; every requirement is an unratified assumption.
 `POST /api/raw-materials/{id}/receipts` SHALL take `receivedQuantity` (greater than 0), `unitPurchaseCost` (at least 0),
 `receiptDate` (required) and optional `notes` (at most 1000) (FR-61).
 
-> GAP: the validation rejections (quantity, cost, date, notes length) are not asserted (see docs/requirements.md Coverage gaps, FR-61 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `rejectsInvalidReceiptsAndRecordsNothing` asserts every receipt validation rejection and the accepted limits.
 
 #### Scenario: Valid receipt
 - **WHEN** a receipt of 20 units at 15.5 dated today is posted
@@ -80,7 +80,7 @@ unchanged (FR-66).
 An adjustment whose actual quantity equals the recorded quantity SHALL be rejected with 400 "Actual stock already
 matches the recorded raw material stock" (FR-67).
 
-> GAP: not asserted by any test (see docs/requirements.md Coverage gaps, FR-67 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `rejectsAnAdjustmentEqualToTheRecordedRawMaterialQuantity` asserts the 400 and that nothing is recorded.
 
 #### Scenario: Same quantity
 - **GIVEN** 9 units in stock

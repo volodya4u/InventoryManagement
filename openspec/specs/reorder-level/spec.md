@@ -55,7 +55,7 @@ The reorder level SHALL be advisory only and SHALL NOT change stock, valuation, 
 (FR-60). Automatic reordering, supplier notifications, purchase orders and a reorder level for finished products are
 out of scope (TC-6).
 
-> GAP: there is no negative test for the advisory-only rule (see docs/requirements.md Coverage gaps, FR-60 row).
+> Covered by slice `harden-raw-material-tests`: `InventoryFlowIntegrationTest` › `leavesStockValuationHistoryAndProductionAloneWhenTheReorderLevelChanges` asserts that a new level changes no stock, cost, value or history and blocks neither production nor a write-off.
 
 #### Scenario: Selling or consuming ignores the level
 - **GIVEN** a raw material at or below its reorder level
