@@ -1,3 +1,6 @@
 # The agent log is append-only and is written both in cloud sessions and locally:
 # when two branches add lines, a merge keeps all of them instead of conflicting.
 .agent-log/actions.jsonl merge=union
+
+# Git hooks keep LF: with core.autocrlf=true a CRLF shebang line stops them from running.
+.githooks/* text eol=lf

@@ -57,7 +57,9 @@ for (let i = 0; i < argv.length; i += 1) {
 }
 
 const LOCK_PATH = "factory-lock.json";
+// ADR-0002 adaptation: .github/workflows/ joins the soft tier, because Dependabot's github-actions bumps edit those files.
 const WORKFLOW_PREFIX = ".claude/workflows/";
+const GITHUB_WORKFLOW_PREFIX = ".github/workflows/";
 const STUB_RE = /^echo |^true$|not yet configured/i;
 
 const failures = [];
@@ -125,7 +127,7 @@ function collectLockTargets() {
   return files.sort();
 }
 
-const isWorkflowTier = (rel) => rel.startsWith(WORKFLOW_PREFIX);
+const isWorkflowTier = (rel) => rel.startsWith(WORKFLOW_PREFIX) || rel.startsWith(GITHUB_WORKFLOW_PREFIX);
 const isQualityTier = (rel) => rel.startsWith("quality/");
 
 function hasApprovedPdCommit(rel, sinceIso) {
@@ -212,7 +214,9 @@ if (lock?.files) {
     if (isWorkflowTier(rel)) {
       warn(
         rel,
-        `workflow-tier drift (${kind}) vs factory-lock.json — tolerated (the confirmed Workflow-args bug forces legitimate forks) but recorded as a ledger event.`,
+        rel.startsWith(GITHUB_WORKFLOW_PREFIX)
+          ? `workflow-tier drift (${kind}) vs factory-lock.json — tolerated (Dependabot's github-actions bumps edit these files) but recorded as a ledger event; review the change.`
+          : `workflow-tier drift (${kind}) vs factory-lock.json — tolerated (the confirmed Workflow-args bug forces legitimate forks) but recorded as a ledger event.`,
       );
       emitLedger({
         ts: new Date().toISOString(),

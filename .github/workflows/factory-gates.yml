@@ -1,0 +1,45 @@
+name: Factory gates
+
+# The factory's deterministic gates (ADR-0002), next to the build and the pr-evidence job in ci.yml. They are plain
+# Node scripts with no dependencies, so the runner's preinstalled Node is enough.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: factory-gates-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }} # never cancel a run on main
+
+jobs:
+  factory-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the integrity check reads git log for the "Refs: PD-n" commits that approve a gate change
+
+      # The committed report must be exactly what the check generates now, so a stale report cannot be merged.
+      - name: Traceability report is fresh
+        run: node scripts/check-traceability.mjs --check-fresh
+
+      - name: Traceability chain
+        run: node scripts/check-traceability.mjs
+
+      - name: Acceptance methods exist
+        run: node scripts/check-acceptance-methods.mjs --mode=existence
+
+      - name: No open corrections
+        run: node scripts/correct.mjs --check
+
+      # Locked gate files (factory-lock.json): scripts and .githooks/* may only change through a commit that says
+      # "Refs: PD-n" or re-seals the lock. Workflow files are the soft tier (a warning), because Dependabot bumps them.
+      # Skipped for Dependabot pull requests, like pr-evidence.
+      - name: Factory integrity
+        if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]'
+        run: node scripts/check-factory-integrity.mjs
