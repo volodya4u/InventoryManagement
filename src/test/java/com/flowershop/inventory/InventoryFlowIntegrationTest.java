@@ -2022,6 +2022,268 @@ class InventoryFlowIntegrationTest {
                 .containsExactly(new BigDecimal("2.18"), new BigDecimal("0.04"), new BigDecimal("2.13"));
     }
 
+    // @trace FR-42
+    @Test
+    void rejectsRawMaterialsWithATooLongNameOrDescriptionOrANegativeQuantity() throws Exception {
+        var session = signedInSession();
+
+        postRawMaterial(session, "N".repeat(121), "", "PIECE", "1", "1").andExpect(status().isBadRequest());
+        postRawMaterial(session, "   ", "", "PIECE", "1", "1").andExpect(status().isBadRequest());
+        postRawMaterial(session, "Rose", "d".repeat(1001), "PIECE", "1", "1").andExpect(status().isBadRequest());
+        postRawMaterial(session, "Rose", "", "PIECE", "-1", "1").andExpect(status().isBadRequest());
+        assertThat(rowCount("raw_material")).isZero();
+
+        // The limits themselves are accepted: 120 characters of name, 1000 of description, a quantity of 0.
+        postRawMaterial(session, "N".repeat(120), "d".repeat(1000), "PIECE", "0", null)
+                .andExpect(status().isCreated());
+        assertThat(rowCount("raw_material")).isEqualTo(1);
+    }
+
+    // @trace FR-43
+    @Test
+    void rejectsAnUnsupportedMeasurementUnitOnCreateAndOnUpdate() throws Exception {
+        var session = signedInSession();
+
+        postRawMaterial(session, "Rose", "", "LITER", "1", "1")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid data"))
+                .andExpect(jsonPath("$.detail").value("Unsupported measurement unit"));
+        assertThat(rowCount("raw_material")).isZero();
+
+        postRawMaterial(session, "Rose", "", "PIECE", "0", null).andExpect(status().isCreated());
+        putRawMaterial(session, 1, "Rose", "LITER", null)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Unsupported measurement unit"));
+        assertThat(jdbcTemplate.queryForObject("SELECT unit FROM raw_material WHERE id = 1", String.class))
+                .isEqualTo("PIECE");
+    }
+
+    // @trace FR-46
+    @Test
+    void recordsNoOpeningMovementForARawMaterialCreatedWithoutStock() throws Exception {
+        var session = signedInSession();
+
+        postRawMaterial(session, "Empty", "", "PIECE", "0", null)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.quantity").value(0))
+                .andExpect(jsonPath("$.averageUnitCost").value(0));
+        assertThat(rowCount("raw_material_stock_movement")).isZero();
+
+        // With stock, the same call records the opening movement.
+        postRawMaterial(session, "Stocked", "", "PIECE", "4", "2.50").andExpect(status().isCreated());
+        assertThat(jdbcTemplate.queryForList(
+                "SELECT movement_type FROM raw_material_stock_movement WHERE raw_material_id = 2",
+                String.class)).containsExactly("OPENING_BALANCE");
+    }
+
+    // @trace FR-48
+    @Test
+    void listsRawMaterialsByNameIgnoringCase() throws Exception {
+        var session = signedInSession();
+        for (var name : List.of("tulip", "Rose", "ribbon", "Anemone", "Baby's breath")) {
+            postRawMaterial(session, name, "", "PIECE", "0", null).andExpect(status().isCreated());
+        }
+
+        mockMvc.perform(get("/api/raw-materials").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(5))
+                .andExpect(jsonPath("$[0].name").value("Anemone"))
+                .andExpect(jsonPath("$[1].name").value("Baby's breath"))
+                .andExpect(jsonPath("$[2].name").value("ribbon"))
+                .andExpect(jsonPath("$[3].name").value("Rose"))
+                .andExpect(jsonPath("$[4].name").value("tulip"));
+    }
+
+    // @trace FR-49
+    @Test
+    void answers404WhenUpdatingAnUnknownRawMaterial() throws Exception {
+        var session = signedInSession();
+        postRawMaterial(session, "Rose", "", "PIECE", "0", null).andExpect(status().isCreated());
+
+        putRawMaterial(session, 999, "Renamed", "PIECE", null)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Record not found"))
+                .andExpect(jsonPath("$.detail").value("Raw material with id 999 not found"));
+        assertThat(jdbcTemplate.queryForList("SELECT name FROM raw_material", String.class))
+                .containsExactly("Rose");
+    }
+
+    // @trace FR-54
+    @Test
+    void removesTheStockMovementsWithTheDeletedRawMaterial() throws Exception {
+        var session = signedInSession();
+        postRawMaterial(session, "Rose", "", "PIECE", "10", "2").andExpect(status().isCreated());
+        postRawMaterial(session, "Ribbon", "", "METER", "5", "1").andExpect(status().isCreated());
+        postJson(session, "/api/raw-materials/1/receipts", """
+                {"receivedQuantity": 4, "unitPurchaseCost": 3, "receiptDate": "2026-07-19"}""")
+                .andExpect(status().isOk());
+        assertThat(rowCount("raw_material_stock_movement")).isEqualTo(3);
+
+        var csrfCookie = csrfCookie(session);
+        mockMvc.perform(delete("/api/raw-materials/1")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent());
+
+        // Both of Rose's movements went with it (OQ-5: history is not kept); Ribbon's stayed.
+        assertThat(jdbcTemplate.queryForList(
+                "SELECT raw_material_id FROM raw_material_stock_movement", Long.class))
+                .containsExactly(2L);
+    }
+
+    // @trace FR-56
+    @Test
+    void acceptsRawMaterialsWithTheSameName() throws Exception {
+        var session = signedInSession();
+
+        postRawMaterial(session, "Rose", "", "PIECE", "1", "1").andExpect(status().isCreated());
+        postRawMaterial(session, "Rose", "", "BUNCH", "2", "3").andExpect(status().isCreated());
+        postRawMaterial(session, "ROSE", "", "PIECE", "0", null).andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/raw-materials").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3));
+        assertThat(jdbcTemplate.queryForList("SELECT id FROM raw_material", Long.class))
+                .containsExactlyInAnyOrder(1L, 2L, 3L);
+    }
+
+    // @trace FR-60
+    @Test
+    void leavesStockValuationHistoryAndProductionAloneWhenTheReorderLevelChanges() throws Exception {
+        var session = signedInSession();
+        var csrfCookie = csrfCookie(session);
+        postRawMaterial(session, "Rose", "", "PIECE", "10", "2").andExpect(status().isCreated());
+        saveProduct(HttpMethod.POST, "/api/products", session, csrfCookie, "ROSE-BOX", "Rose Box", 1)
+                .andExpect(status().isCreated());
+
+        // The level (50) is far above the quantity (10): the material is flagged, nothing else moves.
+        putRawMaterial(session, 1, "Rose", "PIECE", "50")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reorderLevel").value(50))
+                .andExpect(jsonPath("$.belowReorderLevel").value(true))
+                .andExpect(jsonPath("$.quantity").value(10))
+                .andExpect(jsonPath("$.averageUnitCost").value(2))
+                .andExpect(jsonPath("$.stockValue").value(20));
+        assertThat(rowCount("raw_material_stock_movement")).isEqualTo(1);
+
+        // A low-stock material can still be produced from and written off.
+        postJson(session, "/api/products/1/production", """
+                {"quantity": 1, "productionDate": "2026-07-21"}""")
+                .andExpect(status().isOk());
+        assertMaterialQuantity("Rose", "9");
+        postJson(session, "/api/raw-materials/1/write-offs", """
+                {"quantity": 9, "operationDate": "2026-07-21", "reason": "Wilted"}""")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(0));
+    }
+
+    // @trace FR-61
+    @Test
+    void rejectsInvalidReceiptsAndRecordsNothing() throws Exception {
+        var session = signedInSession();
+        postRawMaterial(session, "Rose", "", "PIECE", "5", "2").andExpect(status().isCreated());
+        var receipts = "/api/raw-materials/1/receipts";
+
+        postJson(session, receipts, """
+                {"receivedQuantity": 0, "unitPurchaseCost": 1, "receiptDate": "2026-07-19"}""")
+                .andExpect(status().isBadRequest());
+        postJson(session, receipts, """
+                {"receivedQuantity": -2, "unitPurchaseCost": 1, "receiptDate": "2026-07-19"}""")
+                .andExpect(status().isBadRequest());
+        postJson(session, receipts, """
+                {"unitPurchaseCost": 1, "receiptDate": "2026-07-19"}""")
+                .andExpect(status().isBadRequest());
+        postJson(session, receipts, """
+                {"receivedQuantity": 1, "unitPurchaseCost": -0.01, "receiptDate": "2026-07-19"}""")
+                .andExpect(status().isBadRequest());
+        postJson(session, receipts, """
+                {"receivedQuantity": 1, "receiptDate": "2026-07-19"}""")
+                .andExpect(status().isBadRequest());
+        postJson(session, receipts, """
+                {"receivedQuantity": 1, "unitPurchaseCost": 1}""")
+                .andExpect(status().isBadRequest());
+        postJson(session, receipts, """
+                {"receivedQuantity": 1, "unitPurchaseCost": 1, "receiptDate": "2026-07-19", "notes": "%s"}"""
+                .formatted("n".repeat(1001)))
+                .andExpect(status().isBadRequest());
+
+        assertMaterialQuantity("Rose", "5");
+        assertThat(rowCount("raw_material_stock_movement")).isEqualTo(1);
+
+        // A free delivery with notes at the 1000-character limit is accepted.
+        postJson(session, receipts, """
+                {"receivedQuantity": 1, "unitPurchaseCost": 0, "receiptDate": "2026-07-19", "notes": "%s"}"""
+                .formatted("n".repeat(1000)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(6));
+        assertThat(rowCount("raw_material_stock_movement")).isEqualTo(2);
+    }
+
+    // @trace FR-67
+    @Test
+    void rejectsAnAdjustmentEqualToTheRecordedRawMaterialQuantity() throws Exception {
+        var session = signedInSession();
+        postRawMaterial(session, "Rose", "", "PIECE", "5", "2").andExpect(status().isCreated());
+
+        postJson(session, "/api/raw-materials/1/adjustments", """
+                {"actualQuantity": 5, "operationDate": "2026-07-19", "reason": "Count"}""")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid data"))
+                .andExpect(jsonPath("$.detail").value("Actual stock already matches the recorded raw material stock"));
+
+        assertMaterialQuantity("Rose", "5");
+        assertThat(rowCount("raw_material_stock_movement")).isEqualTo(1);
+
+        // One unit of difference is accepted and recorded.
+        postJson(session, "/api/raw-materials/1/adjustments", """
+                {"actualQuantity": 4, "operationDate": "2026-07-19", "reason": "Count"}""")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(4));
+        assertThat(rowCount("raw_material_stock_movement")).isEqualTo(2);
+    }
+
+    private ResultActions postRawMaterial(
+            MockHttpSession session,
+            String name,
+            String description,
+            String unit,
+            String quantity,
+            String initialUnitCost) throws Exception {
+        var csrfCookie = csrfCookie(session);
+        var request = multipart("/api/raw-materials")
+                .param("name", name)
+                .param("description", description)
+                .param("unit", unit)
+                .param("quantity", quantity);
+        if (initialUnitCost != null) {
+            request.param("initialUnitCost", initialUnitCost);
+        }
+        return mockMvc.perform(request
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue()));
+    }
+
+    private ResultActions putRawMaterial(
+            MockHttpSession session, long id, String name, String unit, String reorderLevel) throws Exception {
+        var csrfCookie = csrfCookie(session);
+        var request = multipart(HttpMethod.PUT, "/api/raw-materials/" + id)
+                .param("name", name)
+                .param("unit", unit);
+        if (reorderLevel != null) {
+            request.param("reorderLevel", reorderLevel);
+        }
+        return mockMvc.perform(request
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue()));
+    }
+
+    private int rowCount(String table) {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + table, Integer.class);
+    }
+
     private ResultActions login(String password) throws Exception {
         return login("admin", password);
     }
