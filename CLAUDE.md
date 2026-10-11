@@ -12,6 +12,11 @@
   finish every change first (the autonomy-log row included), run `node scripts/dod.mjs`, then the reviewer, then
   commit (log-only is fine), and confirm with `node scripts/pr-evidence.mjs origin/main HEAD` before pushing — the
   `pr-evidence` CI job runs the same check.
+- Push and open the pull request without asking, as the last step of a finished change: once `pr-evidence` shows
+  every gate ✅, check the description with `PR_BODY=… node scripts/check-pr-description.mjs`, run
+  `git push -u origin <branch>` and `gh pr create` into `main`. Stop and report instead if a gate is red or the reviewer
+  asked for changes. A human merges every pull request by hand: never merge, enable auto-merge, force-push or push
+  `main`.
 - Run the loop's red and green tests through `node scripts/test-run.mjs` so they are recorded, not pasted.
 - Run each evidence-producing command (`dod.mjs`, `test-run.mjs`, `eval-record.mjs`, `pr-evidence.mjs`) on its own,
   not chained behind `&&`: the log hook clips each tool call's command line, so a command buried in a chain can be
