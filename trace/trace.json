@@ -922,7 +922,9 @@
         "openspec/specs/products/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -949,7 +951,9 @@
         "openspec/specs/products/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -958,7 +962,9 @@
         "openspec/specs/products/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -985,7 +991,9 @@
         "openspec/specs/products/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -1003,7 +1011,9 @@
         "openspec/specs/products/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -1033,7 +1043,9 @@
         "openspec/specs/production/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -1078,7 +1090,9 @@
         "openspec/specs/production/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -1114,7 +1128,9 @@
         "openspec/specs/product-stock/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -1123,7 +1139,9 @@
         "openspec/specs/product-stock/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -1132,7 +1150,9 @@
         "openspec/specs/product-stock/spec.md"
       ],
       "planned": true,
-      "tests": [],
+      "tests": [
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+      ],
       "recordings": []
     },
     {
@@ -1834,23 +1854,11 @@
     },
     {
       "check": "test-trace",
-      "msg": "FR-76 has no test annotated \"@trace FR-76\""
-    },
-    {
-      "check": "test-trace",
       "msg": "FR-77 has no test annotated \"@trace FR-77\""
     },
     {
       "check": "test-trace",
       "msg": "FR-78 has no test annotated \"@trace FR-78\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-79 has no test annotated \"@trace FR-79\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-80 has no test annotated \"@trace FR-80\""
     },
     {
       "check": "test-trace",
@@ -1862,23 +1870,11 @@
     },
     {
       "check": "test-trace",
-      "msg": "FR-83 has no test annotated \"@trace FR-83\""
-    },
-    {
-      "check": "test-trace",
       "msg": "FR-84 has no test annotated \"@trace FR-84\""
     },
     {
       "check": "test-trace",
-      "msg": "FR-85 has no test annotated \"@trace FR-85\""
-    },
-    {
-      "check": "test-trace",
       "msg": "FR-87 has no test annotated \"@trace FR-87\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-88 has no test annotated \"@trace FR-88\""
     },
     {
       "check": "test-trace",
@@ -1898,10 +1894,6 @@
     },
     {
       "check": "test-trace",
-      "msg": "FR-93 has no test annotated \"@trace FR-93\""
-    },
-    {
-      "check": "test-trace",
       "msg": "FR-94 has no test annotated \"@trace FR-94\""
     },
     {
@@ -1911,18 +1903,6 @@
     {
       "check": "test-trace",
       "msg": "FR-96 has no test annotated \"@trace FR-96\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-97 has no test annotated \"@trace FR-97\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-98 has no test annotated \"@trace FR-98\""
-    },
-    {
-      "check": "test-trace",
-      "msg": "FR-99 has no test annotated \"@trace FR-99\""
     },
     {
       "check": "test-trace",
@@ -2659,6 +2639,10 @@
     {
       "check": "active-changes",
       "msg": "active change \"harden-frontend-specs\" is not archived"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"harden-product-and-production-tests\" is not archived"
     },
     {
       "check": "active-changes",

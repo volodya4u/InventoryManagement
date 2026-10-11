@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/check-acceptance-methods.mjs",
-  "mode": "existence",
+  "mode": "artifact",
   "productCode": true,
   "contracts": {
     "FR-1": [
@@ -8,31 +8,31 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-2": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-3": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-4": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-5": [
@@ -40,15 +40,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-6": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-7": [
@@ -56,15 +56,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-8": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-9": [
@@ -72,7 +72,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-10": [
@@ -80,7 +80,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-11": [
@@ -88,23 +88,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-12": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-13": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-14": [
@@ -112,7 +112,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-15": [
@@ -120,7 +120,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-16": [
@@ -128,7 +128,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-17": [
@@ -136,7 +136,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-18": [
@@ -144,7 +144,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-19": [
@@ -152,7 +152,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-20": [
@@ -160,7 +160,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-21": [
@@ -168,7 +168,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-22": [
@@ -176,7 +176,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-23": [
@@ -184,7 +184,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-24": [
@@ -192,7 +192,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-25": [
@@ -200,7 +200,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-26": [
@@ -208,7 +208,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-27": [
@@ -216,7 +216,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-28": [
@@ -224,7 +224,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-29": [
@@ -232,7 +232,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-30": [
@@ -240,7 +240,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-31": [
@@ -248,7 +248,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-32": [
@@ -256,7 +256,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-33": [
@@ -264,15 +264,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-34": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/app.routes.spec.ts",
+        "status": "artifact-ok"
       }
     ],
     "FR-35": [
@@ -280,7 +280,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-36": [
@@ -288,23 +288,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-37": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-38": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-39": [
@@ -312,7 +312,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-40": [
@@ -320,7 +320,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-41": [
@@ -328,23 +328,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-42": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-43": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-44": [
@@ -352,7 +352,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-45": [
@@ -360,15 +360,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-46": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-47": [
@@ -376,23 +376,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-48": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-49": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-50": [
@@ -400,7 +400,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-51": [
@@ -408,7 +408,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-52": [
@@ -416,7 +416,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-53": [
@@ -424,31 +424,31 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-54": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-55": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
+        "status": "artifact-ok"
       }
     ],
     "FR-56": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-57": [
@@ -456,7 +456,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-58": [
@@ -464,7 +464,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-59": [
@@ -472,23 +472,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-60": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-61": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-62": [
@@ -496,7 +496,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-63": [
@@ -504,7 +504,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-64": [
@@ -512,7 +512,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-65": [
@@ -520,7 +520,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-66": [
@@ -528,15 +528,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-67": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-68": [
@@ -544,7 +544,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-69": [
@@ -552,7 +552,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-70": [
@@ -560,7 +560,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-71": [
@@ -568,7 +568,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-72": [
@@ -576,7 +576,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-73": [
@@ -584,7 +584,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-74": [
@@ -592,23 +592,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-75": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/core/image-file.spec.ts",
+        "status": "artifact-ok"
       }
     ],
     "FR-76": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-77": [
@@ -616,7 +616,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-78": [
@@ -624,23 +624,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-79": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-80": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-81": [
@@ -648,7 +648,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-82": [
@@ -656,15 +656,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-83": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-84": [
@@ -672,23 +672,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-85": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-86": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/products/products.component.spec.ts",
+        "status": "artifact-ok"
       }
     ],
     "FR-87": [
@@ -696,15 +696,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-88": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-89": [
@@ -712,7 +712,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-90": [
@@ -720,7 +720,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-91": [
@@ -728,7 +728,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-92": [
@@ -736,15 +736,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-93": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-94": [
@@ -752,7 +752,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-95": [
@@ -760,7 +760,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-96": [
@@ -768,31 +768,31 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-97": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-98": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-99": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-100": [
@@ -800,7 +800,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-101": [
@@ -808,23 +808,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-102": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-103": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-104": [
@@ -832,7 +832,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-105": [
@@ -840,7 +840,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-106": [
@@ -848,15 +848,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-107": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-108": [
@@ -864,23 +864,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-109": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-110": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-111": [
@@ -888,7 +888,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-112": [
@@ -896,7 +896,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-113": [
@@ -904,15 +904,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-114": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-115": [
@@ -920,31 +920,31 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-116": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-117": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-118": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-119": [
@@ -952,7 +952,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-120": [
@@ -960,7 +960,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-121": [
@@ -968,7 +968,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-122": [
@@ -976,7 +976,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-123": [
@@ -984,7 +984,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-124": [
@@ -992,7 +992,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-125": [
@@ -1000,7 +1000,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-126": [
@@ -1008,15 +1008,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-127": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-128": [
@@ -1024,7 +1024,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-129": [
@@ -1032,7 +1032,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-130": [
@@ -1040,23 +1040,23 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-131": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-132": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-133": [
@@ -1064,15 +1064,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-134": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-135": [
@@ -1080,7 +1080,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-136": [
@@ -1088,7 +1088,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-137": [
@@ -1096,7 +1096,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-138": [
@@ -1104,7 +1104,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-139": [
@@ -1112,7 +1112,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-140": [
@@ -1120,15 +1120,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-141": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-142": [
@@ -1136,15 +1136,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-143": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-144": [
@@ -1152,7 +1152,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-145": [
@@ -1160,15 +1160,15 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-146": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
+        "status": "artifact-ok"
       }
     ],
     "FR-147": [
@@ -1176,7 +1176,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-148": [
@@ -1184,7 +1184,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "FR-149": [
@@ -1192,63 +1192,63 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "NFR-1": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/auth/LocalAdminInitializerTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-2": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/config/SecurityConfigTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-3": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-4": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/auth/SessionCookieHttpTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-5": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-6": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-7": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-8": [
@@ -1256,31 +1256,31 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "NFR-9": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-10": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-11": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-12": [
@@ -1288,7 +1288,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "NFR-13": [
@@ -1296,7 +1296,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "NFR-14": [
@@ -1304,7 +1304,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "NFR-15": [
@@ -1312,7 +1312,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "NFR-16": [
@@ -1320,7 +1320,7 @@
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
         "artifact": null,
-        "status": "mechanism-ok"
+        "status": "missing-artifact"
       }
     ],
     "NFR-18": [
@@ -1335,24 +1335,24 @@
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/products/products.component.spec.ts",
+        "status": "artifact-ok"
       }
     ],
     "NFR-21": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
+        "status": "artifact-ok"
       }
     ],
     "NFR-22": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "mechanism-ok"
+        "artifact": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
+        "status": "artifact-ok"
       }
     ]
   }

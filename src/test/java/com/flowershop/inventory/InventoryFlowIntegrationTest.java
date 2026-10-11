@@ -18,6 +18,7 @@ import jakarta.servlet.http.Cookie;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -2284,6 +2285,275 @@ class InventoryFlowIntegrationTest {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + table, Integer.class);
     }
 
+    // @trace FR-76
+    @Test
+    void enforcesProductFieldLengthsAndWholeNumberQuantities() throws Exception {
+        insertRawMaterial(1, "Rose", "PIECE", "10", "5");
+        var session = signedInSession();
+
+        postProduct(session, ROSE_RECIPE,
+                "sku", "S".repeat(60), "name", "N".repeat(120), "description", "D".repeat(1000))
+                .andExpect(status().isCreated());
+        for (var invalid : List.of(
+                new String[] {"sku", "S".repeat(61)},
+                new String[] {"sku", "  "},
+                new String[] {"name", "N".repeat(121)},
+                new String[] {"description", "D".repeat(1001)},
+                new String[] {"quantity", "1.5", "initialUnitCost", "10"},
+                new String[] {"quantity", "-1", "initialUnitCost", "10"},
+                new String[] {"quantity", "1234567890123", "initialUnitCost", "10"})) {
+            postProduct(session, ROSE_RECIPE, invalid)
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Validation error"));
+        }
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.class)).isEqualTo(1);
+    }
+
+    // @trace FR-79
+    @Test
+    void validatesTheRecipeOnTheServerWhenCreatingAndUpdatingAProduct() throws Exception {
+        insertRawMaterial(1, "Rose", "PIECE", "10", "5");
+        insertRawMaterial(2, "Ribbon", "METER", "10", "2");
+        var session = signedInSession();
+
+        for (var invalid : List.of(
+                "[]",
+                "[{\"rawMaterialId\":1,\"quantityPerUnit\":0}]",
+                "[{\"rawMaterialId\":1,\"quantityPerUnit\":-1}]",
+                "[{\"quantityPerUnit\":1}]",
+                "[{\"rawMaterialId\":1}]")) {
+            postProduct(session, invalid)
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Validation error"));
+        }
+        postProduct(session, "[{\"rawMaterialId\":1,\"quantityPerUnit\":1},{\"rawMaterialId\":1,\"quantityPerUnit\":2}]")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Each raw material can appear only once in a product recipe"));
+        postProduct(session, "[{\"rawMaterialId\":999,\"quantityPerUnit\":1}]")
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Raw material with id 999 not found"));
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.class)).isZero();
+
+        postProduct(session, ROSE_RECIPE).andExpect(status().isCreated());
+        putProduct(session, 1, "[]", "name", "Renamed").andExpect(status().isBadRequest());
+        putProduct(session, 1, "[{\"rawMaterialId\":2,\"quantityPerUnit\":0}]", "name", "Renamed")
+                .andExpect(status().isBadRequest());
+        putProduct(session, 1, "[{\"rawMaterialId\":999,\"quantityPerUnit\":1}]", "name", "Renamed")
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Raw material with id 999 not found"));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT name FROM product WHERE id = 1", String.class))
+                .isEqualTo("Box");
+        assertThat(jdbcTemplate.queryForList("SELECT raw_material_id FROM product_recipe_item WHERE product_id = 1", Long.class))
+                .containsExactly(1L);
+    }
+
+    // @trace FR-80
+    @Test
+    void requiresAnInitialUnitCostForPositiveOpeningStockOnTheServer() throws Exception {
+        insertRawMaterial(1, "Rose", "PIECE", "10", "5");
+        var session = signedInSession();
+
+        postProduct(session, ROSE_RECIPE, "quantity", "2")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(
+                        "Initial unit cost is required when initial stock is greater than zero"));
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.class)).isZero();
+
+        postProduct(session, ROSE_RECIPE, "sku", "EMPTY-1", "quantity", "0")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.quantity").value(0))
+                .andExpect(jsonPath("$.averageUnitCost").value(0));
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_stock_movement", Integer.class)).isZero();
+
+        postProduct(session, ROSE_RECIPE, "sku", "OPEN-1", "quantity", "2", "initialUnitCost", "100")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.averageUnitCost").value(100));
+        assertThat(jdbcTemplate.queryForMap(
+                "SELECT movement_type, notes FROM product_stock_movement"))
+                .containsEntry("movement_type", "OPENING_BALANCE")
+                .containsEntry("notes", "Initial product stock");
+        assertMaterialQuantity("Rose", "10");
+    }
+
+    // @trace FR-83
+    @Test
+    void answers404WhenUpdatingAnUnknownProductAndNeverChangesStockOnUpdate() throws Exception {
+        insertRawMaterial(1, "Rose", "PIECE", "10", "5");
+        var session = signedInSession();
+
+        putProduct(session, 9999, ROSE_RECIPE)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Record not found"))
+                .andExpect(jsonPath("$.detail").value("Product with id 9999 not found"));
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.class)).isZero();
+
+        postProduct(session, ROSE_RECIPE, "quantity", "2", "initialUnitCost", "20").andExpect(status().isCreated());
+        putProduct(session, 1, ROSE_RECIPE,
+                "name", "Renamed", "quantity", "99", "initialUnitCost", "99")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Renamed"))
+                .andExpect(jsonPath("$.quantity").value(2))
+                .andExpect(jsonPath("$.averageUnitCost").value(20));
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_stock_movement", Integer.class))
+                .isEqualTo(1);
+    }
+
+    // @trace FR-85
+    @Test
+    void removesTheRecipeBatchesAndMovementsOfADeletedUnsoldProduct() throws Exception {
+        insertRawMaterial(1, "Rose", "PIECE", "10", "5");
+        var session = signedInSession();
+        postProduct(session, "[{\"rawMaterialId\":1,\"quantityPerUnit\":2}]", "quantity", "2", "initialUnitCost", "20")
+                .andExpect(status().isCreated());
+        postJson(session, "/api/products/1/production", "{\"quantity\":1,\"productionDate\":\"2026-07-21\"}")
+                .andExpect(status().isOk());
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_recipe_item", Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_stock_movement", Integer.class))
+                .isEqualTo(2);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM production_batch", Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM production_consumption", Integer.class))
+                .isEqualTo(1);
+
+        var csrfCookie = csrfCookie(session);
+        mockMvc.perform(delete("/api/products/1")
+                        .session(session)
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent());
+
+        for (var table : List.of(
+                "product", "product_recipe_item", "product_stock_movement", "production_batch",
+                "production_consumption")) {
+            assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + table, Integer.class))
+                    .as(table)
+                    .isZero();
+        }
+        assertMaterialQuantity("Rose", "8");
+    }
+
+    // @trace FR-88
+    @Test
+    void rejectsProductionOfAProductWithoutARecipe() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 3, "40", "20");
+        var session = signedInSession();
+
+        postJson(session, "/api/products/1/production", "{\"quantity\":1,\"productionDate\":\"2026-07-21\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid data"))
+                .andExpect(jsonPath("$.detail").value("Add at least one raw material to the product recipe"));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM production_batch", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_stock_movement", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("3");
+    }
+
+    // @trace FR-93
+    @Test
+    void keepsPastBatchesUnchangedWhenTheRecipeIsEditedLater() throws Exception {
+        insertRawMaterial(1, "Rose", "PIECE", "20", "10");
+        insertRawMaterial(2, "Ribbon", "METER", "30", "4");
+        var session = signedInSession();
+        postProduct(session, "[{\"rawMaterialId\":1,\"quantityPerUnit\":2}]", "advertisingCostPerUnit", "5")
+                .andExpect(status().isCreated());
+        postJson(session, "/api/products/1/production", "{\"quantity\":3,\"productionDate\":\"2026-07-21\"}")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(3))
+                .andExpect(jsonPath("$.averageUnitCost").value(25));
+        var batchBefore = jdbcTemplate.queryForMap("SELECT * FROM production_batch WHERE id = 1");
+        var consumptionBefore = jdbcTemplate.queryForMap("SELECT * FROM production_consumption WHERE id = 1");
+        assertThat(new BigDecimal(batchBefore.get("advertising_cost").toString())).isEqualByComparingTo("15");
+
+        putProduct(session, 1, "[{\"rawMaterialId\":2,\"quantityPerUnit\":3}]", "advertisingCostPerUnit", "8")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(3))
+                .andExpect(jsonPath("$.averageUnitCost").value(25));
+
+        assertThat(jdbcTemplate.queryForMap("SELECT * FROM production_batch WHERE id = 1")).isEqualTo(batchBefore);
+        assertThat(jdbcTemplate.queryForMap("SELECT * FROM production_consumption WHERE id = 1"))
+                .isEqualTo(consumptionBefore);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT quantity FROM production_consumption WHERE production_batch_id = 1 AND raw_material_id = 1",
+                BigDecimal.class)).isEqualByComparingTo("6");
+
+        postJson(session, "/api/products/1/production", "{\"quantity\":1,\"productionDate\":\"2026-07-22\"}")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(4))
+                .andExpect(jsonPath("$.averageUnitCost").value(23.75));
+        assertMaterialQuantity("Rose", "14");
+        assertMaterialQuantity("Ribbon", "27");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT total_cost FROM production_batch WHERE id = 2", BigDecimal.class))
+                .isEqualByComparingTo("20");
+        assertThat(jdbcTemplate.queryForMap("SELECT * FROM production_batch WHERE id = 1")).isEqualTo(batchBefore);
+    }
+
+    // @trace FR-97
+    @Test
+    void rejectsFractionalProductAdjustmentsAndWriteOffsOverHttp() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 3, "40", "20");
+        var session = signedInSession();
+
+        postJson(session, "/api/products/1/adjustments",
+                "{\"actualQuantity\":2.5,\"operationDate\":\"2026-07-21\",\"reason\":\"Count\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid data"))
+                .andExpect(jsonPath("$.detail").value("Actual Product stock must be a whole number"));
+        postJson(session, "/api/products/1/write-offs",
+                "{\"quantity\":1.5,\"operationDate\":\"2026-07-21\",\"reason\":\"Wilted\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Write-off quantity must be a whole number"));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("3");
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_stock_movement", Integer.class)).isZero();
+    }
+
+    // @trace FR-98
+    @Test
+    void adjustsProductStockUpWithoutConsumingRawMaterials() throws Exception {
+        insertRawMaterial(1, "Rose", "PIECE", "10", "5");
+        insertProduct(1, "BOX-1", "Box one", 3, "40", "20");
+        jdbcTemplate.update(
+                "INSERT INTO product_recipe_item (product_id, raw_material_id, quantity_per_unit) VALUES (1, 1, 2)");
+        var session = signedInSession();
+
+        postJson(session, "/api/products/1/adjustments",
+                "{\"actualQuantity\":6,\"operationDate\":\"2026-07-21\",\"reason\":\"Count\"}")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity").value(6))
+                .andExpect(jsonPath("$.averageUnitCost").value(20));
+
+        var movement = jdbcTemplate.queryForMap(
+                "SELECT movement_type, quantity, unit_cost, total_cost FROM product_stock_movement");
+        assertThat(movement).containsEntry("movement_type", "ADJUSTMENT_INCREASE");
+        assertThat(new BigDecimal(movement.get("quantity").toString())).isEqualByComparingTo("3");
+        assertThat(new BigDecimal(movement.get("unit_cost").toString())).isEqualByComparingTo("20");
+        assertThat(new BigDecimal(movement.get("total_cost").toString())).isEqualByComparingTo("60");
+        assertMaterialQuantity("Rose", "10");
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM raw_material_stock_movement", Integer.class))
+                .isZero();
+    }
+
+    // @trace FR-99
+    @Test
+    void rejectsAProductAdjustmentEqualToTheCurrentQuantity() throws Exception {
+        insertProduct(1, "BOX-1", "Box one", 6, "40", "20");
+        var session = signedInSession();
+
+        postJson(session, "/api/products/1/adjustments",
+                "{\"actualQuantity\":6,\"operationDate\":\"2026-07-21\",\"reason\":\"Count\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid data"))
+                .andExpect(jsonPath("$.detail").value("Actual stock already matches the recorded Product stock"));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT quantity FROM product WHERE id = 1", BigDecimal.class))
+                .isEqualByComparingTo("6");
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_stock_movement", Integer.class)).isZero();
+    }
+
     private ResultActions login(String password) throws Exception {
         return login("admin", password);
     }
@@ -2513,6 +2783,49 @@ class InventoryFlowIntegrationTest {
                 .param("quantity", "2")
                 .param("initialUnitCost", "20")
                 .param("markupPercentage", "50")
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue()));
+    }
+
+    private static final String ROSE_RECIPE = "[{\"rawMaterialId\":1,\"quantityPerUnit\":1}]";
+
+    private void insertRawMaterial(long id, String name, String unit, String quantity, String averageUnitCost) {
+        jdbcTemplate.update("""
+                INSERT INTO raw_material (id, name, description, unit, quantity, average_unit_cost)
+                VALUES (?, ?, '', ?, ?, ?)
+                """, id, name, unit, quantity, averageUnitCost);
+    }
+
+    /** Posts the multipart product form; {@code overrides} are name/value pairs replacing the defaults. */
+    private ResultActions postProduct(MockHttpSession session, String recipeJson, String... overrides)
+            throws Exception {
+        return submitProduct(HttpMethod.POST, "/api/products", session, recipeJson, overrides);
+    }
+
+    private ResultActions putProduct(MockHttpSession session, long id, String recipeJson, String... overrides)
+            throws Exception {
+        return submitProduct(HttpMethod.PUT, "/api/products/" + id, session, recipeJson, overrides);
+    }
+
+    private ResultActions submitProduct(
+            HttpMethod method, String path, MockHttpSession session, String recipeJson, String... overrides)
+            throws Exception {
+        var form = new LinkedHashMap<String, String>();
+        form.put("sku", "BOX-1");
+        form.put("name", "Box");
+        form.put("quantity", "0");
+        form.put("markupPercentage", "50");
+        for (int i = 0; i < overrides.length; i += 2) {
+            form.put(overrides[i], overrides[i + 1]);
+        }
+        var csrfCookie = csrfCookie(session);
+        var builder = multipart(method, path)
+                .file(new MockMultipartFile(
+                        "recipe", "recipe.json", MediaType.APPLICATION_JSON_VALUE,
+                        recipeJson.getBytes(StandardCharsets.UTF_8)));
+        form.forEach((name, value) -> builder.param(name, value));
+        return mockMvc.perform(builder
                 .session(session)
                 .cookie(csrfCookie)
                 .header("X-XSRF-TOKEN", csrfCookie.getValue()));

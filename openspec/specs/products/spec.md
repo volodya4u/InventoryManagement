@@ -15,7 +15,7 @@ tests; every requirement is an unratified assumption.
 120), `description` (at most 1000), `quantity` (whole number, at least 0, at most 12 digits), optional
 `initialUnitCost`, `advertisingCostPerUnit` (default 0), `markupPercentage` (required) and a `recipe` part (FR-76).
 
-> GAP: the length limits and fractional-quantity rejection are not asserted (see docs/requirements.md Coverage gaps, FR-76 row).
+> Covered by slice `harden-product-and-production-tests`: `InventoryFlowIntegrationTest` › `enforcesProductFieldLengthsAndWholeNumberQuantities` asserts the length limits and the whole-number quantity rule; the form-field constraint failures answer with a 400 titled "Validation error".
 
 #### Scenario: Valid product
 - **WHEN** a product is created with a SKU, name, markup, a recipe and quantity 2
@@ -23,7 +23,7 @@ tests; every requirement is an unratified assumption.
 
 #### Scenario: Fractional quantity
 - **WHEN** a product is created with quantity 1.5
-- **THEN** the request is rejected with 400 (code-level behavior, not test-verified)
+- **THEN** the request is rejected with 400
 
 ### Requirement: SKU uniqueness
 
@@ -51,7 +51,7 @@ A product SHALL need a recipe of at least one item; each item SHALL have an exis
 greater than 0, and a raw material MAY appear only once; violations SHALL give 400 (or 404 for an unknown material)
 (FR-79).
 
-> GAP: backend validation of empty, duplicate, non-positive and unknown-material recipes is untested; only the client form is (see docs/requirements.md Coverage gaps, FR-79 row).
+> Covered by slice `harden-product-and-production-tests`: `validatesTheRecipeOnTheServerWhenCreatingAndUpdatingAProduct` asserts the empty, duplicate, non-positive, incomplete and unknown-material recipes on create and update.
 
 #### Scenario: Empty recipe
 - **WHEN** a product is created with no recipe items
@@ -67,7 +67,7 @@ An opening product quantity above zero SHALL require an initial unit cost (400 "
 initial stock is greater than zero"), rounded to 4 decimals half-up, which becomes the product's `averageUnitCost`, and
 SHALL record an `OPENING_BALANCE` movement "Initial product stock" without consuming raw materials (FR-80).
 
-> GAP: the server-side missing-cost rejection is tested only on the client (see docs/requirements.md Coverage gaps, FR-80 row).
+> Covered by slice `harden-product-and-production-tests`: `requiresAnInitialUnitCostForPositiveOpeningStockOnTheServer` asserts the rejection and the zero-stock case.
 
 #### Scenario: Opening stock does not consume materials
 - **WHEN** a product is created with quantity 2 and initial unit cost 100
@@ -105,7 +105,7 @@ and creating a product from the UI SHALL post opening stock, initial unit cost a
 `PUT /api/products/{id}` SHALL update SKU, name, description, advertising cost, markup, recipe (fully replaced) and
 optionally the image; it SHALL NOT change quantity or average unit cost; an unknown id SHALL give 404 (FR-83).
 
-> GAP: the 404 is not asserted (see docs/requirements.md Coverage gaps, FR-83 row).
+> Covered by slice `harden-product-and-production-tests`: `answers404WhenUpdatingAnUnknownProductAndNeverChangesStockOnUpdate` asserts the 404 and that an update ignores quantity and initial unit cost.
 
 #### Scenario: Edit without quantity
 - **WHEN** a product is edited in the UI
@@ -130,7 +130,7 @@ A product that has any sale SHALL NOT be deleted (409 "Product “<name>” cann
 an unsold product SHALL be deleted with 204 and its recipe and movements removed with it (FR-85). The UI SHALL ask
 "Delete product “<name>”?" via a browser confirm before deleting (FR-86).
 
-> GAP: the cascade is not asserted (see docs/requirements.md OQ-5 / Coverage gaps, FR-85 row).
+> Covered by slice `harden-product-and-production-tests`: `removesTheRecipeBatchesAndMovementsOfADeletedUnsoldProduct` asserts the cascade.
 > Covered by slice `harden-frontend-specs`: `products.component.spec.ts` asserts the delete confirmation (FR-86).
 
 #### Scenario: Sold product
