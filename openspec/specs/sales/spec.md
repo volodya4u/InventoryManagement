@@ -28,7 +28,7 @@ most 1000) and 1 to 100 items; otherwise it SHALL give 400 (FR-101).
 Each sale item SHALL need an existing product (404 otherwise), a whole `quantity` greater than 0 (at most 12 digits) and
 a `unitPrice` of at least 0 with at most 2 decimals; a product MAY appear only once per sale (FR-102).
 
-> GAP: duplicate-product, fractional, negative-price and unknown-product rejections are not asserted (see docs/requirements.md Coverage gaps, FR-102 row).
+> Covered by slice `harden-sales-reports-history-tests`: `InventoryFlowIntegrationTest` › `rejectsInvalidSaleItemsAndRecordsNothing` asserts the unknown-product, duplicate-product, fractional, zero, negative-price and three-decimal-price rejections and that nothing is recorded.
 
 #### Scenario: Unknown product
 - **WHEN** an item references a missing product id
@@ -36,14 +36,14 @@ a `unitPrice` of at least 0 with at most 2 decimals; a product MAY appear only o
 
 #### Scenario: Duplicate product
 - **WHEN** the same product appears twice in one sale
-- **THEN** the request is rejected with 400 (code-level behavior, not test-verified)
+- **THEN** the request is rejected with 400
 
 ### Requirement: Sale numbering
 
 Each sale SHALL get a unique number `SALE-YYYYMMDD-NNNN`, where the date is the sale date and NNNN is the highest
 existing number for that date plus one, zero-padded to 4 digits (FR-103).
 
-> GAP: incrementing within a date is not asserted (see docs/requirements.md Coverage gaps, FR-103 row).
+> Covered by slice `harden-sales-reports-history-tests`: `numbersSalesWithinTheirOwnDate` asserts incrementing within a date and restarting on another.
 
 #### Scenario: First sale of a date
 - **WHEN** the first sale dated 2026-07-21 is created
@@ -90,7 +90,7 @@ price at sale time), actual unit price and unit cost (the product's average unit
 Line revenue SHALL equal round2(quantity x unit price), line cost round2(quantity x unit cost); sale totals SHALL sum the
 lines; gross profit SHALL equal revenue - cost and may be negative; rounding is half-up to 2 decimals (FR-107).
 
-> GAP: a negative profit is not asserted (see docs/requirements.md Coverage gaps, FR-107 row).
+> Covered by slice `harden-sales-reports-history-tests`: `recordsANegativeGrossProfitWhenAProductIsSoldBelowItsCost` asserts a negative gross profit.
 
 #### Scenario: Two units
 - **GIVEN** unit price 240 and unit cost 150
@@ -110,7 +110,7 @@ A new sale SHALL have status `COMPLETED` (FR-108).
 `GET /api/sales` SHALL list sales newest first (sale date, then id, descending), each with items and reversal documents;
 `GET /api/sales/{id}` SHALL return one sale or 404 "Record not found" (FR-109).
 
-> GAP: ordering and the 404 are not asserted (see docs/requirements.md Coverage gaps, FR-109 row).
+> Covered by slice `harden-sales-reports-history-tests`: `listsSalesNewestFirstAndAnswers404ForAnUnknownSale` asserts the ordering and the 404.
 
 #### Scenario: Unknown sale
 - **WHEN** `GET /api/sales/9999` targets a missing id
@@ -120,7 +120,7 @@ A new sale SHALL have status `COMPLETED` (FR-108).
 
 A sale document SHALL never be edited or deleted: the API offers only create, read, return and cancel (FR-110).
 
-> GAP: structural property with no test (see docs/requirements.md Coverage gaps, FR-110 row).
+> Covered by slice `harden-sales-reports-history-tests`: `offersNoWayToEditOrDeleteASale` asserts that PUT, PATCH and DELETE are refused with 405 and the sale is unchanged.
 
 #### Scenario: No update or delete endpoint
 - **WHEN** a client sends `PUT` or `DELETE` to `/api/sales/{id}`

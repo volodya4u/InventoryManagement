@@ -14,7 +14,7 @@ requirement is an unratified assumption.
 `POST /api/sales/{id}/returns` SHALL take `returnDate`, `reason` (required, at most 200), optional `notes` (at most 1000)
 and a non-empty list of items, each a distinct `saleItemId` of that sale with a whole quantity greater than 0 (FR-114).
 
-> GAP: duplicate item, foreign item and blank reason rejections are not asserted (see docs/requirements.md Coverage gaps, FR-114 row).
+> Covered by slice `harden-sales-reports-history-tests`: `InventoryFlowIntegrationTest` › `rejectsReturnsWithDuplicateForeignOrBlankInput` asserts the duplicate-item, other-sale-item and blank-reason rejections.
 
 #### Scenario: Valid return
 - **GIVEN** a completed sale
@@ -23,7 +23,7 @@ and a non-empty list of items, each a distinct `saleItemId` of that sale with a 
 
 #### Scenario: Blank reason
 - **WHEN** a return is posted with a blank reason
-- **THEN** the request is rejected with 400 (code-level behavior, not test-verified)
+- **THEN** the request is rejected with 400
 
 ### Requirement: Remaining returnable quantity
 
@@ -40,7 +40,7 @@ A returned quantity SHALL NOT exceed the item's remaining unreturned quantity; o
 A cancelled sale SHALL accept no returns (400 "A cancelled sale cannot receive Product returns") and a fully returned
 sale SHALL accept none (400 "All Products from this sale have already been returned") (FR-116).
 
-> GAP: not asserted by any test (see docs/requirements.md Coverage gaps, FR-116 row).
+> Covered by slice `harden-sales-reports-history-tests`: `acceptsNoReturnOnACancelledOrFullyReturnedSale` asserts both rejections.
 
 #### Scenario: Return on a cancelled sale
 - **GIVEN** a `CANCELLED` sale
@@ -57,7 +57,7 @@ sale SHALL accept none (400 "All Products from this sale have already been retur
 A return or cancellation date earlier than the sale date SHALL be rejected with 400 "<Return date or Cancellation date>
 cannot be earlier than the sale date" (FR-117).
 
-> GAP: not asserted; other date limits are absent by design (see docs/requirements.md OQ-4 / Coverage gaps, FR-117 row).
+> Covered by slice `harden-sales-reports-history-tests`: `rejectsAReturnOrCancellationDatedBeforeTheSale` asserts both date rejections; other date limits stay absent by design (OQ-4).
 
 #### Scenario: Early return date
 - **GIVEN** a sale dated 2026-07-21
@@ -69,7 +69,7 @@ cannot be earlier than the sale date" (FR-117).
 Each reversal SHALL get a unique number `RET-YYYYMMDD-NNNN`, built like the sale number but from the reversal date, and
 SHALL store date, reason, notes, items, refund, returned cost and reversed gross profit (FR-118).
 
-> GAP: incrementing within a date is not asserted (see docs/requirements.md Coverage gaps, FR-118 row).
+> Covered by slice `harden-sales-reports-history-tests`: `numbersReversalsWithinTheirOwnDate` asserts incrementing within a date and restarting on another.
 
 #### Scenario: First reversal of a date
 - **WHEN** the first return dated 2026-08-02 is created

@@ -13,7 +13,7 @@ tests; every requirement is an unratified assumption.
 `GET /api/dashboard` SHALL return `rawMaterialTypes` (count of raw materials), `productTypes` (count of products) and
 `productUnits` (sum of product quantities) (FR-37).
 
-> GAP: no test asserts these three values (see docs/requirements.md Coverage gaps, FR-37 row).
+> Covered by slice `harden-sales-reports-history-tests`: `InventoryFlowIntegrationTest` › `countsRawMaterialsProductsAndProductUnitsOnTheDashboard` asserts the three values.
 
 #### Scenario: Counts of catalog and units
 - **GIVEN** 2 raw materials and 1 product with quantity 5
@@ -25,7 +25,8 @@ tests; every requirement is an unratified assumption.
 `salesCount` SHALL count sales whose status is not `CANCELLED`, so `RETURNED` and `PARTIALLY_RETURNED` sales are counted
 (FR-38).
 
-> GAP: the cancelled exclusion is not asserted; whether counting returned sales is intended is unclear (see docs/requirements.md OQ-2 / Coverage gaps).
+> Covered by slice `harden-sales-reports-history-tests`: `countsEverySaleExceptCancelledOnesOnTheDashboard` asserts the cancelled exclusion and that returned and partly returned sales are counted.
+> GAP: whether counting returned sales is intended is unclear (see docs/requirements.md OQ-2).
 
 #### Scenario: One completed sale
 - **GIVEN** one `COMPLETED` sale
@@ -35,7 +36,7 @@ tests; every requirement is an unratified assumption.
 #### Scenario: Cancelled sale
 - **GIVEN** a sale in status `CANCELLED`
 - **WHEN** the dashboard is requested
-- **THEN** that sale is not counted (code-level behavior, not test-verified)
+- **THEN** that sale is not counted
 
 ### Requirement: Low-stock count
 
