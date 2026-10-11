@@ -2,6 +2,7 @@ package com.flowershop.inventory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -2554,6 +2555,215 @@ class InventoryFlowIntegrationTest {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_stock_movement", Integer.class)).isZero();
     }
 
+    // @trace FR-33
+    @Test
+    void forwardsEveryBrowserRouteToTheAngularApplication() throws Exception {
+        for (var path : List.of(
+                "/", "/login", "/dashboard", "/raw-materials", "/products", "/sales", "/stock-movements",
+                "/change-password", "/reports/monthly-sales", "/reports/a/b")) {
+            mockMvc.perform(get(path))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/index.html"));
+        }
+        mockMvc.perform(get("/no-such-route"))
+                .andExpect(result -> assertThat(result.getResponse().getForwardedUrl()).isNull());
+    }
+
+    // @trace FR-73
+    @Test
+    void servesStoredImagesWithTheirContentTypeAndNoStore() throws Exception {
+        var session = signedInSession();
+        submitMultipart(HttpMethod.POST, "/api/raw-materials", session,
+                List.of(imagePart("rose.png", "image/png", PNG_BYTES)),
+                "name", "Rose", "description", "", "unit", "PIECE", "quantity", "1", "initialUnitCost", "1")
+                .andExpect(status().isCreated());
+        submitMultipart(HttpMethod.POST, "/api/raw-materials", session, List.of(),
+                "name", "Moss", "description", "", "unit", "GRAM", "quantity", "1", "initialUnitCost", "1")
+                .andExpect(status().isCreated());
+        submitMultipart(HttpMethod.POST, "/api/products", session,
+                List.of(recipePart(ROSE_RECIPE), imagePart("box.jpg", "image/jpeg", JPEG_BYTES)),
+                "sku", "BOX-1", "name", "Box", "quantity", "0", "markupPercentage", "50")
+                .andExpect(status().isCreated());
+        submitMultipart(HttpMethod.POST, "/api/products", session, List.of(recipePart(ROSE_RECIPE)),
+                "sku", "BOX-2", "name", "Plain box", "quantity", "0", "markupPercentage", "50")
+                .andExpect(status().isCreated());
+
+        var rawMaterialImage = mockMvc.perform(get("/api/raw-materials/1/image").session(session))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andReturn().getResponse();
+        assertThat(rawMaterialImage.getContentType()).isEqualTo("image/png");
+        assertThat(rawMaterialImage.getContentAsByteArray()).isEqualTo(PNG_BYTES);
+        var productImage = mockMvc.perform(get("/api/products/1/image").session(session))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andReturn().getResponse();
+        assertThat(productImage.getContentType()).isEqualTo("image/jpeg");
+        assertThat(productImage.getContentAsByteArray()).isEqualTo(JPEG_BYTES);
+
+        for (var rawMaterialId : List.of(2, 999)) {
+            mockMvc.perform(get("/api/raw-materials/" + rawMaterialId + "/image").session(session))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("Record not found"))
+                    .andExpect(jsonPath("$.detail").value("Raw material image not found"));
+        }
+        for (var productId : List.of(2, 999)) {
+            mockMvc.perform(get("/api/products/" + productId + "/image").session(session))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("Record not found"))
+                    .andExpect(jsonPath("$.detail").value("Product image not found"));
+        }
+    }
+
+    // @trace FR-74
+    @Test
+    void keepsTheStoredImageWhenAnUpdateSendsNoNewImage() throws Exception {
+        var session = signedInSession();
+        submitMultipart(HttpMethod.POST, "/api/raw-materials", session,
+                List.of(imagePart("rose.png", "image/png", PNG_BYTES)),
+                "name", "Rose", "description", "", "unit", "PIECE", "quantity", "1", "initialUnitCost", "1")
+                .andExpect(status().isCreated());
+        submitMultipart(HttpMethod.POST, "/api/products", session,
+                List.of(recipePart(ROSE_RECIPE), imagePart("box.png", "image/png", PNG_BYTES)),
+                "sku", "BOX-1", "name", "Box", "quantity", "0", "markupPercentage", "50")
+                .andExpect(status().isCreated());
+
+        var emptyImage = new MockMultipartFile("image", "", "application/octet-stream", new byte[0]);
+        for (var files : List.of(List.<MockMultipartFile>of(), List.of(emptyImage))) {
+            submitMultipart(HttpMethod.PUT, "/api/raw-materials/1", session, files,
+                    "name", "Renamed rose", "unit", "PIECE")
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name").value("Renamed rose"))
+                    .andExpect(jsonPath("$.hasImage").value(true));
+            var productFiles = new ArrayList<MockMultipartFile>(files);
+            productFiles.add(recipePart(ROSE_RECIPE));
+            submitMultipart(HttpMethod.PUT, "/api/products/1", session, productFiles,
+                    "sku", "BOX-1", "name", "Renamed box", "markupPercentage", "50")
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name").value("Renamed box"));
+            assertStoredImage("raw_material", PNG_BYTES, "image/png");
+            assertStoredImage("product", PNG_BYTES, "image/png");
+        }
+
+        submitMultipart(HttpMethod.PUT, "/api/raw-materials/1", session,
+                List.of(imagePart("rose.jpg", "image/jpeg", JPEG_BYTES)), "name", "Renamed rose", "unit", "PIECE")
+                .andExpect(status().isOk());
+        submitMultipart(HttpMethod.PUT, "/api/products/1", session,
+                List.of(recipePart(ROSE_RECIPE), imagePart("box.jpg", "image/jpeg", JPEG_BYTES)),
+                "sku", "BOX-1", "name", "Renamed box", "markupPercentage", "50")
+                .andExpect(status().isOk());
+        assertStoredImage("raw_material", JPEG_BYTES, "image/jpeg");
+        assertStoredImage("product", JPEG_BYTES, "image/jpeg");
+    }
+
+    // @trace FR-149
+    @Test
+    void refusesNegativeQuantitiesAndCostsAndValuesOutsideTheClosedSetsAtTheDatabase() {
+        seedRowsForTheDatabaseRules();
+
+        // Each rule is {table, column, a value it refuses, a value it accepts}.
+        assertSoftly(soft -> {
+            for (var rule : List.of(
+                    new String[] {"raw_material", "quantity", "-1", "0"},
+                    new String[] {"raw_material", "average_unit_cost", "-1", "0"},
+                    new String[] {"raw_material", "reorder_level", "-1", "0"},
+                    new String[] {"product", "quantity", "-1", "0"},
+                    new String[] {"product", "price", "-1", "0"},
+                    new String[] {"product", "markup_percentage", "-1", "0"},
+                    new String[] {"product", "advertising_cost_per_unit", "-1", "0"},
+                    new String[] {"product", "average_unit_cost", "-1", "0"},
+                    new String[] {"raw_material_stock_movement", "quantity", "0", "1"},
+                    new String[] {"raw_material_stock_movement", "unit_cost", "-1", "0"},
+                    new String[] {"raw_material_stock_movement", "total_cost", "-1", "0"},
+                    new String[] {"raw_material_stock_movement", "movement_type", "'BOGUS'", "'RECEIPT'"},
+                    new String[] {"product_stock_movement", "quantity", "0", "1"},
+                    new String[] {"product_stock_movement", "unit_cost", "-1", "0"},
+                    new String[] {"product_stock_movement", "total_cost", "-1", "0"},
+                    new String[] {"product_stock_movement", "movement_type", "'BOGUS'", "'WRITE_OFF'"},
+                    new String[] {"sale", "total_revenue", "-1", "0"},
+                    new String[] {"sale", "total_cost", "-1", "0"},
+                    new String[] {"sale", "payment_method", "'BARTER'", "'CARD'"},
+                    new String[] {"sale", "status", "'BOGUS'", "'COMPLETED'"},
+                    new String[] {"sale_item", "quantity", "0", "1"},
+                    new String[] {"sale_item", "unit_price", "-1", "0"},
+                    new String[] {"sale_return", "total_refund", "-1", "0"},
+                    new String[] {"sale_return", "total_cost", "-1", "0"},
+                    new String[] {"sale_return", "operation_type", "'REFUND'", "'CANCELLATION'"})) {
+                var table = rule[0];
+                var column = rule[1];
+                jdbcTemplate.update("UPDATE %s SET %s = %s WHERE id = 1".formatted(table, column, rule[3]));
+                soft.assertThatThrownBy(() -> jdbcTemplate.update(
+                                "UPDATE %s SET %s = %s WHERE id = 1".formatted(table, column, rule[2])))
+                        .as(table + "." + column)
+                        .isInstanceOf(DataIntegrityViolationException.class);
+                soft.assertThat(jdbcTemplate.queryForObject(
+                                "SELECT CAST(%s AS TEXT) FROM %s WHERE id = 1".formatted(column, table), String.class))
+                        .as(table + "." + column + " kept its accepted value")
+                        .isEqualTo(rule[3].replace("'", ""));
+            }
+        });
+    }
+
+    // @trace FR-149
+    @Test
+    void refusesDuplicateSaleAndReturnNumbersIgnoringCaseAtTheDatabase() {
+        seedRowsForTheDatabaseRules();
+
+        assertThatThrownBy(() -> insertSale("SALE-20260721-0001", "2026-07-21", "CASH", "1", "1", "0", "1", "1"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> insertSale("sale-20260721-0001", "2026-07-21", "CASH", "1", "1", "0", "1", "1"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        for (var returnNumber : List.of("RET-20260721-0001", "ret-20260721-0001")) {
+            assertThatThrownBy(() -> jdbcTemplate.update("""
+                    INSERT INTO sale_return
+                        (sale_id, return_number, return_date, operation_type, reason,
+                         total_refund, total_cost, gross_profit_reversal)
+                    VALUES (1, ?, '2026-07-21', 'RETURN', 'Damaged', 1, 1, 0)
+                    """, returnNumber))
+                    .as(returnNumber)
+                    .isInstanceOf(DataIntegrityViolationException.class);
+        }
+        assertThat(rowCount("sale")).isEqualTo(1);
+        assertThat(rowCount("sale_return")).isEqualTo(1);
+    }
+
+    // @trace FR-149
+    @Test
+    void refusesToDeleteRowsThatOtherRowsReferenceAtTheDatabase() {
+        seedRowsForTheDatabaseRules();
+
+        // A product with a sale item, a raw material in a recipe, and a sale with a return.
+        assertSoftly(soft -> {
+            for (var delete : List.of(
+                    "DELETE FROM product WHERE id = 1",
+                    "DELETE FROM raw_material WHERE id = 1",
+                    "DELETE FROM sale WHERE id = 1")) {
+                soft.assertThatThrownBy(() -> jdbcTemplate.update(delete))
+                        .as(delete)
+                        .isInstanceOf(DataIntegrityViolationException.class);
+            }
+        });
+        assertThat(rowCount("product")).isEqualTo(1);
+        assertThat(rowCount("raw_material")).isEqualTo(1);
+        assertThat(rowCount("sale")).isEqualTo(1);
+    }
+
+    // @trace FR-149
+    @Test
+    void keepsForeignKeysOnAtTheDatabase() {
+        seedRowsForTheDatabaseRules();
+
+        assertThat(jdbcTemplate.queryForObject("PRAGMA foreign_keys", Integer.class)).isEqualTo(1);
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                "INSERT INTO product_recipe_item (product_id, raw_material_id, quantity_per_unit) VALUES (999, 1, 1)"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> jdbcTemplate.update("""
+                INSERT INTO product_stock_movement
+                    (product_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                VALUES (999, 'WRITE_OFF', 1, 1, 1, '2026-07-21')
+                """)).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
     private ResultActions login(String password) throws Exception {
         return login("admin", password);
     }
@@ -2786,6 +2996,67 @@ class InventoryFlowIntegrationTest {
                 .session(session)
                 .cookie(csrfCookie)
                 .header("X-XSRF-TOKEN", csrfCookie.getValue()));
+    }
+
+    /** One valid row in each table the database rules apply to, for the FR-149 tests. */
+    private void seedRowsForTheDatabaseRules() {
+        insertRawMaterial(1, "Rose", "PIECE", "10", "5");
+        insertProduct(1, "ROSE-BOX-001", "Rose Box", 5, "250", "150");
+        jdbcTemplate.update(
+                "INSERT INTO product_recipe_item (product_id, raw_material_id, quantity_per_unit) VALUES (1, 1, 2)");
+        jdbcTemplate.update("""
+                INSERT INTO raw_material_stock_movement
+                    (raw_material_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                VALUES (1, 'RECEIPT', 1, 5, 5, '2026-07-21')
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO product_stock_movement
+                    (product_id, movement_type, quantity, unit_cost, total_cost, occurred_at)
+                VALUES (1, 'WRITE_OFF', 1, 150, 150, '2026-07-21')
+                """);
+        insertSale("SALE-20260721-0001", "2026-07-21", "CASH", "250", "150", "100", "1", "250");
+        jdbcTemplate.update("""
+                INSERT INTO sale_return
+                    (sale_id, return_number, return_date, operation_type, reason,
+                     total_refund, total_cost, gross_profit_reversal)
+                VALUES (1, 'RET-20260721-0001', '2026-07-21', 'RETURN', 'Damaged', 250, 150, 100)
+                """);
+    }
+
+    private static final byte[] PNG_BYTES = {(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00};
+    private static final byte[] JPEG_BYTES = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0x00};
+
+    private static MockMultipartFile imagePart(String filename, String contentType, byte[] bytes) {
+        return new MockMultipartFile("image", filename, contentType, bytes);
+    }
+
+    private static MockMultipartFile recipePart(String recipeJson) {
+        return new MockMultipartFile(
+                "recipe", "recipe.json", MediaType.APPLICATION_JSON_VALUE, recipeJson.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /** Sends a multipart form with the given file parts; {@code params} are name/value pairs. */
+    private ResultActions submitMultipart(
+            HttpMethod method, String path, MockHttpSession session, List<MockMultipartFile> files, String... params)
+            throws Exception {
+        var csrfCookie = csrfCookie(session);
+        var builder = multipart(method, path);
+        for (var file : files) {
+            builder.file(file);
+        }
+        for (int i = 0; i < params.length; i += 2) {
+            builder.param(params[i], params[i + 1]);
+        }
+        return mockMvc.perform(builder
+                .session(session)
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue()));
+    }
+
+    private void assertStoredImage(String table, byte[] bytes, String contentType) {
+        var row = jdbcTemplate.queryForMap("SELECT image, image_content_type FROM %s WHERE id = 1".formatted(table));
+        assertThat((byte[]) row.get("image")).as(table).isEqualTo(bytes);
+        assertThat(row.get("image_content_type")).as(table).isEqualTo(contentType);
     }
 
     private static final String ROSE_RECIPE = "[{\"rawMaterialId\":1,\"quantityPerUnit\":1}]";

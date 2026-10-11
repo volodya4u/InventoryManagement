@@ -15,7 +15,7 @@ An image SHALL be optional. The server SHALL accept only JPG, JPEG or PNG, and t
 (`image/jpeg` or `image/png`) and the file signature (magic bytes) SHALL all agree; otherwise it SHALL answer 400
 "Invalid image" with a specific message (FR-70).
 
-> GAP: the extension-only and MIME-only rejections are not asserted (see docs/requirements.md Coverage gaps, FR-70 row).
+> Covered by slice `harden-infrastructure-tests`: `ImageValidatorTest` asserts the extension-only, MIME-only and signature-mismatch rejections and the accepted spellings.
 
 #### Scenario: Valid PNG
 - **WHEN** a file named `x.png` with MIME `image/png` and PNG signature bytes is uploaded
@@ -36,14 +36,20 @@ The maximum image size SHALL be 2 MB (2,097,152 bytes); a larger file SHALL give
 
 ### Requirement: Oversized multipart request
 
-A multipart request above the Spring limits (`max-file-size` 2MB, `max-request-size` 3MB) SHALL give 413 "File too
-large" with detail "The maximum image size is 2 MB" (FR-72).
+A multipart request above the Spring limits (`max-file-size` 2MB, `max-request-size` 3MB) SHALL be refused with 413 (FR-72).
+Over real HTTP a file above 2 MB gets Spring's own problem detail (title "Content Too Large", detail "Maximum upload size
+exceeded"); the "File too large" handler in `ApiExceptionHandler` does not answer these requests. A request above 3 MB is
+refused too, but the container may close the connection before the client can read the 413.
 
-> GAP: not asserted by any test (see docs/requirements.md Coverage gaps, FR-72 row).
+> Covered by slice `harden-infrastructure-tests`: `ImageUploadLimitHttpTest` (a real server, because MockMvc has no servlet container) asserts the 413 for a file above 2 MB, the refusal of a request above 3 MB with nothing stored, and that exactly 2 MB is accepted. The requirement text was corrected: it named the "File too large" handler, which these requests do not reach.
 
 #### Scenario: Request above 3 MB
 - **WHEN** a multipart request larger than 3 MB is sent
-- **THEN** the response is 413 "File too large" with detail "The maximum image size is 2 MB"
+- **THEN** the request is refused and nothing is stored (413, or a closed connection)
+
+#### Scenario: File above 2 MB
+- **WHEN** a multipart request carries an image of 2,097,153 bytes
+- **THEN** the response is 413 titled "Content Too Large" with detail "Maximum upload size exceeded"
 
 ### Requirement: Storage and serving
 
@@ -51,7 +57,7 @@ The image SHALL be stored as a BLOB with its content type and served by `GET /ap
 `GET /api/products/{id}/image` with that content type and `Cache-Control: no-store`; when none exists the response
 SHALL be 404 "Record not found" (FR-73).
 
-> GAP: `no-store`, the product endpoint and the 404 are not asserted; the raw material round trip is (see docs/requirements.md Coverage gaps, FR-73 row).
+> Covered by slice `harden-infrastructure-tests`: `servesStoredImagesWithTheirContentTypeAndNoStore` asserts both endpoints, `no-store` and the 404 messages.
 
 #### Scenario: Round trip
 - **GIVEN** a raw material created with a PNG
@@ -66,7 +72,8 @@ SHALL be 404 "Record not found" (FR-73).
 
 Updating without a new image SHALL keep the stored one; there SHALL be no way to remove an image once set (FR-74).
 
-> GAP: not asserted; whether non-removal is intended is unclear (see docs/requirements.md OQ-11 / Coverage gaps, FR-74 row).
+> Covered by slice `harden-infrastructure-tests`: `keepsTheStoredImageWhenAnUpdateSendsNoNewImage` asserts that an update without an image keeps it and a new image replaces it.
+> GAP: whether non-removal is intended is unclear (see docs/requirements.md OQ-11).
 
 #### Scenario: Update without image
 - **GIVEN** a product with a stored image
