@@ -5,13 +5,14 @@ license: MIT
 compatibility: Requires Node.js 20+. Reads .agent-log/actions.jsonl at the project root (written by the hooks in .claude/settings.json).
 metadata:
   author: fwdays-agentic-engineering-crash-course
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Agent log report
 
 Produce a human-readable report of everything the agent did in this repo, from `.agent-log/actions.jsonl`
-(one JSON object per line, written by the PostToolUse / PostToolUseFailure hooks).
+(one JSON object per line, written by the PreToolUse, PostToolUse and PostToolUseFailure hooks: `PreToolUse` is a call
+the agent proposed, `PostToolUse` / `PostToolUseFailure` is one that ran).
 
 ## Workflow
 
@@ -26,6 +27,10 @@ Produce a human-readable report of everything the agent did in this repo, from `
 
 ## Gotchas
 
+- A `PreToolUse` line whose `id` never gets a matching `PostToolUse` / `PostToolUseFailure` line is a call that was
+  **proposed but not executed**: a hook, a permission rule or the human blocked it (for example a `Write` to
+  `.env.production`). The script lists these under "Proposed but not executed". Present them as blocked / not executed,
+  never as something the agent did, and never as a success or a failure of the work.
 - If the file is missing or empty, say so and suggest checking the hooks in `.claude/settings.json` (`node scripts/hooks-selftest.mjs`); do not create the log.
 - Lines that are not valid JSON are counted as `invalid` and never crash the report.
 - The `tool` column is whatever the hook wrote: `Read`, `Edit`, `Write`, `Bash`, `Glob`, `Grep`, MCP tools such as `mcp__context7__query-docs`.
