@@ -42,7 +42,7 @@ inventory") for each raw material or product that has stock and no movement yet 
 Database rules SHALL enforce non-negative quantities and costs, unique SKU, sale number and return number, restricted
 deletes of referenced rows (recipe materials, sold products, sale documents), and foreign keys on (FR-149).
 
-> GAP: only the duplicate SKU constraint is asserted; other CHECK and FK rules are read from the schema only (see docs/requirements.md Coverage gaps, FR-149 row).
+> Covered by slice `harden-infrastructure-tests`: four `InventoryFlowIntegrationTest` tests assert the CHECK rules, the unique sale and return numbers, the restricted deletes and the foreign keys by direct SQL.
 
 #### Scenario: Duplicate SKU
 - **GIVEN** a product with SKU "ROSE-1"
@@ -64,7 +64,7 @@ cancellation, write-off, adjustment) SHALL run in one database transaction, so a
 Stock deduction SHALL be a check-and-set against the value that was read, so concurrent writers cannot drive stock
 negative; the connection pool size is 1 (NFR-13).
 
-> GAP: no concurrency test exists (see docs/requirements.md Coverage gaps, NFR-13 row).
+> Covered by slice `harden-infrastructure-tests`: `StockQuantitiesTest` (a competing deduction between the read and the guarded write) and `StockDeductionConcurrencyTest` (eight threads, and the pool size) assert it.
 
 #### Scenario: Concurrent writers
 - **WHEN** two writers deduct more than the stock holds

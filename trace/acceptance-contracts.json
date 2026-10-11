@@ -263,8 +263,8 @@
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "missing-artifact"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-34": [
@@ -559,8 +559,8 @@
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "missing-artifact"
+        "artifact": "src/test/java/com/flowershop/inventory/image/ImageValidatorTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-71": [
@@ -575,24 +575,24 @@
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "missing-artifact"
+        "artifact": "src/test/java/com/flowershop/inventory/image/ImageUploadLimitHttpTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-73": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "missing-artifact"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-74": [
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "missing-artifact"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "FR-75": [
@@ -1191,8 +1191,8 @@
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "missing-artifact"
+        "artifact": "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-1": [
@@ -1295,8 +1295,8 @@
       {
         "method": "local-verifiable",
         "mechanism": "file:scripts/dod.mjs",
-        "artifact": null,
-        "status": "missing-artifact"
+        "artifact": "src/test/java/com/flowershop/inventory/inventory/StockDeductionConcurrencyTest.java",
+        "status": "artifact-ok"
       }
     ],
     "NFR-14": [

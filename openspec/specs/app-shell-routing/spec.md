@@ -15,8 +15,7 @@ The server SHALL forward browser reloads of `/`, `/login`, `/dashboard`, `/raw-m
 `/stock-movements`, `/change-password` and `/reports/**` to `/index.html` (FR-33). A new Angular route also needs its
 path in `SpaController` and a forwarding test (TC-5).
 
-> GAP: only two of nine forwarded routes (nested report routes and the stock history route) are covered by a forwarding
-> test (see docs/requirements.md Coverage gaps, FR-33 row).
+> Covered by slice `harden-infrastructure-tests`: `InventoryFlowIntegrationTest` › `forwardsEveryBrowserRouteToTheAngularApplication` asserts all nine routes, signed out, and that an unlisted path is not forwarded.
 
 #### Scenario: Nested report route
 - **WHEN** a browser requests `/reports/monthly-sales` directly
