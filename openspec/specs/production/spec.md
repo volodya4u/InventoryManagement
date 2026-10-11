@@ -14,7 +14,7 @@ reverse-engineered from the shipped code and its tests; every requirement is an 
 `productionDate` (required) and optional `notes` (at most 1000); a product with no recipe SHALL be rejected with 400
 "Add at least one raw material to the product recipe" (FR-88).
 
-> GAP: the no-recipe rejection is not asserted (see docs/requirements.md Coverage gaps, FR-88 row).
+> Covered by slice `harden-product-and-production-tests`: `InventoryFlowIntegrationTest` › `rejectsProductionOfAProductWithoutARecipe` asserts the rejection and that nothing is recorded.
 
 #### Scenario: Valid run
 - **GIVEN** a product with a recipe and enough raw materials
@@ -74,7 +74,7 @@ rounded to 4 decimals half-up (FR-92).
 Production SHALL be the only operation that adds produced units; changing a recipe later SHALL affect only future
 production and past batches SHALL keep their recorded quantities and costs (FR-93).
 
-> GAP: no test edits a recipe after a batch (see docs/requirements.md Coverage gaps, FR-93 row).
+> Covered by slice `harden-product-and-production-tests`: `keepsPastBatchesUnchangedWhenTheRecipeIsEditedLater` asserts that the batch and its consumption stay as recorded and that the next batch uses the new recipe.
 
 #### Scenario: Recipe edited after a batch
 - **GIVEN** a product with a recorded batch

@@ -33,7 +33,7 @@ A product write-off larger than the balance SHALL give 409 "Insufficient product
 Product write-off and adjustment quantities SHALL be whole numbers; a fractional value SHALL give 400 "<field> must be a
 whole number" (FR-97).
 
-> GAP: the fractional adjustment is not asserted; the fractional write-off is (see docs/requirements.md OQ-12 / Coverage gaps, FR-97 row).
+> Covered by slice `harden-product-and-production-tests`: `InventoryFlowIntegrationTest` › `rejectsFractionalProductAdjustmentsAndWriteOffsOverHttp` asserts both messages.
 
 #### Scenario: Fractional write-off
 - **WHEN** a write-off of 1.5 is posted
@@ -45,7 +45,7 @@ whole number" (FR-97).
 record `ADJUSTMENT_INCREASE` or `ADJUSTMENT_DECREASE` at the current average cost; an increase SHALL NOT consume raw
 materials (FR-98).
 
-> GAP: the "no raw materials consumed" part is not asserted (see docs/requirements.md Coverage gaps, FR-98 row).
+> Covered by slice `harden-product-and-production-tests`: `adjustsProductStockUpWithoutConsumingRawMaterials` asserts that raw material stock and movements are untouched.
 
 #### Scenario: Increase then decrease
 - **GIVEN** 3 units in stock
@@ -57,7 +57,7 @@ materials (FR-98).
 A product adjustment equal to the current quantity SHALL be rejected with 400 "Actual stock already matches the recorded
 Product stock" (FR-99).
 
-> GAP: not asserted by any test (see docs/requirements.md Coverage gaps, FR-99 row).
+> Covered by slice `harden-product-and-production-tests`: `rejectsAProductAdjustmentEqualToTheCurrentQuantity` asserts the 400 and that nothing is recorded.
 
 #### Scenario: Same quantity
 - **GIVEN** 6 units in stock
