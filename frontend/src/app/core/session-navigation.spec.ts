@@ -52,6 +52,7 @@ describe('protected material page', () => {
     requests.expectNone(() => true);
   });
 
+  // @trace FR-27
   it('removes the material form and goes to login when the pre-save session check fails', async () => {
     const harness = await RouterTestingHarness.create();
     const navigation = harness.navigateByUrl('/raw-materials');
@@ -83,6 +84,7 @@ describe('protected material page', () => {
     expect(materials.saving()).toBe(false);
   });
 
+  // @trace FR-28
   it('rechecks authentication when moving between protected child pages', async () => {
     const harness = await RouterTestingHarness.create();
     const first = harness.navigateByUrl('/raw-materials');

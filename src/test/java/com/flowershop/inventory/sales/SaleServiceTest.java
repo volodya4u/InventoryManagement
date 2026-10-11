@@ -24,6 +24,7 @@ class SaleServiceTest {
     private final ProductRepository productRepository = mock(ProductRepository.class);
     private final SaleService service = new SaleService(repository, productRepository);
 
+    // @trace FR-101
     @Test
     void rejectsIncompleteSaleBeforeAccessingRepositories() {
         assertThatThrownBy(() -> service.create(null))
@@ -33,6 +34,7 @@ class SaleServiceTest {
         verifyNoInteractions(repository, productRepository);
     }
 
+    // @trace FR-106
     @Test
     void createsSaleUsingRoundedFinancialSnapshots() {
         var saleDate = LocalDate.of(2026, 10, 5);
@@ -79,6 +81,7 @@ class SaleServiceTest {
                 "Sale SALE-20261005-001");
     }
 
+    // @trace FR-104
     @Test
     void reportsProductShortageBeforeCreatingSale() {
         when(productRepository.findById(3))
@@ -106,6 +109,7 @@ class SaleServiceTest {
                 org.mockito.ArgumentMatchers.any());
     }
 
+    // @trace FR-121, FR-122
     @Test
     void partiallyReturnsProductsAndRestoresWeightedAverageStockCost() {
         var saleDate = LocalDate.of(2026, 10, 1);
@@ -169,6 +173,7 @@ class SaleServiceTest {
                 "Return RET-20261005-001 for SALE-50");
     }
 
+    // @trace FR-125
     @Test
     void refusesToCancelSaleThatAlreadyHasReturns() {
         when(repository.findById(50)).thenReturn(Optional.of(sale(

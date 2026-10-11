@@ -38,6 +38,7 @@ describe('LoginComponent', () => {
     localStorage.clear();
   });
 
+  // @trace FR-15
   it('tells the user the password was changed', () => {
     setup({ passwordChanged: 'true' });
     expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain(
@@ -45,11 +46,13 @@ describe('LoginComponent', () => {
     );
   });
 
+  // @trace FR-26
   it('tells the user the session has ended', () => {
     setup({ sessionExpired: 'true' });
     expect(component.notice()).toBe('Your session has ended. Please sign in again.');
   });
 
+  // @trace FR-20
   it('does not send an empty password', () => {
     setup();
     component.submit();
@@ -58,6 +61,7 @@ describe('LoginComponent', () => {
     requests.expectNone('/api/auth/csrf');
   });
 
+  // @trace FR-20
   it('signs in with the trimmed username and opens the dashboard', () => {
     setup();
     component.form.setValue({ username: '  admin ', password: ' secret ' });
@@ -75,6 +79,7 @@ describe('LoginComponent', () => {
     expect(component.submitting()).toBe(false);
   });
 
+  // @trace FR-21
   it('shows why signing in failed and stays on the page', () => {
     setup();
     component.form.controls.password.setValue('wrong');
@@ -93,6 +98,7 @@ describe('LoginComponent', () => {
     expect(component.submitting()).toBe(false);
   });
 
+  // @trace FR-22
   it('shows the password for five seconds', () => {
     vi.useFakeTimers();
     setup();

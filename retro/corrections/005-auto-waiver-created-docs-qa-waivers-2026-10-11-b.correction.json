@@ -1,0 +1,18 @@
+{
+  "id": "COR-5",
+  "ts": "2026-10-11T17:22:51.690Z",
+  "utterance": "AUTO: waiver created (docs/qa/waivers/2026-10-11-baseline-NFR-16.md) — an evidence requirement was waived; record why and disposition this correction.",
+  "contradictedClaim": null,
+  "mappedReqIds": [],
+  "gateThatShouldHaveCaught": null,
+  "failureMode": "skipped-convention",
+  "failureModeSource": "detector",
+  "source": "auto-waiver",
+  "autoKey": "waiver-created:docs/qa/waivers/2026-10-11-baseline-NFR-16.md",
+  "disposition": {
+    "status": "waived",
+    "by": "volodya4u (confirmed in chat 2026-10-11 at the retro-tagging pull request; recorded by claude)",
+    "ts": "2026-10-11T17:23:01.519Z",
+    "note": "no availability or backup target declared (OQ-10); deferred in docs/mvp-capability-plan.md section 6"
+  }
+}

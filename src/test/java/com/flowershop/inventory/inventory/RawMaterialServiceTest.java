@@ -27,6 +27,7 @@ class RawMaterialServiceTest {
     private final ImageValidator imageValidator = mock(ImageValidator.class);
     private final RawMaterialService service = new RawMaterialService(repository, imageValidator);
 
+    // @trace FR-45
     @Test
     void createsMaterialAndRecordsOpeningStock() {
         var image = mock(MultipartFile.class);
@@ -68,6 +69,7 @@ class RawMaterialServiceTest {
         assertThat(openingDate.getValue()).isIn(earliestOpeningDate, latestOpeningDate);
     }
 
+    // @trace FR-44
     @Test
     void requiresUnitCostWhenOpeningStockIsPositive() {
         assertThatThrownBy(() -> service.create(
@@ -78,6 +80,7 @@ class RawMaterialServiceTest {
         verifyNoInteractions(repository, imageValidator);
     }
 
+    // @trace FR-62, FR-63
     @Test
     void receivesStockUsingWeightedAverageCost() {
         var existing = material(4, "Ribbon", "10", "2.0000", true);
@@ -104,6 +107,7 @@ class RawMaterialServiceTest {
                 "supplier delivery");
     }
 
+    // @trace FR-65
     @Test
     void rejectsWriteOffWhenStockIsInsufficient() {
         when(repository.findById(4))
@@ -127,6 +131,7 @@ class RawMaterialServiceTest {
         verify(repository, never()).consumeStock(4, new BigDecimal("3"));
     }
 
+    // @trace FR-52
     @Test
     void refusesToDeleteMaterialUsedByARecipe() {
         when(repository.findById(4))

@@ -9,6 +9,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 class InventorySchemaMigrationTest {
 
+    // @trace FR-57, FR-147, FR-148
     @Test
     void migratesAnExistingRawMaterialTableAndIsIdempotent() throws Exception {
         var dataSource = new SingleConnectionDataSource("jdbc:sqlite::memory:", true);

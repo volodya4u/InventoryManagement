@@ -75,6 +75,7 @@ describe('StockMovementsComponent', () => {
     TestBed.resetTestingModule();
   });
 
+  // @trace FR-135
   it('loads the first page of all inventory', () => {
     const request = expectHistory();
     expect(params(request)).toEqual({ inventoryType: 'ALL', page: '0', size: '25' });
@@ -85,6 +86,7 @@ describe('StockMovementsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Rose Box');
   });
 
+  // @trace FR-135
   it('sends only the filters that are set, trims the search, and starts again at page 0', () => {
     expectHistory().flush(history());
     component.nextPage();
@@ -112,6 +114,7 @@ describe('StockMovementsComponent', () => {
     expect(component.page()).toBe(0);
   });
 
+  // @trace FR-135
   it('pages forward and back only within the result', () => {
     expectHistory().flush(history());
     component.previousPage();
@@ -132,6 +135,7 @@ describe('StockMovementsComponent', () => {
     first.flush(history());
   });
 
+  // @trace FR-135
   it('ignores paging clicks while a page is loading', () => {
     expectHistory().flush(history({ totalPages: 3 }));
     component.nextPage();
@@ -150,6 +154,7 @@ describe('StockMovementsComponent', () => {
     expect(component.page()).toBe(1);
   });
 
+  // @trace FR-135
   it('clears the filters and the page on reset', () => {
     expectHistory().flush(history());
     component.filters.patchValue({ movementType: 'WRITE_OFF', query: 'moss', to: '2026-09-30' });
@@ -162,6 +167,7 @@ describe('StockMovementsComponent', () => {
     reset.flush(history());
   });
 
+  // @trace FR-135
   it('shows the API error and drops the old result', () => {
     expectHistory().flush(history());
     component.applyFilters();
@@ -175,6 +181,7 @@ describe('StockMovementsComponent', () => {
     expect(component.loading()).toBe(false);
   });
 
+  // @trace FR-135
   it('describes the visible range and which rows link to a sale', () => {
     expect(component.pageStart(history({ page: 1 }))).toBe(26);
     expect(component.pageEnd(history({ page: 1 }))).toBe(30);

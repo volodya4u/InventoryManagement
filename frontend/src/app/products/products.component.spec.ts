@@ -95,6 +95,7 @@ describe('ProductsComponent', () => {
     expect(component.form.hasError('initialUnitCostRequired')).toBe(true);
   });
 
+  // @trace FR-78
   it('rejects a markup or advertising cost with more than two decimals', () => {
     // The server caps both at two decimals (@Digits(fraction = 2)) and returns 400 otherwise,
     // so the form must reject the third decimal instead of letting the save fail.
@@ -112,6 +113,7 @@ describe('ProductsComponent', () => {
     expect(component.form.controls.advertisingCostPerUnit.valid).toBe(true);
   });
 
+  // @trace FR-82
   it('prices a new product from its recipe, advertising cost and markup', () => {
     setup([], [rawMaterial(), rawMaterial({ id: 2, name: 'Ribbon', averageUnitCost: 0.4 })]);
     component.openCreate();
@@ -125,6 +127,7 @@ describe('ProductsComponent', () => {
     expect(component.calculatedSellingPrice()).toBe(13.95);
   });
 
+  // @trace FR-94
   it('counts production needs without floating-point drift', () => {
     const bouquet = product({
       recipe: [
@@ -157,6 +160,7 @@ describe('ProductsComponent', () => {
     requests.expectNone({ method: 'POST', url: '/api/products/1/production' });
   });
 
+  // @trace FR-94
   it('posts production when the materials are enough, then reloads', () => {
     setup([product()], [rawMaterial()]);
     component.openProduction(product());
@@ -170,6 +174,7 @@ describe('ProductsComponent', () => {
     expect(component.productionDialogOpen()).toBe(false);
   });
 
+  // @trace FR-100
   it('blocks a write-off larger than the stock', () => {
     setup([product({ quantity: 2 })], [rawMaterial()]);
     component.openStockOperation(product({ quantity: 2 }), 'WRITE_OFF');
@@ -180,6 +185,7 @@ describe('ProductsComponent', () => {
     requests.expectNone({ method: 'POST', url: '/api/products/1/write-offs' });
   });
 
+  // @trace FR-100
   it('sends an adjustment as the counted quantity and updates the row in place', () => {
     setup([product()], [rawMaterial()]);
     component.openStockOperation(product(), 'ADJUSTMENT');
@@ -206,6 +212,7 @@ describe('ProductsComponent', () => {
     expect(component.stockOperationDialogOpen()).toBe(false);
   });
 
+  // @trace FR-87
   it('creates a product with its opening stock, initial unit cost and recipe', async () => {
     setup([], [rawMaterial()]);
     component.openCreate();
@@ -333,6 +340,7 @@ describe('ProductsComponent amounts', () => {
     };
   }
 
+  // @trace FR-82
   it('estimates the unit cost of a recipe without floating-point drift', () => {
     component.rawMaterials.set([
       rawMaterial({ id: 1, averageUnitCost: 0.4 }),
@@ -360,6 +368,7 @@ describe('ProductsComponent amounts', () => {
     return component.calculatedSellingPrice();
   }
 
+  // @trace FR-82
   it('previews the selling price the server calculates', () => {
     // The server rounds the exact price half up: 2.555, 4.015, 2.135 and 2.175 (twice) here.
     expect(previewSellingPrice(0.73, 2, 75)).toBe(2.56);
@@ -382,6 +391,7 @@ describe('ProductsComponent amounts', () => {
     expect(prefillInitialUnitCost(0.61, 3.5)).toBe(2.14);
   });
 
+  // @trace FR-94
   it('costs a production run without floating-point drift', () => {
     component.rawMaterials.set([
       rawMaterial({ id: 1, averageUnitCost: 1.1 }),
@@ -406,6 +416,7 @@ describe('ProductsComponent amounts', () => {
     expect(component.estimatedProductionCost()).toBe(2.55);
   });
 
+  // @trace FR-82
   it('values stock without floating-point drift', () => {
     component.openStockOperation(product({ quantity: 10, averageUnitCost: 1.1 }), 'WRITE_OFF');
     component.stockOperationForm.controls.quantity.setValue(3);

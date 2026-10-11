@@ -99,6 +99,7 @@ describe('MonthlySalesReportComponent', () => {
     URL.revokeObjectURL = originalRevokeObjectUrl;
   });
 
+  // @trace FR-144
   it('loads the current month on open', () => {
     expect(component.selectedMonth()).toBe('2026-01');
     expectReport('2026-01').flush(report());
@@ -109,6 +110,7 @@ describe('MonthlySalesReportComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('S-0007');
   });
 
+  // @trace FR-144
   it('reloads for another month and ignores a cleared month picker', () => {
     expectReport('2026-01').flush(report());
 
@@ -122,6 +124,7 @@ describe('MonthlySalesReportComponent', () => {
     expect(component.selectedMonth()).toBe('2025-12');
   });
 
+  // @trace FR-144
   it('shows the API error and drops the previous report', () => {
     expectReport('2026-01').flush(report());
     component.load();
@@ -135,6 +138,7 @@ describe('MonthlySalesReportComponent', () => {
     expect(component.loading()).toBe(false);
   });
 
+  // @trace FR-145
   it('exports sales and returns as a UTF-8 CSV with escaped quotes', async () => {
     expectReport('2026-01').flush(report());
     const createObjectUrl = vi.fn((_: Blob) => 'blob:monthly-sales');
@@ -165,6 +169,7 @@ describe('MonthlySalesReportComponent', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:monthly-sales');
   });
 
+  // @trace FR-145
   it('does not export a month without sales or returns', () => {
     expectReport('2026-01').flush(report({ sales: [], returns: [] }));
     URL.createObjectURL = vi.fn();

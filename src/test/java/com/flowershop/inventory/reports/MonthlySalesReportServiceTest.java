@@ -22,6 +22,7 @@ class MonthlySalesReportServiceTest {
             mock(MonthlySalesReportRepository.class);
     private final MonthlySalesReportService service = new MonthlySalesReportService(repository);
 
+    // @trace FR-136
     @Test
     void rejectsInvalidMonthBeforeQueryingRepository() {
         assertThatThrownBy(() -> service.generate("2026-13"))
@@ -31,6 +32,7 @@ class MonthlySalesReportServiceTest {
         verifyNoInteractions(repository);
     }
 
+    // @trace FR-136, FR-139, FR-140, FR-142
     @Test
     void generatesNetTotalsAverageAndZeroFilledPaymentMethods() {
         var start = LocalDate.of(2026, 9, 1);

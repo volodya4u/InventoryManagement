@@ -42,6 +42,7 @@ describe('ChangePasswordComponent', () => {
     requests.expectNone('/api/auth/change-password');
   });
 
+  // @trace FR-11
   it('requires a new password of 10 to 64 characters', () => {
     fill('old-password', 'x'.repeat(9), 'x'.repeat(9));
     expect(component.form.controls.newPassword.hasError('minlength')).toBe(true);
@@ -53,6 +54,7 @@ describe('ChangePasswordComponent', () => {
     expect(component.form.controls.newPassword.hasError('maxlength')).toBe(true);
   });
 
+  // @trace FR-15
   it('changes the password, ends the session and asks to sign in again', () => {
     fill('old-password', 'new-password-1', 'new-password-1');
     component.submit();
@@ -74,6 +76,7 @@ describe('ChangePasswordComponent', () => {
     expect(component.submitting()).toBe(false);
   });
 
+  // @trace FR-16
   it('shows the server error and keeps the session', () => {
     fill('wrong-password', 'new-password-1', 'new-password-1');
     component.submit();

@@ -30,6 +30,7 @@ describe('ShellComponent', () => {
     localStorage.clear();
   });
 
+  // @trace FR-35
   it('opens the menu from the toggle and closes it from a link', () => {
     const toggle: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-expanded]');
     toggle.click();
@@ -43,6 +44,7 @@ describe('ShellComponent', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 
+  // @trace FR-9
   it('signs out once and goes to the login page', () => {
     component.logout();
     component.logout();
@@ -54,6 +56,7 @@ describe('ShellComponent', () => {
     expect(TestBed.inject(AuthService).user()).toBeNull();
   });
 
+  // @trace FR-9
   it('still goes to the login page when signing out fails', () => {
     component.logout();
     requests
