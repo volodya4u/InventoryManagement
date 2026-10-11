@@ -14,7 +14,7 @@ JUnit 5 under `src/test/java`; frontend tests are `*.spec.ts` next to the code.
   its tests are the proof). Every requirement cites the FR ids in `docs/requirements.md`.
 - `changes/` — one folder per new slice (proposal, design, tasks). New work only.
 - `docs/specs/` is the repo's own per-feature spec convention (`docs/specs/TEMPLATE.md`, checked by
-  `scripts/check-specs.mjs`). It stays in force for new features until the user decides how the two merge.
+  `scripts/check-specs.mjs`). The user decided on 2026-10-11 (see `AGENTS.md`, "Project Factory"): a feature that changes the schema, an API and a page together uses `docs/specs/`; anything smaller uses `changes/` here.
 
 ## Rules
 
