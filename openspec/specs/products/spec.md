@@ -79,12 +79,20 @@ The selling price SHALL never be entered. On create and on every update it SHALL
 raw material averageUnitCost + advertisingCostPerUnit) x (1 + markupPercentage / 100), rounded to 2 decimals half-up (so
 0.545 gives 0.55), and stored (FR-81).
 
-> GAP: the stored price is not recalculated when a raw material's average cost later changes; whether that is intended is unclear (see docs/requirements.md OQ-1).
+> Stated by the owner on 2026-10-11 (docs/requirements.md OQ-1): this is intended. A product keeps the price it was saved with when a raw material's average cost later changes; a product developed or saved afterwards is priced at the new cost. A new production batch is also costed at the current average cost (observed in the code).
+> Asserted by `InventoryFlowIntegrationTest` › `keepsAProductsStoredPriceWhenARawMaterialCostChangesAndUsesTheNewCostOnTheNextSaveAndBatch`.
 
 #### Scenario: Worked price
 - **GIVEN** a recipe costing 100 per unit, advertising cost 0 and markup 125
 - **WHEN** the product is saved
 - **THEN** the selling price is 225.00
+
+#### Scenario: Cost changes after saving
+- **GIVEN** a product with a recipe of 2 units of a raw material costing 10, saved at price 30 (markup 50 percent)
+- **WHEN** a receipt moves that material's average cost to 15
+- **THEN** the product still shows price 30
+- **AND** the next production batch of one unit costs 30 (2 units at 15)
+- **AND** saving the product again prices it at 45
 
 #### Scenario: Half-up rounding
 - **GIVEN** a computed price of 0.545

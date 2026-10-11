@@ -1131,6 +1131,7 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/ProductServiceTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
       ],
       "recordings": []
@@ -1247,6 +1248,7 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/ProductServiceTest.java",
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
       ],
       "recordings": []
