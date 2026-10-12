@@ -14,6 +14,11 @@ const FENCE_CLOSE = "````";
 
 const lf = (text) => text.replace(/\r\n/g, "\n");
 
+// The case directories under evals/factory-rules (none when the folder is missing).
+export function caseNames(casesDir) {
+  return existsSync(casesDir) ? readdirSync(casesDir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name) : [];
+}
+
 // The "## Project Factory" section of AGENTS.md, from its heading to the next "## " heading, without trailing blanks.
 export function agentsSection(agentsText) {
   const text = lf(agentsText);
@@ -48,7 +53,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const root = process.cwd();
   const casesDir = join(root, "evals", "factory-rules");
   const section = agentsSection(readFileSync(join(root, "AGENTS.md"), "utf8"));
-  const names = existsSync(casesDir) ? readdirSync(casesDir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name) : [];
+  const names = caseNames(casesDir);
   for (const name of names) {
     const path = join(casesDir, name, "prompt.md");
     const before = readFileSync(path, "utf8");
