@@ -1,12 +1,103 @@
 {
   "generatedBy": "scripts/check-trajectory.mjs",
-  "slices": [],
+  "slices": [
+    {
+      "slice": "2026-10-12-harden-frontend-specs",
+      "reviewEvidence": "missing",
+      "trailerCommits": 0,
+      "libDomains": [],
+      "processComplete": false
+    },
+    {
+      "slice": "2026-10-12-harden-infrastructure-tests",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": false
+    },
+    {
+      "slice": "2026-10-12-harden-product-and-production-tests",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": false
+    },
+    {
+      "slice": "2026-10-12-harden-raw-material-tests",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": false
+    },
+    {
+      "slice": "2026-10-12-harden-sales-reports-history-tests",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": false
+    },
+    {
+      "slice": "2026-10-12-harden-security-tests",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": false
+    }
+  ],
   "overlaps": [],
   "failures": [],
   "warnings": [
     {
-      "check": "slices",
-      "msg": "no archived slices found under openspec/changes/archive/ (nothing to audit yet)"
+      "check": "review-evidence",
+      "msg": "2026-10-12-harden-frontend-specs: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "process",
+      "msg": "2026-10-12-harden-frontend-specs: archived change is missing design.md and/or tasks.md"
+    },
+    {
+      "check": "trailer",
+      "msg": "2026-10-12-harden-frontend-specs: no commit carries a \"Slice: harden-frontend-specs\" trailer"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-12-harden-infrastructure-tests: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "process",
+      "msg": "2026-10-12-harden-infrastructure-tests: archived change is missing design.md and/or tasks.md"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-12-harden-product-and-production-tests: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "process",
+      "msg": "2026-10-12-harden-product-and-production-tests: archived change is missing design.md and/or tasks.md"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-12-harden-raw-material-tests: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "process",
+      "msg": "2026-10-12-harden-raw-material-tests: archived change is missing design.md and/or tasks.md"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-12-harden-sales-reports-history-tests: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "process",
+      "msg": "2026-10-12-harden-sales-reports-history-tests: archived change is missing design.md and/or tasks.md"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-12-harden-security-tests: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "process",
+      "msg": "2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md"
     }
   ]
 }

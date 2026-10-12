@@ -2533,30 +2533,6 @@
     {
       "check": "recording-evidence",
       "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"harden-frontend-specs\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"harden-infrastructure-tests\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"harden-product-and-production-tests\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"harden-raw-material-tests\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"harden-sales-reports-history-tests\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"harden-security-tests\" is not archived"
     }
   ]
 }

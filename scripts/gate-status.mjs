@@ -45,6 +45,9 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+// ADR-0002 / ADR-0003 adaptation: the release variants below rewrite the reports the pre-commit hook owns.
+import { snapshotFiles } from "./generated-files.mjs";
+import { GENERATED } from "./hooks-pre-commit.mjs";
 
 const root = process.cwd();
 const here = dirname(fileURLToPath(import.meta.url));
@@ -168,7 +171,11 @@ function runCheck(key) {
   return { status, out, scopeN };
 }
 const checks = {};
+// The release variants rewrite the tracked reports the hook owns (and trace/*.json) in another form; put them back, so a
+// dashboard run leaves the working tree as it found it (ADR-0002 and ADR-0003 called this a trap).
+const restoreGenerated = snapshotFiles(root, GENERATED.flatMap(([, outputs]) => outputs));
 for (const key of Object.keys(GATE_COMMANDS)) checks[key] = runCheck(key);
+const restoredGenerated = restoreGenerated();
 
 // ---------------------------------------------------------------------------
 // worst() — NEVER folds SKIP-pending / NOT-EARNED / n/a into PASS (RC2).
@@ -490,6 +497,9 @@ if (anyCheckFail || divergences.length || open.length || unrecorded.length) {
   exitCode = 0;
 }
 const warnings = advisories.length + (boundaryWarn ? 1 : 0) + (detectorWarn ? 1 : 0);
+if (restoredGenerated.length) {
+  console.log(`\nRestored ${restoredGenerated.length} generated file(s) the release checks rewrote: ${restoredGenerated.join(", ")}.`);
+}
 console.log(`\nScope: ${gateRows.length} gate(s)`);
 console.log(`Result: ${resultWord}${warnings ? `, ${warnings} warning(s)` : ""}`);
 

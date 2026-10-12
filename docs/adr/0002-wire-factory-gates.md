@@ -66,6 +66,7 @@ Playwright, and a rule that every commit under `src/` carries a trailer), so non
   files (`trace/acceptance-contracts.json` flips to artifact mode, `docs/qa/traceability-report.md` and `trace/*.json`
   change, and a line is appended to `trace/ledger.jsonl`). Discard that with `git checkout -- docs/qa trace` before
   committing; the pre-commit hook regenerates the two reports it owns in their normal form. Untracking those generated
-  files would remove the trap and is a possible follow-up.
+  files would remove the trap and is a possible follow-up. *Update 2026-10-12 (ADR-0004): `gate-status.mjs` now restores them, and
+  `trace/ledger.jsonl` is untracked.*
 - Not wired, as follow-ups: `npx openspec validate --strict` in CI (an npm download at run time), and a unit test for the
-  adapted `@trace` scanners from ADR-0001.
+  adapted `@trace` scanners from ADR-0001. *Update 2026-10-12 (ADR-0004): both are done.*

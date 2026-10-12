@@ -1,11 +1,11 @@
 {
-  "createdAt": "2026-10-11T00:28:19.461Z",
-  "gitHead": "bcb11583ccf19e8cbb9bd046606b2f48d87839a6",
+  "createdAt": "2026-10-12T01:06:04.714Z",
+  "gitHead": "1a85d6205f80da70228ca922c01c9c1c1570193f",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
     ".github/workflows/ci.yml": "88d7fbc5f3870968e87ae85c585638e5e395402e6069c7a457857788c93906f6",
-    ".github/workflows/factory-gates.yml": "6108e4c4bea0c2a59cf272203fee687afceb8eed78ad9457477a5b956b8fffbc",
+    ".github/workflows/factory-gates.yml": "1390ac9ac5ed417e38b4256d880fb12047c9f547c2b33333ada5bb7de693f2b3",
     ".github/workflows/pr-description.yml": "95c40b66bfc61a724a3d774537074f48e1348de1ae4c8deca6c958350077a0a5",
     "quality/process-baseline.json": "c4138cf68d31420931034e59d580cc4db6fdd08550de95347c7396bd9b2923d5",
     "quality/telemetry.config.json": "db4b77dfac7e3a8d267359aaa94b42b2033b99e138ce6ba387f5e3d490922cb7",
@@ -25,9 +25,10 @@
     "scripts/check-review.test.mjs": "95b3900717ca569727246fa41a7d3d51b2b3353a13a751f05daf9e86d11cf86a",
     "scripts/check-specs.mjs": "8aa944a2cb0f8bd1625120be8ee0e31d4b559636421614f7257b6d8b619207e5",
     "scripts/check-specs.test.mjs": "aae372f6cba64018b45f8653c0fea860bd4c72d568ac018b93b1d943daf6d671",
+    "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
     "scripts/check-traceability.mjs": "5c5203555db344c2410bca4cab07e11fc662785ed2abf19500f228cab3315775",
     "scripts/check-trajectory.mjs": "425e584d4f3618871110440b65e05b3890aaff395fefc4697aa0b0ea1c166cfb",
-    "scripts/gate-status.mjs": "07617acbbd6ae513bcc7675478e920bd86ff2c765ae1b2ebc2ab27dad50e5fae"
+    "scripts/gate-status.mjs": "f7c41d592f7805c60f39d020265ae151008fad679eb0f240c06e75dd37e2a53a"
   },
   "adaptations": [
     "additive onboarding (ADR-0001): installed only pure-Node checks (traceability, trajectory, coverage/eval ratchets, acceptance, process ratchet, integrity, ledger, correct, gate-status); Playwright/JS-app scripts, .claude/* and package.json deliberately not installed (.githooks and a factory-gates workflow were added later by ADR-0002)",
@@ -36,6 +37,7 @@
     "check-coverage-ratchet and check-eval-ratchet installed because gate-status calls them, but not applicable here (no JS coverage or eval artifacts): they report NOT-EARNED",
     "lock also covers pre-existing repo gates scripts/check-*.mjs and .github/workflows/*.yml as found at onboarding",
     "ADR-0002: .githooks/pre-commit and commit-msg (adapted hooks: no ESLint/tsc, warn-only trailers) and .github/workflows/factory-gates.yml (integrity hard gate, Dependabot skipped) added and locked in the same commit as the wiring; ci.yml and .claude/settings.json unchanged",
-    "check-factory-integrity.mjs: .github/workflows/ joins the soft tier (drift is a warning plus a ledger event) because Dependabot github-actions bumps auto-merge and edit those files; scripts and .githooks stay hard-locked (ADR-0002)"
+    "check-factory-integrity.mjs: .github/workflows/ joins the soft tier (drift is a warning plus a ledger event) because Dependabot github-actions bumps auto-merge and edit those files; scripts and .githooks stay hard-locked (ADR-0002)",
+    "ADR-0004: scripts/gate-status.mjs restores the hook-owned reports and trace/*.json that its release variants rewrite (scripts/generated-files.mjs, imported next to hooks-pre-commit.mjs); factory-gates.yml gains a pinned openspec validate --strict step; scripts/check-trace-scanners.test.mjs joins the lock because its name matches scripts/check-*.mjs"
   ]
 }
