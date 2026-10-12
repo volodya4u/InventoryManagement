@@ -18,6 +18,7 @@ the scores are stale and the gate fails, so a reviewer or rules change cannot la
 ```sh
 node scripts/eval-record.mjs                      # the CLI's logged-in model (recorded as "default")
 node scripts/eval-record.mjs --model claude-opus-5-5   # pin a model; it is recorded and shown in the PR report
+node scripts/eval-record.mjs --runs 3                  # three agent runs per case: the score is the mean, so one bad run does not flip a case to 0
 ```
 
 The gate keys on the inputs, not the model, because the model can change under you (an editor or operator can switch
@@ -57,6 +58,11 @@ numbers in `docs/autonomy-log.md`. This is a follow-up, not part of this suite.
   `rs.getBigDecimal` instead of `SqliteDecimals.read`, a `schema.sql` change with no migration, a deleted test, a
   committed `APP_ADMIN_INITIAL_PASSWORD`, and a spec whose acceptance criterion drifted from its test
   (`spec-ac-drift`). Each grader passes only if the review flags that specific defect as blocking.
+- `evals/factory-rules/` — scenario checks of the "Project Factory" section of `AGENTS.md`: which spec track a change
+  uses, what a test that proves a requirement carries and which Factory checks to run, and the waiver path for a
+  requirement that cannot have a test. Each prompt embeds the section between two markers, because the sandbox has no
+  repository; `scripts/factory-rules-evals.test.mjs` fails when the copy differs from `AGENTS.md`, and
+  `node scripts/factory-rules-evals.mjs` refreshes it. They are the evidence that the committed rules steer an agent.
 - `.agents/skills/<skill>/evals/` — two cases per skill (synced into `.claude/skills/` by `scripts/skills-sync.mjs`).
 
 ## Known limit
