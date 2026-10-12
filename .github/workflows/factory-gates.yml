@@ -38,6 +38,18 @@ jobs:
       - name: Acceptance artifacts exist
         run: node scripts/check-acceptance-methods.mjs --mode=artifact
 
+      # ADR-0002 follow-up. Every spec under openspec/specs and every active change under openspec/changes must pass the
+      # OpenSpec format check. The CLI is not a repository dependency: it is downloaded from npm at run time, pinned to one
+      # version (1.13.2, published 2026-09-23), with its telemetry off. Bump the pin by hand; Dependabot does not see it.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22 # the CLI needs Node 20.19 or newer
+
+      - name: OpenSpec specs and changes are valid
+        env:
+          OPENSPEC_TELEMETRY: "0"
+        run: npx --yes @fission-ai/openspec@1.13.2 validate --all --strict --no-interactive
+
       - name: No open corrections
         run: node scripts/correct.mjs --check
 
