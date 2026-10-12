@@ -46,9 +46,9 @@ the generators of the two reports (they rewrite `docs/qa/traceability-report.md`
 rewrites tracked generated files; undo that with `git checkout -- docs/qa/traceability-report.md
 docs/qa/trajectory-report.md trace`, not the whole of `docs/qa` (the waivers are hand-written).
 
-- Requirements: `docs/requirements.md` — ids `FR-n`, `NFR-n`, `TC-n`, `BC-n`, each FR/NFR row with its evidence and a
-  verification class. A row with no class fails `--mode=existence`; `local-verifiable` is the only class with a
-  mechanism here (a class such as `e2e` or `pixel-diff` fails it). Open questions `OQ-n`
+- Requirements: `docs/requirements.md` — ids `FR-n`, `NFR-n`, `TC-n`, `BC-n`, each MVP FR/NFR row with its evidence and a
+  verification class. A row with no class fails `--mode=existence`; use `local-verifiable` (the others, such as `e2e`
+  or `pixel-diff`, have no mechanism here and fail it). Open questions `OQ-n`
   are questions for the owner, not defects: never "fix" what one describes, and record the owner's answer in its row.
 - Baseline specs: `openspec/specs/<capability>/` describe the shipped behavior, and each requirement cites its FR ids;
   `openspec/project.md` has the layout and rules. Existing behavior changes only through a slice the user approved.
