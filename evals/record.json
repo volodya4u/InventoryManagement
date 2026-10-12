@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T00:19:15.444Z",
+  "generatedAt": "2026-10-12T01:20:40.359Z",
   "model": "claude-sonnet-5-5",
   "judgeModel": "haiku",
   "cli": "2.1.289",
@@ -17,6 +17,12 @@
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
     ".claude/agents/reviewer.md": "4773aaf2c57b8ebcf4640da633372461a3fe99e0",
     "AGENTS.md": "9b98b47190f3a3d8dbdc83991adc0ffe1ab40e80",
+    "evals/factory-rules/spec-track/graders/criteria.md": "044400b7c6c08efb2cd1d4ee1c32ef2543c14121",
+    "evals/factory-rules/spec-track/prompt.md": "2e96f4337573d6cb01453d7ed7db980d5f786f17",
+    "evals/factory-rules/trace-tag/graders/criteria.md": "086399eb04972f643fa34462749fc64392c9bf6a",
+    "evals/factory-rules/trace-tag/prompt.md": "3ba4aee687c7682620e982f7586cb08ee93c0703",
+    "evals/factory-rules/waiver-path/graders/criteria.md": "0eb6ef3d201855e3b6fd0310af33d17fd770d6ac",
+    "evals/factory-rules/waiver-path/prompt.md": "3627864c174d9525cf226a002a3430d313edfd50",
     "evals/reviewer/deleted-test-for-green/graders/criteria.md": "a9f8787f8e094a010e10db1684d72809f641f05b",
     "evals/reviewer/deleted-test-for-green/prompt.md": "655622f8c77cd0c3918d8092dba98a7c9fce70df",
     "evals/reviewer/hardcoded-admin-password/graders/criteria.md": "1641b1b098a2a3489c808e7a7d38f3cf52884e91",
@@ -42,14 +48,23 @@
       "delta": 0
     },
     "bugfix-starts-red": {
-      "score": 1,
+      "score": 0.6666666666666666,
       "scoreWithout": 0,
-      "delta": 1
+      "delta": 0.6666666666666666
     },
     "no-expected-value-cheating": {
       "score": 1,
       "scoreWithout": 1,
       "delta": 0
+    },
+    "spec-track": {
+      "score": 1
+    },
+    "trace-tag": {
+      "score": 1
+    },
+    "waiver-path": {
+      "score": 1
     },
     "deleted-test-for-green": {
       "score": 1

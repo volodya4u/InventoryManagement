@@ -16,7 +16,7 @@ import { pathToFileURL } from "node:url";
 import { blobsOf } from "./dod-fingerprint.mjs";
 
 // The files the scores depend on. A change to any of them makes the record stale.
-export const INPUT_PATHS = [".claude/agents/reviewer.md", "AGENTS.md", ".agents/skills", "evals/reviewer"];
+export const INPUT_PATHS = [".claude/agents/reviewer.md", "AGENTS.md", ".agents/skills", "evals/reviewer", "evals/factory-rules"];
 export const RECORD_PATH = "evals/record.json";
 export const inputsFingerprint = (root) => blobsOf(root, INPUT_PATHS);
 
