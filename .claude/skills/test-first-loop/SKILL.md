@@ -17,7 +17,9 @@ Run the whole loop yourself; come back to the human only at the exits named belo
 
 1. **Criteria.** Take the acceptance criteria from `docs/specs/<feature>.md`, or restate the request as one to five
    Given / When / Then lines. A feature that changes the schema, an API and a page together gets a spec first
-   (`docs/specs/TEMPLATE.md`), approved by the human.
+   (`docs/specs/TEMPLATE.md`), approved by the human; a smaller change is an `openspec/changes/<slice>/` (the spec
+   track rule is in the "Project Factory" section of `AGENTS.md`). A new or changed requirement also needs its row in
+   `docs/requirements.md`, and the test that proves it carries a `// @trace FR-n` comment.
 
    **Docs first.** If the change will add the first import of a package nothing on `main` imports yet (a Java package,
    or an npm module or entry point such as `@angular/common/http`), look its API up for the installed version before
@@ -32,7 +34,8 @@ Run the whole loop yourself; come back to the human only at the exits named belo
    - Harness scripts: `node scripts/test-run.mjs harness scripts/<name>.test.mjs`
    - Changing behaviour that has no test yet: first pin today's behaviour with a passing test, then write the failing one.
 3. **Green.** Make the smallest change that passes the test, then re-run the same `test-run.mjs` command. Repeat.
-4. **Done.** Run `node scripts/dod.mjs` (self-test, harness unit tests, `mvn -B -ntp verify`, Prettier, frontend
+4. **Done.** First run the Factory gates of `.github/workflows/factory-gates.yml` that `AGENTS.md` lists (each on its
+   own; `dod.mjs` does not run them), then run `node scripts/dod.mjs` as the final check (self-test, harness unit tests, `mvn -B -ntp verify`, Prettier, frontend
    tests, the angular-cli MCP smoke test; the same checks as CI). It records each run. If a check is red, go back to
    step 3 with its failure. For formatting, run `pnpm exec prettier --write <files>` in `frontend/`.
 5. **Review.** Finish every change first, the autonomy-log row included: the reviewer's verdict counts only for the

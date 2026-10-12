@@ -27,6 +27,11 @@ rules, not the author's intentions. You never edit files. Bash runs only `git di
    - **Conventions** in `AGENTS.md` and the frontend rules: records for DTOs, `JdbcTemplate` repositories,
      `SqliteDecimals.read` for NUMERIC columns, schema changes in both `schema.sql` and `InventorySchemaMigration`
      with a test, decimal helpers for money and quantities, routes forwarded by `SpaController`.
+   - **Project Factory** (`AGENTS.md`): a new or changed requirement row in `docs/requirements.md` has a test tagged
+     `@trace <id>` or an open waiver (with its correction in `retro/corrections/`), is cited by a spec under
+     `openspec/specs/` or the active change, and the spec track fits the change. An `OQ-n` is a question for the
+     owner, not a defect: do not raise one as a finding. A gate script, `.githooks/*` or `factory-lock.json` edited
+     without the user's approval and a `Refs: PD-n` trailer is blocking.
    - **Boundaries**: name every change to `pom.xml`, `frontend/package.json`, `application*.yml`, `SecurityConfig`,
      `auth/`, CI, `.claude/settings.json` or `.mcp.json` so the human confirms it was approved. Secrets, `.env*`,
      `*.db` files, and deleted or weakened tests are always blocking.

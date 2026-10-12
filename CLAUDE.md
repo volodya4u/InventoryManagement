@@ -6,6 +6,10 @@
   config files; a one-line diff needs no plan.
 - For a feature that needs a spec (`AGENTS.md`), save the approved plan as `docs/specs/<feature>.md` from the template
   before writing code.
+- Project Factory (`AGENTS.md`): a new or changed requirement ships with its `@trace` test or an open waiver, the spec
+  citation and the spec track the user chose; run the Factory checks listed there (each on its own) before the
+  reviewer, because `node scripts/dod.mjs` does not. Editing a gate script or `.githooks/*` needs the user's approval
+  and a `Refs: PD-n` trailer or a re-seal.
 - Review with the `reviewer` subagent, passing only the base ref, the goal and the spec path. Changes to `auth/`,
   `SecurityConfig`, `.claude/` or CI also get `/security-review`.
 - The reviewer's verdict counts only for the files it saw, and only once a commit folds it into `actions.jsonl`. So
