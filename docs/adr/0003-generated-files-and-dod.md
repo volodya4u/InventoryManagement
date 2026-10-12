@@ -16,7 +16,7 @@ Two kinds of generated file did that:
 - `trace/acceptance-contracts.json` was tracked, counted as code, and written by `scripts/check-acceptance-methods.mjs`
   (both modes) whenever someone ran it. Nothing in the pre-commit hook or CI refreshes or compares it (CI runs
   `--mode=existence`). In slice H3 it was run by hand after dod and the first review, so both gates went red on the head
-  commit and were repeated. ADR-0002 already listed untracking it as a possible follow-up, and slice H6's task list (`openspec/changes/harden-frontend-specs/tasks.md`) already carried a
+  commit and were repeated. ADR-0002 already listed untracking it as a possible follow-up, and slice H6's task list (`openspec/changes/harden-frontend-specs/tasks.md` (since archived as `openspec/changes/archive/2026-10-12-harden-frontend-specs/`)) already carried a
   workaround: keep the file an existence-mode record and do not leave artifact-mode output in the tree.
 - `trace/trace.json` and `trace/trajectory.json` are rewritten by the pre-commit hook at commit time and also count as
   code, and `check-traceability.mjs --check-fresh` compares only the Markdown report, not the JSON. If they are stale when
@@ -53,6 +53,6 @@ of `check-acceptance-methods.mjs` did.
 - Running `check-acceptance-methods.mjs` by hand is now safe at any point: its output is ignored by git.
 - `gate-status.mjs` no longer leaves a modified tracked file behind from the acceptance check; the other generated files it
   touches (`docs/qa/`, `trace/*.json`, `trace/ledger.jsonl`) are still the trap ADR-0002 describes.
-- Not decided here: retro-tagging the old tests so that `check-acceptance-methods.mjs --mode=artifact` passes, and archiving
+- Not decided here (*update 2026-10-12: the retro-tagging was done in its own slice, and the archiving in ADR-0004*): retro-tagging the old tests so that `check-acceptance-methods.mjs --mode=artifact` passes, and archiving
   the finished `harden-*` OpenSpec changes. The first is planned as its own slice; the second would swap "not archived"
   warnings for missing `design.md` and `review-findings.json` warnings and is left alone.

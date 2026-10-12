@@ -21,6 +21,9 @@ CLAUDE.local.md
 # written by a manual run of scripts/check-acceptance-methods.mjs; nothing checks or refreshes it (ADR-0003)
 trace/acceptance-contracts.json
 
+# appended to by every run of scripts/gate-status.mjs and the factory checks; local telemetry, nothing validates it (ADR-0003)
+trace/ledger.jsonl
+
 # eval run outputs (local gate; see evals/README.md)
 evals/results/
 .agents/skills/*/evals/results/

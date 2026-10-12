@@ -5,12 +5,17 @@ archived slice took: review evidence, `Slice:` trailers, and module scope.
 It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
-Scope: 0 archived slice(s).
-Result: PASS, 1 warning(s)
+Scope: 6 archived slice(s).
+Result: PASS, 13 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
-
+| 2026-10-12-harden-frontend-specs | **missing** | **0** | **no** | - |
+| 2026-10-12-harden-infrastructure-tests | **missing** | 1 | **no** | - |
+| 2026-10-12-harden-product-and-production-tests | **missing** | 1 | **no** | - |
+| 2026-10-12-harden-raw-material-tests | **missing** | 1 | **no** | - |
+| 2026-10-12-harden-sales-reports-history-tests | **missing** | 1 | **no** | - |
+| 2026-10-12-harden-security-tests | **missing** | 1 | **no** | - |
 
 ## Cross-slice module overlap
 
@@ -22,4 +27,16 @@ None.
 
 ## Warnings
 
-- **slices**: no archived slices found under openspec/changes/archive/ (nothing to audit yet)
+- **review-evidence**: 2026-10-12-harden-frontend-specs: review-findings.json is missing (review must have run clean before archive)
+- **process**: 2026-10-12-harden-frontend-specs: archived change is missing design.md and/or tasks.md
+- **trailer**: 2026-10-12-harden-frontend-specs: no commit carries a "Slice: harden-frontend-specs" trailer
+- **review-evidence**: 2026-10-12-harden-infrastructure-tests: review-findings.json is missing (review must have run clean before archive)
+- **process**: 2026-10-12-harden-infrastructure-tests: archived change is missing design.md and/or tasks.md
+- **review-evidence**: 2026-10-12-harden-product-and-production-tests: review-findings.json is missing (review must have run clean before archive)
+- **process**: 2026-10-12-harden-product-and-production-tests: archived change is missing design.md and/or tasks.md
+- **review-evidence**: 2026-10-12-harden-raw-material-tests: review-findings.json is missing (review must have run clean before archive)
+- **process**: 2026-10-12-harden-raw-material-tests: archived change is missing design.md and/or tasks.md
+- **review-evidence**: 2026-10-12-harden-sales-reports-history-tests: review-findings.json is missing (review must have run clean before archive)
+- **process**: 2026-10-12-harden-sales-reports-history-tests: archived change is missing design.md and/or tasks.md
+- **review-evidence**: 2026-10-12-harden-security-tests: review-findings.json is missing (review must have run clean before archive)
+- **process**: 2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md
