@@ -53,7 +53,7 @@
     {
       "slice": "2026-10-20-structured-test-evidence",
       "reviewEvidence": "missing",
-      "trailerCommits": 0,
+      "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
     }
@@ -120,10 +120,6 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)"
-    },
-    {
-      "check": "trailer",
-      "msg": "2026-10-20-structured-test-evidence: no commit carries a \"Slice: structured-test-evidence\" trailer"
     }
   ]
 }

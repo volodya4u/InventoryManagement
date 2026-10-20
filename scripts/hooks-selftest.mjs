@@ -414,6 +414,7 @@ for (const [command, expect] of [
   ["git log | head", 2],
   ["git diff > out.txt", 2],
   ["git diff --output=out.txt", 2],
+  ["git log -1 --format=x --output=.git/config", 2],
   ["git diff --ext-diff", 2],
   ["git diff --no-index /dev/null .env", 2],
   ["git show HEAD:.env.local", 2],
