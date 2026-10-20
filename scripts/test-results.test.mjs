@@ -78,7 +78,6 @@ test("junit: node:test reports name each test by file and title, nested under it
   // A file that fails to import reports one failing case: an error, not an assertion.
   const broken = `<testsuites><testcase name="C:\\repo\\scripts\\x.test.mjs" classname="test"><failure type="testCodeFailure" message="x">cause: SyntaxError: The requested module './a.mjs' does not provide an export named 'b'</failure></testcase></testsuites>`;
   assert.deepEqual(junitTests(broken, { kind: "node", file: "scripts/x.test.mjs" }).map((t) => t.status), ["error"]);
-  assert.deepEqual(junitTests("", { kind: "node", file: "scripts/x.test.mjs" }), []);
 });
 
 const VITEST = JSON.stringify({
@@ -106,5 +105,18 @@ test("vitest: the JSON report names each test by file and title and tells an Ass
     { id: "frontend/src/app/dash/dash.component.spec.ts › later", status: "skipped" },
     { id: "frontend/src/app/dash/dash.component.spec.ts › someday", status: "skipped" },
   ]);
-  assert.deepEqual(vitestTests("not json", "C:\\repo"), []);
+});
+
+test("a report that cannot be read gives no results, so the run is unstructured", () => {
+  // Vitest: not JSON at all, cut off mid-write, or JSON with no testResults.
+  for (const text of ["not json", VITEST.slice(0, 80), "{}", ""]) assert.equal(vitestTests(text, "C:\\repo"), null, JSON.stringify(text));
+  // A valid report with no test file in it is readable: it says no test ran.
+  assert.deepEqual(vitestTests(JSON.stringify({ testResults: [] }), "C:\\repo"), []);
+  // JUnit: empty, cut off before any element, or not JUnit at all.
+  for (const text of ["", '<?xml version="1.0" encoding="utf-8"?>\n', "TAP version 13\nok 1 - passes\n"]) {
+    assert.equal(junitTests(text, { kind: "node", file: "scripts/x.test.mjs" }), null, JSON.stringify(text));
+    assert.equal(junitTests(text, { kind: "surefire" }), null, JSON.stringify(text));
+  }
+  // A readable JUnit document with no test case says no test ran.
+  assert.deepEqual(junitTests("<testsuites></testsuites>", { kind: "node", file: "scripts/x.test.mjs" }), []);
 });

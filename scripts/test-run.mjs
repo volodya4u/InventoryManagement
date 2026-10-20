@@ -87,15 +87,21 @@ export function summarize(target, rawOutput, status) {
   return summarizeNodeTest(out, status);
 }
 
-// The run's kind from its per-test results (null: the runner wrote no report, so the console summary stands, unstructured).
-// A compile error wins over any report, and so does a runner that failed while every test passed (kind error).
+// The run's kind from its per-test results (null: no readable report, so the console summary stands, unstructured).
+// A report that lists tests wins over a compile line in the console, which a test's child process can print; the
+// console's compile stands only when no test ran. A runner that failed while every test passed is kind error.
+// (No stale report can be read: the Vitest and JUnit files are deleted before each run, and only the Surefire files
+// written since it started are read.)
 export function structuredVerdict(results, status, summary) {
   if (!results) return { ...summary, structured: false, results: [] };
-  if (summary.kind === "compile") return { ...summary, structured: true, results: [] };
   const ran = results.filter((r) => r.status !== "skipped");
+  if (summary.kind === "compile" && !ran.length) return { ...summary, structured: true, results: [] };
   const failed = ran.filter((r) => r.status === "assertion" || r.status === "error").length;
   const kind = !ran.length ? "no-tests" : ran.some((r) => r.status === "assertion") ? "assertion" : failed || status !== 0 ? "error" : "pass";
-  return { tests: ran.length, failed, kind, firstFailure: kind === "pass" ? "" : summary.firstFailure, structured: true, results };
+  // The console's first failure is the compile line it saw when it said compile; the report overruled that, so the
+  // line is not the run's first failure, and no better one is known.
+  const firstFailure = kind === "pass" || summary.kind === "compile" ? "" : summary.firstFailure;
+  return { tests: ran.length, failed, kind, firstFailure, structured: true, results };
 }
 
 const reportPath = (root, target) => join(root, "target", "test-run", target === "frontend" ? "vitest.json" : "harness.xml");
@@ -111,7 +117,9 @@ function readResults(root, target, selector, since) {
         .filter((f) => /^TEST-.*\.xml$/.test(f))
         .map((f) => join(dir, f))
         .filter((f) => statSync(f).mtimeMs >= since);
-      return files.length ? files.flatMap((f) => junitTests(readFileSync(f, "utf8"), { kind: "surefire" })) : null;
+      // One file per class: an unreadable one is skipped, and the run has no results only if none could be read.
+      const read = files.map((f) => junitTests(readFileSync(f, "utf8"), { kind: "surefire" })).filter(Boolean);
+      return read.length ? read.flat() : null;
     }
     const report = reportPath(root, target);
     if (!existsSync(report)) return null;

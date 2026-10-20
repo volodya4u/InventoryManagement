@@ -5,8 +5,8 @@ archived slice took: review evidence, `Slice:` trailers, and module scope.
 It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
-Scope: 8 archived slice(s).
-Result: PASS, 15 warning(s)
+Scope: 9 archived slice(s).
+Result: PASS, 16 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
@@ -18,6 +18,7 @@ Result: PASS, 15 warning(s)
 | 2026-10-12-harden-security-tests | **missing** | 1 | **no** | - |
 | 2026-10-20-gate-status-explicit | **missing** | 3 | yes | - |
 | 2026-10-20-structured-test-evidence | **missing** | 2 | yes | - |
+| 2026-10-21-structured-evidence-followups | **missing** | 2 | yes | - |
 
 ## Cross-slice module overlap
 
@@ -44,3 +45,4 @@ None.
 - **process**: 2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md
 - **review-evidence**: 2026-10-20-gate-status-explicit: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)

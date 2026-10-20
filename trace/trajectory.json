@@ -56,6 +56,13 @@
       "trailerCommits": 2,
       "libDomains": [],
       "processComplete": true
+    },
+    {
+      "slice": "2026-10-21-structured-evidence-followups",
+      "reviewEvidence": "missing",
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
     }
   ],
   "overlaps": [],
@@ -120,6 +127,10 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)"
     }
   ]
 }

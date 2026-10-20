@@ -5,6 +5,7 @@
 //           a file `<repo path> › <suite > ... > title>`
 //   status  pass | assertion (a failed assertion) | error (any other failure) | skipped (also pending and todo)
 // Readers: Surefire XML (target/surefire-reports/TEST-*.xml), node:test's junit reporter and Vitest's json reporter.
+// Each returns null for a report it cannot read, and [] for a readable report in which no test ran.
 // No dependency: the XML reader below knows only what those two JUnit writers emit.
 
 const ENTITIES = { lt: "<", gt: ">", amp: "&", quot: '"', apos: "'" };
@@ -68,7 +69,10 @@ function statusOf(c, { assertionOnFailure }) {
 }
 
 // kind "surefire": ids from the classname; kind "node": ids from `file` (the repo path of the test file run).
+// null when the text is not a JUnit document (empty, cut off before any element, another format): a report that cannot
+// be read says nothing, so the run is recorded unstructured instead of as one where no test ran.
 export function junitTests(xml, { kind, file }) {
+  if (!/<(testsuites|testsuite|testcase)\b/.test(String(xml))) return null;
   return testcases(xml).map((c) => {
     const id =
       kind === "surefire"
@@ -81,15 +85,17 @@ export function junitTests(xml, { kind, file }) {
 const slashes = (path) => String(path).replace(/\\/g, "/").replace(/\/+$/, "");
 
 // Vitest's json reporter: one entry per file, with each test's ancestor titles. Paths are made relative to the repo root.
+// null when the text is not such a report (not JSON, cut off mid-write, no testResults), as for junitTests.
 export function vitestTests(json, root) {
   let report;
   try {
     report = JSON.parse(json);
   } catch {
-    return [];
+    return null;
   }
+  if (!Array.isArray(report?.testResults)) return null;
   const base = `${slashes(root)}/`.toLowerCase();
-  return (report.testResults ?? []).flatMap((file) => {
+  return report.testResults.flatMap((file) => {
     const name = slashes(file.name ?? "");
     const path = name.toLowerCase().startsWith(base) ? name.slice(base.length) : name;
     return (file.assertionResults ?? []).map((t) => {

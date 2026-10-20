@@ -124,9 +124,23 @@ test("structured: a run's kind comes from its test results, and a run with no re
   assert.equal(structuredVerdict([t("A#a", "pass")], 1, consoleRed).kind, "error");
   // Only skipped tests, or none: nothing ran.
   assert.equal(structuredVerdict([t("A#d", "skipped")], 0, consoleRed).kind, "no-tests");
-  // A compile error stays a compile error even if an old report is lying around.
-  assert.equal(structuredVerdict([t("A#a", "pass")], 1, { ...consoleRed, kind: "compile" }).kind, "compile");
+  // A compile error stands when the report lists no test that ran.
+  assert.equal(structuredVerdict([], 1, { ...consoleRed, kind: "compile" }).kind, "compile");
+  assert.equal(structuredVerdict([t("A#d", "skipped")], 1, { ...consoleRed, kind: "compile" }).kind, "compile");
   // No report: the console summary, marked unstructured, with no per-test results.
   const none = structuredVerdict(null, 1, consoleRed);
   assert.deepEqual(none, { ...consoleRed, structured: false, results: [] });
+});
+
+test("structured: a report that lists tests wins over a compile error the console mentions", () => {
+  // A test that spawns a child process can print "SyntaxError" while every test of the file passes or fails on its own.
+  const stray = { tests: 2, failed: 0, kind: "compile", firstFailure: "SyntaxError: Unexpected token in the child's output" };
+  const passing = structuredVerdict([t("scripts/x.test.mjs › a", "pass"), t("scripts/x.test.mjs › b", "pass")], 0, stray);
+  assert.deepEqual([passing.kind, passing.structured, passing.results.length], ["pass", true, 2]);
+  const red = structuredVerdict([t("scripts/x.test.mjs › a", "pass"), t("scripts/x.test.mjs › b", "assertion")], 1, stray);
+  assert.deepEqual([red.kind, red.results.map((r) => r.status)], ["assertion", ["pass", "assertion"]]);
+  // The stray line is not the run's first failure either: the recorded text must not blame a compile error.
+  assert.doesNotMatch(red.firstFailure, /SyntaxError/);
+  // A file that really fails to import shows up in the report as a failing case: an error, not a pass.
+  assert.equal(structuredVerdict([t("scripts/x.test.mjs › C:/repo/scripts/x.test.mjs", "error")], 1, stray).kind, "error");
 });

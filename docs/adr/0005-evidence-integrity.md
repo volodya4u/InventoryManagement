@@ -1,6 +1,6 @@
 # ADR-0005: Evidence integrity — no misleading passes
 
-- **Status:** Accepted (slices 1 and 2 of 6)
+- **Status:** Accepted (slices 1 and 2 of 6, with a follow-up to slice 2)
 - **Date:** 2026-10-20
 - **Deciders:** volodya4u (user), Claude
 
@@ -76,3 +76,15 @@ This ADR records slice 1. Later slices extend it.
   replayable workflow.
 - `scripts/check-specs.mjs` (locked, re-sealed with the notes kept): a pull request diffs with `-M`, and only the archived
   proposals the branch adds are checked there, because `validateSpecs` already checks the active ones.
+
+## Follow-up to slice 2 (structured-evidence-followups)
+
+Three gaps that the review of #92 left open are now closed:
+
+- **A report that cannot be read gives no results.** This covers Vitest JSON that does not parse, and JUnit text with no
+  test element. The run is then recorded `structured: false`, not as one where no test ran.
+- **A report that lists tests wins over a compile line in the console.** A test's child process can print such a line.
+  The console's `compile` stands only when no test ran.
+- **A criterion title shared by several tests in one file is ambiguous.** That happens when it matches only their leaf
+  titles. Such a run counts neither as red nor as green, and the gate asks for distinct test titles. A title that
+  equals a test's whole suite path still names that one test.

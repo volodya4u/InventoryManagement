@@ -145,10 +145,18 @@ function isTest(result, test) {
 
 // The criterion's test's status in one structured run: its own results only, never the run's kind, which an
 // unrelated test of the same class or file decides. A run without results (unstructured, or recorded before they
-// were) says nothing about the test.
+// were) says nothing about the test. A file criterion's title that equals a test's whole suite path names that test;
+// one that only matches the leaf title of several distinct tests is "ambiguous", and that run counts neither way.
 function statusIn(run, test) {
   if (run.structured !== true) return undefined;
-  const mine = (run.results ?? []).filter((r) => isTest(r, test)).map((r) => r.status);
+  let matched = (run.results ?? []).filter((r) => isTest(r, test));
+  if (test.file) {
+    const exact = matched.filter((r) => r.id === `${test.file} › ${test.title}`);
+    const ids = [...new Set(matched.map((r) => r.id))];
+    if (exact.length) matched = exact;
+    else if (ids.length > 1) return { ambiguous: ids };
+  }
+  const mine = matched.map((r) => r.status);
   if (!mine.length) return undefined;
   for (const status of ["assertion", "error"]) if (mine.includes(status)) return status;
   return mine.every((s) => s === "skipped") ? "skipped" : "pass";
@@ -160,11 +168,19 @@ export function redGreenProblems(records, criteria, headCode) {
   const runs = records.filter((r) => r.event === "TestRun").sort(byTime);
   return criteria.flatMap(({ spec, n, test, testCell }) => {
     if (!test) return [`AC${n} of ${spec} names no test as \`Class\` › \`method\` or \`path\` › "title" (found "${testCell ?? ""}").`];
-    const seen = runs.filter((r) => covers(r, test)).map((r) => ({ run: r, status: statusIn(r, test) })).filter((s) => s.status);
+    const statuses = runs.filter((r) => covers(r, test)).map((r) => ({ run: r, status: statusIn(r, test) }));
+    const ambiguous = [...new Set(statuses.flatMap((s) => s.status?.ambiguous ?? []))];
+    const seen = statuses.filter((s) => typeof s.status === "string");
     const red = seen.findIndex((s) => s.status === "assertion");
     const greens = red >= 0 ? seen.slice(red + 1).filter((s) => s.status === "pass") : [];
     if (greens.some((s) => s.run.code === headCode)) return [];
     const name = test.file ? `${test.file} › "${test.title}"` : `${test.className} › ${test.method}`;
+    if (ambiguous.length) {
+      return [
+        `AC${n} of ${spec}: no red (assertion) then green TestRun for ${name}: "${test.title}" matches more than one test in ${test.file} ` +
+          `(${ambiguous.map((id) => id.slice(test.file.length + 3)).join("; ")}), so no run shows which one went red; give the tests distinct titles, then run \`${howToRun(test)}\` again.`,
+      ];
+    }
     const why = !seen.length
       ? "no structured TestRun names it (a run without a report, or recorded before per-test results, does not count)"
       : red < 0
