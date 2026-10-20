@@ -153,7 +153,7 @@ $env:APP_ADMIN_INITIAL_PASSWORD = "<strong-random-password>"
 
 The password is used only when the administrator account is created for the first time. Only a bcrypt hash with a random salt is stored in the database. Subsequent application starts do not require this variable and do not overwrite the existing user. The initial username can optionally be changed through `APP_ADMIN_INITIAL_USERNAME`.
 
-Never commit, publish, or document a real password in the repository.
+Never give `APP_ADMIN_INITIAL_PASSWORD` or the setting it feeds (`app.bootstrap.admin-password`) a literal value in config, scripts or docs, real or placeholder: the setting reads only `${APP_ADMIN_INITIAL_PASSWORD}`, at most with an empty default, and docs use a `<placeholder>` as above. The pre-commit hook refuses both.
 
 ## Single Production Build
 

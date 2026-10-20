@@ -18,7 +18,7 @@ Result: PASS, 16 warning(s)
 | 2026-10-12-harden-security-tests | **missing** | 1 | **no** | - |
 | 2026-10-20-gate-status-explicit | **missing** | 3 | yes | - |
 | 2026-10-20-structured-test-evidence | **missing** | 2 | yes | - |
-| 2026-10-21-structured-evidence-followups | **missing** | 1 | yes | - |
+| 2026-10-21-structured-evidence-followups | **missing** | 2 | yes | - |
 
 ## Cross-slice module overlap
 
