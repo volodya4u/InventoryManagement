@@ -2,6 +2,7 @@
 // The fake secrets below are assembled from pieces on purpose: the pre-commit hook scans every staged file, this one
 // included, and must not refuse a test that only talks about secrets.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { envFiles, isScannable, secretHits } from "./hooks-pre-commit.mjs";
 
@@ -12,6 +13,12 @@ const DATABASE_URL = ["postgresql://admin:hunter2", "@db.example.com/shop"].join
 const ADMIN_PASSWORD = ["APP_ADMIN_INITIAL_PASSWORD", "=Sup3rSecret!42"].join("");
 const QUOTED_ADMIN_PASSWORD = ["$env:APP_ADMIN_INITIAL_PASSWORD", ' = "Sup3rSecret!42"'].join("");
 const EMPTY_ADMIN_PASSWORD = ["APP_ADMIN_INITIAL_PASSWORD", "="].join("");
+// The setting the variable feeds (app.bootstrap.admin-password in application-local.yml), with a literal instead.
+const LITERAL = ["EXAMPLE-not-a-", "real-password"].join("");
+const YAML_SETTING = ["app:\n  bootstrap:\n    admin", "-password: ", LITERAL, "\n"].join("");
+const EVAL_SETTING = ["app:\n  admin:\n    initial", "-password: ", LITERAL].join("");
+const PROPERTIES_SETTING = ["app.bootstrap.admin", "-password=", LITERAL].join("");
+const DEFAULTED_SETTING = ["    admin", "-password: ${APP_ADMIN_INITIAL_PASSWORD:", LITERAL, "}"].join("");
 
 test("env files are refused, the .example template is not", () => {
   assert.deepEqual(envFiles([".env", ".env.production", "frontend/.env.local", "docs/x.md"]), [
@@ -40,6 +47,35 @@ test("obvious secrets are found by name, ordinary text is not", () => {
   assert.deepEqual(secretHits(QUOTED_ADMIN_PASSWORD), ["the admin bootstrap password"]);
   assert.deepEqual(secretHits("postgresql://localhost/shop"), []);
   assert.deepEqual(secretHits("nothing to see here"), []);
+});
+
+test("the admin bootstrap setting takes only the variable, never a literal", () => {
+  const hit = ["the admin bootstrap setting"];
+  assert.deepEqual(secretHits(YAML_SETTING), hit);
+  assert.deepEqual(secretHits(EVAL_SETTING), hit);
+  assert.deepEqual(secretHits(PROPERTIES_SETTING), hit);
+  assert.deepEqual(secretHits(PROPERTIES_SETTING.replace("=", ": ")), hit);
+  assert.deepEqual(secretHits(YAML_SETTING.replace("admin-password", "admin_password")), hit);
+  assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, `"${LITERAL}"`)), hit);
+  assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, "<your password>")), hit);
+  assert.deepEqual(secretHits(DEFAULTED_SETTING), hit);
+  assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, "${OTHER_PASSWORD}")), hit);
+
+  // The real application-local.yml, and the other shapes that carry no literal.
+  const localConfig = new URL("../src/main/resources/application-local.yml", import.meta.url);
+  assert.deepEqual(secretHits(readFileSync(localConfig, "utf8")), []);
+  assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, "${APP_ADMIN_INITIAL_PASSWORD}")), []);
+  assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, '"${APP_ADMIN_INITIAL_PASSWORD:}" # empty default')), []);
+  assert.deepEqual(secretHits(PROPERTIES_SETTING.replace(LITERAL, "")), []);
+  assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, "")), []);
+  // A diff quoted in a document (the reviewer eval's fixture) is not a config line: the key does not start the line.
+  assert.deepEqual(secretHits(`+${EVAL_SETTING.split("\n").pop()}`), []);
+  assert.deepEqual(secretHits("The setting `app.bootstrap.admin-password` is read once."), []);
+  // Code that names a camelCase variable or field is not config: the check runs on every staged file.
+  assert.deepEqual(secretHits("        initialPassword = initialPassword.trim();"), []);
+  assert.deepEqual(secretHits("  adminPassword: string;"), []);
+  // The hook scans itself when it is staged, and its patterns name the variable.
+  assert.deepEqual(secretHits(readFileSync(new URL("./hooks-pre-commit.mjs", import.meta.url), "utf8")), []);
 });
 
 test("binary files are not scanned", () => {
