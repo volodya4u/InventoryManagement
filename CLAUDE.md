@@ -17,7 +17,7 @@
   commit (log-only is fine), and confirm with `node scripts/pr-evidence.mjs origin/main HEAD` before pushing — the
   `pr-evidence` CI job runs the same check.
 - Push and open the pull request without asking, as the last step of a finished change: once `pr-evidence` shows
-  every gate ✅, check the description with `PR_BODY=… node scripts/check-pr-description.mjs`, run
+  no gate `FAIL` (each is `PASS`, `N/A` or an approved `WAIVED`), check the description with `PR_BODY=… node scripts/check-pr-description.mjs`, run
   `node scripts/push-branch.mjs` (it pushes the current `claude/*` branch and nothing else, and is the one push
   `.claude/settings.json` allows without a prompt; a raw `git push` still asks, and so does editing the script) and `gh pr create` into `main`. Stop and
   report instead if a gate is red or the reviewer asked for changes. A human merges every pull request by hand: never

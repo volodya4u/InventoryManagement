@@ -1,6 +1,6 @@
 {
-  "createdAt": "2026-10-12T01:06:04.714Z",
-  "gitHead": "1a85d6205f80da70228ca922c01c9c1c1570193f",
+  "createdAt": "2026-10-20T11:17:02.771Z",
+  "gitHead": "d5bebd296408e3ac8103fbb7b40a221e65bc4c95",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
@@ -23,8 +23,8 @@
     "scripts/check-process-ratchet.mjs": "a824c3bf4a36e4c1979c09d899242dbe4ac1cdf6e08bf227fca5b4772f331a03",
     "scripts/check-review.mjs": "c6ee1c6334e887fb6ee35639e0c69c5f983a8e51bf26653e80b7dc5994e5b3df",
     "scripts/check-review.test.mjs": "95b3900717ca569727246fa41a7d3d51b2b3353a13a751f05daf9e86d11cf86a",
-    "scripts/check-specs.mjs": "8aa944a2cb0f8bd1625120be8ee0e31d4b559636421614f7257b6d8b619207e5",
-    "scripts/check-specs.test.mjs": "aae372f6cba64018b45f8653c0fea860bd4c72d568ac018b93b1d943daf6d671",
+    "scripts/check-specs.mjs": "1425e3361ec136aa5abcb960ebde4bb907af405eb2c200d2262459a47f005b59",
+    "scripts/check-specs.test.mjs": "cab839f424bfeaa0f7069f2d3cd654db476d463dd321636dcc9521ac4e67f73b",
     "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
     "scripts/check-traceability.mjs": "5c5203555db344c2410bca4cab07e11fc662785ed2abf19500f228cab3315775",
     "scripts/check-trajectory.mjs": "425e584d4f3618871110440b65e05b3890aaff395fefc4697aa0b0ea1c166cfb",
@@ -38,6 +38,7 @@
     "lock also covers pre-existing repo gates scripts/check-*.mjs and .github/workflows/*.yml as found at onboarding",
     "ADR-0002: .githooks/pre-commit and commit-msg (adapted hooks: no ESLint/tsc, warn-only trailers) and .github/workflows/factory-gates.yml (integrity hard gate, Dependabot skipped) added and locked in the same commit as the wiring; ci.yml and .claude/settings.json unchanged",
     "check-factory-integrity.mjs: .github/workflows/ joins the soft tier (drift is a warning plus a ledger event) because Dependabot github-actions bumps auto-merge and edit those files; scripts and .githooks stay hard-locked (ADR-0002)",
-    "ADR-0004: scripts/gate-status.mjs restores the hook-owned reports and trace/*.json that its release variants rewrite (scripts/generated-files.mjs, imported next to hooks-pre-commit.mjs); factory-gates.yml gains a pinned openspec validate --strict step; scripts/check-trace-scanners.test.mjs joins the lock because its name matches scripts/check-*.mjs"
+    "ADR-0004: scripts/gate-status.mjs restores the hook-owned reports and trace/*.json that its release variants rewrite (scripts/generated-files.mjs, imported next to hooks-pre-commit.mjs); factory-gates.yml gains a pinned openspec validate --strict step; scripts/check-trace-scanners.test.mjs joins the lock because its name matches scripts/check-*.mjs",
+    "ADR-0005 (slice 1, gate-status-explicit): scripts/check-specs.mjs accepts scripts/*.test.mjs › \"title\" references and checks the acceptance tables of active OpenSpec slice proposals, and in a pull request of each proposal the branch adds; scripts/check-specs.test.mjs pins it"
   ]
 }
