@@ -110,6 +110,52 @@ test("in a pull request, schema + controller + page together need a spec", () =>
   assert.match(prSpecProblems(root, "HEAD~1", "HEAD").join(" "), /schema\.sql, a controller and a page together, but adds or edits no spec/);
 });
 
+test("an active OpenSpec change's acceptance table names tests that exist and holds their quoted text", () => {
+  const root = project("openspec-change");
+  write(root, "scripts/gate.test.mjs", 'test("status: shows N/A", () => {\n  assert.ok(text.includes("➖ N/A"));\n});\n');
+  const proposal = (rows) =>
+    `# A slice\n\n## Why\nx\n\n## Acceptance criteria\n\n| # | Given / When / Then | Test |\n| - | --- | --- |\n${rows.join("\n")}\n`;
+  write(root, "openspec/changes/a-slice/proposal.md", proposal(['| 1 | Given a gate, when it does not apply, then "➖ N/A" | `scripts/gate.test.mjs` › "status: shows N/A" |']));
+  write(root, "openspec/changes/archive/2026-10-01-old/proposal.md", proposal(['| 1 | Given x, then y | `GoneTest` › `gone` |']));
+  assert.deepEqual(validateSpecs(root).problems, [], "a harness test reference resolves; an archived change is not checked");
+
+  write(
+    root,
+    "openspec/changes/a-slice/proposal.md",
+    proposal([
+      '| 1 | Given a gate, when it does not apply, then "➖ N/A shown" | `scripts/gate.test.mjs` › "status: shows N/A" |',
+      '| 2 | Given x, then y | `scripts/gate.test.mjs` › "no such title" |',
+      "| 3 | Given x, then y | `FlowTest` › `missingMethod` |",
+    ]),
+  );
+  const text = validateSpecs(root).problems.join("\n");
+  assert.match(text, /openspec\/changes\/a-slice\/proposal\.md: AC1 quotes "➖ N\/A shown", which scripts\/gate\.test\.mjs does not contain/);
+  assert.match(text, /openspec\/changes\/a-slice\/proposal\.md: AC2 names scripts\/gate\.test\.mjs › "no such title", but that file has no test with this title/);
+  assert.match(text, /openspec\/changes\/a-slice\/proposal\.md: AC3 names FlowTest › missingMethod, but FlowTest has no method missingMethod/);
+  assert.doesNotMatch(text, /Status must read/, "a slice proposal has no Status line to approve");
+});
+
+test("in a pull request, a slice proposal the branch adds is checked even when it is already archived", () => {
+  const root = join(tmp, "archived-slice");
+  write(root, "README.md", "x\n");
+  git(root, "init", "-q");
+  git(root, "add", "-A");
+  git(root, "commit", "-qm", "base");
+  write(
+    root,
+    "openspec/changes/archive/2026-10-20-a-slice/proposal.md",
+    "# A slice\n\n## Acceptance criteria\n\n| # | Given / When / Then | Test |\n| - | --- | --- |\n| 1 | Given x, then y | `scripts/gate.test.mjs` › \"no such title\" |\n",
+  );
+  write(root, "scripts/gate.test.mjs", 'test("another title", () => {});\n');
+  git(root, "add", "-A");
+  git(root, "commit", "-qm", "slice");
+  assert.deepEqual(validateSpecs(root).problems, [], "the repository-wide check skips archived slices");
+  assert.match(
+    prSpecProblems(root, "HEAD~1", "HEAD").join("\n"),
+    /openspec\/changes\/archive\/2026-10-20-a-slice\/proposal\.md: AC1 names scripts\/gate\.test\.mjs › "no such title", but that file has no test with this title/,
+  );
+});
+
 // Enforcement: CI runs this file through `node --test scripts/*.test.mjs`, so a spec in this repository that drifts
 // from its tests fails the build.
 test("the repository's own specs are consistent with their tests", () => {

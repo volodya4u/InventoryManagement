@@ -3,10 +3,15 @@
 // reorder-level spec's AC5 promised a "Low stock" card while the card and its test said "Low Stock".
 // For each docs/specs/*.md except TEMPLATE.md:
 //   - the Status line reads "Approved by <who> on <YYYY-MM-DD>", and no template placeholder (<...>) is left;
-//   - each acceptance criterion names a test that exists: `Class` › `method` (a JUnit method under src/test/java) or
-//     `frontend/...spec.ts` › "title" (an it(...) or test(...) with that title in that file);
+//   - each acceptance criterion names a test that exists: `Class` › `method` (a JUnit method under src/test/java),
+//     `frontend/...spec.ts` › "title" (an it(...) or test(...) with that title in that file) or
+//     `scripts/...test.mjs` › "title" (a node:test test with that title);
 //   - each "double-quoted" text in its Given / When / Then appears verbatim in that test's file: quoted text is exact
 //     UI or API copy (docs/specs/TEMPLATE.md). The check reads the whole file, not only the named test.
+// The acceptance table of each active OpenSpec change (openspec/changes/<slice>/proposal.md, not archive/) is checked the
+// same way when it has one; a slice proposal has no Status line. In a pull request, a proposal the branch adds is checked
+// too, archived or not. scripts/pr-evidence.mjs asks a slice the branch adds for the table, and for red -> green on each
+// criterion the branch adds or changes.
 // In a pull request (prSpecProblems, also run by scripts/pr-evidence.mjs): a spec the branch adds is committed before
 // the first commit that touches src/ or frontend/src/, and a change to schema.sql, a controller and a page together
 // adds or edits a spec.
@@ -20,6 +25,7 @@ import { findFiles } from "./dod-checks.mjs";
 
 const SPEC_PATH = /^docs\/specs\/(?!TEMPLATE\.md$)[^/]+\.md$/;
 const CODE_PATH = /^(src|frontend\/src)\//;
+const PROPOSAL_PATH = /^openspec\/changes\/(archive\/)?[^/]+\/proposal\.md$/;
 const APPROVED = /^Approved by \S.* on \d{4}-\d{2}-\d{2}$/;
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -42,14 +48,15 @@ export function tableCells(row) {
   return found;
 }
 
-// `Class` › `method` -> a JUnit method; `frontend/...spec.ts` › "title" -> a Vitest test in that file.
+// `Class` › `method` -> a JUnit method; `frontend/...spec.ts` › "title" -> a Vitest test in that file;
+// `scripts/...test.mjs` › "title" -> a node:test test in that file.
 function testRef(cell) {
   const parts = cell.split("›");
   if (parts.length !== 2) return null;
   const left = parts[0].replace(/`/g, "").trim();
   const right = parts[1].replace(/`/g, "").trim().replace(/^["“](.*)["”]$/, "$1");
   if (!left || !right) return null;
-  return /\.(spec|test)\.ts$/.test(left) ? { file: left, title: right } : { className: left, method: right };
+  return /\.(spec|test)\.ts$|\.test\.mjs$/.test(left) ? { file: left, title: right } : { className: left, method: right };
 }
 
 const describe = (ref) => (ref.file ? `${ref.file} › "${ref.title}"` : `${ref.className} › ${ref.method}`);
@@ -99,9 +106,15 @@ export function specProblems(root, path) {
   }
   for (const placeholder of spec.placeholders) problems.push(`${path}: template placeholder ${placeholder} left in the spec`);
   if (!spec.criteria.length) problems.push(`${path}: no acceptance criteria table`);
-  for (const c of spec.criteria) {
+  return [...problems, ...criteriaProblems(root, path, spec.criteria)];
+}
+
+// Each criterion names a test that exists and holds the criterion's quoted text.
+function criteriaProblems(root, path, criteria) {
+  const problems = [];
+  for (const c of criteria) {
     if (!c.test) {
-      problems.push(`${path}: AC${c.n} names no test as \`Class\` › \`method\` or \`path.spec.ts\` › "title" (found "${c.testCell}")`);
+      problems.push(`${path}: AC${c.n} names no test as \`Class\` › \`method\`, \`path.spec.ts\` › "title" or \`scripts/x.test.mjs\` › "title" (found "${c.testCell}")`);
       continue;
     }
     const found = locate(root, c.test);
@@ -118,10 +131,23 @@ export function specProblems(root, path) {
   return problems;
 }
 
+// The active OpenSpec changes that have a proposal.md (archive/ holds finished slices, whose tests may since be renamed).
+function activeProposals(root) {
+  const dir = join(root, "openspec", "changes");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name !== "archive" && existsSync(join(dir, e.name, "proposal.md")))
+    .map((e) => `openspec/changes/${e.name}/proposal.md`)
+    .sort();
+}
+
 export function validateSpecs(root) {
   const dir = join(root, "docs", "specs");
   const specs = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".md") && f !== "TEMPLATE.md").sort() : [];
-  const problems = specs.flatMap((f) => specProblems(root, `docs/specs/${f}`));
+  const problems = [
+    ...specs.flatMap((f) => specProblems(root, `docs/specs/${f}`)),
+    ...activeProposals(root).flatMap((path) => criteriaProblems(root, path, parseSpec(readFileSync(join(root, path), "utf8")).criteria)),
+  ];
   return { ok: problems.length === 0, specs, problems };
 }
 
@@ -159,6 +185,9 @@ export function prSpecProblems(root, base, head = "HEAD") {
         "(AGENTS.md: such a feature starts with an approved spec).",
     );
   }
+  // A slice proposal the branch adds is checked like an active one, even when the branch already archived it.
+  const added = git("diff", "--name-only", "--diff-filter=A", `${base}...${head}`).split("\n").filter((p) => PROPOSAL_PATH.test(p));
+  for (const path of added) problems.push(...criteriaProblems(root, path, parseSpec(git("show", `${head}:${path}`)).criteria));
   return problems;
 }
 

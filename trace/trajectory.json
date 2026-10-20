@@ -42,6 +42,13 @@
       "trailerCommits": 1,
       "libDomains": [],
       "processComplete": false
+    },
+    {
+      "slice": "2026-10-20-gate-status-explicit",
+      "reviewEvidence": "missing",
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
     }
   ],
   "overlaps": [],
@@ -98,6 +105,10 @@
     {
       "check": "process",
       "msg": "2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-20-gate-status-explicit: review-findings.json is missing (review must have run clean before archive)"
     }
   ]
 }
