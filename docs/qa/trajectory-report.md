@@ -16,7 +16,7 @@ Result: PASS, 14 warning(s)
 | 2026-10-12-harden-raw-material-tests | **missing** | 1 | **no** | - |
 | 2026-10-12-harden-sales-reports-history-tests | **missing** | 1 | **no** | - |
 | 2026-10-12-harden-security-tests | **missing** | 1 | **no** | - |
-| 2026-10-20-gate-status-explicit | **missing** | 1 | yes | - |
+| 2026-10-20-gate-status-explicit | **missing** | 2 | yes | - |
 
 ## Cross-slice module overlap
 
