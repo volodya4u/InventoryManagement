@@ -19,8 +19,8 @@ const SECRET_PATTERNS = [
   ["database URL with a password", /postgres(?:ql)?:\/\/[^\s'"]+:[^\s'"]+@/],
   // AGENTS.md: never give APP_ADMIN_INITIAL_PASSWORD or the setting it feeds a literal value in config, scripts or docs, real or placeholder. A value is anything but empty, a ${...} reference or a <placeholder>, quoted or not; the name inside ${...} is not an assignment.
   ["the admin bootstrap password", /(?<!\$\{)APP_ADMIN_INITIAL_PASSWORD[ \t]*[:=][ \t]*(?!\$\{)(?!["']?<)(?!["']?[ \t]*\r?$)\S/m],
-  // The setting it feeds (app.bootstrap.admin-password; app.admin.initial-password in the reviewer eval) takes only ${APP_ADMIN_INITIAL_PASSWORD}, at most with an empty default, or nothing. A key that does not start its line (prose, a quoted diff) is not config.
-  ["the admin bootstrap setting", /^[ \t]*["']?(?:app[._](?:bootstrap|admin)[._])?(?:admin|initial)(?:[-_]p|P)assword["']?[ \t]*[:=][ \t]*(?!["']?\$\{APP_ADMIN_INITIAL_PASSWORD(?::)?\}["']?[ \t]*(?:#.*)?\r?$)(?!(?:#.*)?\r?$)\S/m],
+  // The setting it feeds (app.bootstrap.admin-password; app.admin.initial-password in the reviewer eval) takes only ${APP_ADMIN_INITIAL_PASSWORD}, at most with an empty default, or nothing; stricter than the docs allowance, so not a <placeholder> either, since docs set the variable, not the setting. A key that does not start its line (prose, a quoted diff) is not config, and camelCase is left out because it is also how code names a variable or field.
+  ["the admin bootstrap setting", /^[ \t]*["']?(?:app[._](?:bootstrap|admin)[._])?(?:admin|initial)[-_]password["']?[ \t]*[:=][ \t]*(?!["']?\$\{APP_ADMIN_INITIAL_PASSWORD(?::)?\}["']?[ \t]*(?:#.*)?\r?$)(?!(?:#.*)?\r?$)\S/m],
 ];
 
 export function secretHits(content) {

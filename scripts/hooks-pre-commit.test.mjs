@@ -55,7 +55,7 @@ test("the admin bootstrap setting takes only the variable, never a literal", () 
   assert.deepEqual(secretHits(EVAL_SETTING), hit);
   assert.deepEqual(secretHits(PROPERTIES_SETTING), hit);
   assert.deepEqual(secretHits(PROPERTIES_SETTING.replace("=", ": ")), hit);
-  assert.deepEqual(secretHits(YAML_SETTING.replace("admin-password", "adminPassword")), hit);
+  assert.deepEqual(secretHits(YAML_SETTING.replace("admin-password", "admin_password")), hit);
   assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, `"${LITERAL}"`)), hit);
   assert.deepEqual(secretHits(YAML_SETTING.replace(LITERAL, "<your password>")), hit);
   assert.deepEqual(secretHits(DEFAULTED_SETTING), hit);
@@ -71,6 +71,9 @@ test("the admin bootstrap setting takes only the variable, never a literal", () 
   // A diff quoted in a document (the reviewer eval's fixture) is not a config line: the key does not start the line.
   assert.deepEqual(secretHits(`+${EVAL_SETTING.split("\n").pop()}`), []);
   assert.deepEqual(secretHits("The setting `app.bootstrap.admin-password` is read once."), []);
+  // Code that names a camelCase variable or field is not config: the check runs on every staged file.
+  assert.deepEqual(secretHits("        initialPassword = initialPassword.trim();"), []);
+  assert.deepEqual(secretHits("  adminPassword: string;"), []);
   // The hook scans itself when it is staged, and its patterns name the variable.
   assert.deepEqual(secretHits(readFileSync(new URL("./hooks-pre-commit.mjs", import.meta.url), "utf8")), []);
 });
