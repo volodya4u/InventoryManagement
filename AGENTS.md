@@ -103,8 +103,9 @@ docs/qa/trajectory-report.md trace`, not the whole of `docs/qa` (the waivers are
 
 - Ask before: adding a dependency, editing `pom.xml`, `frontend/package.json`, `application*.yml`,
   `SecurityConfig` or `auth/`, CI workflows, `.claude/settings.json`, `.mcp.json`.
-- Never: touch `.env*` (a hook blocks it anyway), write a real password (`APP_ADMIN_INITIAL_PASSWORD`)
-  anywhere in the repo, commit `*.db` files, delete tests to get green, `git push --force`, `rm -rf`.
+- Never: touch `.env*` (a hook blocks it anyway), give `APP_ADMIN_INITIAL_PASSWORD` or the setting it feeds a literal
+  value in config, scripts or docs, real or placeholder (only `${APP_ADMIN_INITIAL_PASSWORD}`, at most with an empty
+  default, or a `<placeholder>` in docs), commit `*.db` files, delete tests to get green, `git push --force`, `rm -rf`.
 
 <!-- Maintainers: keep this file under ~50 lines. Add a rule only after the agent gets something wrong
      twice. No repo overview, no file map, no API docs — the README covers the domain. -->

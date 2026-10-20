@@ -60,7 +60,7 @@
     {
       "slice": "2026-10-21-structured-evidence-followups",
       "reviewEvidence": "missing",
-      "trailerCommits": 0,
+      "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
     }
@@ -131,10 +131,6 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)"
-    },
-    {
-      "check": "trailer",
-      "msg": "2026-10-21-structured-evidence-followups: no commit carries a \"Slice: structured-evidence-followups\" trailer"
     }
   ]
 }
