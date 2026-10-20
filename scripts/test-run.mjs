@@ -3,18 +3,23 @@
 // the skill names, prints the tail of the output and appends a TestRun record (exit code, tests, failed, why it failed,
 // the first failure line) to the agent log buffer (scripts/loop-record.mjs). scripts/pr-evidence.mjs reads the records
 // to show red -> green in the pull request, so nobody pastes it there by hand.
+// The record also lists each test of the run with its status (`results`, read from the runner's own report through
+// scripts/test-results.mjs: Surefire XML, Vitest JSON, node:test JUnit), so the gate can tell the criterion's own test
+// from the rest of its class or file. A run whose report is missing keeps the console summary and is recorded
+// `structured: false`; the gate does not count it. `testFiles` holds the blob id of each test file the run used.
 // Usage (from the repo root):
 //   node scripts/test-run.mjs backend <TestClass>[#method]       mvn -B -ntp -Dskip.frontend=true test -Dtest=...
 //   node scripts/test-run.mjs frontend <path/to/file.spec.ts>    ng test --watch=false --include ... (in frontend/)
 //   node scripts/test-run.mjs harness <scripts/file.test.mjs>    node --test ...
 // Exit code: the runner's (2 for bad arguments). The full output goes to target/test-run/last.log.
-import { spawnSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
-import { frontendNode, vitestSummary } from "./dod-checks.mjs";
+import { findFiles, frontendNode, vitestSummary } from "./dod-checks.mjs";
 import { codeFingerprint } from "./dod-fingerprint.mjs";
 import { appendRecord } from "./loop-record.mjs";
+import { junitTests, vitestTests } from "./test-results.mjs";
 
 const ansi = /\x1b\[[0-9;]*m/g;
 const clip = (line) => line.trim().slice(0, 200);
@@ -82,6 +87,59 @@ export function summarize(target, rawOutput, status) {
   return summarizeNodeTest(out, status);
 }
 
+// The run's kind from its per-test results (null: the runner wrote no report, so the console summary stands, unstructured).
+// A compile error wins over any report, and so does a runner that failed while every test passed (kind error).
+export function structuredVerdict(results, status, summary) {
+  if (!results) return { ...summary, structured: false, results: [] };
+  if (summary.kind === "compile") return { ...summary, structured: true, results: [] };
+  const ran = results.filter((r) => r.status !== "skipped");
+  const failed = ran.filter((r) => r.status === "assertion" || r.status === "error").length;
+  const kind = !ran.length ? "no-tests" : ran.some((r) => r.status === "assertion") ? "assertion" : failed || status !== 0 ? "error" : "pass";
+  return { tests: ran.length, failed, kind, firstFailure: kind === "pass" ? "" : summary.firstFailure, structured: true, results };
+}
+
+const reportPath = (root, target) => join(root, "target", "test-run", target === "frontend" ? "vitest.json" : "harness.xml");
+
+// The per-test results of this run, or null when the runner wrote no report. Surefire keeps one file per class and
+// never deletes old ones, so only the files written since the run started are read.
+function readResults(root, target, selector, since) {
+  try {
+    if (target === "backend") {
+      const dir = join(root, "target", "surefire-reports");
+      if (!existsSync(dir)) return null;
+      const files = readdirSync(dir)
+        .filter((f) => /^TEST-.*\.xml$/.test(f))
+        .map((f) => join(dir, f))
+        .filter((f) => statSync(f).mtimeMs >= since);
+      return files.length ? files.flatMap((f) => junitTests(readFileSync(f, "utf8"), { kind: "surefire" })) : null;
+    }
+    const report = reportPath(root, target);
+    if (!existsSync(report)) return null;
+    const text = readFileSync(report, "utf8");
+    return target === "frontend" ? vitestTests(text, root) : junitTests(text, { kind: "node", file: selector });
+  } catch {
+    return null;
+  }
+}
+
+// The blob id of each test file the run used (its class files for a backend selector), as `git add` would store it.
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function testFiles(root, target, selector) {
+  const classes = [...new Set(selector.split(",").map((s) => s.split("#")[0]))];
+  const paths =
+    target === "backend"
+      ? classes.flatMap((c) => findFiles(join(root, "src", "test", "java"), new RegExp(`^${escapeRegExp(c)}\\.java$`)))
+      : [join(root, selector)];
+  const rel = paths.map((p) => relative(root, p).replace(/\\/g, "/"));
+  if (!rel.length) return {};
+  try {
+    const blobs = execFileSync("git", ["-C", root, "hash-object", "--", ...rel], { encoding: "utf8" }).trim().split(/\r?\n/);
+    return Object.fromEntries(rel.map((path, i) => [path, blobs[i]]));
+  } catch {
+    return {};
+  }
+}
+
 function command(root, target, selector) {
   if (target === "backend") {
     return { cmd: "mvn", args: ["-B", "-ntp", "-Dskip.frontend=true", "test", `-Dtest=${selector}`], cwd: root, shell: process.platform === "win32" };
@@ -89,9 +147,12 @@ function command(root, target, selector) {
   if (target === "frontend") {
     const ng = join(root, "frontend", "node_modules", "@angular", "cli", "bin", "ng.js");
     const include = selector.replace(/^frontend\//, "");
-    return { cmd: frontendNode(root), args: [ng, "test", "--watch=false", "--include", include], cwd: join(root, "frontend"), env: { ...process.env, NG_CLI_ANALYTICS: "false" } };
+    // json first: --output-file applies to the first reporter; default keeps the console summary.
+    const args = [ng, "test", "--watch=false", "--include", include, "--reporters", "json", "--reporters", "default", "--output-file", reportPath(root, target)];
+    return { cmd: frontendNode(root), args, cwd: join(root, "frontend"), env: { ...process.env, NG_CLI_ANALYTICS: "false" } };
   }
-  return { cmd: process.execPath, args: ["--test", selector], cwd: root };
+  const reporters = ["--test-reporter=spec", "--test-reporter-destination=stdout", "--test-reporter=junit", `--test-reporter-destination=${reportPath(root, target)}`];
+  return { cmd: process.execPath, args: ["--test", ...reporters, selector], cwd: root };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -109,18 +170,21 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     /* not a git work tree: record without it */
   }
   const { cmd, args, ...options } = command(root, target, selector);
+  mkdirSync(join(root, "target", "test-run"), { recursive: true });
+  rmSync(reportPath(root, target), { force: true });
+  const files = testFiles(root, target, selector);
   const since = Date.now();
   const r = spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, ...options });
   const seconds = Number(((Date.now() - since) / 1000).toFixed(1));
   const output = `${r.stdout ?? ""}${r.stderr ?? ""}${r.error ? String(r.error) : ""}`;
-  mkdirSync(join(root, "target", "test-run"), { recursive: true });
   writeFileSync(join(root, "target", "test-run", "last.log"), output);
   const status = r.status ?? 1;
-  const s = summarize(target, output, status);
+  const s = structuredVerdict(readResults(root, target, selector, since), status, summarize(target, output, status));
   console.log(output.replace(ansi, "").trimEnd().split(/\r?\n/).slice(-40).join("\n"));
   const outcome = s.kind === "pass" ? "green" : `red (${s.kind})`;
-  console.log(`\nTestRun ${target} ${selector}: ${outcome}, exit ${status}, ${s.tests} tests, ${s.failed} failed${s.firstFailure ? ` - ${s.firstFailure}` : ""}`);
-  const recorded = appendRecord(root, { event: "TestRun", target, selector, exit: status, ...s, seconds, code });
+  const how = s.structured ? "" : " (no structured report: this run does not count as red or green)";
+  console.log(`\nTestRun ${target} ${selector}: ${outcome}${how}, exit ${status}, ${s.tests} tests, ${s.failed} failed${s.firstFailure ? ` - ${s.firstFailure}` : ""}`);
+  const recorded = appendRecord(root, { event: "TestRun", target, selector, exit: status, ...s, seconds, code, testFiles: files });
   console.log(recorded ? "Recorded in .agent-log/pending.jsonl; the next commit folds it into the agent log." : "Could not record the run.");
   process.exit(status);
 }

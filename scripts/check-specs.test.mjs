@@ -156,6 +156,26 @@ test("in a pull request, a slice proposal the branch adds is checked even when i
   );
 });
 
+test("in a pull request, an active slice proposal is checked once, and a renamed proposal is not checked as new", () => {
+  const root = join(tmp, "once-and-renames");
+  const broken = "# A slice\n\n## Acceptance criteria\n\n| # | Given / When / Then | Test |\n| - | --- | --- |\n| 1 | Given x, then y | `scripts/gate.test.mjs` › \"no such title\" |\n";
+  write(root, "scripts/gate.test.mjs", 'test("another title", () => {});\n');
+  write(root, "openspec/changes/old-slice/proposal.md", broken);
+  git(root, "init", "-q");
+  git(root, "config", "diff.renames", "false"); // the check must not depend on the user's rename setting
+  git(root, "add", "-A");
+  git(root, "commit", "-qm", "base with an active slice whose test was renamed since");
+  // The branch archives the old slice (a rename) and adds a new active one with the same broken criterion.
+  mkdirSync(join(root, "openspec/changes/archive"), { recursive: true });
+  git(root, "mv", "openspec/changes/old-slice", "openspec/changes/archive/2026-10-20-old-slice");
+  write(root, "openspec/changes/new-slice/proposal.md", broken);
+  git(root, "add", "-A");
+  git(root, "commit", "-qm", "archive the old slice, add a new one");
+  const all = [...validateSpecs(root).problems, ...prSpecProblems(root, "HEAD~1", "HEAD")];
+  assert.equal(all.filter((p) => p.startsWith("openspec/changes/new-slice/proposal.md: AC1")).length, 1, all.join("\n"));
+  assert.equal(all.filter((p) => p.includes("old-slice")).length, 0, all.join("\n"));
+});
+
 // Enforcement: CI runs this file through `node --test scripts/*.test.mjs`, so a spec in this repository that drifts
 // from its tests fails the build.
 test("the repository's own specs are consistent with their tests", () => {

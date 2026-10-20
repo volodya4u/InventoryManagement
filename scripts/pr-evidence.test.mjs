@@ -4,6 +4,7 @@ import { test } from "node:test";
 import {
   acceptanceFiles,
   autonomyProblems,
+  branchWaivers,
   blockedActions,
   changedCriteria,
   dodProblems,
@@ -18,7 +19,23 @@ import {
 } from "./pr-evidence.mjs";
 
 const dod = (ts, exit, code, checks = []) => ({ ts, event: "DodRun", exit, code, checks });
-const run = (ts, target, selector, kind) => ({ ts, event: "TestRun", target, selector, exit: kind === "pass" ? 0 : 1, kind });
+// A structured TestRun (scripts/test-run.mjs): each test the selector ran, with the run's status unless results are given.
+// The fixture classes and files contain the tests below.
+const HEAD = "head";
+const TESTS = {
+  FlowTest: ["flagsLowStock", "flagsEmptyStock", "m"],
+  InventoryFlowIntegrationTest: ["rejectsAnUnauthenticatedRequest"],
+  "frontend/src/app/dash/dash.component.spec.ts": ["shows it"],
+  "scripts/pr-evidence.test.mjs": ["status: works"],
+  "scripts/a.test.mjs": ["a"],
+};
+const run = (ts, target, selector, kind, { results, code = HEAD, structured = true } = {}) => {
+  const ids = selector.includes("#") ? [selector] : (TESTS[selector] ?? []).map((t) => (target === "backend" ? `${selector}#${t}` : `${selector} › ${t}`));
+  const status = { pass: "pass", assertion: "assertion" }[kind] ?? "error";
+  return { ts, event: "TestRun", target, selector, exit: kind === "pass" ? 0 : 1, kind, structured, code, results: results ?? (kind === "compile" ? [] : ids.map((id) => ({ id, status }))) };
+};
+const gateOf = (records, sources, waivers = []) => redGreenGate(records, sources, waivers, HEAD);
+const problemsOf = (records, criteria) => redGreenProblems(records, criteria, HEAD);
 
 test("dod: a green run on the head commit's code passes; a branch without code changes needs none", () => {
   assert.deepEqual(dodProblems([dod("t1", 1, "c0"), dod("t2", 0, "head")], { codeChanged: true, headCode: "head" }), []);
@@ -42,16 +59,16 @@ test("red-green: each new criterion's test failed on an assertion, then passed",
     run("t3", "backend", "FlowTest", "pass"),
     run("t4", "frontend", "frontend/src/app/dash/dash.component.spec.ts", "pass"),
   ];
-  assert.deepEqual(redGreenProblems(records, criteria), []);
+  assert.deepEqual(problemsOf(records, criteria), []);
 });
 
 test("red-green: green only, red on a compile error, or green before red fails", () => {
   const greenOnly = [run("t1", "backend", "FlowTest#flagsLowStock", "pass"), run("t2", "frontend", "frontend/src/app/dash/dash.component.spec.ts", "pass")];
-  assert.equal(redGreenProblems(greenOnly, criteria).length, 2);
+  assert.equal(problemsOf(greenOnly, criteria).length, 2);
   const compile = [run("t1", "backend", "FlowTest", "compile"), run("t2", "backend", "FlowTest", "pass")];
-  assert.match(redGreenProblems(compile, criteria.slice(0, 1)).join(" "), /AC1 of docs\/specs\/x\.md: no red \(assertion\) then green TestRun for FlowTest › flagsLowStock/);
+  assert.match(problemsOf(compile, criteria.slice(0, 1)).join(" "), /AC1 of docs\/specs\/x\.md: no red \(assertion\) then green TestRun for FlowTest › flagsLowStock/);
   const wrongOrder = [run("t1", "backend", "FlowTest", "pass"), run("t2", "backend", "FlowTest", "assertion")];
-  assert.equal(redGreenProblems(wrongOrder, criteria.slice(0, 1)).length, 1);
+  assert.equal(problemsOf(wrongOrder, criteria.slice(0, 1)).length, 1);
 });
 
 test("status: FAIL with problems, WAIVED when every problem is waived, N/A when the gate does not apply, PASS otherwise", () => {
@@ -72,7 +89,7 @@ test("red-green: an OpenSpec slice the branch adds with no acceptance table, or 
   // #72: the slice's proposal had no acceptance table, so the old gate saw no new spec and showed a pass.
   const noTable = changedCriteria(PROPOSAL, "# Harden security tests\n\n## Why\nGaps.\n\n## What Changes\n- tests\n", null);
   assert.equal(noTable.missingTable, true);
-  const bare = redGreenGate([], [noTable]);
+  const bare = gateOf([], [noTable]);
   assert.equal(gateStatus(bare), "FAIL");
   assert.match(bare.problems.join(" "), /harden-security-tests\/proposal\.md.*no ## Acceptance criteria table/);
 
@@ -80,13 +97,13 @@ test("red-green: an OpenSpec slice the branch adds with no acceptance table, or 
   const withTable = changedCriteria(PROPOSAL, table([["1", "Given no session, when the API is called, then 401", SECURITY]]), null);
   assert.equal(withTable.missingTable, false);
   const green = [run("t1", "backend", "InventoryFlowIntegrationTest", "pass")];
-  const gate = redGreenGate(green, [withTable]);
+  const gate = gateOf(green, [withTable]);
   assert.equal(gateStatus(gate), "FAIL");
   assert.match(gate.problems.join(" "), /AC1 of openspec\/changes\/harden-security-tests\/proposal\.md: no red \(assertion\) then green TestRun/);
 
   // Red on an assertion, then green: it passes.
   const loop = [run("t1", "backend", "InventoryFlowIntegrationTest#rejectsAnUnauthenticatedRequest", "assertion"), ...green.map((r) => ({ ...r, ts: "t2" }))];
-  assert.equal(gateStatus(redGreenGate(loop, [withTable])), "PASS");
+  assert.equal(gateStatus(gateOf(loop, [withTable])), "PASS");
 
   // An archived slice the branch adds is held to the same rule.
   assert.deepEqual(acceptanceFiles(["A\topenspec/changes/archive/2026-10-12-harden-security-tests/proposal.md", "A\topenspec/changes/archive/2026-10-12-harden-security-tests/tasks.md"]), [
@@ -106,7 +123,7 @@ test("red-green: a changed criterion of an existing spec needs new evidence; an 
   ]);
   const source = changedCriteria("docs/specs/x.md", after, before);
   assert.deepEqual(source.criteria.map((c) => c.n), [2, 3]);
-  const gate = redGreenGate([], [source]);
+  const gate = gateOf([], [source]);
   assert.equal(gateStatus(gate), "FAIL");
   assert.equal(gate.problems.length, 2);
   assert.doesNotMatch(gate.problems.join(" "), /AC1/);
@@ -121,12 +138,12 @@ test("red-green: a changed criterion of an existing spec needs new evidence; an 
 });
 
 test("red-green: a branch with no new or changed criterion is N/A, never PASS", () => {
-  const gate = redGreenGate([run("t1", "backend", "FlowTest", "pass")], []);
+  const gate = gateOf([run("t1", "backend", "FlowTest", "pass")], []);
   assert.equal(gate.applies, false);
   assert.equal(gateStatus(gate), "N/A");
   assert.match(gate.detail, /no new or changed acceptance criterion/);
   const unchanged = changedCriteria("docs/specs/x.md", table([["1", "a", "`FlowTest` › `m`"]]), table([["1", "a", "`FlowTest` › `m`"]]));
-  assert.equal(gateStatus(redGreenGate([], [unchanged])), "N/A");
+  assert.equal(gateStatus(gateOf([], [unchanged])), "N/A");
 });
 
 const WAIVER = (status, criteria, approval = "volodya4u in chat on 2026-10-20") =>
@@ -136,13 +153,13 @@ test("red-green: a criterion an open, approved waiver names is WAIVED; an unwaiv
   const source = changedCriteria(PROPOSAL, table([["1", "Given no lockout, when signing in, then no lock", SECURITY], ["2", "Given a session, when read, then 200", "`FlowTest` › `m`"]]), null);
   const waiver = parseGateWaiver("docs/qa/waivers/2026-10-20-absence.md", WAIVER("open", `${PROPOSAL} AC1`));
   assert.deepEqual(waiver.criteria, [{ path: PROPOSAL, n: 1 }]);
-  const partly = redGreenGate([], [source], [waiver]);
+  const partly = gateOf([], [source], [waiver]);
   assert.equal(gateStatus(partly), "FAIL");
   assert.equal(partly.problems.length, 1);
   assert.match(partly.problems[0], /AC2/);
   assert.match(partly.waived.join(" "), /AC1 of openspec\/changes\/harden-security-tests\/proposal\.md.*volodya4u in chat on 2026-10-20/);
 
-  const whole = redGreenGate([], [source], [parseGateWaiver("docs/qa/waivers/w.md", WAIVER("open", PROPOSAL))]);
+  const whole = gateOf([], [source], [parseGateWaiver("docs/qa/waivers/w.md", WAIVER("open", PROPOSAL))]);
   assert.equal(gateStatus(whole), "WAIVED");
   assert.match(whole.detail, /waived/);
 
@@ -156,7 +173,7 @@ test("red-green: a criterion an open, approved waiver names is WAIVED; an unwaiv
   // A closed waiver, one with no Status line, one with no approval, or one for another gate waives nothing.
   const noStatus = WAIVER("open", PROPOSAL).replace("Status: open\n", "");
   for (const text of [WAIVER("closed", PROPOSAL), noStatus, WAIVER("open", PROPOSAL, ""), WAIVER("open", PROPOSAL).replace("Red → green", "Docs lookup")]) {
-    assert.equal(gateStatus(redGreenGate([], [source], [parseGateWaiver("docs/qa/waivers/w.md", text)])), "FAIL", text);
+    assert.equal(gateStatus(gateOf([], [source], [parseGateWaiver("docs/qa/waivers/w.md", text)])), "FAIL", text);
   }
 });
 
@@ -164,9 +181,86 @@ test("red-green: a harness test is covered by a harness TestRun of that file", (
   const source = changedCriteria(PROPOSAL, table([["1", "Given a gate, when computed, then a status", '`scripts/pr-evidence.test.mjs` › "status: works"']]), null);
   assert.deepEqual(source.criteria[0].test, { file: "scripts/pr-evidence.test.mjs", title: "status: works" });
   const loop = [run("t1", "harness", "scripts/pr-evidence.test.mjs", "assertion"), run("t2", "harness", "scripts/pr-evidence.test.mjs", "pass")];
-  assert.equal(gateStatus(redGreenGate(loop, [source])), "PASS");
+  assert.equal(gateStatus(gateOf(loop, [source])), "PASS");
   const otherTarget = [run("t1", "frontend", "scripts/pr-evidence.test.mjs", "assertion"), run("t2", "frontend", "scripts/pr-evidence.test.mjs", "pass")];
-  assert.equal(gateStatus(redGreenGate(otherTarget, [source])), "FAIL");
+  assert.equal(gateStatus(gateOf(otherTarget, [source])), "FAIL");
+});
+
+const FLOW = [{ spec: "docs/specs/x.md", n: 1, test: { className: "FlowTest", method: "flagsLowStock" } }];
+const DASH = [{ spec: "docs/specs/x.md", n: 2, test: { file: "frontend/src/app/dash/dash.component.spec.ts", title: "shows it" } }];
+const r = (id, status) => ({ id, status });
+
+test("red-green: only the criterion's own test counts; a failure of another test in the same class or file does not", () => {
+  const otherMethod = [
+    run("t1", "backend", "FlowTest", "assertion", { results: [r("FlowTest#flagsLowStock", "pass"), r("FlowTest#flagsEmptyStock", "assertion")] }),
+    run("t2", "backend", "FlowTest", "pass"),
+  ];
+  assert.match(problemsOf(otherMethod, FLOW).join(" "), /for FlowTest › flagsLowStock: it never failed on an assertion/);
+  const otherTitle = "frontend/src/app/dash/dash.component.spec.ts › DashboardComponent > shows another thing";
+  const otherFileTest = [
+    run("t1", "frontend", "frontend/src/app/dash/dash.component.spec.ts", "assertion", {
+      results: [r("frontend/src/app/dash/dash.component.spec.ts › DashboardComponent > shows it", "pass"), r(otherTitle, "assertion")],
+    }),
+    run("t2", "frontend", "frontend/src/app/dash/dash.component.spec.ts", "pass"),
+  ];
+  assert.equal(problemsOf(otherFileTest, DASH).length, 1);
+  // The criterion's own test, by its leaf title under a describe block or by its id, does count.
+  const own = [
+    run("t1", "frontend", "frontend/src/app/dash/dash.component.spec.ts", "assertion", { results: [r("frontend/src/app/dash/dash.component.spec.ts › DashboardComponent > shows it", "assertion")] }),
+    run("t2", "frontend", "frontend/src/app/dash/dash.component.spec.ts", "pass", { results: [r("frontend/src/app/dash/dash.component.spec.ts › DashboardComponent > shows it", "pass")] }),
+  ];
+  assert.deepEqual(problemsOf(own, DASH), []);
+  const parameterized = [
+    run("t1", "backend", "FlowTest", "assertion", { results: [r("FlowTest#flagsLowStock(int)[1]", "pass"), r("FlowTest#flagsLowStock(int)[2]", "assertion")] }),
+    run("t2", "backend", "FlowTest", "pass", { results: [r("FlowTest#flagsLowStock(int)[1]", "pass"), r("FlowTest#flagsLowStock(int)[2]", "pass")] }),
+  ];
+  assert.deepEqual(problemsOf(parameterized, FLOW), [], "a parameterized test's cases count as that test");
+});
+
+test("red-green: a skipped target test, an error or an unstructured run is not red", () => {
+  const green = run("t9", "backend", "FlowTest", "pass");
+  for (const status of ["skipped", "error"]) {
+    const records = [run("t1", "backend", "FlowTest", "error", { results: [r("FlowTest#flagsLowStock", status)] }), green];
+    assert.match(problemsOf(records, FLOW).join(" "), new RegExp(`it never failed on an assertion in a structured run \\(seen: ${status}`), status);
+  }
+  // A run recorded without a report (or before results were recorded) does not count, whatever its kind says.
+  const unstructured = [{ ...run("t1", "backend", "FlowTest#flagsLowStock", "assertion"), structured: false }, green];
+  assert.match(problemsOf(unstructured, FLOW).join(" "), /never failed on an assertion/);
+  const legacy = [{ ts: "t1", event: "TestRun", target: "backend", selector: "FlowTest", kind: "assertion", exit: 1 }, green];
+  assert.match(problemsOf(legacy, FLOW).join(" "), /never failed on an assertion/);
+  // No structured run of the test at all.
+  assert.match(problemsOf([], FLOW).join(" "), /for FlowTest › flagsLowStock: no structured TestRun names it/);
+});
+
+test("red-green: a green run on older code is stale; the last green must cover the head commit's code", () => {
+  const red = run("t1", "backend", "FlowTest#flagsLowStock", "assertion", { code: "c1" });
+  const staleGreen = run("t2", "backend", "FlowTest#flagsLowStock", "pass", { code: "c2" });
+  assert.match(problemsOf([red, staleGreen], FLOW).join(" "), /stale.*re-run `node scripts\/test-run\.mjs backend FlowTest#flagsLowStock` after the last code change/);
+  const greenOnHead = run("t3", "backend", "FlowTest", "pass");
+  assert.deepEqual(problemsOf([red, staleGreen, greenOnHead], FLOW), []);
+  // A green on the head code that came before the red does not count either.
+  assert.equal(problemsOf([run("t0", "backend", "FlowTest", "pass"), red, staleGreen], FLOW).length, 1);
+});
+
+test("red-green: a criterion that names no test fails", () => {
+  const source = changedCriteria("docs/specs/x.md", table([["1", "Given x, then y", "the integration test"]]), null);
+  const gate = gateOf([], [source]);
+  assert.equal(gateStatus(gate), "FAIL");
+  assert.match(gate.problems.join(" "), /AC1 of docs\/specs\/x\.md names no test .*found "the integration test"/);
+});
+
+test("waivers: only a waiver the branch adds counts", () => {
+  const text = WAIVER("open", PROPOSAL);
+  const read = (path) => (path.startsWith("docs/qa/waivers/") ? text : null);
+  const lines = [
+    "A\tdocs/qa/waivers/2026-10-20-new.md",
+    "M\tdocs/qa/waivers/2026-10-11-baseline-NFR-15.md",
+    "R100\tdocs/qa/waivers/old.md\tdocs/qa/waivers/renamed.md",
+    "A\tdocs/qa/waivers/nested/deeper.md",
+    "A\tdocs/qa/other.md",
+  ];
+  assert.deepEqual(branchWaivers(lines, read).map((w) => w.path), ["docs/qa/waivers/2026-10-20-new.md"]);
+  assert.equal(branchWaivers(lines, read)[0].approval, "volodya4u in chat on 2026-10-20");
 });
 
 const row = (level, who, evidence, why = "Harness change") => `| 29 | Some work | ${level} | ${who} | ${evidence} | ${why} |`;
@@ -230,7 +324,10 @@ test("the report shows PASS, FAIL, N/A and WAIVED in their own words", () => {
       { name: "Red → green", applies: true, problems: [], waived: ["AC1 of a.md (approved: volodya4u)"], detail: "1 criterion waived" },
     ],
     dodRuns: [dod("2026-10-05T14:31:00Z", 1, "x", [{ name: "Frontend formatting", exit: 1, result: "unformatted files" }])],
-    testRuns: [{ ...run("2026-10-05T14:38:00Z", "harness", "scripts/a.test.mjs", "assertion"), firstFailure: "AssertionError: a | b" }],
+    testRuns: [
+      { ...run("2026-10-05T14:38:00Z", "harness", "scripts/a.test.mjs", "assertion", { code: "y" }), firstFailure: "AssertionError: a | b" },
+      { ts: "2026-10-05T14:39:00Z", event: "TestRun", target: "backend", selector: "FlowTest", kind: "pass", code: "old" },
+    ],
     reviews: [],
     headCode: "y",
     headTree: "z",
@@ -243,4 +340,6 @@ test("the report shows PASS, FAIL, N/A and WAIVED in their own words", () => {
   assert.doesNotMatch(text, /\| Docs lookup \| ✅/, "a gate that does not apply is never shown as a pass");
   assert.match(text, /Frontend formatting: unformatted files/);
   assert.match(text, /AssertionError: a \\\| b/);
+  assert.match(text, /\| harness scripts\/a\.test\.mjs \| ❌ assertion \| 1 assertion \| AssertionError: a \\\| b \| yes \|/);
+  assert.match(text, /\| backend FlowTest \| ✅ pass \| unstructured \(does not count\) \|  \| no \|/);
 });
