@@ -26,7 +26,9 @@ than one file or running anything that is not on the allow-list in `.claude/sett
   `InventoryFlowIntegrationTest`); new frontend logic has a `*.spec.ts` next to the code.
 - Evidence is the tools' record, not typed text: `node scripts/dod.mjs` and `node scripts/test-run.mjs` (the loop's red
   and green runs) record their results in the agent log, a hook records the reviewer's verdict, and the `pr-evidence`
-  CI job checks them against the pull request's head commit and reports them (`scripts/pr-evidence.mjs`).
+  CI job checks them against the pull request's head commit and reports them (`scripts/pr-evidence.mjs`). Each gate
+  reads `PASS`, `FAIL`, `N/A` (it did not apply, and says why) or `WAIVED` (an open, approved waiver the branch adds
+  covers each failure); only `FAIL` fails the job.
 - Changing `.claude/agents/reviewer.md`, a skill under `.agents/skills/`, this file, or the model: run the matching
   evals (`evals/README.md`) and paste the scores. CI only checks the suite is present (`scripts/check-evals.mjs`).
 - Before a PR, a fresh-context, read-only reviewer checks the diff (Claude Code: the `reviewer` subagent); fix or
@@ -58,7 +60,9 @@ docs/qa/trajectory-report.md trace`, not the whole of `docs/qa` (the waivers are
   spec it changes. The user chose this rule on 2026-10-11. Both tracks also need the Factory chain: a new MVP FR row in
   `docs/requirements.md`, its id cited in a spec under `openspec/specs/` (or a `spec.md` in the active change), and
   its id in `docs/mvp-capability-plan.md`; a `docs/specs/` file alone does not count, and a missing citation fails
-  `check-traceability.mjs`. An archived change with an unticked task fails it too.
+  `check-traceability.mjs`. An archived change with an unticked task fails it too. Since 2026-10-20 (ADR-0005), a new
+  slice's `proposal.md` has an `## Acceptance criteria` table in the `docs/specs/` format, and on either track each
+  criterion a branch adds or changes needs a red (assertion), then green `test-run.mjs` record.
 - Evidence: a test that proves a requirement carries `// @trace FR-12` (comma-separated ids allowed) above it, in a file
   under `src/test/java` or `frontend/src` named `*Test.java`, `*Tests.java`, `*.spec.ts` or `*.test.ts` (any other name
   is not found). `--mode=artifact` fails a requirement with no tagged test and no open waiver, so a new requirement row

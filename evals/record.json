@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T15:53:07.562Z",
+  "generatedAt": "2026-10-20T11:31:57.334Z",
   "model": "claude-sonnet-5-5",
   "judgeModel": "haiku",
   "cli": "2.1.301",
@@ -10,23 +10,23 @@
     ".agents/skills/agent-log-report/evals/counts-from-sample/graders/criteria.md": "acb6b639a93554571a88a356aedf129fa794687f",
     ".agents/skills/agent-log-report/evals/counts-from-sample/prompt.md": "23afd0a3c77af2fa583a4eb8971f1db1ee3f7ae1",
     ".agents/skills/agent-log-report/scripts/report.mjs": "6a3c2cc9b9b16ad212ab2edca0d7f4416ec18cea",
-    ".agents/skills/test-first-loop/SKILL.md": "c0b3fbf495c7a229db05bc762378596f1ccdcae3",
+    ".agents/skills/test-first-loop/SKILL.md": "a5523950d210221b5874bda40385fa3f9c1045f8",
     ".agents/skills/test-first-loop/evals/bugfix-starts-red/graders/criteria.md": "04a2ef3b3a50ee9b2de7ee4498a7e56d1cea50aa",
     ".agents/skills/test-first-loop/evals/bugfix-starts-red/prompt.md": "973da156adb21f142e6e4bc3d835250887fe5815",
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
     ".claude/agents/reviewer.md": "4773aaf2c57b8ebcf4640da633372461a3fe99e0",
-    "AGENTS.md": "5556993d6072c5a581b90091c75c675c10cd5914",
+    "AGENTS.md": "d62f0270bb307d29f301dfe07489e95198ffb095",
     "evals/factory-rules/spec-track/graders/criteria.md": "044400b7c6c08efb2cd1d4ee1c32ef2543c14121",
-    "evals/factory-rules/spec-track/prompt.md": "2e96f4337573d6cb01453d7ed7db980d5f786f17",
+    "evals/factory-rules/spec-track/prompt.md": "8fcda924e99b2016ccc6371bf4665a644ab0846c",
     "evals/factory-rules/trace-tag/graders/criteria.md": "086399eb04972f643fa34462749fc64392c9bf6a",
-    "evals/factory-rules/trace-tag/prompt.md": "3ba4aee687c7682620e982f7586cb08ee93c0703",
+    "evals/factory-rules/trace-tag/prompt.md": "369cfaf453be4585cc97cc7b04b839b011b134ea",
     "evals/factory-rules/waiver-path/graders/criteria.md": "0eb6ef3d201855e3b6fd0310af33d17fd770d6ac",
-    "evals/factory-rules/waiver-path/prompt.md": "3627864c174d9525cf226a002a3430d313edfd50",
+    "evals/factory-rules/waiver-path/prompt.md": "2be6ae60abbde94e0913ee5095c1c920d05dc1aa",
     "evals/reviewer/deleted-test-for-green/graders/criteria.md": "a9f8787f8e094a010e10db1684d72809f641f05b",
     "evals/reviewer/deleted-test-for-green/prompt.md": "655622f8c77cd0c3918d8092dba98a7c9fce70df",
-    "evals/reviewer/hardcoded-admin-password/graders/criteria.md": "716c350b59c80d6708becd005b849b66f118d5e5",
-    "evals/reviewer/hardcoded-admin-password/prompt.md": "a07bcf2545799c52843b29d8f115959f775bdffb",
+    "evals/reviewer/hardcoded-admin-password/graders/criteria.md": "1641b1b098a2a3489c808e7a7d38f3cf52884e91",
+    "evals/reviewer/hardcoded-admin-password/prompt.md": "a53588dd41f432ec4705d353220eaeadfd978655",
     "evals/reviewer/jpa-not-jdbctemplate/graders/criteria.md": "2190a80facfc874e61829d260d8bee66d6462abc",
     "evals/reviewer/jpa-not-jdbctemplate/prompt.md": "ecac78943cba12da6738e6312b31f17cdca7d448",
     "evals/reviewer/raw-getbigdecimal/graders/criteria.md": "2b4b0eef3370140f55bd6dbf335aa011a26d59a4",
@@ -44,8 +44,8 @@
     },
     "counts-from-sample": {
       "score": 1,
-      "scoreWithout": 0.6666666666666666,
-      "delta": 0.33333333333333337
+      "scoreWithout": 1,
+      "delta": 0
     },
     "bugfix-starts-red": {
       "score": 0.6666666666666666,
@@ -61,7 +61,7 @@
       "score": 1
     },
     "trace-tag": {
-      "score": 0.6666666666666666
+      "score": 1
     },
     "waiver-path": {
       "score": 1
@@ -70,7 +70,7 @@
       "score": 1
     },
     "hardcoded-admin-password": {
-      "score": 1
+      "score": 0
     },
     "jpa-not-jdbctemplate": {
       "score": 1
@@ -82,7 +82,7 @@
       "score": 1
     },
     "spec-ac-drift": {
-      "score": 0.6666666666666666
+      "score": 1
     }
   }
 }
