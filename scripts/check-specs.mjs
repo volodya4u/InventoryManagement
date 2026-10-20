@@ -185,8 +185,11 @@ export function prSpecProblems(root, base, head = "HEAD") {
         "(AGENTS.md: such a feature starts with an approved spec).",
     );
   }
-  // A slice proposal the branch adds is checked like an active one, even when the branch already archived it.
-  const added = git("diff", "--name-only", "--diff-filter=A", `${base}...${head}`).split("\n").filter((p) => PROPOSAL_PATH.test(p));
+  // A slice proposal the branch adds straight under archive/ is checked like an active one (validateSpecs already checks
+  // the active ones). -M is explicit, so archiving an old slice is a rename, not a new file, whatever diff.renames says.
+  const added = git("diff", "--name-only", "-M", "--diff-filter=A", `${base}...${head}`)
+    .split("\n")
+    .filter((p) => PROPOSAL_PATH.test(p) && p.startsWith("openspec/changes/archive/"));
   for (const path of added) problems.push(...criteriaProblems(root, path, parseSpec(git("show", `${head}:${path}`)).criteria));
   return problems;
 }

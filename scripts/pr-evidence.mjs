@@ -114,6 +114,15 @@ export function parseGateWaiver(path, text) {
   };
 }
 
+// The gate waivers a branch adds, from its `git diff --name-status` lines: an old waiver, an edited one or a renamed one
+// cannot cover new work. read(path) returns the file at the head commit.
+export function branchWaivers(nameStatusLines, read) {
+  return nameStatusLines
+    .map((line) => line.split("\t"))
+    .filter(([status, path]) => status === "A" && /^docs\/qa\/waivers\/[^/]+\.md$/.test(path))
+    .map(([, path]) => parseGateWaiver(path, read(path) ?? ""));
+}
+
 // Does a TestRun selector cover a criterion's test? Backend selectors are `Class`, `Class#method` or a comma list; a
 // file reference is a frontend spec or a harness test (scripts/*.test.mjs), run as that file.
 function covers(run, test) {
@@ -126,21 +135,50 @@ function howToRun(test) {
   return `node scripts/test-run.mjs ${/\.mjs$/.test(test.file) ? "harness" : "frontend"} ${test.file}`;
 }
 
-export function redGreenProblems(records, criteria) {
+// Is a per-test result (scripts/test-results.mjs) the criterion's own test? `Class#method` (a parameterized test's cases,
+// `Class#method(int)[1]`, count as it); a file's `<file> › <suite > title>` by its whole path or its leaf title.
+function isTest(result, test) {
+  const id = String(result.id ?? "");
+  if (!test.file) return id === `${test.className}#${test.method}` || id.startsWith(`${test.className}#${test.method}(`);
+  return id === `${test.file} › ${test.title}` || (id.startsWith(`${test.file} › `) && id.endsWith(` > ${test.title}`));
+}
+
+// The criterion's test's status in one structured run: its own results only, never the run's kind, which an
+// unrelated test of the same class or file decides. A run without results (unstructured, or recorded before they
+// were) says nothing about the test.
+function statusIn(run, test) {
+  if (run.structured !== true) return undefined;
+  const mine = (run.results ?? []).filter((r) => isTest(r, test)).map((r) => r.status);
+  if (!mine.length) return undefined;
+  for (const status of ["assertion", "error"]) if (mine.includes(status)) return status;
+  return mine.every((s) => s === "skipped") ? "skipped" : "pass";
+}
+
+// Each criterion needs a structured run where its own test failed on an assertion, then a later one where that test
+// passed on the head commit's code (headCode); a green on older code is stale.
+export function redGreenProblems(records, criteria, headCode) {
   const runs = records.filter((r) => r.event === "TestRun").sort(byTime);
   return criteria.flatMap(({ spec, n, test, testCell }) => {
     if (!test) return [`AC${n} of ${spec} names no test as \`Class\` › \`method\` or \`path\` › "title" (found "${testCell ?? ""}").`];
-    const mine = runs.filter((r) => covers(r, test));
-    const red = mine.findIndex((r) => r.kind === "assertion");
-    const green = red >= 0 && mine.slice(red + 1).some((r) => r.kind === "pass");
-    if (green) return [];
+    const seen = runs.filter((r) => covers(r, test)).map((r) => ({ run: r, status: statusIn(r, test) })).filter((s) => s.status);
+    const red = seen.findIndex((s) => s.status === "assertion");
+    const greens = red >= 0 ? seen.slice(red + 1).filter((s) => s.status === "pass") : [];
+    if (greens.some((s) => s.run.code === headCode)) return [];
     const name = test.file ? `${test.file} › "${test.title}"` : `${test.className} › ${test.method}`;
-    return [`AC${n} of ${spec}: no red (assertion) then green TestRun for ${name}. Run \`${howToRun(test)}\` before and after the change.`];
+    const why = !seen.length
+      ? "no structured TestRun names it (a run without a report, or recorded before per-test results, does not count)"
+      : red < 0
+        ? `it never failed on an assertion in a structured run (seen: ${[...new Set(seen.map((s) => s.status))].join(", ")})`
+        : greens.length
+          ? "it went red, then green, but every later green ran on older code than the head commit (stale)"
+          : "it failed on an assertion but never passed afterwards";
+    const next = greens.length ? `re-run \`${howToRun(test)}\` after the last code change, then commit` : `run \`${howToRun(test)}\` before and after the change`;
+    return [`AC${n} of ${spec}: no red (assertion) then green TestRun for ${name}: ${why}; ${next}.`];
   });
 }
 
 // The Red -> green gate over the acceptance files the branch touches (changedCriteria), with the gate waivers it adds.
-export function redGreenGate(records, sources, waivers = []) {
+export function redGreenGate(records, sources, waivers, headCode) {
   const usable = waivers.filter((w) => w.open && /^red\s*(->|→)\s*green$/i.test(w.gate) && w.approval);
   const waiverFor = (path, n) => usable.find((w) => w.criteria.some((c) => c.path === path && (c.n === null || c.n === n)));
   const problems = [];
@@ -152,7 +190,7 @@ export function redGreenGate(records, sources, waivers = []) {
       else problems.push(`${source.path}: a slice the branch adds has no ## Acceptance criteria table naming its tests (the docs/specs format), so nothing proves it went red, then green.`);
     }
     for (const c of source.criteria) {
-      const [problem] = redGreenProblems(records, [c]);
+      const [problem] = redGreenProblems(records, [c], headCode);
       if (!problem) continue;
       const w = waiverFor(source.path, c.n);
       if (w) waived.push(`AC${c.n} of ${source.path} (${w.path}, approved: ${w.approval})`);
@@ -219,6 +257,14 @@ export function blockedActions(lines) {
 const cell = (text) => String(text ?? "").replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
 const time = (ts) => String(ts ?? "").replace("T", " ").replace(/\.\d+Z$|Z$/, "");
 
+// A run's per-test counts, or why it has none (scripts/test-run.mjs records `results` from the runner's report).
+function perTest(run) {
+  if (run.structured !== true) return "unstructured (does not count)";
+  const counts = {};
+  for (const r of run.results ?? []) counts[r.status] = (counts[r.status] ?? 0) + 1;
+  return Object.entries(counts).map(([status, n]) => `${n} ${status}`).join(", ") || "none";
+}
+
 // A gate's cell: its status in words, then the problems (FAIL), the waived items and who approved them (WAIVED), or
 // what held or why the gate did not apply (PASS, N/A).
 function gateCell(g) {
@@ -250,8 +296,12 @@ export function report({ base, head, gates, dodRuns, testRuns, reviews, evals, h
   } else out.push("No dod run recorded on this branch.");
   out.push("", "### The loop: targeted test runs", "");
   if (testRuns.length) {
-    out.push("| Time (UTC) | Test | Result | First failure |", "| --- | --- | --- | --- |");
-    for (const r of testRuns) out.push(`| ${time(r.ts)} | ${cell(`${r.target} ${r.selector}`)} | ${r.kind === "pass" ? "✅ pass" : `❌ ${r.kind}`} | ${cell(r.firstFailure)} |`);
+    out.push("| Time (UTC) | Test | Result | Per test | First failure | Covers the head commit's code |", "| --- | --- | --- | --- | --- | --- |");
+    for (const r of testRuns) {
+      out.push(
+        `| ${time(r.ts)} | ${cell(`${r.target} ${r.selector}`)} | ${r.kind === "pass" ? "✅ pass" : `❌ ${r.kind}`} | ${cell(perTest(r))} | ${cell(r.firstFailure)} | ${r.code === headCode ? "yes" : "no"} |`,
+      );
+    }
   } else out.push("No targeted test run recorded on this branch.");
   if (evals) {
     out.push("", `### Evals (recorded ${time(evals.generatedAt)}, model ${evals.model}, judge ${evals.judgeModel})`, "", "| Case | Score | Δ (skill vs baseline) |", "| --- | --- | --- |");
@@ -322,12 +372,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const acceptance = acceptanceFiles(nameStatus).map(({ path, basePath }) =>
     changedCriteria(path, showAt(head, path) ?? "", basePath ? showAt(mergeBase, basePath) : null),
   );
-  // Gate waivers count only when this branch adds them (an old waiver cannot cover new work).
-  const waivers = nameStatus
-    .map((line) => line.split("\t"))
-    .filter(([status, path]) => status === "A" && /^docs\/qa\/waivers\/[^/]+\.md$/.test(path))
-    .map(([, path]) => parseGateWaiver(path, showAt(head, path) ?? ""));
-  const redGreen = redGreenGate(records, acceptance, waivers);
+  const waivers = branchWaivers(nameStatus, (path) => showAt(head, path));
+  const redGreen = redGreenGate(records, acceptance, waivers, headCode);
   const { specs } = validateSpecs(root);
   const reviews = reviewVerdicts(lines);
   const record = existsSync(join(root, RECORD_PATH)) ? JSON.parse(readFileSync(join(root, RECORD_PATH), "utf8")) : null;
@@ -397,3 +443,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   );
   process.exit(gates.some((g) => gateStatus(g) === "FAIL") ? 1 : 0);
 }
+
