@@ -2,13 +2,16 @@
 // The evidence of a pull request, taken from the records the tools wrote and checked against the head commit of the
 // pull request, so nothing in it is typed by hand. CI runs it on every pull request (.github/workflows/ci.yml, job
 // pr-evidence) and appends the report to the job summary. Run it before pushing: node scripts/pr-evidence.mjs origin/main HEAD
-// Gates, each of which must hold:
+// Each gate reports PASS (it applied and held), FAIL (it applied and did not hold), N/A (it did not apply, and says why)
+// or WAIVED (each failure is covered by an open, approved waiver, named in the report). Only FAIL fails the job.
+// The gates:
 //   Review              the reviewer's last recorded verdict is APPROVE on the head commit's files (check-review.mjs)
 //   Definition of done  when the branch changes code, a green DodRun record covers exactly the head commit's code
 //   Specs               specs agree with the tests they name; a new spec precedes the code; schema + API + page has a
 //                       spec (check-specs.mjs)
-//   Red -> green        each acceptance criterion of a spec the branch adds has a TestRun that failed on an assertion
-//                       and a later one that passed (scripts/test-run.mjs)
+//   Red -> green        each acceptance criterion the branch adds or changes (in docs/specs/*.md or in an OpenSpec slice's
+//                       proposal.md) has a TestRun that failed on an assertion and a later one that passed
+//                       (scripts/test-run.mjs); a slice proposal the branch adds must have an acceptance table
 //   Autonomy log        a branch that changes the harness, CI, a boundary file or a spec adds a valid row to
 //                       docs/autonomy-log.md
 //   Docs lookup         a branch that adds an import of a package nothing on main imports yet (src/**/*.java,
@@ -27,7 +30,6 @@ import { codeFingerprintAt, treeFingerprintAt } from "./dod-fingerprint.mjs";
 import { INPUT_PATHS, RECORD_PATH, inputsFingerprint, recordProblems } from "./eval-record.mjs";
 
 const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
-const SPEC_PATH = /^docs\/specs\/(?!TEMPLATE\.md$)[^/]+\.md$/;
 // Work that steers or bounds the agent, or a feature with a spec: always worth a row in the autonomy log.
 const SIGNIFICANT =
   /^(\.claude\/|\.agents\/|\.github\/|scripts\/|evals\/|docs\/specs\/|\.mcp\.json$|AGENTS\.md$|CLAUDE\.md$|pom\.xml$|frontend\/package\.json$|frontend\/pnpm-lock\.yaml$|src\/main\/resources\/(schema\.sql|application[^/]*\.yml)$|src\/main\/java\/.*\/(auth\/|SecurityConfig\.java$|InventorySchemaMigration\.java$))/;
@@ -45,23 +47,127 @@ export function dodProblems(records, { codeChanged, headCode }) {
   return [];
 }
 
-// Does a TestRun selector cover a criterion's test? Backend selectors are `Class`, `Class#method` or a comma list.
+// The one place a gate's status is decided: a problem left fails it, a waived item alone makes it WAIVED, and a gate that
+// held is PASS only if it applied to this branch (N/A otherwise), so "nothing to check" never reads as a pass.
+export function gateStatus({ applies, problems = [], waived = [] }) {
+  if (problems.length) return "FAIL";
+  if (waived.length) return "WAIVED";
+  return applies ? "PASS" : "N/A";
+}
+
+// The files whose acceptance criteria Red -> green checks: specs and OpenSpec slice proposals (active or archived) the
+// branch adds or changes, from `git diff --name-status -M` lines. basePath is the version to compare with (the old path
+// of a rename), or null for a new file.
+const ACCEPTANCE_PATH = /^(docs\/specs\/(?!TEMPLATE\.md$)[^/]+\.md|openspec\/changes\/(archive\/)?[^/]+\/proposal\.md)$/;
+const PROPOSAL_PATH = /^openspec\/changes\/(archive\/)?[^/]+\/proposal\.md$/;
+export function acceptanceFiles(nameStatusLines) {
+  return nameStatusLines.flatMap((line) => {
+    const [status, ...paths] = line.split("\t");
+    const path = paths.at(-1);
+    if (!ACCEPTANCE_PATH.test(path ?? "") || status.startsWith("D")) return [];
+    return [{ path, basePath: status.startsWith("R") ? paths[0] : status.startsWith("A") || status.startsWith("C") ? null : path }];
+  });
+}
+
+// The criteria of one file that are new or changed against its base version (null: the branch adds the file). A changed
+// row keeps its number, so it is compared by Given / When / Then text and test cell. A slice proposal the branch adds
+// with no criteria is flagged, or leaving the table out would pass the gate.
+export function changedCriteria(path, headText, baseText) {
+  const head = parseSpec(headText).criteria;
+  const before = new Map((baseText == null ? [] : parseSpec(baseText).criteria).map((c) => [c.n, `${c.gwt}\0${c.testCell}`]));
+  return {
+    path,
+    criteria: head.filter((c) => before.get(c.n) !== `${c.gwt}\0${c.testCell}`).map((c) => ({ spec: path, n: c.n, test: c.test, testCell: c.testCell })),
+    missingTable: baseText == null && PROPOSAL_PATH.test(path) && head.length === 0,
+  };
+}
+
+// A gate waiver: a docs/qa/waivers/*.md the branch adds, open, for the Red -> green gate, with an approval, naming the
+// criteria it covers as `<path> AC<n>[, AC<m>...]` or `<path>` (every criterion of that file, and a missing table). A
+// waiver with no Status line is not open: a gate exception must say so.
+const field = (text, name) => new RegExp(`^[ \\t]*(?:-[ \\t]*)?(?:\\*\\*)?${name}:(?:\\*\\*)?[ \\t]*(.*?)[ \\t]*$`, "im").exec(text)?.[1] ?? "";
+function waivedCriteria(list) {
+  const found = [];
+  let path = null;
+  let numbered = false;
+  for (const m of list.matchAll(/([\w./-]+\.md)|\bAC(\d+)\b/g)) {
+    if (m[1]) {
+      if (path && !numbered) found.push({ path, n: null });
+      path = m[1];
+      numbered = false;
+    } else if (path) {
+      found.push({ path, n: Number(m[2]) });
+      numbered = true;
+    }
+  }
+  if (path && !numbered) found.push({ path, n: null });
+  return found;
+}
+export function parseGateWaiver(path, text) {
+  const t = String(text).replace(/\r\n?/g, "\n");
+  return {
+    path,
+    open: field(t, "Status").toLowerCase() === "open",
+    gate: field(t, "Gate"),
+    approval: field(t, "Approval"),
+    criteria: waivedCriteria(field(t, "Criteria")),
+  };
+}
+
+// Does a TestRun selector cover a criterion's test? Backend selectors are `Class`, `Class#method` or a comma list; a
+// file reference is a frontend spec or a harness test (scripts/*.test.mjs), run as that file.
 function covers(run, test) {
-  if (test.file) return run.target === "frontend" && run.selector === test.file;
+  if (test.file) return run.target === (/\.mjs$/.test(test.file) ? "harness" : "frontend") && run.selector === test.file;
   return run.target === "backend" && String(run.selector).split(",").some((s) => s === test.className || s === `${test.className}#${test.method}`);
+}
+
+function howToRun(test) {
+  if (!test.file) return `node scripts/test-run.mjs backend ${test.className}#${test.method}`;
+  return `node scripts/test-run.mjs ${/\.mjs$/.test(test.file) ? "harness" : "frontend"} ${test.file}`;
 }
 
 export function redGreenProblems(records, criteria) {
   const runs = records.filter((r) => r.event === "TestRun").sort(byTime);
-  return criteria.flatMap(({ spec, n, test }) => {
+  return criteria.flatMap(({ spec, n, test, testCell }) => {
+    if (!test) return [`AC${n} of ${spec} names no test as \`Class\` › \`method\` or \`path\` › "title" (found "${testCell ?? ""}").`];
     const mine = runs.filter((r) => covers(r, test));
     const red = mine.findIndex((r) => r.kind === "assertion");
     const green = red >= 0 && mine.slice(red + 1).some((r) => r.kind === "pass");
     if (green) return [];
     const name = test.file ? `${test.file} › "${test.title}"` : `${test.className} › ${test.method}`;
-    const how = test.file ? `node scripts/test-run.mjs frontend ${test.file}` : `node scripts/test-run.mjs backend ${test.className}#${test.method}`;
-    return [`AC${n} of ${spec}: no red (assertion) then green TestRun for ${name}. Run \`${how}\` before and after the change.`];
+    return [`AC${n} of ${spec}: no red (assertion) then green TestRun for ${name}. Run \`${howToRun(test)}\` before and after the change.`];
   });
+}
+
+// The Red -> green gate over the acceptance files the branch touches (changedCriteria), with the gate waivers it adds.
+export function redGreenGate(records, sources, waivers = []) {
+  const usable = waivers.filter((w) => w.open && /^red\s*(->|→)\s*green$/i.test(w.gate) && w.approval);
+  const waiverFor = (path, n) => usable.find((w) => w.criteria.some((c) => c.path === path && (c.n === null || c.n === n)));
+  const problems = [];
+  const waived = [];
+  for (const source of sources) {
+    if (source.missingTable) {
+      const w = waiverFor(source.path, null);
+      if (w) waived.push(`${source.path} has no acceptance table (${w.path}, approved: ${w.approval})`);
+      else problems.push(`${source.path}: a slice the branch adds has no ## Acceptance criteria table naming its tests (the docs/specs format), so nothing proves it went red, then green.`);
+    }
+    for (const c of source.criteria) {
+      const [problem] = redGreenProblems(records, [c]);
+      if (!problem) continue;
+      const w = waiverFor(source.path, c.n);
+      if (w) waived.push(`AC${c.n} of ${source.path} (${w.path}, approved: ${w.approval})`);
+      else problems.push(problem);
+    }
+  }
+  const count = sources.reduce((n, s) => n + s.criteria.length, 0);
+  const applies = count > 0 || sources.some((s) => s.missingTable);
+  const files = sources.filter((s) => s.criteria.length || s.missingTable).map((s) => s.path);
+  const detail = !applies
+    ? "no new or changed acceptance criterion on this branch"
+    : waived.length
+      ? `${waived.length} item(s) waived, the rest of ${files.join(", ")} went red, then green`
+      : `every new or changed criterion of ${files.join(", ")} went red, then green`;
+  return { applies, problems, waived, detail };
 }
 
 // The rows the branch adds: '+' lines of the table whose number the base version does not have. An edited row keeps
@@ -113,6 +219,15 @@ export function blockedActions(lines) {
 const cell = (text) => String(text ?? "").replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
 const time = (ts) => String(ts ?? "").replace("T", " ").replace(/\.\d+Z$|Z$/, "");
 
+// A gate's cell: its status in words, then the problems (FAIL), the waived items and who approved them (WAIVED), or
+// what held or why the gate did not apply (PASS, N/A).
+function gateCell(g) {
+  const status = gateStatus(g);
+  if (status === "FAIL") return `❌ FAIL: ${g.problems.join(" ")}`;
+  if (status === "WAIVED") return `⚠️ WAIVED: ${[g.detail, ...g.waived].filter(Boolean).join("; ")}`;
+  return `${status === "PASS" ? "✅ PASS" : "➖ N/A"}: ${g.detail}`;
+}
+
 export function report({ base, head, gates, dodRuns, testRuns, reviews, evals, headCode, headTree, activity }) {
   const out = [
     "## Pull request evidence",
@@ -121,7 +236,7 @@ export function report({ base, head, gates, dodRuns, testRuns, reviews, evals, h
     "",
     "| Gate | Result |",
     "| --- | --- |",
-    ...gates.map((g) => `| ${g.name} | ${g.problems.length ? `❌ ${cell(g.problems.join(" "))}` : `✅ ${cell(g.ok)}`} |`),
+    ...gates.map((g) => `| ${g.name} | ${cell(gateCell(g))} |`),
     "",
     "### The loop: dod runs",
     "",
@@ -196,10 +311,23 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     .filter((l) => /^\+\s*\|\s*\d+\s*\|/.test(l))
     .map((l) => l.slice(1));
   const addedRows = newRows(plusRows, baseLog);
-  const newSpecs = git("diff", "--name-only", "--diff-filter=A", `${base}...${head}`).split("\n").filter((p) => SPEC_PATH.test(p));
-  const criteria = newSpecs.flatMap((spec) =>
-    parseSpec(git("show", `${head}:${spec}`)).criteria.filter((c) => c.test).map((c) => ({ spec, n: c.n, test: c.test })),
+  const nameStatus = git("diff", "--name-status", "-M", `${base}...${head}`).split("\n").filter(Boolean);
+  const showAt = (rev, path) => {
+    try {
+      return git("show", `${rev}:${path}`);
+    } catch {
+      return null;
+    }
+  };
+  const acceptance = acceptanceFiles(nameStatus).map(({ path, basePath }) =>
+    changedCriteria(path, showAt(head, path) ?? "", basePath ? showAt(mergeBase, basePath) : null),
   );
+  // Gate waivers count only when this branch adds them (an old waiver cannot cover new work).
+  const waivers = nameStatus
+    .map((line) => line.split("\t"))
+    .filter(([status, path]) => status === "A" && /^docs\/qa\/waivers\/[^/]+\.md$/.test(path))
+    .map(([, path]) => parseGateWaiver(path, showAt(head, path) ?? ""));
+  const redGreen = redGreenGate(records, acceptance, waivers);
   const { specs } = validateSpecs(root);
   const reviews = reviewVerdicts(lines);
   const record = existsSync(join(root, RECORD_PATH)) ? JSON.parse(readFileSync(join(root, RECORD_PATH), "utf8")) : null;
@@ -211,16 +339,37 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const modes = {};
   for (const e of tools) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
   const gates = [
-    { name: "Review", problems: reviewProblems(lines, headTree), ok: `the reviewer's last verdict is APPROVE on the head commit's files (${reviews.length} round(s))` },
-    { name: "Definition of done", problems: dodProblems(records, { codeChanged, headCode }), ok: codeChanged ? "a green dod run covers the head commit's code" : "no code changed on this branch" },
-    { name: "Specs", problems: [...validateSpecs(root).problems, ...prSpecProblems(root, base, head)], ok: `${specs.length} spec(s) agree with the tests they name; spec-first order and the cross-layer rule hold` },
-    { name: "Red → green", problems: redGreenProblems(records, criteria), ok: newSpecs.length ? `every criterion of ${newSpecs.join(", ")} went red, then green` : "no new spec on this branch" },
-    { name: "Autonomy log", problems: autonomyProblems(changed, addedRows), ok: addedRows.length ? `${addedRows.length} row(s) added` : "no significant change, no row needed" },
-    { name: "Evals", problems: evalsProblems(changed, record, inputsFingerprint(root)), ok: evalsRelevant ? `evals/record.json is fresh (model ${record?.model})` : "no reviewer, skill, AGENTS.md or case change on this branch" },
+    { name: "Review", applies: true, problems: reviewProblems(lines, headTree), detail: `the reviewer's last verdict is APPROVE on the head commit's files (${reviews.length} round(s))` },
+    {
+      name: "Definition of done",
+      applies: codeChanged,
+      problems: dodProblems(records, { codeChanged, headCode }),
+      detail: codeChanged ? "a green dod run covers the head commit's code" : "no code changed on this branch",
+    },
+    {
+      name: "Specs",
+      applies: true,
+      problems: [...validateSpecs(root).problems, ...prSpecProblems(root, base, head)],
+      detail: `${specs.length} spec(s) and the active OpenSpec changes agree with the tests they name; spec-first order and the cross-layer rule hold`,
+    },
+    { name: "Red → green", ...redGreen },
+    {
+      name: "Autonomy log",
+      applies: changed.some(significant),
+      problems: autonomyProblems(changed, addedRows),
+      detail: changed.some(significant) ? `${addedRows.length} row(s) added` : "no significant change, no row needed",
+    },
+    {
+      name: "Evals",
+      applies: evalsRelevant,
+      problems: evalsProblems(changed, record, inputsFingerprint(root)),
+      detail: evalsRelevant ? `evals/record.json is fresh (model ${record?.model})` : "no reviewer, skill, AGENTS.md or case change on this branch",
+    },
     {
       name: "Docs lookup",
+      applies: newKeys.length > 0,
       problems: docsLookupProblems(newKeys, tools),
-      ok: newKeys.length
+      detail: newKeys.length
         ? `${docsLookups} lookup(s) recorded for ${newKeys.map((k) => k.replace(/^(java|ts):/, "")).join(", ")}`
         : "no new third-party import on this branch",
     },
@@ -246,5 +395,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       },
     }),
   );
-  process.exit(gates.some((g) => g.problems.length) ? 1 : 0);
+  process.exit(gates.some((g) => gateStatus(g) === "FAIL") ? 1 : 0);
 }

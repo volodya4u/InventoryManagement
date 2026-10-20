@@ -32,7 +32,9 @@ docs/qa/trajectory-report.md trace`, not the whole of `docs/qa` (the waivers are
   spec it changes. The user chose this rule on 2026-10-11. Both tracks also need the Factory chain: a new MVP FR row in
   `docs/requirements.md`, its id cited in a spec under `openspec/specs/` (or a `spec.md` in the active change), and
   its id in `docs/mvp-capability-plan.md`; a `docs/specs/` file alone does not count, and a missing citation fails
-  `check-traceability.mjs`. An archived change with an unticked task fails it too.
+  `check-traceability.mjs`. An archived change with an unticked task fails it too. Since 2026-10-20 (ADR-0005), a new
+  slice's `proposal.md` has an `## Acceptance criteria` table in the `docs/specs/` format, and on either track each
+  criterion a branch adds or changes needs a red (assertion), then green `test-run.mjs` record.
 - Evidence: a test that proves a requirement carries `// @trace FR-12` (comma-separated ids allowed) above it, in a file
   under `src/test/java` or `frontend/src` named `*Test.java`, `*Tests.java`, `*.spec.ts` or `*.test.ts` (any other name
   is not found). `--mode=artifact` fails a requirement with no tagged test and no open waiver, so a new requirement row

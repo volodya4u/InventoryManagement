@@ -49,8 +49,9 @@ Run the whole loop yourself; come back to the human only at the exits named belo
    - **The records only count once a commit folds them in.** The reviewer runs (step 5) after your code commits, so
      make one more commit after the review — log-only is fine: `git commit -m "Record the reviewer run"`.
    - **Verify before you push:** `node scripts/pr-evidence.mjs <base> HEAD` (base usually `origin/main`) must show
-     every gate ✅: the review on these files, a green dod run on this code, the specs, red → green for a new spec, the
-     autonomy-log row, a docs lookup for a new library. CI's `pr-evidence` job runs the same check and puts
+     no gate `FAIL` (each `PASS`, `N/A` with its reason, or an approved `WAIVED`): the review on these files, a green
+     dod run on this code, the specs, red → green for each criterion the branch adds or changes (a spec or a slice's
+     `proposal.md`), the autonomy-log row, a docs lookup for a new library. CI's `pr-evidence` job runs the same check and puts
      the report in its summary, so you need not paste red and green lines or the dod table by hand; report anything
      left open.
 
