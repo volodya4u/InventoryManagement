@@ -47,7 +47,7 @@ jobs:
           export PATH="$GITHUB_WORKSPACE/target/frontend-tooling/node:$PATH"
           pnpm exec prettier --check .
 
-      # The default bash shell runs with `-o pipefail`, so a failing `ng test` still fails the step through the tee.
+      # Save Vitest output for the test-run guard below.
       - name: Frontend unit tests
         working-directory: frontend
         run: |
@@ -78,7 +78,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # main's history and the branch's commits, to diff the agent log and fingerprint the head
+      # Explicit Bash enables pipefail, so tee cannot hide a failed evidence gate.
       - name: Evidence from the agent log and the specs
+        shell: bash
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
