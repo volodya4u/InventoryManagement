@@ -190,6 +190,25 @@ const FLOW = [{ spec: "docs/specs/x.md", n: 1, test: { className: "FlowTest", me
 const DASH = [{ spec: "docs/specs/x.md", n: 2, test: { file: "frontend/src/app/dash/dash.component.spec.ts", title: "shows it" } }];
 const r = (id, status) => ({ id, status });
 
+test("red-green: a title that two tests in one file share is ambiguous and does not count", () => {
+  const file = "frontend/src/app/dash/dash.component.spec.ts";
+  const both = (a, b) => [r(`${file} › DashboardComponent > on load > shows it`, a), r(`${file} › DashboardComponent > on error > shows it`, b)];
+  // The other block's assertion must not stand in for the criterion's red, nor its pass for the green.
+  const records = [run("t1", "frontend", file, "assertion", { results: both("pass", "assertion") }), run("t2", "frontend", file, "pass", { results: both("pass", "pass") })];
+  const text = problemsOf(records, DASH).join(" ");
+  assert.match(text, /"shows it" matches more than one test in frontend\/src\/app\/dash\/dash\.component\.spec\.ts/);
+  assert.match(text, /DashboardComponent > on load > shows it/);
+  assert.match(text, /DashboardComponent > on error > shows it/);
+  assert.match(text, /give the tests distinct titles/);
+  // Named by its whole suite path, the criterion matches one test only, so the same runs count.
+  const exact = [{ ...DASH[0], test: { file, title: "DashboardComponent > on error > shows it" } }];
+  assert.deepEqual(problemsOf(records, exact), []);
+  // The same id listed twice (a runner reporting a retry) is one test, not two.
+  const retried = [r(`${file} › DashboardComponent > shows it`, "assertion"), r(`${file} › DashboardComponent > shows it`, "assertion")];
+  const once = [run("t1", "frontend", file, "assertion", { results: retried }), run("t2", "frontend", file, "pass", { results: [r(`${file} › DashboardComponent > shows it`, "pass")] })];
+  assert.deepEqual(problemsOf(once, DASH), []);
+});
+
 test("red-green: only the criterion's own test counts; a failure of another test in the same class or file does not", () => {
   const otherMethod = [
     run("t1", "backend", "FlowTest", "assertion", { results: [r("FlowTest#flagsLowStock", "pass"), r("FlowTest#flagsEmptyStock", "assertion")] }),

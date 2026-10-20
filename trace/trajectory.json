@@ -53,7 +53,14 @@
     {
       "slice": "2026-10-20-structured-test-evidence",
       "reviewEvidence": "missing",
-      "trailerCommits": 1,
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-21-structured-evidence-followups",
+      "reviewEvidence": "missing",
+      "trailerCommits": 0,
       "libDomains": [],
       "processComplete": true
     }
@@ -120,6 +127,14 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "trailer",
+      "msg": "2026-10-21-structured-evidence-followups: no commit carries a \"Slice: structured-evidence-followups\" trailer"
     }
   ]
 }
