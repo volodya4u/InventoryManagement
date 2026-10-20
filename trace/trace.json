@@ -2536,6 +2536,10 @@
     },
     {
       "check": "active-changes",
+      "msg": "active change \"git-output-deny-rules\" is not archived"
+    },
+    {
+      "check": "active-changes",
       "msg": "active change \"push-branch-entry-tests\" is not archived"
     }
   ]

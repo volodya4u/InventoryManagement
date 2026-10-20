@@ -1,6 +1,6 @@
 # ADR-0005: Evidence integrity — no misleading passes
 
-- **Status:** Accepted (slice 1 of 6)
+- **Status:** Accepted (slices 1 and 2 of 6)
 - **Date:** 2026-10-20
 - **Deciders:** volodya4u (user), Claude
 
@@ -50,3 +50,29 @@ This ADR records slice 1. Later slices extend it.
 - A hardening slice like #72 now fails the gate unless each criterion has a recorded red, then green run, or an approved
   waiver. Slice 4 adds the break → red → restore → green form for strengthening tests of existing behavior.
 - Readers of the report can tell `N/A` from `PASS` at a glance. Tooling that matched on "✅" alone must also accept `➖ N/A`.
+
+## Decision (slice 2, structured-test-evidence)
+
+- **Each test gets its own result.** `scripts/test-run.mjs` reads the runner's own report and records each test with
+  its status, through the new `scripts/test-results.mjs`:
+  - Surefire XML;
+  - Vitest's JSON reporter, through `ng test --reporters json --output-file`, which is in the Angular 22 CLI reference;
+  - node:test's `junit` reporter.
+
+  A test id is `Class#method` or `<file> › <suite > title>`. A status is `pass`, `assertion`, `error` or `skipped`.
+  The run-level kind is derived from those results. A run without a report is recorded `structured: false`.
+- **The gate looks at the criterion's own test.** A failure of another test in the same class or file does not count
+  as the criterion's red. Neither does a skipped test, an exception, a compile error or an unstructured run.
+- **The green must be on the final code.** The passing run has to come after the red and carry the head commit's code
+  fingerprint. A green on older code is reported as stale, and the fix is to re-run the targeted test after the last
+  code change.
+- **Records written before per-test results no longer count.** That is safe because the gate only reads records the
+  branch adds.
+- **This slice bootstrapped its own recorder.** Four of its criteria were written before a structured red could be
+  recorded, and a fifth (a criterion that names no test) was already enforced by slice 1. Each was shown red by a
+  controlled break of the code it tests. The break was in a path the recorder does not use itself: breaking the shared
+  `AssertionError` pattern would have made the recorder log `error` instead of `assertion`, and that run was discarded.
+  The code was then restored to the same blob ids and the run recorded green. Slice 4 turns this into a recorded,
+  replayable workflow.
+- `scripts/check-specs.mjs` (locked, re-sealed with the notes kept): a pull request diffs with `-M`, and only the archived
+  proposals the branch adds are checked there, because `validateSpecs` already checks the active ones.
