@@ -1,7 +1,7 @@
 // Unit tests for the parsers in scripts/test-run.mjs. Run: node --test scripts/test-run.test.mjs
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { normalizeSelector, summarize } from "./test-run.mjs";
+import { normalizeSelector, structuredVerdict, summarize } from "./test-run.mjs";
 
 const mavenRed = `[INFO] Running com.flowershop.inventory.InventoryFlowIntegrationTest
 [ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 3.2 s <<< FAILURE! -- in com.flowershop.inventory.InventoryFlowIntegrationTest
@@ -106,4 +106,27 @@ test("selectors are recorded the way specs name tests", () => {
   assert.equal(normalizeSelector("frontend", "frontend\\src\\app\\x\\x.component.spec.ts"), "frontend/src/app/x/x.component.spec.ts");
   assert.equal(normalizeSelector("backend", "InventoryFlowIntegrationTest#recordsX"), "InventoryFlowIntegrationTest#recordsX");
   assert.equal(normalizeSelector("harness", ".\\scripts\\check-specs.test.mjs"), "scripts/check-specs.test.mjs");
+});
+
+const t = (id, status) => ({ id, status });
+const consoleRed = { tests: 3, failed: 1, kind: "assertion", firstFailure: "AssertionError: x" };
+
+test("structured: a run's kind comes from its test results, and a run with no results is unstructured", () => {
+  // Another test's assertion and this test's error: the run is red on an assertion, and each test keeps its own status.
+  const mixed = structuredVerdict([t("A#a", "pass"), t("A#b", "assertion"), t("A#c", "error"), t("A#d", "skipped")], 1, consoleRed);
+  assert.equal(mixed.structured, true);
+  assert.equal(mixed.kind, "assertion");
+  assert.deepEqual([mixed.tests, mixed.failed], [3, 2]);
+  assert.deepEqual(mixed.results.map((r) => r.status), ["pass", "assertion", "error", "skipped"]);
+  assert.equal(structuredVerdict([t("A#a", "pass"), t("A#c", "error")], 1, consoleRed).kind, "error");
+  assert.equal(structuredVerdict([t("A#a", "pass")], 0, consoleRed).kind, "pass");
+  // Every test passed but the runner failed (a context that did not close, a reporter error): not a pass.
+  assert.equal(structuredVerdict([t("A#a", "pass")], 1, consoleRed).kind, "error");
+  // Only skipped tests, or none: nothing ran.
+  assert.equal(structuredVerdict([t("A#d", "skipped")], 0, consoleRed).kind, "no-tests");
+  // A compile error stays a compile error even if an old report is lying around.
+  assert.equal(structuredVerdict([t("A#a", "pass")], 1, { ...consoleRed, kind: "compile" }).kind, "compile");
+  // No report: the console summary, marked unstructured, with no per-test results.
+  const none = structuredVerdict(null, 1, consoleRed);
+  assert.deepEqual(none, { ...consoleRed, structured: false, results: [] });
 });
