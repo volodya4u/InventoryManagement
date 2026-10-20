@@ -16,8 +16,28 @@ export function pushArguments(branch) {
   if (!BRANCH.test(branch) || branch.includes("..") || branch.endsWith(".") || branch.endsWith(".lock")) {
     throw new Error(`refusing to push ${JSON.stringify(branch)}: only a branch named claude/<name> is pushed by this script`);
   }
-  return ["push", "-u", "origin", `refs/heads/${branch}:refs/heads/${branch}`];
+  // --no-follow-tags: a `push.followTags` setting would otherwise push annotated tags along with the branch.
+  return ["push", "--no-follow-tags", "-u", "origin", `refs/heads/${branch}:refs/heads/${branch}`];
 }
+
+// Why the push would not go where `remote.origin.url` says, or "" when it would. `urls` are the configured
+// `remote.origin.url` values, `pushUrls` the URLs git pushes origin to (`git remote get-url --push --all origin`, which
+// applies a `pushurl`, an `insteadOf` and a `pushInsteadOf`). The URLs are not printed: one may carry a credential.
+export function originProblem(urls, pushUrls) {
+  if (urls.length !== 1) return `refusing to push: origin must have exactly one url (found ${urls.length})`;
+  if (pushUrls.length !== 1 || pushUrls[0] !== urls[0]) {
+    return "refusing to push: git would push origin somewhere other than remote.origin.url (a pushurl, insteadOf or pushInsteadOf setting); push by hand if that is intended";
+  }
+  return "";
+}
+
+const lines = (args) => {
+  try {
+    return execFileSync("git", args, { encoding: "utf8" }).split(/\r?\n/).filter(Boolean);
+  } catch {
+    return []; // not set
+  }
+};
 
 function main() {
   if (process.argv.length > 2) {
@@ -35,6 +55,11 @@ function main() {
     args = pushArguments(branch);
   } catch (error) {
     console.error(error.message);
+    process.exit(2);
+  }
+  const destination = originProblem(lines(["config", "--get-all", "remote.origin.url"]), lines(["remote", "get-url", "--push", "--all", "origin"]));
+  if (destination) {
+    console.error(destination);
     process.exit(2);
   }
   try {
