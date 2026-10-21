@@ -1,6 +1,6 @@
 # ADR-0005: Evidence integrity — no misleading passes
 
-- **Status:** Accepted (slices 1 and 2 of 6, with a follow-up to slice 2)
+- **Status:** Accepted (slices 1 and 2 of 6 with a follow-up to slice 2, and step A of slice 3)
 - **Date:** 2026-10-20
 - **Deciders:** volodya4u (user), Claude
 
@@ -88,3 +88,20 @@ Three gaps that the review of #92 left open are now closed:
 - **A criterion title shared by several tests in one file is ambiguous.** That happens when it matches only their leaf
   titles. Such a run counts neither as red nor as green, and the gate asks for distinct test titles. A title that
   equals a test's whole suite path still names that one test.
+
+## Decision (slice 3, step A: review-provenance-local)
+
+- **The agent and the owner share one GitHub identity here.** `gh` is authenticated as the owner, and the agent opens
+  pull requests as the owner. So a commit status, comment or review on GitHub cannot tell the agent from the owner, and
+  GitHub does not let the owner approve their own pull request. A `pull_request` workflow also runs the branch's own copy
+  of the workflow file. The planned trusted channel would therefore not be trustworthy as designed. On 2026-10-21 the
+  owner chose to ship the local checks now and to leave the trusted channel to its own slice.
+- **A verdict counts only on a line the log hook wrote for the reviewer.** That line has a `toolu_` id and its
+  `PreToolUse` line with the same id and tool. It is either the reviewer's own `SubagentHandback` or the `Agent` call
+  with `subagent_type: reviewer`. Other verdict lines are ignored, and when no valid verdict is left the gate says how
+  many. Every verdict line already in `.agent-log/actions.jsonl` passes this rule.
+- **An APPROVE needs `blocking === 0`.** An APPROVE with blocking findings, or with no count at all, fails.
+- **The limit stays stated.** These rules raise the cost of a forged line, such as the one #52 planted, but cannot
+  prove a review happened. A careful author can still write both lines by hand. Only a record outside the branch that
+  the author cannot write can prove it: a key the agent cannot use, or a workflow that runs from the base branch.
+  `scripts/check-review.mjs` is locked, so the lock is re-sealed with its notes kept.

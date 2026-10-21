@@ -10,13 +10,16 @@ const tmp = mkdtempSync(join(tmpdir(), "agent-log-summary-"));
 after(() => rmSync(tmp, { recursive: true, force: true }));
 
 // The reviewer's verdict rides on its PostToolUse (SubagentHandback) line — a tool event — not on a SubagentStop line.
+// The lines have the hook's shape: a toolu_ id, and a PreToolUse line before each PostToolUse line (check-review.mjs
+// counts a verdict only on such a line).
 const fixture = join(tmp, "actions.jsonl");
 writeFileSync(
   fixture,
   [
-    { ts: "2026-01-01T00:00:00Z", event: "PreToolUse", id: "t1", tool: "Bash", cmd: "x", mode: "auto" },
-    { ts: "2026-01-01T00:00:01Z", event: "PostToolUse", id: "t1", tool: "Bash", exit: 0, mode: "auto" },
-    { ts: "2026-01-01T00:00:02Z", event: "PostToolUse", id: "t2", tool: "SubagentHandback", agent: "reviewer", verdict: "APPROVE", blocking: 0, exit: 0, mode: "auto" },
+    { ts: "2026-01-01T00:00:00Z", event: "PreToolUse", id: "toolu_t1", tool: "Bash", cmd: "x", mode: "auto" },
+    { ts: "2026-01-01T00:00:01Z", event: "PostToolUse", id: "toolu_t1", tool: "Bash", exit: 0, mode: "auto" },
+    { ts: "2026-01-01T00:00:01Z", event: "PreToolUse", id: "toolu_t2", tool: "SubagentHandback", agent: "reviewer", mode: "auto" },
+    { ts: "2026-01-01T00:00:02Z", event: "PostToolUse", id: "toolu_t2", tool: "SubagentHandback", agent: "reviewer", verdict: "APPROVE", blocking: 0, exit: 0, mode: "auto" },
     { ts: "2026-01-01T00:00:03Z", event: "DodRun", exit: 0 },
   ]
     .map((e) => JSON.stringify(e))

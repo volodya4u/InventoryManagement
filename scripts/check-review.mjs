@@ -24,16 +24,36 @@ export function reviewerRan(lines) {
   return lines.flatMap(parse).some((e) => e.agent === "reviewer" || e.subagent_type === "reviewer");
 }
 
+// A verdict line the log hook wrote for the reviewer: a toolu_ id, its PreToolUse line (same id and tool) among the
+// lines, and the reviewer's own hand-back or the Agent call that spawned it. A hand-written line, such as the one
+// d37db08 planted in #52, lacks one of these; it can still be forged with care, which only a record outside the
+// branch can prevent (ADR-0005).
+const TOOL_USE_ID = /^toolu_[A-Za-z0-9]+$/;
+const fromReviewer = (e) =>
+  (e.tool === "SubagentHandback" && e.agent === "reviewer") || ((e.tool === "Agent" || e.tool === "Task") && e.subagent_type === "reviewer");
+const hasVerdict = (e) => e.event === "PostToolUse" && (e.verdict === "APPROVE" || e.verdict === "CHANGES REQUESTED");
+
+function hookRecorded(entries) {
+  const proposed = new Set(entries.filter((e) => e.event === "PreToolUse" && e.id).map((e) => `${e.id}\0${e.tool}`));
+  return (e) => TOOL_USE_ID.test(String(e.id ?? "")) && proposed.has(`${e.id}\0${e.tool}`) && fromReviewer(e);
+}
+
+// Verdict lines that do not count because no hook recorded them for the reviewer.
+export function ignoredVerdicts(lines) {
+  const entries = lines.flatMap(parse);
+  const recorded = hookRecorded(entries);
+  return entries.filter((e) => hasVerdict(e) && !recorded(e));
+}
+
 // The reviewer's recorded verdicts, oldest first, one per review. Only executed lines count (a PreToolUse line is a
-// proposal). One review's hand-back is recorded twice — on the reviewer's own `SubagentHandback` line and on the
+// proposal), and only those the hook recorded for the reviewer (hookRecorded). One review's hand-back is recorded twice — on the reviewer's own `SubagentHandback` line and on the
 // parent `Agent` call's completion — with the same verdict, tree, blocking count and findings; a resumed reviewer
 // records once. Those duplicates are collapsed by content so each review counts once, while genuinely separate rounds
 // (a later review sees a different tree, or returns a different verdict) are kept.
 export function reviewVerdicts(lines) {
-  const sorted = lines
-    .flatMap(parse)
-    .filter((e) => e.event === "PostToolUse" && (e.verdict === "APPROVE" || e.verdict === "CHANGES REQUESTED"))
-    .sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
+  const entries = lines.flatMap(parse);
+  const recorded = hookRecorded(entries);
+  const sorted = entries.filter((e) => hasVerdict(e) && recorded(e)).sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
   // Collapse duplicates by content, keeping the LAST occurrence so a repeated verdict never shadows a later distinct
   // one: reviewProblems decides on the final verdict, and keeping the last is the safe choice if a tuple ever recurs.
   const seen = new Set();
@@ -52,6 +72,14 @@ export function reviewVerdicts(lines) {
 export function reviewProblems(lines, tree) {
   const verdicts = reviewVerdicts(lines);
   if (!verdicts.length) {
+    const ignored = ignoredVerdicts(lines).length;
+    if (ignored) {
+      return [
+        `The agent log has no reviewer verdict that counts: ignored ${ignored} verdict line(s) that no hook recorded for the ` +
+          "reviewer (each needs a toolu_ id, its PreToolUse line, and the reviewer's hand-back or its Agent call). Run the " +
+          "`reviewer` subagent on the final diff, then commit so the log folds in.",
+      ];
+    }
     return [
       reviewerRan(lines)
         ? "The reviewer ran on this branch, but no verdict was recorded: its report must end in a `## Review: APPROVE` " +
@@ -66,6 +94,12 @@ export function reviewProblems(lines, tree) {
       `The reviewer's last verdict is CHANGES REQUESTED (${last.blocking ?? "?"} blocking): fix or answer the ` +
         "blocking findings, then run the reviewer again.",
     ];
+  }
+  if (!Number.isInteger(last.blocking)) {
+    return ["The reviewer's last APPROVE has no blocking count (the hook records one from its `### Blocking` list): run the reviewer again on the final diff."];
+  }
+  if (last.blocking !== 0) {
+    return [`The reviewer's last verdict is APPROVE but lists ${last.blocking} blocking finding(s): fix or answer them, then run the reviewer again.`];
   }
   if (!last.tree || last.tree !== tree) {
     return ["Files changed after the reviewer's last APPROVE (its recorded tree differs): run the reviewer again on the final diff, then commit."];
