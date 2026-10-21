@@ -1,0 +1,6 @@
+# Keys whose signature on an approve/<head-sha> tag counts as the owner's approval of a pull request (ADR-0005,
+# slice 3 step B; scripts/signed-approval.mjs, .github/workflows/human-approval.yml). Git's allowed-signers format, one
+# key per line:   <email> namespaces="git" <key-type> <public-key> [comment]
+# Only hardware-backed key types count (sk-ssh-ed25519@openssh.com, sk-ecdsa-sha2-nistp256@openssh.com), so a
+# signature needs a physical touch the agent cannot give. The checks read this file as main has it, never a branch's
+# copy, so adding a key takes a merged pull request. No key is listed yet: until one is, signed approval is N/A.

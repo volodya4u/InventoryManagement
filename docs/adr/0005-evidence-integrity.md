@@ -1,6 +1,6 @@
 # ADR-0005: Evidence integrity — no misleading passes
 
-- **Status:** Accepted (slices 1 and 2 of 6 with a follow-up to slice 2, and step A of slice 3)
+- **Status:** Accepted (slices 1, 2 and 3 of 6, with a follow-up to slice 2)
 - **Date:** 2026-10-20
 - **Deciders:** volodya4u (user), Claude
 
@@ -105,3 +105,45 @@ Three gaps that the review of #92 left open are now closed:
   prove a review happened. A careful author can still write both lines by hand. Only a record outside the branch that
   the author cannot write can prove it: a key the agent cannot use, or a workflow that runs from the base branch.
   `scripts/check-review.mjs` is locked, so the lock is re-sealed with its notes kept.
+
+## Decision (slice 3, step B: review-signed-approval)
+
+- **The trusted channel is a signature the agent cannot make.** The owner approves a pull request by signing an
+  annotated tag `approve/<head-sha>` with an SSH key on a FIDO2 hardware key, which needs a touch for each signature.
+  The owner chose this on 2026-10-21 over a second GitHub account and over a reviewer run in CI with an API key.
+  `scripts/approve-pr.mjs` signs the tag, checks it, pushes it and re-runs the checks.
+- **The verifier runs from main.** `.github/workflows/human-approval.yml` runs on `pull_request_target`: it checks out
+  main and runs main's `scripts/signed-approval.mjs`. The pull request's head and tags are only fetched as data and
+  read by `git verify-tag`. The token is read-only, and no secret is used. The allowed signers are main's
+  `quality/allowed-signers`, never a branch's copy, and only hardware-backed (`sk-…`) key types count. The owner marks
+  this check as required in branch protection.
+- **Both are required, and shown apart.** The agent reviewer's APPROVE (step A) stays required. `pr-evidence` adds a
+  **Human approval** row next to **Review**, so a human approval never reads as an automated pass. In CI a missing
+  signature fails that row; locally it is N/A, so the finish flow can push before the owner signs.
+- **It starts when a key is listed.** This change adds the signers file with no key, so everything stays N/A until a
+  pull request adds the owner's public key.
+- **The signers file is read by field position.** Both reviews of this slice found that taking the first
+  type-looking token let a principal named `sk-ssh-ed25519@openssh.com` carry a software key past the filter. The key
+  type is now the field before the key, and it must equal the type encoded in the key blob. `cert-authority` and
+  `no-touch-required` lines are refused in any letter case, as OpenSSH reads them, and git itself refuses unknown keys
+  (`gpg.minTrustLevel=fully`). The verifier cannot see how the key was made, so the touch guarantee also needs the key
+  itself to have been generated without `-O no-touch-required` (with `-O verify-required`, a PIN is asked too).
+- **Limits.**
+  - A valid tag proves that a holder of the hardware key approved that commit, not that they read the diff.
+  - The touch proves that a signature was made, not what was signed. So `approve-pr.mjs` must run from a checkout of
+    main the agent has not touched; it refuses to run when it or its verifier differs from `origin/main`, and it pins
+    `gpg.ssh.program`. A tool cannot vouch for itself, though, so the owner should keep a separate clone for approving.
+  - `pr-evidence` still runs the branch's own code, so its row can be faked by a branch that edits it.
+  - The `human-approval` check is evidence and a reminder, not proof. Its final review found that `pull_request_target`
+    runs the **base** branch's workflow, so an author who can push branches, as the agent can, has a way around it:
+    1. Open a pull request into a branch whose copy of the workflow always passes.
+    2. Retarget it to main.
+    3. Re-run that green run.
+
+    None of that shows in the diff against main. `edited` is now a trigger, so a retarget makes main's verifier run
+    and go red, but re-running the old green run is still possible. A branch could also add another workflow that
+    reports a check with the same name.
+  - **The proof is the signature.** Before merging, the owner runs main's verifier from a clean clone of main
+    (`node scripts/signed-approval.mjs origin/main <head-sha> --ci`), and `approve-pr.mjs` prints that command. The
+    agent cannot alter that clone or forge the hardware-key signature it checks. A GitHub-side protection, such as a
+    ruleset that pins the workflow to main's ref, is left to the owner.

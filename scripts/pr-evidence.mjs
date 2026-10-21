@@ -6,6 +6,9 @@
 // or WAIVED (each failure is covered by an open, approved waiver, named in the report). Only FAIL fails the job.
 // The gates:
 //   Review              the reviewer's last recorded verdict is APPROVE on the head commit's files (check-review.mjs)
+//   Human approval      the owner's tag approve/<head-sha>, signed with a hardware key listed in the base's
+//                       quality/allowed-signers (signed-approval.mjs); required in CI, N/A locally and until a key
+//                       is listed
 //   Definition of done  when the branch changes code, a green DodRun record covers exactly the head commit's code
 //   Specs               specs agree with the tests they name; a new spec precedes the code; schema + API + page has a
 //                       spec (check-specs.mjs)
@@ -28,6 +31,7 @@ import { docsLookupCount, docsLookupProblems, newImportKeys } from "./check-docs
 import { parseSpec, prSpecProblems, tableCells, validateSpecs } from "./check-specs.mjs";
 import { codeFingerprintAt, treeFingerprintAt } from "./dod-fingerprint.mjs";
 import { INPUT_PATHS, RECORD_PATH, inputsFingerprint, recordProblems } from "./eval-record.mjs";
+import { humanApprovalGate, signedApproval } from "./signed-approval.mjs";
 
 const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
 // Work that steers or bounds the agent, or a feature with a spec: always worth a row in the autonomy log.
@@ -402,6 +406,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   for (const e of tools) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
   const gates = [
     { name: "Review", applies: true, problems: reviewProblems(lines, headTree), detail: `the reviewer's last verdict is APPROVE on the head commit's files (${reviews.length} round(s))` },
+    // GitHub sets GITHUB_ACTIONS in every job. This job runs the branch's own copy of this script and of ci.yml, so a
+    // branch that edits them can fake any row here, this one included; only a check run from the base's code can be
+    // trusted against that (ADR-0005, slice 3 step B).
+    { name: "Human approval", ...humanApprovalGate(signedApproval(root, { base, head }), { ci: process.env.GITHUB_ACTIONS === "true" }) },
     {
       name: "Definition of done",
       applies: codeChanged,
