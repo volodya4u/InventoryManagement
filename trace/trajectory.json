@@ -74,7 +74,7 @@
     {
       "slice": "2026-10-21-signed-approval-follow-ups",
       "reviewEvidence": "missing",
-      "trailerCommits": 0,
+      "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
     },
@@ -160,10 +160,6 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-signed-approval-follow-ups: review-findings.json is missing (review must have run clean before archive)"
-    },
-    {
-      "check": "trailer",
-      "msg": "2026-10-21-signed-approval-follow-ups: no commit carries a \"Slice: signed-approval-follow-ups\" trailer"
     },
     {
       "check": "review-evidence",
