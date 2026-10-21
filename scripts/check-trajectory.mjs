@@ -64,8 +64,12 @@ if (!isRepo) warn("git", "not a git work tree — trailer/scope checks skipped")
 // that file is reviewed when the pull request that merged it (the first merge on HEAD's first-parent line that brought
 // in the newest commit carrying its trailer) added a verdict that passes the rule pr-evidence applies: the last
 // hook-recorded verdict is APPROVE with 0 blocking, on the branch head's tree (scripts/check-review.mjs).
-// A merged slice's answer never changes, so it is cached per newest trailer commit in the gitignored target/ folder;
-// the cache also holds a hash of this script and check-review.mjs, so a rule change starts it afresh.
+// A commit that is itself on the first-parent line (pushed to main, or a squash merge) was brought in by no pull request
+// merge, so it reads missing: a later, unrelated merge descends from it too and must not lend its approval.
+// A merged slice's answer never changes, so it is cached per newest trailer commit in the gitignored target/ folder,
+// with the merge it came from. An entry counts only while that merge is on HEAD's first-parent line; the cache holds a
+// hash of this script, check-review.mjs and dod-fingerprint.mjs, so a rule change starts it afresh; and a cache file
+// that git tracks (committed by a branch) is ignored.
 const mainLine = isRepo ? new Set(git(["rev-list", "--first-parent", "HEAD"]).out.split("\n")) : new Set();
 // The newest commit on HEAD with a `Slice: <name>` line, per name, read in one pass (git log lists newest first). The
 // line is matched whole, not as a git trailer: commits here often put it above the attribution, apart from the trailers.
@@ -77,11 +81,12 @@ if (isRepo) {
   }
 }
 const CACHE = "target/trajectory/review-cache.json";
-const RULES = createHash("sha256")
-  .update(readFileSync(new URL(import.meta.url)))
-  .update(readFileSync(new URL("./check-review.mjs", import.meta.url)))
+const RULES = ["", "./check-review.mjs", "./dod-fingerprint.mjs"]
+  .reduce((h, rel) => h.update(readFileSync(rel ? new URL(rel, import.meta.url) : new URL(import.meta.url))), createHash("sha256"))
   .digest("hex");
+const cacheTracked = isRepo && git(["ls-files", "--error-unmatch", CACHE]).ok;
 const cached = (() => {
+  if (cacheTracked) return {};
   try {
     const c = JSON.parse(read(CACHE));
     return c.rules === RULES ? c.reviews : {};
@@ -89,27 +94,36 @@ const cached = (() => {
     return {};
   }
 })();
-const cacheSize = Object.keys(cached).length;
+let cacheChanged = false;
 function agentLogReview(trailerName) {
   const newest = newestBySlice.get(trailerName);
-  if (!newest) return "missing";
-  if (cached[newest]) return cached[newest];
-  const merge = git(["rev-list", "--merges", "--ancestry-path", "--reverse", `${newest}..HEAD`]).out.split("\n").find((c) => mainLine.has(c));
+  if (!newest || mainLine.has(newest)) return "missing";
+  const hit = cached[newest];
+  if (hit && mainLine.has(hit.merge)) return hit.review;
+  const merge = git(["rev-list", "--merges", "--ancestry-path", "--topo-order", "--reverse", `${newest}..HEAD`]).out.split("\n").find((c) => mainLine.has(c));
   // Not merged yet (the branch of the slice itself): nothing to cache, a later run finds the merge.
   if (!merge) return "missing";
-  return (cached[newest] = mergedReview(merge));
+  const review = mergedReview(merge);
+  // A git error (a shallow clone, say) is not an answer about the slice, so it is not cached.
+  if (review === null) return "missing";
+  cached[newest] = { merge, review };
+  cacheChanged = true;
+  return review;
 }
 function mergedReview(merge) {
-  const [base, head] = git(["rev-parse", `${merge}^1`, `${merge}^2`]).out.split("\n");
+  const parents = git(["rev-parse", `${merge}^1`, `${merge}^2`]);
+  if (!parents.ok) return null;
+  const [base, head] = parents.out.split("\n");
   let lines;
   try {
     lines = addedLogLines(base, head);
   } catch {
-    return "missing";
+    return null;
   }
   if (!reviewVerdicts(lines).length && !ignoredVerdicts(lines).length) return "missing";
   const [problem] = reviewProblems(lines, treeFingerprintAt(root, head));
-  return problem ? `not approved (agent log): ${problem}` : "approved (agent log)";
+  // Only the reason: the gate's advice ("run the reviewer again") cannot be followed once the slice has merged.
+  return problem ? `not approved (agent log): ${problem.split(":")[0]}` : "approved (agent log)";
 }
 const REVIEWED = new Set(["clean", "approved (agent log)"]);
 
@@ -222,7 +236,7 @@ ${failures.length ? failures.map((f) => `- **${f.check}**: ${f.msg}`).join("\n")
 ${warnings.length ? warnings.map((w) => `- **${w.check}**: ${w.msg}`).join("\n") : "None."}
 `;
 
-if (Object.keys(cached).length !== cacheSize) {
+if (cacheChanged && !cacheTracked) {
   mkdirSync(join(root, "target", "trajectory"), { recursive: true });
   writeFileSync(join(root, CACHE), `${JSON.stringify({ rules: RULES, reviews: cached }, null, 2)}\n`);
 }

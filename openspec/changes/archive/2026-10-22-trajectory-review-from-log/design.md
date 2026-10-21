@@ -14,14 +14,24 @@ For each archived slice:
    `main`. Its second parent is the branch head, its first parent the base.
 
 A slice with no such commit, or not merged yet (the branch of the slice itself), reads `missing`. So does a merged slice
-whose pull request added no verdict at all.
+whose pull request added no verdict at all, and a slice whose newest `Slice:` commit is itself on the first-parent line
+(pushed to `main`, or a squash merge): no pull request merge brought it in, and every later, unrelated merge descends
+from it, so taking "the first merge after it" would lend that pull request's approval to the slice (found in review).
+Merges are listed with `--topo-order`, so clock skew cannot reorder them.
 
 ## Cost
 The pre-commit hook runs this script on every commit. Finding the merge, diffing the agent log and fingerprinting the
 head cost about 0.3 s per slice, so a merged slice's answer is cached in `target/trajectory/review-cache.json`
-(gitignored), keyed by its newest trailer commit. The cache also stores a hash of this script and `check-review.mjs`,
-so a change to either rule starts it afresh. Unmerged slices are never cached. A cached run takes about as long as the
-check did before this change.
+(gitignored), keyed by its newest trailer commit, with the merge it came from. The cache is believed only as far as
+this:
+- an entry counts while its merge is on `HEAD`'s first-parent line, so a checkout of another history gets the cold
+  answer;
+- the file stores a hash of this script, `check-review.mjs` and `dod-fingerprint.mjs`, so a change to any part of the
+  rule starts it afresh;
+- a cache file that git tracks (one a branch committed with `git add -f`) is ignored and never written.
+
+Unmerged slices and git errors (a shallow clone, say) are never cached. A cached run takes about as long as the check
+did before this change.
 
 ## What it found
 On `main`, 20 of the 22 merged slices read `approved (agent log)`. Two do not:

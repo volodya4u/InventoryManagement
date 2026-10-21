@@ -136,7 +136,7 @@
     },
     {
       "slice": "2026-10-21-structured-evidence-followups",
-      "reviewEvidence": "not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs): run the reviewer again on the final diff, then commit.",
+      "reviewEvidence": "not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs)",
       "trailerCommits": 2,
       "libDomains": [],
       "processComplete": true
@@ -158,7 +158,7 @@
     {
       "slice": "2026-10-22-trajectory-review-from-log",
       "reviewEvidence": "missing",
-      "trailerCommits": 0,
+      "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
     }
@@ -200,15 +200,11 @@
     },
     {
       "check": "review-evidence",
-      "msg": "2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs): run the reviewer again on the final diff, then commit. (review must have run clean before archive)"
+      "msg": "2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs) (review must have run clean before archive)"
     },
     {
       "check": "review-evidence",
       "msg": "2026-10-22-trajectory-review-from-log: no review-findings.json, and the agent log's review is missing (review must have run clean before archive)"
-    },
-    {
-      "check": "trailer",
-      "msg": "2026-10-22-trajectory-review-from-log: no commit carries a \"Slice: trajectory-review-from-log\" trailer"
     }
   ]
 }

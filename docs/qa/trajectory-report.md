@@ -6,7 +6,7 @@ It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
 Scope: 23 archived slice(s).
-Result: PASS, 11 warning(s)
+Result: PASS, 10 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
@@ -32,7 +32,7 @@ Result: PASS, 11 warning(s)
 | 2026-10-21-structured-evidence-followups | **not approved (agent log)** | 2 | yes | - |
 | 2026-10-22-agents-decision-recipe | approved (agent log) | 1 | yes | - |
 | 2026-10-22-decisions-trace-scope | approved (agent log) | 1 | yes | - |
-| 2026-10-22-trajectory-review-from-log | **missing** | **0** | yes | - |
+| 2026-10-22-trajectory-review-from-log | **missing** | 1 | yes | - |
 
 ## Cross-slice module overlap
 
@@ -52,6 +52,5 @@ None.
 - **process**: 2026-10-12-harden-raw-material-tests: archived change is missing design.md and/or tasks.md
 - **process**: 2026-10-12-harden-sales-reports-history-tests: archived change is missing design.md and/or tasks.md
 - **process**: 2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md
-- **review-evidence**: 2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs): run the reviewer again on the final diff, then commit. (review must have run clean before archive)
+- **review-evidence**: 2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs) (review must have run clean before archive)
 - **review-evidence**: 2026-10-22-trajectory-review-from-log: no review-findings.json, and the agent log's review is missing (review must have run clean before archive)
-- **trailer**: 2026-10-22-trajectory-review-from-log: no commit carries a "Slice: trajectory-review-from-log" trailer

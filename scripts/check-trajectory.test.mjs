@@ -70,8 +70,13 @@ test("an archived slice counts as reviewed when its pull request recorded the re
   // The last verdict decides: an APPROVE after CHANGES REQUESTED counts, the reverse does not.
   const rounds = (tree) => [verdict(1, { tree: "earlier", verdict: "CHANGES REQUESTED", blocking: 1 }), verdict(2, { tree })].join("\n");
   assert.equal(evidence(repo("second-round", rounds)).review, "approved (agent log)");
-  // A review-findings.json written by the factory still decides first.
+  // A review-findings.json written by the factory still decides first, even over an agent-log APPROVE.
   assert.equal(evidence(repo("findings", () => "", { findings: { clean: true } })).review, "clean");
+  assert.equal(evidence(repo("findings-unclean", (tree) => verdict(1, { tree }), { findings: { clean: false } })).review, "unclean");
+  // A warm cache gives the same answer as a cold run.
+  const warm = repo("warm", (tree) => verdict(1, { tree }));
+  assert.equal(evidence(warm).review, "approved (agent log)");
+  assert.equal(evidence(warm).review, "approved (agent log)");
 });
 
 test("an archived slice is not counted as reviewed on a verdict that is stale, open or not recorded by the hook", () => {
@@ -94,4 +99,31 @@ test("an archived slice is not counted as reviewed on a verdict that is stale, o
   git(direct, "add", "-A");
   git(direct, "commit", "-q", "-m", "Do the demo\n\nSlice: demo");
   assert.deepEqual(evidence(direct), { review: "missing", warned: true });
+  // A later, unrelated pull request with its own APPROVE does not lend it to the slice that landed on main directly.
+  git(direct, "switch", "-q", "-c", "claude/other");
+  write(direct, "scripts/other.mjs", "export const other = 1;\n");
+  git(direct, "add", "-A");
+  git(direct, "commit", "-q", "-m", "Do something else");
+  write(direct, ".agent-log/actions.jsonl", `${verdict(1, { tree: treeFingerprintAt(direct, "HEAD") })}\n`);
+  git(direct, "add", "-A");
+  git(direct, "commit", "-q", "-m", "Fold the review into the agent log");
+  git(direct, "switch", "-q", "main");
+  git(direct, "merge", "-q", "--no-ff", "-m", "Merge pull request #2 from claude/other", "claude/other");
+  assert.deepEqual(evidence(direct), { review: "missing", warned: true });
+  // A cache entry whose merge is not on this history, or a cache file someone committed, is not believed. A cold run
+  // of a slice with no verdict writes the cache; a planted entry then claims an approval for it.
+  const planted = repo("planted", () => "");
+  assert.equal(evidence(planted).review, "missing");
+  const cacheFile = join(planted, "target/trajectory/review-cache.json");
+  const newest = git(planted, "log", "-n", "1", "--grep=^Slice:", "--format=%H");
+  const plant = (merge) => {
+    const { rules } = JSON.parse(readFileSync(cacheFile, "utf8"));
+    writeFileSync(cacheFile, JSON.stringify({ rules, reviews: { [newest]: { merge, review: "approved (agent log)" } } }));
+  };
+  plant("0".repeat(40));
+  assert.equal(evidence(planted).review, "missing", "a merge that is not on HEAD's first-parent line");
+  plant(git(planted, "rev-parse", "HEAD"));
+  git(planted, "add", "-f", "target/trajectory/review-cache.json");
+  git(planted, "commit", "-q", "-m", "Commit a cache");
+  assert.equal(evidence(planted).review, "missing", "a cache file tracked by git");
 });

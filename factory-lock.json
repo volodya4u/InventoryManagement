@@ -1,6 +1,6 @@
 {
-  "createdAt": "2026-10-21T22:36:49.210Z",
-  "gitHead": "63501bd22feca54341db716960d5f2ef803a3b22",
+  "createdAt": "2026-10-21T22:50:18.284Z",
+  "gitHead": "95adb0e43ff214c85cd49880fd2aa376be34bc26",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
@@ -28,8 +28,8 @@
     "scripts/check-specs.test.mjs": "324a3a04274a57902965059335718144c532cff7d675d18bc19249694a978f09",
     "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
     "scripts/check-traceability.mjs": "5c5203555db344c2410bca4cab07e11fc662785ed2abf19500f228cab3315775",
-    "scripts/check-trajectory.mjs": "064ff8c703c34bacc3917755f2bb11e4dacde52912a0663f47b3b19ae45f61b5",
-    "scripts/check-trajectory.test.mjs": "27a6dd7e49fb6cfaa82db62c253b8b94c6ff579138abb1f01e157fa1fe6f7e33",
+    "scripts/check-trajectory.mjs": "792e5ec0ed7a24da47a284761ced7eabf5ad021d67503db9f1d8781b53e2b680",
+    "scripts/check-trajectory.test.mjs": "5c7ffd25b3e7b8f8539cfc1fb1e09c50037b40da7781023ed1d12cd7212953fb",
     "scripts/gate-status.mjs": "f7c41d592f7805c60f39d020265ae151008fad679eb0f240c06e75dd37e2a53a"
   },
   "adaptations": [
@@ -45,6 +45,7 @@
     "ADR-0005 (slice 2, structured-test-evidence): scripts/check-specs.mjs prSpecProblems diffs with -M and checks only archived proposals the branch adds (validateSpecs checks the active ones); scripts/check-specs.test.mjs pins it",
     "ADR-0005 (slice 3 step A, review-provenance-local): scripts/check-review.mjs counts a verdict only on a hook-recorded reviewer line (toolu_ id, its PreToolUse line, the reviewer's hand-back or Agent call) and an APPROVE only with blocking === 0; scripts/check-review.test.mjs pins it, with the #52 replay",
     "Housekeeping re-seal (owner-approved 2026-10-22): .github/workflows/ci.yml takes the reviewed pipefail defaults of #98 (1d59673), and .github/workflows/human-approval.yml (ADR-0005 slice 3 step B, #99) joins the lock's soft tier; no gate script or hook changed",
-    "trajectory-review-from-log (owner-approved 2026-10-22): scripts/check-trajectory.mjs counts a slice without review-findings.json as reviewed when the pull request that merged it recorded the reviewer's APPROVE (0 blocking) on its head tree, by the rule of scripts/check-review.mjs, cached per merged slice in target/; scripts/check-trajectory.test.mjs pins it and joins the lock because its name matches scripts/check-*.mjs"
+    "trajectory-review-from-log (owner-approved 2026-10-22): scripts/check-trajectory.mjs counts a slice without review-findings.json as reviewed when the pull request that merged it recorded the reviewer's APPROVE (0 blocking) on its head tree, by the rule of scripts/check-review.mjs, cached per merged slice in target/; scripts/check-trajectory.test.mjs pins it and joins the lock because its name matches scripts/check-*.mjs",
+    "trajectory-review-from-log, review round 2 (owner-approved 2026-10-22): a slice whose newest Slice: commit is on the first-parent line reads missing, so no later pull request lends it an approval; cache entries count only while their merge is on that line, the cache hash covers dod-fingerprint.mjs, and git errors and a tracked cache file are not trusted"
   ]
 }
