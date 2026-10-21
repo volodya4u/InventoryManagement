@@ -67,7 +67,7 @@
     {
       "slice": "2026-10-21-break-run-no-renames",
       "reviewEvidence": "missing",
-      "trailerCommits": 0,
+      "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
     },
@@ -110,6 +110,13 @@
       "slice": "2026-10-21-structured-evidence-followups",
       "reviewEvidence": "missing",
       "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-22-decisions-trace-scope",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
     }
@@ -186,10 +193,6 @@
       "msg": "2026-10-21-break-run-no-renames: review-findings.json is missing (review must have run clean before archive)"
     },
     {
-      "check": "trailer",
-      "msg": "2026-10-21-break-run-no-renames: no commit carries a \"Slice: break-run-no-renames\" trailer"
-    },
-    {
       "check": "review-evidence",
       "msg": "2026-10-21-replayable-break-runs: review-findings.json is missing (review must have run clean before archive)"
     },
@@ -212,6 +215,10 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-22-decisions-trace-scope: review-findings.json is missing (review must have run clean before archive)"
     }
   ]
 }

@@ -106,10 +106,18 @@ export function decisionProblems(questions, { requirementIds, traces }) {
 }
 
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const traceIds = (lines, at) =>
-  lines
-    .slice(Math.max(0, at - 8), at)
+// The lines above a test's declaration (at most 8), up to the end or the declaration of the test above it, so a
+// neighbour's tag never counts for this test. A comment line never ends one, even when it mentions a test( in prose.
+const ENDS_PREVIOUS = /^\s*}|\bvoid\s+\w+\s*\(|\b(?:it|test)(?:\.\w+)*\(/;
+const COMMENT = /^\s*(?:\/\/|\/\*|\*)/;
+const endsPrevious = (line) => !COMMENT.test(line) && ENDS_PREVIOUS.test(line);
+function traceIds(lines, declaration) {
+  let from = declaration;
+  while (from > Math.max(0, declaration - 8) && !endsPrevious(lines[from - 1])) from--;
+  return lines
+    .slice(from, declaration + 1)
     .flatMap((l) => [...(/@trace\s+([\w\s,-]+)/.exec(l)?.[1] ?? "").matchAll(/\b(?:FR|NFR|TC|BC)-\d+\b/g)].map((m) => m[0]));
+}
 
 // The @trace ids above a test, found the way scripts/check-specs.mjs finds tests; null when there is no such test.
 function testTraces(root, ref) {
@@ -120,7 +128,7 @@ function testTraces(root, ref) {
     const lines = readFileSync(path, "utf8").split(/\r?\n/);
     const title = file[2].replace(/^["“](.*)["”]$/, "$1");
     const at = lines.findIndex((l) => ["'", '"', "`"].some((q) => new RegExp(`\\b(?:it|test)\\(\\s*${q}${escape(title)}${q}`).test(l)));
-    return at < 0 ? null : traceIds(lines, at + 1);
+    return at < 0 ? null : traceIds(lines, at);
   }
   const method = /^([\w$]+)#(\w+)$/.exec(ref);
   if (!method) return null;
@@ -128,7 +136,7 @@ function testTraces(root, ref) {
   if (!found) return null;
   const lines = readFileSync(found, "utf8").split(/\r?\n/);
   const at = lines.findIndex((l) => new RegExp(`\\bvoid\\s+${escape(method[2])}\\s*\\(`).test(l));
-  return at < 0 ? null : traceIds(lines, at + 1);
+  return at < 0 ? null : traceIds(lines, at);
 }
 
 export function repoDecisionProblems(root) {
