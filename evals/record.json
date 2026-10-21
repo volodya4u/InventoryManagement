@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-20T20:59:32.418Z",
+  "generatedAt": "2026-10-21T21:55:43.208Z",
   "model": "claude-sonnet-5-5",
   "judgeModel": "haiku",
-  "cli": "2.1.301",
+  "cli": "2.1.306",
   "inputs": {
     ".agents/skills/agent-log-report/SKILL.md": "30854d9ae986a2b698a15979e9e3e105cfc225d7",
     ".agents/skills/agent-log-report/evals/blocked-action-shown/graders/criteria.md": "ba699676122d78a59c78b20d928e657871201a94",
@@ -16,13 +16,13 @@
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
     ".claude/agents/reviewer.md": "4773aaf2c57b8ebcf4640da633372461a3fe99e0",
-    "AGENTS.md": "634d22423d923a9ac8e56db7c8bd430e7136ebd6",
+    "AGENTS.md": "6e6deba006b219213c18a09e8a3e7d2600a57c44",
     "evals/factory-rules/spec-track/graders/criteria.md": "044400b7c6c08efb2cd1d4ee1c32ef2543c14121",
-    "evals/factory-rules/spec-track/prompt.md": "8fcda924e99b2016ccc6371bf4665a644ab0846c",
+    "evals/factory-rules/spec-track/prompt.md": "9682a073b3fa1a98ebedf8b05c8e2a12f74e9b5e",
     "evals/factory-rules/trace-tag/graders/criteria.md": "086399eb04972f643fa34462749fc64392c9bf6a",
-    "evals/factory-rules/trace-tag/prompt.md": "369cfaf453be4585cc97cc7b04b839b011b134ea",
+    "evals/factory-rules/trace-tag/prompt.md": "631b8b46634a2d006d8a549f79d49e4854435976",
     "evals/factory-rules/waiver-path/graders/criteria.md": "0eb6ef3d201855e3b6fd0310af33d17fd770d6ac",
-    "evals/factory-rules/waiver-path/prompt.md": "2be6ae60abbde94e0913ee5095c1c920d05dc1aa",
+    "evals/factory-rules/waiver-path/prompt.md": "423825cc9b1080ed9a10721d391f76c308ca52e1",
     "evals/reviewer/deleted-test-for-green/graders/criteria.md": "a9f8787f8e094a010e10db1684d72809f641f05b",
     "evals/reviewer/deleted-test-for-green/prompt.md": "655622f8c77cd0c3918d8092dba98a7c9fce70df",
     "evals/reviewer/hardcoded-admin-password/graders/criteria.md": "716c350b59c80d6708becd005b849b66f118d5e5",
@@ -44,13 +44,13 @@
     },
     "counts-from-sample": {
       "score": 1,
-      "scoreWithout": 0.6666666666666666,
-      "delta": 0.33333333333333337
+      "scoreWithout": 1,
+      "delta": 0
     },
     "bugfix-starts-red": {
-      "score": 0,
+      "score": 1,
       "scoreWithout": 0,
-      "delta": 0
+      "delta": 1
     },
     "no-expected-value-cheating": {
       "score": 1,
@@ -73,7 +73,7 @@
       "score": 1
     },
     "jpa-not-jdbctemplate": {
-      "score": 0.6666666666666666
+      "score": 1
     },
     "raw-getbigdecimal": {
       "score": 1

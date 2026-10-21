@@ -5,8 +5,8 @@ archived slice took: review evidence, `Slice:` trailers, and module scope.
 It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
-Scope: 17 archived slice(s).
-Result: PASS, 24 warning(s)
+Scope: 18 archived slice(s).
+Result: PASS, 25 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
@@ -26,6 +26,7 @@ Result: PASS, 24 warning(s)
 | 2026-10-21-signed-approval-follow-ups | **missing** | 2 | yes | - |
 | 2026-10-21-structured-decisions | **missing** | 1 | yes | - |
 | 2026-10-21-structured-evidence-followups | **missing** | 2 | yes | - |
+| 2026-10-22-agents-decision-recipe | **missing** | 1 | yes | - |
 | 2026-10-22-decisions-trace-scope | **missing** | 1 | yes | - |
 
 ## Cross-slice module overlap
@@ -61,4 +62,5 @@ None.
 - **review-evidence**: 2026-10-21-signed-approval-follow-ups: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-structured-decisions: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-22-agents-decision-recipe: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-22-decisions-trace-scope: review-findings.json is missing (review must have run clean before archive)
