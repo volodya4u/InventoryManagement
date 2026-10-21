@@ -283,6 +283,63 @@ test("waivers: only a waiver the branch adds counts", () => {
   assert.equal(branchWaivers(lines, read)[0].approval, "volodya4u in chat on 2026-10-20");
 });
 
+// A break run (scripts/break-run.mjs): start green, break red, restore green, each a BreakRun record with the code
+// fingerprint and per-test results; the patch is committed under docs/evidence/break-runs/<run>/mutation.patch.
+const FLOW_TEST = "src/test/java/com/x/FlowTest.java";
+const breakRec = (run, step, kind, code, extra = {}) => ({
+  ts: `${run}-${["start", "break", "restore"].indexOf(step)}`,
+  event: "BreakRun",
+  run,
+  step,
+  target: "backend",
+  selector: "FlowTest#flagsLowStock",
+  structured: true,
+  kind,
+  code,
+  results: [r("FlowTest#flagsLowStock", kind === "pass" ? "pass" : "assertion")],
+  testFiles: { [FLOW_TEST]: "blob-test" },
+  ...(step === "start" ? {} : { patchSha256: "sha-1", patchFiles: ["src/main/java/com/x/Flow.java"] }),
+  ...extra,
+});
+const fullBreakRun = (run = "r1") => [breakRec(run, "start", "pass", HEAD), breakRec(run, "break", "assertion", "broken"), breakRec(run, "restore", "pass", HEAD)];
+const HARDENING = [{ ...FLOW[0], hardening: true }];
+const breaks = (records, criteria = HARDENING, patches = { r1: "sha-1" }) => redGreenProblems(records, criteria, HEAD, patches);
+
+test("hardening: a criterion passes with a break run: green, red on its own test, restored to the head commit's code", () => {
+  assert.deepEqual(breaks(fullBreakRun()), []);
+  // The table in a slice marked Kind: hardening carries the flag on each criterion.
+  const hard = changedCriteria(PROPOSAL, `Kind: hardening\n\n${table([["1", "Given x, then y", "`FlowTest` › `flagsLowStock`"]])}`, null);
+  assert.equal(hard.criteria[0].hardening, true);
+  assert.equal(changedCriteria(PROPOSAL, table([["1", "Given x, then y", "`FlowTest` › `flagsLowStock`"]]), null).criteria[0].hardening, false);
+});
+
+test("hardening: a break run without a restore, restored to other code, red on another test, touching the test file, or whose patch is not committed does not count", () => {
+  const [start, broken, restore] = fullBreakRun();
+  const cases = {
+    "no restore": [start, broken],
+    "restored to other code": [start, broken, { ...restore, code: "other" }],
+    "a start on other code than the restore": [{ ...start, code: "older" }, broken, restore],
+    "a restore to the start's code, older than the head commit's (stale)": [{ ...start, code: "older" }, broken, { ...restore, code: "older" }],
+    "a break that changed no code": [start, { ...broken, code: HEAD }, restore],
+    "red on another test": [start, { ...broken, results: [r("FlowTest#flagsLowStock", "pass"), r("FlowTest#other", "assertion")] }, restore],
+    "an error, not an assertion": [start, { ...broken, results: [r("FlowTest#flagsLowStock", "error")] }, restore],
+    "a patch that edits the test file": [start, { ...broken, patchFiles: [FLOW_TEST] }, { ...restore, patchFiles: [FLOW_TEST] }],
+    "a restore of another patch": [start, broken, { ...restore, patchSha256: "sha-2" }],
+  };
+  for (const [name, records] of Object.entries(cases)) {
+    assert.match(breaks(records).join(" "), /no red \(assertion\) then green TestRun or complete break run for FlowTest › flagsLowStock/, name);
+  }
+  assert.match(breaks([{ ...start, code: "older" }, broken, { ...restore, code: "older" }]).join(" "), /older code than the head commit \(stale\)/);
+  assert.match(breaks(fullBreakRun(), HARDENING, {}).join(" "), /docs\/evidence\/break-runs\/r1\/mutation\.patch/, "the patch must be committed");
+  assert.equal(breaks(fullBreakRun(), HARDENING, { r1: "sha-other" }).length, 1, "the committed patch must be the one that ran");
+});
+
+test("hardening: only a slice marked Kind: hardening accepts break runs, and it still accepts red then green", () => {
+  assert.equal(breaks(fullBreakRun(), FLOW).length, 1, "a break run does not satisfy a criterion of a slice that is not hardening");
+  const redGreen = [run("t1", "backend", "FlowTest#flagsLowStock", "assertion"), run("t2", "backend", "FlowTest#flagsLowStock", "pass")];
+  assert.deepEqual(breaks(redGreen), []);
+});
+
 const row = (level, who, evidence, why = "Harness change") => `| 29 | Some work | ${level} | ${who} | ${evidence} | ${why} |`;
 
 test("autonomy: a harness or boundary change needs an added row; product code alone does not", () => {

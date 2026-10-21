@@ -160,17 +160,18 @@ function command(root, target, selector) {
     return { cmd: frontendNode(root), args, cwd: join(root, "frontend"), env: { ...process.env, NG_CLI_ANALYTICS: "false" } };
   }
   const reporters = ["--test-reporter=spec", "--test-reporter-destination=stdout", "--test-reporter=junit", `--test-reporter-destination=${reportPath(root, target)}`];
-  return { cmd: process.execPath, args: ["--test", ...reporters, selector], cwd: root };
+  // Without NODE_TEST_CONTEXT: when this runs inside a node:test process (scripts/break-run.test.mjs does), a nested
+  // `node --test` would report to that parent instead of writing its own JUnit file.
+  const { NODE_TEST_CONTEXT: _parent, ...env } = process.env;
+  return { cmd: process.execPath, args: ["--test", ...reporters, selector], cwd: root, env };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const [target, raw] = process.argv.slice(2);
-  if (!SELECTORS[target] || !raw || !SELECTORS[target].test(raw)) {
-    console.error("Usage: node scripts/test-run.mjs backend <TestClass>[#method] | frontend <file.spec.ts> | harness <file.test.mjs>");
-    process.exit(2);
-  }
-  const root = process.cwd();
-  const selector = normalizeSelector(target, raw);
+export const validSelector = (target, raw) => Boolean(SELECTORS[target] && raw && SELECTORS[target].test(raw));
+
+// One run, not recorded: the fields a TestRun record carries (exit, the summary and per-test results, seconds, the
+// code fingerprint at the start, the test files' blob ids) and the runner's output. scripts/break-run.mjs and
+// scripts/break-replay.mjs run tests through this too.
+export function executeRun(root, target, selector) {
   let code = null;
   try {
     code = codeFingerprint(root); // at the start, like dod.mjs: the code this run tested
@@ -188,11 +189,24 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   writeFileSync(join(root, "target", "test-run", "last.log"), output);
   const status = r.status ?? 1;
   const s = structuredVerdict(readResults(root, target, selector, since), status, summarize(target, output, status));
+  return { output, record: { target, selector, exit: status, ...s, seconds, code, testFiles: files } };
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const [target, raw] = process.argv.slice(2);
+  if (!validSelector(target, raw)) {
+    console.error("Usage: node scripts/test-run.mjs backend <TestClass>[#method] | frontend <file.spec.ts> | harness <file.test.mjs>");
+    process.exit(2);
+  }
+  const root = process.cwd();
+  const selector = normalizeSelector(target, raw);
+  const { output, record } = executeRun(root, target, selector);
+  const s = record;
   console.log(output.replace(ansi, "").trimEnd().split(/\r?\n/).slice(-40).join("\n"));
   const outcome = s.kind === "pass" ? "green" : `red (${s.kind})`;
   const how = s.structured ? "" : " (no structured report: this run does not count as red or green)";
-  console.log(`\nTestRun ${target} ${selector}: ${outcome}${how}, exit ${status}, ${s.tests} tests, ${s.failed} failed${s.firstFailure ? ` - ${s.firstFailure}` : ""}`);
-  const recorded = appendRecord(root, { event: "TestRun", target, selector, exit: status, ...s, seconds, code, testFiles: files });
+  console.log(`\nTestRun ${target} ${selector}: ${outcome}${how}, exit ${s.exit}, ${s.tests} tests, ${s.failed} failed${s.firstFailure ? ` - ${s.firstFailure}` : ""}`);
+  const recorded = appendRecord(root, { event: "TestRun", ...record });
   console.log(recorded ? "Recorded in .agent-log/pending.jsonl; the next commit folds it into the agent log." : "Could not record the run.");
-  process.exit(status);
+  process.exit(s.exit);
 }

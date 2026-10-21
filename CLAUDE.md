@@ -27,6 +27,15 @@
   never edit `quality/allowed-signers`. Once main lists a key there, the **Human approval** gate in CI and the
   `human-approval` check stay red until the owner has signed; that is expected, not something to fix.
 - Run the loop's red and green tests through `node scripts/test-run.mjs` so they are recorded, not pasted.
+- A test that pins behaviour that already exists cannot go red first. Mark its slice's `proposal.md` with a
+  `Kind: hardening` line and show each test red with a recorded controlled break, never an unrecorded hand edit:
+  1. `node scripts/break-run.mjs start <target> <selector>`, which must be green;
+  2. break the code under test by hand (never the test file);
+  3. `node scripts/break-run.mjs break <run-id>`, which must be red on an assertion;
+  4. `node scripts/break-run.mjs restore <run-id>`, which must be green on the start's code.
+
+  Commit `docs/evidence/break-runs/<run-id>/` with the work. A reviewer replays it with
+  `node scripts/break-replay.mjs <run-id>`.
 - Run each evidence-producing command (`dod.mjs`, `test-run.mjs`, `eval-record.mjs`, `pr-evidence.mjs`) on its own,
   not chained behind `&&`: the log hook clips each tool call's command line, so a command buried in a chain can be
   recorded only in part (that once hid an `eval-record.mjs` re-run from a reviewer).

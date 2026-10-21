@@ -58,6 +58,13 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-21-replayable-break-runs",
+      "reviewEvidence": "missing",
+      "trailerCommits": 0,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-21-review-provenance-local",
       "reviewEvidence": "missing",
       "trailerCommits": 1,
@@ -148,6 +155,14 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-21-replayable-break-runs: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "trailer",
+      "msg": "2026-10-21-replayable-break-runs: no commit carries a \"Slice: replayable-break-runs\" trailer"
     },
     {
       "check": "review-evidence",
