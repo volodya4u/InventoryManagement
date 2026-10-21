@@ -1,0 +1,13 @@
+diff --git a/scripts/test-results.mjs b/scripts/test-results.mjs
+index a6a6810..c29494a 100644
+--- a/scripts/test-results.mjs
++++ b/scripts/test-results.mjs
+@@ -61,7 +61,7 @@ function statusOf(c, { assertionOnFailure }) {
+   const o = c.outcome;
+   if (!o) return "pass";
+   if (o.kind === "skipped") return "skipped";
+-  if (o.kind === "error") return "error";
++  if (o.kind === "error") return "assertion";
+   // Surefire writes an AssertionError as <failure> and anything else as <error>; node:test writes every failure as
+   // <failure> and names its cause in the text.
+   if (assertionOnFailure) return "assertion";

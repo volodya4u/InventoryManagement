@@ -4,3 +4,7 @@
 
 # Git hooks keep LF: with core.autocrlf=true a CRLF shebang line stops them from running.
 .githooks/* text eol=lf
+
+# A recorded controlled break (scripts/break-run.mjs) is checked against the SHA-256 the run recorded, and replayed
+# with git apply: keep its bytes exactly, on every checkout.
+docs/evidence/break-runs/** -text

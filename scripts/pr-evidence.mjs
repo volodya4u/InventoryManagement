@@ -32,6 +32,7 @@ import { parseSpec, prSpecProblems, tableCells, validateSpecs } from "./check-sp
 import { codeFingerprintAt, treeFingerprintAt } from "./dod-fingerprint.mjs";
 import { INPUT_PATHS, RECORD_PATH, inputsFingerprint, recordProblems } from "./eval-record.mjs";
 import { humanApprovalGate, signedApproval } from "./signed-approval.mjs";
+import { sha256 } from "./break-run.mjs";
 
 const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
 // Work that steers or bounds the agent, or a feature with a spec: always worth a row in the autonomy log.
@@ -75,13 +76,17 @@ export function acceptanceFiles(nameStatusLines) {
 
 // The criteria of one file that are new or changed against its base version (null: the branch adds the file). A changed
 // row keeps its number, so it is compared by Given / When / Then text and test cell. A slice proposal the branch adds
-// with no criteria is flagged, or leaving the table out would pass the gate.
+// with no criteria is flagged, or leaving the table out would pass the gate. A slice proposal with a `Kind: hardening`
+// line pins behaviour that already exists, so its criteria also accept a complete break run (scripts/break-run.mjs).
 export function changedCriteria(path, headText, baseText) {
   const head = parseSpec(headText).criteria;
   const before = new Map((baseText == null ? [] : parseSpec(baseText).criteria).map((c) => [c.n, `${c.gwt}\0${c.testCell}`]));
+  const hardening = PROPOSAL_PATH.test(path) && /^Kind:[ \t]*hardening[ \t]*$/im.test(String(headText).replace(/\r\n?/g, "\n"));
   return {
     path,
-    criteria: head.filter((c) => before.get(c.n) !== `${c.gwt}\0${c.testCell}`).map((c) => ({ spec: path, n: c.n, test: c.test, testCell: c.testCell })),
+    criteria: head
+      .filter((c) => before.get(c.n) !== `${c.gwt}\0${c.testCell}`)
+      .map((c) => ({ spec: path, n: c.n, test: c.test, testCell: c.testCell, hardening })),
     missingTable: baseText == null && PROPOSAL_PATH.test(path) && head.length === 0,
   };
 }
@@ -166,11 +171,49 @@ function statusIn(run, test) {
   return mine.every((s) => s === "skipped") ? "skipped" : "pass";
 }
 
+// Why no break run (scripts/break-run.mjs) proves a hardening criterion, or null when one does: a green start, a break
+// that changed code (not the test file) and failed the criterion's own test on an assertion, and a restore of that same
+// patch back to the start's code, green, on the head commit's code. The patch must be committed as it ran: patches maps
+// a run id to the SHA-256 of docs/evidence/break-runs/<run>/mutation.patch at the head commit.
+function breakRunReason(records, test, headCode, patches) {
+  const byRun = new Map();
+  for (const r of records.filter((e) => e.event === "BreakRun" && covers(e, test)).sort(byTime)) {
+    byRun.set(r.run, { ...byRun.get(r.run), [r.step]: r });
+  }
+  if (!byRun.size) return "no break run names it";
+  const reasons = [...byRun].map(([run, { start, break: brk, restore }]) => {
+    const tests = Object.keys(start?.testFiles ?? {});
+    const why =
+      !start || statusIn(start, test) !== "pass"
+        ? "its start was not green"
+        : !brk || statusIn(brk, test) !== "assertion"
+          ? "the break did not fail this test on an assertion"
+          : brk.code === start.code
+            ? "the break changed no code"
+            : (brk.patchFiles ?? []).some((f) => tests.includes(f))
+              ? "the break edits the test file"
+              : !restore || statusIn(restore, test) !== "pass"
+                ? "it was not restored to green"
+                : restore.patchSha256 !== brk.patchSha256
+                  ? "the restore reversed another patch"
+                  : restore.code !== start.code
+                    ? "the restore is not the start's code"
+                    : restore.code !== headCode
+                      ? "the restore ran on older code than the head commit (stale)"
+                      : patches[run] !== brk.patchSha256
+                        ? `docs/evidence/break-runs/${run}/mutation.patch is not committed as it ran`
+                        : null;
+    return why && `break run ${run}: ${why}`;
+  });
+  return reasons.includes(null) ? null : reasons.join("; ");
+}
+
 // Each criterion needs a structured run where its own test failed on an assertion, then a later one where that test
-// passed on the head commit's code (headCode); a green on older code is stale.
-export function redGreenProblems(records, criteria, headCode) {
+// passed on the head commit's code (headCode); a green on older code is stale. A criterion of a hardening slice may
+// instead be proved by a complete break run (breakRunReason).
+export function redGreenProblems(records, criteria, headCode, patches = {}) {
   const runs = records.filter((r) => r.event === "TestRun").sort(byTime);
-  return criteria.flatMap(({ spec, n, test, testCell }) => {
+  return criteria.flatMap(({ spec, n, test, testCell, hardening }) => {
     if (!test) return [`AC${n} of ${spec} names no test as \`Class\` › \`method\` or \`path\` › "title" (found "${testCell ?? ""}").`];
     const statuses = runs.filter((r) => covers(r, test)).map((r) => ({ run: r, status: statusIn(r, test) }));
     const ambiguous = [...new Set(statuses.flatMap((s) => s.status?.ambiguous ?? []))];
@@ -178,6 +221,8 @@ export function redGreenProblems(records, criteria, headCode) {
     const red = seen.findIndex((s) => s.status === "assertion");
     const greens = red >= 0 ? seen.slice(red + 1).filter((s) => s.status === "pass") : [];
     if (greens.some((s) => s.run.code === headCode)) return [];
+    const broken = hardening ? breakRunReason(records, test, headCode, patches) : undefined;
+    if (broken === null) return [];
     const name = test.file ? `${test.file} › "${test.title}"` : `${test.className} › ${test.method}`;
     if (ambiguous.length) {
       return [
@@ -193,12 +238,18 @@ export function redGreenProblems(records, criteria, headCode) {
           ? "it went red, then green, but every later green ran on older code than the head commit (stale)"
           : "it failed on an assertion but never passed afterwards";
     const next = greens.length ? `re-run \`${howToRun(test)}\` after the last code change, then commit` : `run \`${howToRun(test)}\` before and after the change`;
+    if (hardening) {
+      return [
+        `AC${n} of ${spec}: no red (assertion) then green TestRun or complete break run for ${name}: ${why}; ${broken}. ` +
+          `For behaviour that already exists, run \`node scripts/break-run.mjs start ...\`, break the code under test, then \`break\` and \`restore\` (CLAUDE.md).`,
+      ];
+    }
     return [`AC${n} of ${spec}: no red (assertion) then green TestRun for ${name}: ${why}; ${next}.`];
   });
 }
 
 // The Red -> green gate over the acceptance files the branch touches (changedCriteria), with the gate waivers it adds.
-export function redGreenGate(records, sources, waivers, headCode) {
+export function redGreenGate(records, sources, waivers, headCode, patches = {}) {
   const usable = waivers.filter((w) => w.open && /^red\s*(->|→)\s*green$/i.test(w.gate) && w.approval);
   const waiverFor = (path, n) => usable.find((w) => w.criteria.some((c) => c.path === path && (c.n === null || c.n === n)));
   const problems = [];
@@ -210,7 +261,7 @@ export function redGreenGate(records, sources, waivers, headCode) {
       else problems.push(`${source.path}: a slice the branch adds has no ## Acceptance criteria table naming its tests (the docs/specs format), so nothing proves it went red, then green.`);
     }
     for (const c of source.criteria) {
-      const [problem] = redGreenProblems(records, [c], headCode);
+      const [problem] = redGreenProblems(records, [c], headCode, patches);
       if (!problem) continue;
       const w = waiverFor(source.path, c.n);
       if (w) waived.push(`AC${c.n} of ${source.path} (${w.path}, approved: ${w.approval})`);
@@ -400,7 +451,20 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     changedCriteria(path, showAt(head, path) ?? "", basePath ? showAt(mergeBase, basePath) : null),
   );
   const waivers = branchWaivers(nameStatus, (path) => showAt(head, path));
-  const redGreen = redGreenGate(records, acceptance, waivers, headCode);
+  // The committed patch of each break run the branch recorded, by run id (scripts/break-run.mjs).
+  const patches = Object.fromEntries(
+    [...new Set(records.filter((r) => r.event === "BreakRun").map((r) => r.run))]
+      .filter((id) => /^[\w.-]+$/.test(String(id)))
+      .flatMap((id) => {
+        // The blob's bytes, untrimmed: the run hashed git's diff output exactly as it wrote it.
+        try {
+          return [[id, sha256(execFileSync("git", ["-C", root, "show", `${head}:docs/evidence/break-runs/${id}/mutation.patch`], { maxBuffer: 64 * 1024 * 1024 }))]];
+        } catch {
+          return [];
+        }
+      }),
+  );
+  const redGreen = redGreenGate(records, acceptance, waivers, headCode, patches);
   const { specs } = validateSpecs(root);
   const reviews = reviewVerdicts(lines);
   const record = existsSync(join(root, RECORD_PATH)) ? JSON.parse(readFileSync(join(root, RECORD_PATH), "utf8")) : null;

@@ -1,6 +1,6 @@
 # ADR-0005: Evidence integrity — no misleading passes
 
-- **Status:** Accepted (slices 1, 2 and 3 of 6, with a follow-up to slice 2)
+- **Status:** Accepted (slices 1, 2, 3 and 4 of 6, with a follow-up to slice 2)
 - **Date:** 2026-10-20
 - **Deciders:** volodya4u (user), Claude
 
@@ -154,3 +154,26 @@ Three gaps that the review of #92 left open are now closed:
     (`node scripts/signed-approval.mjs origin/main <head-sha> --ci`), and `approve-pr.mjs` prints that command. The
     agent cannot alter that clone or forge the hardware-key signature it checks. A GitHub-side protection, such as a
     ruleset that pins the workflow to main's ref, is left to the owner.
+
+## Decision (slice 4: replayable-break-runs)
+
+- **Two workflows, both recorded.** New behaviour goes red → green, as before. Behaviour that already exists goes
+  green → controlled break → red → restore → green, through `scripts/break-run.mjs`. The `start`, `break` and
+  `restore` steps share one run id. The break is the author's hand-made edit to the code under test. The tool saves it
+  as a patch, refuses one that touches the test file or changes nothing, and checks that the restore brings the tree
+  back to the start exactly.
+- **Evidence that can be replayed.** Each step appends a `BreakRun` record to the agent log: the code fingerprint, every
+  test's result, and the patch's SHA-256 and files. `run.json` and `mutation.patch` are committed under
+  `docs/evidence/break-runs/<run-id>/`. That folder is outside the code fingerprint, and `-text` in `.gitattributes`
+  keeps the patch's bytes exact. `scripts/break-replay.mjs <run-id>` applies the committed patch on a clean tree,
+  checks that the recorded test fails on an assertion again, reverses it, and checks that nothing is left behind. It
+  needs no pull request narrative.
+- **The gate accepts it only where it belongs.** A proposal with a `Kind: hardening` line lets each criterion pass on
+  either red → green or a complete break run: the criterion's own test is green at the start, red on an assertion at
+  the break, and green again at a restore of the same patch on the head commit's code, with that patch committed as it
+  ran. Other slices keep red → green only.
+- **The slice that built it showed one criterion red by hand, as slice 2 did.** The guard that break runs only count for
+  hardening slices held before the change, so it was shown red with a controlled break of `pr-evidence.mjs`, then
+  restored to its blob id. From now on such breaks go through `break-run.mjs`.
+- **Not yet:** the `test-first-loop` skill still describes only red → green. Changing it needs a paid eval run, so
+  CLAUDE.md carries the how-to for now.
