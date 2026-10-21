@@ -111,6 +111,41 @@ test("the allowed signers come from the base ref, not the branch, and only hardw
   assert.deepEqual(parsed.ignored.map((i) => i.reason), ["ssh-ed25519 is not a hardware-backed key type"]);
   // With the hardware-only default, the test repository's software key does not count.
   assert.equal(signedApproval(repo().root, { base: "main", head: "HEAD" }).state, "unset");
+
+  // The key type is the field before the key, not any token that looks like one: a principal named after a hardware
+  // type does not turn a software key into a hardware one (the bypass both reviews of this slice found).
+  const sk = "AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIGJsb2I=";
+  const [, softBlob] = owner.pub.split(" ");
+  const tricks = allowedSigners(
+    [
+      `sk-ssh-ed25519@openssh.com namespaces="git" ssh-ed25519 ${softBlob}`,
+      `sk-ssh-ed25519@openssh.com ssh-ed25519 ${softBlob}`,
+      `owner@example.com namespaces="git" sk-ssh-ed25519@openssh.com ${softBlob}`,
+      `owner@example.com cert-authority,namespaces="git" sk-ssh-ed25519@openssh.com ${sk}`,
+      `owner@example.com no-touch-required,namespaces="git" sk-ssh-ed25519@openssh.com ${sk}`,
+      // OpenSSH matches option names without regard to case.
+      `owner@example.com Cert-Authority,namespaces="git" sk-ssh-ed25519@openssh.com ${sk}`,
+      `owner@example.com namespaces="git",NO-TOUCH-REQUIRED sk-ssh-ed25519@openssh.com ${sk}`,
+      `ssh-admin@example.com namespaces="git" sk-ssh-ed25519@openssh.com ${sk} a principal that starts like a type`,
+    ].join("\n"),
+  );
+  assert.deepEqual(tricks.lines, [`ssh-admin@example.com namespaces="git" sk-ssh-ed25519@openssh.com ${sk} a principal that starts like a type`]);
+  assert.deepEqual(
+    tricks.ignored.map((i) => i.reason),
+    [
+      "ssh-ed25519 is not a hardware-backed key type",
+      "ssh-ed25519 is not a hardware-backed key type",
+      "the key is ssh-ed25519, not the sk-ssh-ed25519@openssh.com the line names",
+      "a cert-authority line is not accepted",
+      "no-touch-required lets the key sign without a touch",
+      "a cert-authority line is not accepted",
+      "no-touch-required lets the key sign without a touch",
+    ],
+  );
+  // The same software-key line, end to end: a signature with that key is not an approval.
+  const crafted = repo({ signers: `sk-ssh-ed25519@openssh.com namespaces="git" ${owner.pub}\n` });
+  sign(crafted.root, crafted.head, owner);
+  assert.equal(signedApproval(crafted.root, { base: "main", head: "HEAD" }).state, "unset");
 });
 
 test("human approval: in CI a missing signature fails, locally it is N/A, a bad tag fails in both, and an unset signers file is N/A", () => {

@@ -19,8 +19,37 @@ export const SIGNERS_PATH = "quality/allowed-signers";
 export const HARDWARE_KEY_TYPES = ["sk-ssh-ed25519@openssh.com", "sk-ecdsa-sha2-nistp256@openssh.com"];
 const KEY_TYPE = /^(sk-)?(ssh-[\w-]+|ecdsa-sha2-[\w-]+)(@openssh\.com)?$/;
 
-// The lines of an allowed-signers file (`principals [options] keytype key [comment]`, git's gpg.ssh.allowedSignersFile)
-// whose key type is allowed; the others are ignored, with the reason.
+// The key type a public key blob names in itself: an SSH key is a length-prefixed type string, then the key.
+function blobType(blob) {
+  try {
+    const bytes = Buffer.from(blob, "base64");
+    const length = bytes.readUInt32BE(0);
+    return length > 0 && length < 64 ? bytes.subarray(4, 4 + length).toString("latin1") : null;
+  } catch {
+    return null;
+  }
+}
+
+// Why a line of an allowed-signers file does not count, or null when it does. The fields are read by position, the way
+// ssh-keygen reads them: `principals [options] keytype key [comment]`. A principal can be any string, so a principal
+// named after a hardware key type proves nothing; the type is the field before the key, and it must match the type the
+// key blob itself carries. Certificate authorities and keys that sign without a touch are refused.
+function rejection(tokens, keyTypes) {
+  const [principals, ...rest] = tokens;
+  const options = rest[0] && !KEY_TYPE.test(rest[0]) ? rest[0] : "";
+  const [type, blob] = options ? rest.slice(1) : rest;
+  if (!principals || !type || !blob || !KEY_TYPE.test(type)) return "no key type found";
+  // OpenSSH matches option names without regard to case, so the refusals do too.
+  if (/(^|,)cert-authority(,|$)/i.test(options)) return "a cert-authority line is not accepted";
+  if (/(^|,)no-touch-required(,|$)/i.test(options)) return "no-touch-required lets the key sign without a touch";
+  if (!keyTypes.includes(type)) return `${type} is not a hardware-backed key type`;
+  const own = blobType(blob);
+  if (own !== type) return `the key is ${own ?? "unreadable"}, not the ${type} the line names`;
+  return null;
+}
+
+// The lines of an allowed-signers file (git's gpg.ssh.allowedSignersFile) whose key counts; the others are ignored,
+// with the reason.
 export function allowedSigners(text, keyTypes = HARDWARE_KEY_TYPES) {
   const lines = [];
   const ignored = [];
@@ -28,10 +57,8 @@ export function allowedSigners(text, keyTypes = HARDWARE_KEY_TYPES) {
     const line = raw.trim();
     if (!line || line.startsWith("#")) continue;
     // Options such as namespaces="git" may hold spaces inside quotes, so split on spaces outside quotes.
-    const tokens = line.match(/(?:[^\s"]+|"[^"]*")+/g) ?? [];
-    const type = tokens.find((t) => KEY_TYPE.test(t));
-    if (!type) ignored.push({ line, reason: "no key type found" });
-    else if (!keyTypes.includes(type)) ignored.push({ line, reason: `${type} is not a hardware-backed key type` });
+    const reason = rejection(line.match(/(?:[^\s"]+|"[^"]*")+/g) ?? [], keyTypes);
+    if (reason) ignored.push({ line, reason });
     else lines.push(line);
   }
   return { lines, ignored };
@@ -64,7 +91,9 @@ export function signedApproval(root, { base, head, keyTypes = HARDWARE_KEY_TYPES
   try {
     const signers = join(dir, "allowed_signers");
     writeFileSync(signers, `${lines.join("\n")}\n`);
-    const r = run(root, ["-c", "gpg.format=ssh", "-c", `gpg.ssh.allowedSignersFile=${signers}`, "verify-tag", ref]);
+    // minTrustLevel=fully: git itself refuses a good signature by a key the file does not list (trust "undefined"),
+    // a second line of defence behind the principal check below.
+    const r = run(root, ["-c", "gpg.format=ssh", "-c", `gpg.ssh.allowedSignersFile=${signers}`, "-c", "gpg.minTrustLevel=fully", "verify-tag", ref]);
     const said = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
     const signer = /Good "git" signature for (\S+)/.exec(said)?.[1];
     if (r.status !== 0 || !signer) {

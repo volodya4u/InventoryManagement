@@ -1,7 +1,13 @@
 name: human-approval
 
-# The one check a branch cannot rewrite (ADR-0005, slice 3 step B). pull_request_target runs main's copy of this file,
-# and the job checks out main only, so the verifier that runs is main's scripts/signed-approval.mjs, not the branch's.
+# The owner's signed approval, checked by main's code (ADR-0005, slice 3 step B). pull_request_target runs the base
+# branch's copy of this file and checks out the base branch, so for a pull request into main the verifier that runs is
+# main's scripts/signed-approval.mjs, not the branch's. `edited` is a trigger because retargeting a pull request to
+# main is an edit, and main's verifier must run then too.
+# What this check is NOT: proof against an author who can push branches. Such an author can open a pull request into
+# a branch whose copy of this workflow always passes, then retarget it to main and re-run that green run, none of
+# which shows in the diff against main. The proof is the signature itself: before merging, the owner runs main's
+# verifier from a clean clone of main (scripts/approve-pr.mjs prints the command).
 # It fetches the pull request's head commit and the approve/* tags as data and runs `git verify-tag` on them against
 # main's quality/allowed-signers: nothing from the pull request is executed, the token can only read, and no secret is
 # used. The owner approves with `node scripts/approve-pr.mjs <pr>`, which signs approve/<head-sha> with a hardware key
@@ -9,7 +15,7 @@ name: human-approval
 # Until main's allowed-signers file lists a hardware-backed key, the check reports N/A and passes.
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read

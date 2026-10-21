@@ -22,6 +22,10 @@
   `.claude/settings.json` allows without a prompt; a raw `git push` still asks, and so does editing the script) and `gh pr create` into `main`. Stop and
   report instead if a gate is red or the reviewer asked for changes. A human merges every pull request by hand: never
   merge, enable auto-merge, force-push or push `main`.
+- Human approval (ADR-0005): the owner approves a pull request by signing the tag `approve/<head-sha>` with a hardware
+  key (`node scripts/approve-pr.mjs <pr>`). Never run that script, never create, move or push an `approve/*` tag, and
+  never edit `quality/allowed-signers`. Once main lists a key there, the **Human approval** gate in CI and the
+  `human-approval` check stay red until the owner has signed; that is expected, not something to fix.
 - Run the loop's red and green tests through `node scripts/test-run.mjs` so they are recorded, not pasted.
 - Run each evidence-producing command (`dod.mjs`, `test-run.mjs`, `eval-record.mjs`, `pr-evidence.mjs`) on its own,
   not chained behind `&&`: the log hook clips each tool call's command line, so a command buried in a chain can be

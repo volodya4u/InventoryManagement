@@ -10,7 +10,8 @@ const workflow = readFileSync(new URL("../.github/workflows/human-approval.yml",
 const code = workflow.replace(/^\s*#.*$/gm, "");
 
 test("the human-approval workflow runs main's verifier on pull_request_target and never runs the pull request's code", () => {
-  assert.match(code, /^on:\n {2}pull_request_target:\n {4}types: \[opened, synchronize, reopened\]\n/m);
+  // edited: retargeting a pull request to main is an `edited` event, and main's verifier must run on it.
+  assert.match(code, /^on:\n {2}pull_request_target:\n {4}types: \[opened, synchronize, reopened, edited\]\n/m);
   assert.doesNotMatch(code, /^\s+pull_request:|^\s+push:|workflow_run|workflow_dispatch/m, "only pull_request_target triggers it");
   assert.match(code, /^permissions:\n {2}contents: read\n/m);
   assert.doesNotMatch(code, /write|secrets\./, "no write permission and no secret");

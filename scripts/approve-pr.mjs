@@ -5,9 +5,13 @@
 // checks the tag the way CI will, pushes that one tag, and re-runs the two checks that read it (the human-approval
 // workflow and the pr-evidence job), because a pushed tag does not trigger them.
 // The agent must not run this (CLAUDE.md); without the key's touch it cannot finish anyway.
+// Run it from a checkout of main the agent has not touched: the touch proves that a signature was made, not what was
+// signed, so a tool the agent edited could ask for a touch on another commit. The script refuses to run when it or its
+// verifier differs from origin/main, and it pins git's ssh signing program, but a tool cannot vouch for itself: a
+// separate clone the agent never works in is the safe place (ADR-0005).
 // Setup, once: git config gpg.format ssh && git config user.signingkey ~/.ssh/id_ed25519_sk.pub
 // Usage: node scripts/approve-pr.mjs <pr-number>   (exit 0 = approved and pushed, 1 = failed, 2 = usage)
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { signedApproval } from "./signed-approval.mjs";
 
@@ -25,9 +29,15 @@ function main() {
   const tag = `approve/${sha}`;
   sh("git", ["fetch", "-q", "origin", "main", `+refs/pull/${pr}/head:refs/remotes/pr/${pr}`]);
   if (sh("git", ["rev-parse", `refs/remotes/pr/${pr}`]) !== sha) throw new Error("the fetched head does not match the pull request's head");
+  // The approval tool must be main's: a changed copy in this working tree could sign something other than it shows.
+  const own = ["scripts/approve-pr.mjs", "scripts/signed-approval.mjs"];
+  const changed = spawnSync("git", ["diff", "--quiet", "origin/main", "--", ...own]).status;
+  if (changed !== 0) throw new Error(`${own.join(" or ")} differs from origin/main here: run this from a clean checkout of main`);
   console.log(`Approving #${pr} "${info.title}" at ${sha}\n${info.url}\nTouch your security key when it blinks.`);
   // The signature: git calls ssh-keygen with your user.signingkey, which asks for the touch.
-  sh("git", ["-c", "gpg.format=ssh", "tag", "-s", "-m", `Approve #${pr} (${info.url}) at ${sha}`, tag, sha], { stdio: ["inherit", "pipe", "inherit"] });
+  // gpg.ssh.program is pinned, so a repository-local setting cannot swap in another signing program.
+  const signing = ["-c", "gpg.format=ssh", "-c", "gpg.ssh.program=ssh-keygen"];
+  sh("git", [...signing, "tag", "-s", "-m", `Approve #${pr} (${info.url}) at ${sha}`, tag, sha], { stdio: ["inherit", "pipe", "inherit"] });
   const check = signedApproval(process.cwd(), { base: "origin/main", head: sha });
   if (check.state !== "valid") {
     sh("git", ["tag", "-d", tag]);
@@ -35,7 +45,18 @@ function main() {
   }
   sh("git", ["push", "origin", `refs/tags/${tag}:refs/tags/${tag}`], { stdio: ["ignore", "pipe", "inherit"] });
   console.log(`Pushed ${tag}, signed by ${check.signer}.`);
-  rerun(pr, sha);
+  // The green check is evidence, not proof (an author who can push branches can fake it through a base branch, see
+  // .github/workflows/human-approval.yml); main's verifier run here, from this clean clone, is the proof.
+  console.log(
+    `Before merging, from this clean clone of main:\n  git fetch -q origin main +refs/pull/${pr}/head:refs/remotes/pr/${pr} "+refs/tags/approve/*:refs/tags/approve/*"\n` +
+      `  node scripts/signed-approval.mjs origin/main ${sha} --ci\nIt must print ✅ PASS for the commit you are about to merge (the pull request's head).`,
+  );
+  try {
+    rerun(pr, sha);
+  } catch (error) {
+    // The approval is done; only the re-run failed, so say so instead of failing the whole command.
+    console.log(`Approved, but the checks could not be re-run (${error.message}): re-run them from the pull request's Checks tab.`);
+  }
 }
 
 // Re-run the latest human-approval run for this pull request and the pr-evidence job of the latest CI run on its head.
