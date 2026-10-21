@@ -60,6 +60,17 @@ always reverses the patch in a `finally`. It records nothing: a replay is the re
 Frontend replays need `frontend/node_modules`, as `test-run.mjs` does. A replay runs in place, so it needs no second
 checkout.
 
+## On a Windows checkout
+The first real run was on this repository's CRLF checkout (`core.autocrlf=true`), run `20261021T155613Z-b647`. It broke
+`scripts/test-results.mjs`, which the parser tests then failed, restored it, and replayed cleanly. One quirk showed up:
+after `restore`, `git status` can list a restored file as modified when its content is byte for byte the start's (its
+blob id equals HEAD's, and `git diff` is empty). `git apply -R` rewrote it with different line endings.
+`git checkout -- <file>` clears the flag. The restore's snapshot comparison and the gate compare content, so they are
+not affected. The replay is affected: it checks for a clean tree with `git status`, before applying the patch and
+after reversing it, so the same flag can make it report a tree that is not as it was. That would be a false failure,
+never a false pass. Clear the flag with `git checkout -- <file>` and replay again. On this checkout the replay of
+`20261021T155613Z-b647` stayed clean. Comparing snapshots in the replay too is a follow-up.
+
 ## The nested-runner fix
 Inside a `node:test` process, a child `node --test` sees `NODE_TEST_CONTEXT` and reports to the parent instead of writing
 its JUnit file. The harness command now runs without that variable.
