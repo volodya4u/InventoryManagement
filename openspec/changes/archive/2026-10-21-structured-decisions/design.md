@@ -18,8 +18,8 @@ An answered or ratified row needs all of these:
 - tests that exist and carry `@trace` for one of those requirements.
 
 The test check reuses the conventions of `check-specs.mjs`: `Class#method` for a JUnit method under `src/test/java`,
-and `file › title` for a Vitest or node:test test. It reads the `@trace` lines just above the test, as
-`check-traceability.mjs` counts them.
+and `file › title` for a Vitest or node:test test. It reads the `@trace` lines just above that test, up to the test
+above it (`2026-10-22-decisions-trace-scope`). That is per test, unlike `check-traceability.mjs`, which counts per file.
 
 ## Migration
 - **OQ-1 and OQ-2:** the old rows had the owner's answer in bold, followed by what the code also does, marked "observed,
