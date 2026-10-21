@@ -82,6 +82,27 @@ test("an unknown key, an unsigned tag, a lightweight tag or a tag on another com
   assert.equal(check(repo().root).state, "missing");
 });
 
+test("a repository-local gpg.ssh.program cannot fake a good signature", () => {
+  // A signing program that reads the signed data and names the owner as a good signer, whatever the signature says.
+  const fake = join(tmp, "fake-ssh-keygen");
+  writeFileSync(
+    fake,
+    [
+      "#!/bin/sh",
+      "cat >/dev/null",
+      'if [ "$2" = find-principals ]; then echo owner@example.com; exit 0; fi',
+      'echo \'Good "git" signature for owner@example.com with ED25519 key SHA256:fake\'',
+      "",
+    ].join("\n"),
+    { mode: 0o755 },
+  );
+  const { root, head } = repo();
+  sign(root, head, stranger);
+  git(root, "config", "gpg.ssh.program", fake);
+  const result = check(root);
+  assert.equal(result.state, "invalid", `the repository's gpg.ssh.program decided: ${JSON.stringify(result)}`);
+});
+
 test("the allowed signers come from the base ref, not the branch, and only hardware-backed key types count", () => {
   // The branch adds a stranger's key to its own copy of the file: the check reads main's copy, so it does not count.
   const { root, head } = repo();

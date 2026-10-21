@@ -67,7 +67,14 @@
     {
       "slice": "2026-10-21-review-signed-approval",
       "reviewEvidence": "missing",
-      "trailerCommits": 1,
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-21-signed-approval-follow-ups",
+      "reviewEvidence": "missing",
+      "trailerCommits": 0,
       "libDomains": [],
       "processComplete": true
     },
@@ -149,6 +156,14 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-review-signed-approval: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-21-signed-approval-follow-ups: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "trailer",
+      "msg": "2026-10-21-signed-approval-follow-ups: no commit carries a \"Slice: signed-approval-follow-ups\" trailer"
     },
     {
       "check": "review-evidence",

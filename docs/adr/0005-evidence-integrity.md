@@ -126,13 +126,20 @@ Three gaps that the review of #92 left open are now closed:
   type-looking token let a principal named `sk-ssh-ed25519@openssh.com` carry a software key past the filter. The key
   type is now the field before the key, and it must equal the type encoded in the key blob. `cert-authority` and
   `no-touch-required` lines are refused in any letter case, as OpenSSH reads them, and git itself refuses unknown keys
-  (`gpg.minTrustLevel=fully`). The verifier cannot see how the key was made, so the touch guarantee also needs the key
+  (`gpg.minTrustLevel=fully`). The verifier pins `gpg.ssh.program=ssh-keygen` on the command line, as the signing
+  tool does, so a repository-local signing program cannot print a good signature (`signed-approval-follow-ups`).
+  The verifier cannot see how the key was made, so the touch guarantee also needs the key
   itself to have been generated without `-O no-touch-required` (with `-O verify-required`, a PIN is asked too).
 - **Limits.**
   - A valid tag proves that a holder of the hardware key approved that commit, not that they read the diff.
   - The touch proves that a signature was made, not what was signed. So `approve-pr.mjs` must run from a checkout of
     main the agent has not touched; it refuses to run when it or its verifier differs from `origin/main`, and it pins
     `gpg.ssh.program`. A tool cannot vouch for itself, though, so the owner should keep a separate clone for approving.
+  - The pinned signing program is plain `ssh-keygen`, or the owner's `gpg.ssh.program` from the global git config when
+    it is an absolute path; a repository's own setting is never read (`signed-approval-follow-ups`). On Windows the
+    owner names Windows' own OpenSSH there (`C:/Windows/System32/OpenSSH/ssh-keygen.exe`), because Git for Windows'
+    bundled `ssh-keygen` may not reach a FIDO2 key. The agent runs as the same OS user and could write that global file
+    too, so `approve-pr.mjs` prints the program before the touch for the owner to check.
   - `pr-evidence` still runs the branch's own code, so its row can be faked by a branch that edits it.
   - The `human-approval` check is evidence and a reminder, not proof. Its final review found that `pull_request_target`
     runs the **base** branch's workflow, so an author who can push branches, as the agent can, has a way around it:

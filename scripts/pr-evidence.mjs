@@ -265,6 +265,13 @@ export function evalsProblems(changedFiles, record, currentInputs) {
   return relevant ? recordProblems(record, currentInputs) : [];
 }
 
+// The Human approval row from an approval result (signed-approval.mjs). GitHub sets GITHUB_ACTIONS=true in every job;
+// this job runs the branch's own copy of this script and of ci.yml, so a branch that edits them can fake any row here,
+// this one included; only a check run from the base's code can be trusted against that (ADR-0005, slice 3 step B).
+export function humanApprovalRow(result, env = process.env) {
+  return { name: "Human approval", ...humanApprovalGate(result, { ci: env.GITHUB_ACTIONS === "true" }) };
+}
+
 // Proposals that never ran. A `git commit` is the exception that proves nothing: its own result folds into the next
 // commit, so the last commit of a branch always looks unexecuted.
 export function blockedActions(lines) {
@@ -406,10 +413,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   for (const e of tools) if (e.mode) modes[e.mode] = (modes[e.mode] ?? 0) + 1;
   const gates = [
     { name: "Review", applies: true, problems: reviewProblems(lines, headTree), detail: `the reviewer's last verdict is APPROVE on the head commit's files (${reviews.length} round(s))` },
-    // GitHub sets GITHUB_ACTIONS in every job. This job runs the branch's own copy of this script and of ci.yml, so a
-    // branch that edits them can fake any row here, this one included; only a check run from the base's code can be
-    // trusted against that (ADR-0005, slice 3 step B).
-    { name: "Human approval", ...humanApprovalGate(signedApproval(root, { base, head }), { ci: process.env.GITHUB_ACTIONS === "true" }) },
+    humanApprovalRow(signedApproval(root, { base, head })),
     {
       name: "Definition of done",
       applies: codeChanged,

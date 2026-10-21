@@ -92,8 +92,10 @@ export function signedApproval(root, { base, head, keyTypes = HARDWARE_KEY_TYPES
     const signers = join(dir, "allowed_signers");
     writeFileSync(signers, `${lines.join("\n")}\n`);
     // minTrustLevel=fully: git itself refuses a good signature by a key the file does not list (trust "undefined"),
-    // a second line of defence behind the principal check below.
-    const r = run(root, ["-c", "gpg.format=ssh", "-c", `gpg.ssh.allowedSignersFile=${signers}`, "-c", "gpg.minTrustLevel=fully", "verify-tag", ref]);
+    // a second line of defence behind the principal check below. gpg.ssh.program is pinned as approve-pr.mjs pins it
+    // for signing: a -c setting beats every config file, so a repository-local program cannot print a good signature.
+    const verify = ["-c", "gpg.format=ssh", "-c", "gpg.ssh.program=ssh-keygen", "-c", `gpg.ssh.allowedSignersFile=${signers}`, "-c", "gpg.minTrustLevel=fully"];
+    const r = run(root, [...verify, "verify-tag", ref]);
     const said = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
     const signer = /Good "git" signature for (\S+)/.exec(said)?.[1];
     if (r.status !== 0 || !signer) {
