@@ -5,4 +5,4 @@
 - [x] 3. `.claude/settings.json`: the two deny rules and the `/` anchor for every Edit ask rule; record the green run.
 - [x] 4. `scripts/hooks-selftest.mjs`: the reviewer-guard case for `git log --output` (a regression pin; the guard already blocked it).
 - [x] 5. `design.md`: the probe, why deny rules and not a hook, the side effect and what is left.
-- [ ] 6. `node scripts/dod.mjs`, the five Factory checks each on its own, the autonomy-log row, `reviewer`, `/security-review`, commit, `node scripts/pr-evidence.mjs origin/main HEAD`, push with `node scripts/push-branch.mjs`, pull request.
+- [x] 6. `node scripts/dod.mjs`, the five Factory checks each on its own, the autonomy-log row, `reviewer`, `/security-review`, commit, `node scripts/pr-evidence.mjs origin/main HEAD`, push with `node scripts/push-branch.mjs`, pull request.
