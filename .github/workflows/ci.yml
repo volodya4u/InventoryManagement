@@ -8,6 +8,13 @@ on:
 permissions:
   contents: read
 
+# GitHub runs an unspecified shell as `bash -e {0}`, which lets `cmd | tee` pass when `cmd` fails; `shell: bash` runs
+# `bash --noprofile --norc -eo pipefail {0}` instead, so every `| tee` step below fails with its command
+# (scripts/ci-workflow.test.mjs).
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -47,7 +54,7 @@ jobs:
           export PATH="$GITHUB_WORKSPACE/target/frontend-tooling/node:$PATH"
           pnpm exec prettier --check .
 
-      # Save Vitest output for the test-run guard below.
+      # Save Vitest output for the test-run guard below; the workflow's pipefail still fails the step on a failing run.
       - name: Frontend unit tests
         working-directory: frontend
         run: |
@@ -78,9 +85,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # main's history and the branch's commits, to diff the agent log and fingerprint the head
-      # Explicit Bash enables pipefail, so tee cannot hide a failed evidence gate.
+      # The workflow's `shell: bash` default enables pipefail, so tee cannot hide a failed evidence gate.
       - name: Evidence from the agent log and the specs
-        shell: bash
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
