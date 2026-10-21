@@ -93,6 +93,13 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-21-structured-decisions",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-21-structured-evidence-followups",
       "reviewEvidence": "missing",
       "trailerCommits": 2,
@@ -182,6 +189,10 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-signed-approval-follow-ups: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-21-structured-decisions: review-findings.json is missing (review must have run clean before archive)"
     },
     {
       "check": "review-evidence",

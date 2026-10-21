@@ -348,7 +348,21 @@ test("hardening: a break run whose patch touches any test path, not only the cri
   }
 });
 
-const row = (level, who, evidence, why = "Harness change") => `| 29 | Some work | ${level} | ${who} | ${evidence} | ${why} |`;
+const row = (level, who, evidence, why = "Harness change", review = "agent-reviewer", validity = "valid") =>
+  `| 29 | Some work | ${level} | ${who} | ${evidence} | ${why} | ${review} | ${validity} |`;
+
+test("autonomy: a new row records its review method and evidence validity apart from its level", () => {
+  const ok = (review, validity) => autonomyProblems(["scripts/dod.mjs"], [row(1, "Human approved the plan", "`pr-evidence` job", "why", review, validity)]);
+  for (const review of ["agent-reviewer", "human", "agent-reviewer + human", "none"]) assert.deepEqual(ok(review, "valid"), [], review);
+  // #52: a human review stood, but the machine proof was a hand-written line, so the evidence was weakened, not the level.
+  assert.deepEqual(ok("human", "weakened: the reviewer line was hand-written (d37db08)"), []);
+  assert.deepEqual(ok("agent-reviewer", "invalid: the dod run covered other code"), []);
+  const missing = autonomyProblems(["scripts/dod.mjs"], [`| 29 | Some work | 1 | Human | \`pr-evidence\` job | why |`]).join(" ");
+  assert.match(missing, /row 29: the review method must be one of agent-reviewer, human, agent-reviewer \+ human, none/);
+  assert.match(missing, /row 29: the evidence validity must be valid, or weakened: <why> or invalid: <why>/);
+  assert.match(ok("looked at it", "fine").join(" "), /review method must be one of/);
+  assert.match(ok("human", "weakened").join(" "), /evidence validity must be valid, or weakened: <why>/, "a weakened row says why");
+});
 
 test("autonomy: a harness or boundary change needs an added row; product code alone does not", () => {
   assert.equal(significant("scripts/dod.mjs"), true);

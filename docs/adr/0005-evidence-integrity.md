@@ -1,6 +1,6 @@
 # ADR-0005: Evidence integrity — no misleading passes
 
-- **Status:** Accepted (slices 1, 2, 3 and 4 of 6, with a follow-up to slice 2)
+- **Status:** Accepted (all six slices: 1-4 and 6 here, 5 in #89; with a follow-up to slice 2)
 - **Date:** 2026-10-20
 - **Deciders:** volodya4u (user), Claude
 
@@ -177,3 +177,25 @@ Three gaps that the review of #92 left open are now closed:
   restored to its blob id. From now on such breaks go through `break-run.mjs`.
 - **Not yet:** the `test-first-loop` skill still describes only red → green. Changing it needs a paid eval run, so
   CLAUDE.md carries the how-to for now.
+
+## Decision (slice 6: structured-decisions)
+
+- **Owner decisions are records.** The Open questions table in `docs/requirements.md` gets these columns:
+  - Status (`open | answered | ratified | withdrawn`);
+  - Recommended default, Observed behavior and Owner-approved intent, each in its own column;
+  - Decision owner, Date and Reference;
+  - Requirements and Tests.
+
+  `scripts/decisions.mjs` checks the table, and its test runs on this repository in CI.
+  - An open question keeps its decision cells empty, so a default never reads as an answer.
+  - An answered or ratified one names who decided, when, and where the decision came from. It links requirements that
+    exist and a test that carries `@trace` for one of them.
+
+  That is the OQ-1 path made a rule: owner decision, then the requirement and its spec, then a regression test. OQ-1
+  and OQ-2 moved into the new shape with their answers kept word for word. The other fourteen questions stay open.
+- **Trust is three facts, not one number.** The autonomy log records Review method (`agent-reviewer | human |
+  agent-reviewer + human | none`) and Evidence validity (`valid | weakened: <why> | invalid: <why>`) apart from Level.
+  `pr-evidence` requires both on every row a branch adds. Row 26 (#52) now says what its Downgrade section says: a human
+  review, with weakened evidence. Older rows say `not recorded`, rather than a value reconstructed from memory.
+- **Not yet:** `AGENTS.md` still describes the open questions in one sentence. Changing it needs a paid eval run, so
+  `openspec/project.md` carries the recipe.
