@@ -1,14 +1,17 @@
 # Design — decisions-trace-scope
 
 ## Where the scan stops
-`traceIds` used to read a fixed window: the 8 lines above a test's declaration, plus the declaration line. It now walks
-up from the declaration and stops before the first line that ends the test above, within the same 8 lines:
+`traceIds` used to read a fixed window: the 7 lines above a test's declaration, plus the declaration line. It now walks
+up from the declaration, at most 8 lines, and stops before the first line that ends the test above:
 
 - a line that starts with `}` (the end of a JUnit method, or `});` after a Vitest or node:test test);
-- a line that declares another test: `void name(` in Java, `it(` or `test(` in a spec file. This catches a one-line
-  test such as `it('tagged', () => {});`, which has no line of its own that starts with `}`.
+- a line that declares another test: `void name(` in Java, `it(` or `test(` in a spec file, with any modifier chain
+  (`it.skip(`, `it.only(`, `test.todo(`). This catches a one-line test such as `it('tagged', () => {});`, which has no
+  line of its own that starts with `}`.
 
-Comments and annotations between a test's own tag and its declaration still count, as do several tags on one test.
+A comment line (`//`, `/*` or `*`) never stops the scan, so a note such as "mirrors the backend test(s)" between a
+test's own tag and its declaration does not cut the tag off. Comments and annotations between a test's own tag and its
+declaration still count, as do several tags on one test.
 
 ## Considered and left out
 - **Stopping at `@Test`.** The reviewer named it as an option, but in this repository the tag sits above `@Test`

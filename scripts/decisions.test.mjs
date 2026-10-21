@@ -88,6 +88,13 @@ test("a test's @trace is read from its own lines, never from the test above it",
   const ts = project("ts-neighbour", [answered("ts", "`frontend/src/app/flow.spec.ts › keeps the stored price`")]);
   write(ts, "frontend/src/app/flow.spec.ts", "describe('flow', () => {\n  // @trace FR-81\n  it('tagged', () => {});\n  it('keeps the stored price', () => {});\n});\n");
   assert.match(repoDecisionProblems(ts).join("\n"), /carries no @trace FR-81/);
+  for (const above of ["it.skip('tagged', () => {});", "it.only('tagged', () => {});", "test.todo('tagged');"]) {
+    write(ts, "frontend/src/app/flow.spec.ts", `describe('flow', () => {\n  // @trace FR-81\n  ${above}\n  it('keeps the stored price', () => {});\n});\n`);
+    assert.match(repoDecisionProblems(ts).join("\n"), /carries no @trace FR-81/, above);
+  }
+  // A comment that mentions a test( in prose is not a test, so it does not cut off the test's own tag.
+  write(ts, "frontend/src/app/flow.spec.ts", "describe('flow', () => {\n  // @trace FR-81\n  // Mirrors the backend test(s) of FR-81.\n  it('keeps the stored price', () => {});\n});\n");
+  assert.deepEqual(repoDecisionProblems(ts), []);
   // Its own tag still counts across annotations and comments between the tag and the declaration.
   write(java, "src/test/java/com/x/FlowTest.java", "class FlowTest {\n  @Test\n  void tagged() {}\n\n  // @trace FR-81\n  // Kept after a cost change.\n  @Test\n  @DisplayName(\"keeps\")\n  void keepsTheStoredPrice() {}\n}\n");
   assert.deepEqual(repoDecisionProblems(java), []);
