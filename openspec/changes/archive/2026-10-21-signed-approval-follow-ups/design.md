@@ -39,9 +39,19 @@ A failed `ls-remote` or a failed push also deletes the local tag and names the s
 or its exit code, never the raw `Command failed: …` of `execFileSync`. The runner is passed in so the tests can drive
 each path with a fake runner; the real runner is the script's `sh`.
 
-What this does not cover: a local `approve/<sha>` left over from an earlier successful run still makes `git tag -s`
-fail before the check. Deleting the local tag after a successful push, or checking origin before signing, would cover
-it; neither was asked for here.
+The push check alone was not enough. The final review pointed out that `approve-pr.mjs` fetches
+`+refs/pull/<n>/head:refs/remotes/pr/<n>` without `--no-tags`, and git's default tag auto-follow fetches any tag that
+points into the fetched history. A tag already on origin therefore arrived locally, and `git tag -s` failed with a raw
+"already exists" before the push check could run. That also happened in a fresh clone, as well as with a tag left from
+an earlier run. (This comes from git's documentation; the agent did not reproduce it, since that means pushing an
+`approve/*` tag, even to a throwaway remote.) Two changes close it:
+- the fetch passes `--no-tags`;
+- `refuseExistingApproval({ tag, sha, run })` runs before the touch. It checks `git rev-parse -q --verify
+  refs/tags/approve/<sha>` and then the exact ref on origin. If the tag is in either place, it stops with where the tag
+  is and how to check or remove it. Unlike after signing, it deletes nothing, because an existing tag may be a valid
+  approval. If origin cannot be read, it also stops before the touch.
+
+The ls-remote check in `pushApproval()` stays, for a tag pushed while the owner was signing.
 
 ## The pure functions
 - `driftProblem(diff)` reads the result of `git diff --name-only origin/main -- scripts/approve-pr.mjs

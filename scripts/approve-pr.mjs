@@ -49,6 +49,33 @@ export function signingProgram(globalProgram) {
 // "Command failed: …" of execFileSync.
 const why = (error) => String(error?.stderr ?? "").trim().split(/\r?\n/)[0] || (error?.status != null ? `git exited ${error.status}` : String(error?.message ?? error).split("\n")[0]);
 
+// Whether `git ls-remote` output lists exactly `ref`. ls-remote matches its pattern against the end of each ref, so a
+// ref that merely ends in the name does not count; the peeled `^{}` line of an annotated tag does.
+const listsRef = (output, ref) => String(output ?? "").split(/\r?\n/).some((line) => [ref, `${ref}^{}`].includes(line.split("\t")[1]));
+const howToCheck = (tag, sha) =>
+  `Check it: git fetch -q origin "+refs/tags/approve/*:refs/tags/approve/*" && node scripts/signed-approval.mjs origin/main ${sha} --ci\n` +
+  `If it is not a valid approval, delete it (git tag -d ${tag}; on origin: git push origin :refs/tags/${tag}) and run this again.`;
+
+// Stop before the touch when this commit already has an approval tag, here or on origin: `git tag -s` would refuse with a
+// raw error, or the push would. Nothing is deleted, since the tag may be a valid approval. `run` as in pushApproval.
+export function refuseExistingApproval({ tag, sha, run }) {
+  const ref = `refs/tags/${tag}`;
+  let local = true;
+  try {
+    run("git", ["rev-parse", "-q", "--verify", ref]);
+  } catch {
+    local = false;
+  }
+  if (local) throw new Error(`${tag} already exists in this repository; nothing was signed.\n${howToCheck(tag, sha)}`);
+  let remote;
+  try {
+    remote = run("git", ["ls-remote", "--tags", "origin", ref]);
+  } catch (error) {
+    throw new Error(`could not read the tags on origin (${why(error)}); nothing was signed: run this again when origin is reachable`);
+  }
+  if (listsRef(remote, ref)) throw new Error(`${tag} is already on origin; nothing was signed.\n${howToCheck(tag, sha)}`);
+}
+
 // Push the signed tag, unless origin has it already. On any failure the new local tag is deleted, so a second run
 // starts clean. `run(cmd, args, opts)` returns a command's trimmed stdout or throws as execFileSync does.
 export function pushApproval({ tag, sha, run }) {
@@ -67,14 +94,10 @@ export function pushApproval({ tag, sha, run }) {
     drop();
     throw new Error(`could not read the tags on origin (${why(error)}); deleted the new local ${tag}: run this again when origin is reachable`);
   }
-  // ls-remote matches its pattern against the end of each ref, so only the exact ref (or its peeled line) counts.
-  if (remote.split(/\r?\n/).some((line) => [ref, `${ref}^{}`].includes(line.split("\t")[1]))) {
+  // Checked before signing too (refuseExistingApproval); this catches a tag pushed while the owner was signing.
+  if (listsRef(remote, ref)) {
     drop();
-    throw new Error(
-      `${tag} is already on origin, so this commit already has an approval tag; deleted the new local one and pushed nothing.\n` +
-        `Check the one on origin: git fetch -q origin "+refs/tags/approve/*:refs/tags/approve/*" && node scripts/signed-approval.mjs origin/main ${sha} --ci\n` +
-        `If it is not a valid approval, delete it on origin (git push origin :${ref}) and run this again.`,
-    );
+    throw new Error(`${tag} is already on origin, so this commit already has an approval tag; deleted the new local one and pushed nothing.\n${howToCheck(tag, sha)}`);
   }
   try {
     run("git", ["push", "origin", `${ref}:${ref}`], { stdio: ["ignore", "pipe", "inherit"] });
@@ -102,12 +125,14 @@ function main() {
   if (info.state !== "OPEN") throw new Error(`#${pr} is ${info.state}, not open`);
   const sha = info.headRefOid;
   const tag = `approve/${sha}`;
-  sh("git", ["fetch", "-q", "origin", "main", `+refs/pull/${pr}/head:refs/remotes/pr/${pr}`]);
+  // --no-tags: by default git also fetches tags that point into the fetched history, an approve/<sha> tag included.
+  sh("git", ["fetch", "-q", "--no-tags", "origin", "main", `+refs/pull/${pr}/head:refs/remotes/pr/${pr}`]);
   if (sh("git", ["rev-parse", `refs/remotes/pr/${pr}`]) !== sha) throw new Error("the fetched head does not match the pull request's head");
   const drift = driftProblem(spawnSync("git", ["diff", "--name-only", "origin/main", "--", ...APPROVAL_TOOLS], { encoding: "utf8" }));
   if (drift) throw new Error(drift);
   // The signature: git calls the signing program with your user.signingkey, which asks for the touch.
   // gpg.ssh.program is pinned on the command line, so a repository-local setting cannot swap in another program.
+  refuseExistingApproval({ tag, sha, run: sh });
   const program = signingProgram(spawnSync("git", ["config", "--global", "--get", "gpg.ssh.program"], { encoding: "utf8" }).stdout);
   console.log(`Approving #${pr} "${info.title}" at ${sha}\n${info.url}\nSigning with ${program}. Touch your security key when it blinks.`);
   const signing = ["-c", "gpg.format=ssh", "-c", `gpg.ssh.program=${program}`];

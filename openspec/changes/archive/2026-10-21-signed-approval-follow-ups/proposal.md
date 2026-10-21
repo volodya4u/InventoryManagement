@@ -22,6 +22,11 @@ a FIDO2 security key and Windows' own `C:/Windows/System32/OpenSSH/ssh-keygen.ex
 - `scripts/signed-approval.mjs` passes `-c gpg.ssh.program=ssh-keygen` to `git verify-tag`, as `approve-pr.mjs` does
   when it signs. A command-line `-c` wins over every config file, so a repository-local program is never called.
 - `scripts/approve-pr.mjs`:
+  - Before asking for the touch, `refuseExistingApproval()` stops when `approve/<sha>` is already in the local
+    repository or on origin. It says where the tag is and how to check or remove it, and deletes nothing, since the
+    tag may be a valid approval. The final review found the reason: the fetch of the pull request's head auto-follows
+    tags that point into it, so a tag already on origin arrived locally and `git tag -s` failed with a raw error before
+    the push check ran. The fetch now passes `--no-tags` as well.
   - Before pushing, it runs `git ls-remote --tags origin refs/tags/approve/<sha>` and counts only that exact ref (a
     pattern also matches refs that merely end in it). If the tag is already there, it deletes the local tag and says so,
     with the command that checks the existing tag. If origin cannot be read or the push fails, it also deletes the local
@@ -49,6 +54,7 @@ a FIDO2 security key and Windows' own `C:/Windows/System32/OpenSSH/ssh-keygen.ex
 | 5 | Given the workflow runs and jobs the API returns, when the runs to re-run are chosen, then the latest human-approval run of this pull request and the pr-evidence job of the latest CI run on the head are picked, and other workflows, pull requests and commits are not | `scripts/approve-pr.test.mjs` › "run selection picks the latest human-approval run of the pull request and the pr-evidence job of the latest CI run on the head" |
 | 6 | Given each approval state, when the pr-evidence report is built, then the Human approval row follows Review and reads FAIL in CI without a signature, N/A locally and PASS when signed | `scripts/pr-evidence.test.mjs` › "the report shows the Human approval row after Review: FAIL in CI without a signature, N/A locally, PASS when signed" |
 | 7 | Given the owner's global gpg.ssh.program, when the signing program is chosen, then an absolute path is used as given, and no setting, a relative name or a network path falls back to plain ssh-keygen | `scripts/approve-pr.test.mjs` › "the signing program is an absolute gpg.ssh.program from the global config, else plain ssh-keygen" |
+| 8 | Given approve/<sha> already in the local repository or on origin, or origin unreadable, when the owner starts an approval, then it stops before the touch, signs nothing, deletes nothing and says where the tag is and how to check it; with the tag nowhere it goes ahead | `scripts/approve-pr.test.mjs` › "an approval tag already here or on origin stops the approval before the touch" |
 
 ## Impact
 - Affected specs: none. This is harness work with no FR row; the change declares no spec delta (`skip_specs` in

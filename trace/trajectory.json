@@ -74,7 +74,7 @@
     {
       "slice": "2026-10-21-signed-approval-follow-ups",
       "reviewEvidence": "missing",
-      "trailerCommits": 1,
+      "trailerCommits": 2,
       "libDomains": [],
       "processComplete": true
     },

@@ -4,7 +4,7 @@
 // GitHub API return.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { APPROVAL_TOOLS, approvalRun, ciRun, driftProblem, evidenceJob, pushApproval, signingProgram } from "./approve-pr.mjs";
+import { APPROVAL_TOOLS, approvalRun, ciRun, driftProblem, evidenceJob, pushApproval, refuseExistingApproval, signingProgram } from "./approve-pr.mjs";
 
 const SHA = "0123456789abcdef0123456789abcdef01234567";
 const TAG = `approve/${SHA}`;
@@ -30,6 +30,7 @@ test("an approval tag already on origin is not pushed: the local tag is deleted 
     (error) => {
       assert.match(error.message, new RegExp(`${TAG} is already on origin`));
       assert.match(error.message, new RegExp(`node scripts/signed-approval\\.mjs origin/main ${SHA} --ci`), "says how to check the existing tag");
+      assert.match(error.message, new RegExp(`git push origin :refs/tags/${TAG}`), "says how to remove it");
       assert.doesNotMatch(error.message, /Command failed/);
       return true;
     },
@@ -40,6 +41,36 @@ test("an approval tag already on origin is not pushed: the local tag is deleted 
   const other = runner({ "ls-remote": `1111111111111111111111111111111111111111\trefs/tags/old/${TAG}` });
   pushApproval({ tag: TAG, sha: SHA, run: other.run });
   assert.deepEqual(other.calls, [`git ls-remote --tags origin refs/tags/${TAG}`, `git push origin refs/tags/${TAG}:refs/tags/${TAG}`]);
+});
+
+test("an approval tag already here or on origin stops the approval before the touch", () => {
+  const LOCAL = `git rev-parse -q --verify refs/tags/${TAG}`;
+  const REMOTE = `git ls-remote --tags origin refs/tags/${TAG}`;
+  const absent = failed("git rev-parse", "", 1);
+
+  // Left by an earlier run, or brought in by a fetch: nothing is signed, nothing is deleted.
+  const local = runner({ "rev-parse": `${"2".repeat(40)}` });
+  assert.throws(() => refuseExistingApproval({ tag: TAG, sha: SHA, run: local.run }), (error) => {
+    assert.match(error.message, new RegExp(`${TAG} already exists in this repository; nothing was signed`));
+    assert.match(error.message, new RegExp(`node scripts/signed-approval\\.mjs origin/main ${SHA} --ci`));
+    assert.doesNotMatch(error.message, /Command failed/);
+    return true;
+  });
+  assert.deepEqual(local.calls, [LOCAL]);
+
+  const remote = runner({ "rev-parse": absent, "ls-remote": `${"1".repeat(40)}\trefs/tags/${TAG}` });
+  assert.throws(() => refuseExistingApproval({ tag: TAG, sha: SHA, run: remote.run }), new RegExp(`${TAG} is already on origin; nothing was signed`));
+  assert.deepEqual(remote.calls, [LOCAL, REMOTE]);
+
+  const offline = runner({ "rev-parse": absent, "ls-remote": failed("git ls-remote", "fatal: Could not resolve host") });
+  assert.throws(() => refuseExistingApproval({ tag: TAG, sha: SHA, run: offline.run }), /could not read the tags on origin \(fatal: Could not resolve host\); nothing was signed/);
+
+  // Nowhere, or only a ref that merely ends in the name: the approval goes ahead.
+  for (const listed of ["", `${"1".repeat(40)}\trefs/tags/old/${TAG}`]) {
+    const fresh = runner({ "rev-parse": absent, "ls-remote": listed });
+    assert.equal(refuseExistingApproval({ tag: TAG, sha: SHA, run: fresh.run }), undefined);
+    assert.deepEqual(fresh.calls, [LOCAL, REMOTE]);
+  }
 });
 
 test("when origin cannot be read or the push fails, the local tag is deleted and the message names the step", () => {

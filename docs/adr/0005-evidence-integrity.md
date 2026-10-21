@@ -126,8 +126,8 @@ Three gaps that the review of #92 left open are now closed:
   type-looking token let a principal named `sk-ssh-ed25519@openssh.com` carry a software key past the filter. The key
   type is now the field before the key, and it must equal the type encoded in the key blob. `cert-authority` and
   `no-touch-required` lines are refused in any letter case, as OpenSSH reads them, and git itself refuses unknown keys
-  (`gpg.minTrustLevel=fully`). The verifier pins `gpg.ssh.program=ssh-keygen` on the command line, as the signing
-  tool does, so a repository-local signing program cannot print a good signature (`signed-approval-follow-ups`).
+  (`gpg.minTrustLevel=fully`). The verifier pins `gpg.ssh.program=ssh-keygen` with `-c` on the command line (the
+  signing tool pins its own program the same way), so a repository-local signing program cannot print a good signature (`signed-approval-follow-ups`).
   The verifier cannot see how the key was made, so the touch guarantee also needs the key
   itself to have been generated without `-O no-touch-required` (with `-O verify-required`, a PIN is asked too).
 - **Limits.**

@@ -20,7 +20,7 @@ Result: PASS, 19 warning(s)
 | 2026-10-20-structured-test-evidence | **missing** | 2 | yes | - |
 | 2026-10-21-review-provenance-local | **missing** | 1 | yes | - |
 | 2026-10-21-review-signed-approval | **missing** | 2 | yes | - |
-| 2026-10-21-signed-approval-follow-ups | **missing** | 1 | yes | - |
+| 2026-10-21-signed-approval-follow-ups | **missing** | 2 | yes | - |
 | 2026-10-21-structured-evidence-followups | **missing** | 2 | yes | - |
 
 ## Cross-slice module overlap
