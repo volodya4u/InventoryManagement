@@ -61,16 +61,21 @@ if (!isRepo) warn("git", "not a git work tree — trailer/scope checks skipped")
 
 // ADAPTATION (2026-10-22, owner-approved): this repository reviews with the `reviewer` subagent, whose verdict a hook
 // records in .agent-log/actions.jsonl, not with the review workflow that writes review-findings.json. A slice without
-// that file is reviewed when the pull request that merged it (the first merge on HEAD's first-parent line that brought
-// in the newest commit carrying its trailer) added a verdict that passes the rule pr-evidence applies: the last
-// hook-recorded verdict is APPROVE with 0 blocking, on the branch head's tree (scripts/check-review.mjs).
-// A commit that is itself on the first-parent line (pushed to main, or a squash merge) was brought in by no pull request
-// merge, so it reads missing: a later, unrelated merge descends from it too and must not lend its approval.
+// that file is reviewed when the pull request that merged it (the first merge on main's first-parent line, reachable
+// from HEAD, that brought in the newest commit carrying its trailer) added a verdict that passes the rule pr-evidence
+// applies: the last hook-recorded verdict is APPROVE with 0 blocking, on the branch head's tree (scripts/check-review.mjs).
+// The line is main's (origin/main, else main, else HEAD), not HEAD's: on a branch that merged main, HEAD's own merge of
+// main would otherwise pass for the pull request and lend the slice the verdicts of everything main gained since.
+// A commit that is itself on main's first-parent line (pushed to main, or a squash merge) was brought in by no pull
+// request merge, so it reads missing: a later, unrelated merge descends from it too and must not lend its approval.
 // A merged slice's answer never changes, so it is cached per newest trailer commit in the gitignored target/ folder,
-// with the merge it came from. An entry counts only while that merge is on HEAD's first-parent line; the cache holds a
-// hash of this script, check-review.mjs and dod-fingerprint.mjs, so a rule change starts it afresh; and a cache file
-// that git tracks (committed by a branch) is ignored.
-const mainLine = isRepo ? new Set(git(["rev-list", "--first-parent", "HEAD"]).out.split("\n")) : new Set();
+// with the merge it came from. An entry counts only while that merge is on main's line and reachable from HEAD; the cache
+// holds a hash of this script, check-review.mjs and dod-fingerprint.mjs, so a rule change starts it afresh; and a cache
+// file that git tracks (committed by a branch) is ignored.
+const lineRef = isRepo ? (["origin/main", "main"].find((r) => git(["rev-parse", "--verify", "-q", `${r}^{commit}`]).ok) ?? "HEAD") : "HEAD";
+const mainLine = isRepo ? new Set(git(["rev-list", "--first-parent", lineRef]).out.split("\n")) : new Set();
+const reachable = isRepo ? new Set(git(["rev-list", "HEAD"]).out.split("\n")) : new Set();
+const merged = (c) => mainLine.has(c) && reachable.has(c);
 // The newest commit on HEAD with a `Slice: <name>` line, per name, read in one pass (git log lists newest first). The
 // line is matched whole, not as a git trailer: commits here often put it above the attribution, apart from the trailers.
 const newestBySlice = new Map();
@@ -99,8 +104,8 @@ function agentLogReview(trailerName) {
   const newest = newestBySlice.get(trailerName);
   if (!newest || mainLine.has(newest)) return "missing";
   const hit = cached[newest];
-  if (hit && mainLine.has(hit.merge)) return hit.review;
-  const merge = git(["rev-list", "--merges", "--ancestry-path", "--topo-order", "--reverse", `${newest}..HEAD`]).out.split("\n").find((c) => mainLine.has(c));
+  if (hit && merged(hit.merge)) return hit.review;
+  const merge = git(["rev-list", "--merges", "--ancestry-path", "--topo-order", "--reverse", `${newest}..HEAD`]).out.split("\n").find(merged);
   // Not merged yet (the branch of the slice itself): nothing to cache, a later run finds the merge.
   if (!merge) return "missing";
   const review = mergedReview(merge);
@@ -121,7 +126,13 @@ function mergedReview(merge) {
     return null;
   }
   if (!reviewVerdicts(lines).length && !ignoredVerdicts(lines).length) return "missing";
-  const [problem] = reviewProblems(lines, treeFingerprintAt(root, head));
+  let tree;
+  try {
+    tree = treeFingerprintAt(root, head);
+  } catch {
+    return null;
+  }
+  const [problem] = reviewProblems(lines, tree);
   // Only the reason: the gate's advice ("run the reviewer again") cannot be followed once the slice has merged.
   return problem ? `not approved (agent log): ${problem.split(":")[0]}` : "approved (agent log)";
 }

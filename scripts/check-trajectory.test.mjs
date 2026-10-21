@@ -110,6 +110,39 @@ test("an archived slice is not counted as reviewed on a verdict that is stale, o
   git(direct, "switch", "-q", "main");
   git(direct, "merge", "-q", "--no-ff", "-m", "Merge pull request #2 from claude/other", "claude/other");
   assert.deepEqual(evidence(direct), { review: "missing", warned: true });
+  // A branch that merged main after an unapproved slice and a later approved pull request: the slice reads its own
+  // pull request's verdict, not the later one's, because merges are taken from main's first-parent line, not HEAD's.
+  const later = join(tmp, "branch-merged-main");
+  mkdirSync(later);
+  git(later, "init", "-q", "-b", "main");
+  write(later, "README.md", "x\n");
+  write(later, ".agent-log/actions.jsonl", "");
+  git(later, "add", "-A");
+  git(later, "commit", "-q", "-m", "Start");
+  git(later, "branch", "claude/b");
+  const pr = (branch, message, files, verdictFor) => {
+    git(later, "switch", "-q", "-c", branch, "main");
+    for (const [path, text] of Object.entries(files)) write(later, path, text);
+    git(later, "add", "-A");
+    git(later, "commit", "-q", "-m", message);
+    const log = readFileSync(join(later, ".agent-log/actions.jsonl"), "utf8");
+    write(later, ".agent-log/actions.jsonl", `${log}${verdictFor(treeFingerprintAt(later, "HEAD"))}\n`);
+    git(later, "add", "-A");
+    git(later, "commit", "-q", "-m", "Fold the review into the agent log");
+    git(later, "switch", "-q", "main");
+    git(later, "merge", "-q", "--no-ff", "-m", `Merge pull request from ${branch}`, branch);
+  };
+  const folder = "openspec/changes/archive/2026-10-22-demo";
+  pr("claude/demo", "Do the demo\n\nSlice: demo", { [`${folder}/design.md`]: "# D\n", [`${folder}/tasks.md`]: "- [x] 1.\n" }, (tree) =>
+    verdict(1, { tree, verdict: "CHANGES REQUESTED", blocking: 1 }),
+  );
+  pr("claude/other", "Do something else", { "scripts/other.mjs": "export const o = 1;\n" }, (tree) => verdict(2, { tree }));
+  git(later, "switch", "-q", "claude/b");
+  write(later, "scripts/b.mjs", "export const b = 1;\n");
+  git(later, "add", "-A");
+  git(later, "commit", "-q", "-m", "Work on b");
+  git(later, "merge", "-q", "--no-ff", "-m", "Merge main into claude/b", "main");
+  assert.match(evidence(later).review, /^not approved \(agent log\): The reviewer's last verdict is CHANGES REQUESTED/);
   // A cache entry whose merge is not on this history, or a cache file someone committed, is not believed. A cold run
   // of a slice with no verdict writes the cache; a planted entry then claims an approval for it.
   const planted = repo("planted", () => "");

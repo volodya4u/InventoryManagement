@@ -10,8 +10,13 @@ REQUESTED all fail it the same way they fail the gate.
 For each archived slice:
 1. The newest commit on `HEAD` with a `Slice: <name>` line. The line is matched whole in the commit message, because
    commits here often put it above the attribution, apart from git's trailer block.
-2. The first merge commit on `HEAD`'s first-parent line that descends from it: the pull request that brought it to
-   `main`. Its second parent is the branch head, its first parent the base.
+2. The first merge commit on `main`'s first-parent line (`origin/main`, else `main`, else `HEAD`), reachable from
+   `HEAD`, that descends from it: the pull request that brought it to `main`. Its second parent is the branch head, its
+   first parent the base. The line is `main`'s, not `HEAD`'s, because on a branch that merged `main` (as #95 did),
+   `HEAD`'s first-parent line holds the branch's own merge of `main`. Taken for the pull request, that merge's lines are
+   everything `main` gained since the branch was cut, so a slice would read the last verdict of another pull request
+   (found in the second review round). Where `origin/main` is behind what the branch merged, the slice reads `missing`,
+   never another pull request's verdict.
 
 A slice with no such commit, or not merged yet (the branch of the slice itself), reads `missing`. So does a merged slice
 whose pull request added no verdict at all, and a slice whose newest `Slice:` commit is itself on the first-parent line
@@ -24,8 +29,8 @@ The pre-commit hook runs this script on every commit. Finding the merge, diffing
 head cost about 0.3 s per slice, so a merged slice's answer is cached in `target/trajectory/review-cache.json`
 (gitignored), keyed by its newest trailer commit, with the merge it came from. The cache is believed only as far as
 this:
-- an entry counts while its merge is on `HEAD`'s first-parent line, so a checkout of another history gets the cold
-  answer;
+- an entry counts while its merge is on `main`'s first-parent line and reachable from `HEAD`, so a checkout of another
+  history gets the cold answer;
 - the file stores a hash of this script, `check-review.mjs` and `dod-fingerprint.mjs`, so a change to any part of the
   rule starts it afresh;
 - a cache file that git tracks (one a branch committed with `git add -f`) is ignored and never written.
