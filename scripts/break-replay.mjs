@@ -13,7 +13,7 @@ import { EVIDENCE_DIR, applyPatch, readRun, sha256, snapshot } from "./break-run
 import { executeRun } from "./test-run.mjs";
 
 const git = (root, args) => execFileSync("git", ["-C", root, ...args], { encoding: "utf8" }).trimEnd();
-const changed = (root, from, to) => git(root, ["diff", "--name-only", from, to]).split("\n").filter(Boolean);
+const changed = (root, from, to) => git(root, ["diff", "--name-only", "--no-renames", from, to]).split("\n").filter(Boolean);
 // The blob id of path in a tree object, or null when the tree has no such file.
 const blobIn = (root, tree, path) => git(root, ["ls-tree", tree, "--", path]).split(/\s+/)[2] ?? null;
 

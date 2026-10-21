@@ -3,7 +3,7 @@
 // are the ones a real run writes. Run: node --test scripts/break-run.test.mjs
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
@@ -148,6 +148,20 @@ test("a break that touches any test path is refused, not only the run's own test
   mkdirSync(join(root, "fixtures"));
   writeFileSync(join(root, "fixtures", "cases.json"), "[]\n"); // another test's input, not the code under test
   assert.match(breakRun(root, id).problem ?? "", /the break edits the test file fixtures\/cases\.json/);
+  assert.equal(records(root).filter((r) => r.step === "break").length, 0, "a refused break records nothing");
+});
+
+test("a break that moves a fixture out of its test folder is refused, so a rename does not hide the test path", () => {
+  const root = repo();
+  mkdirSync(join(root, "fixtures"));
+  writeFileSync(join(root, "fixtures", "cases.json"), '[{ "a": 2, "b": 3, "sum": 5 }]\n');
+  git(root, "add", "-A");
+  git(root, "commit", "-qm", "a fixture");
+  const { id } = startRun(root, "harness", "lib.test.mjs");
+  writeFileSync(join(root, "lib.mjs"), BROKEN);
+  // The same content under a path outside the folder: git's rename detection would list only cases.json.
+  renameSync(join(root, "fixtures", "cases.json"), join(root, "cases.json"));
+  assert.match(breakRun(root, id).problem ?? "", /the break edits the test file .*fixtures\/cases\.json/);
   assert.equal(records(root).filter((r) => r.step === "break").length, 0, "a refused break records nothing");
 });
 
