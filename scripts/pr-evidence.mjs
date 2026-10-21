@@ -287,6 +287,9 @@ export function newRows(plusLines, baseText) {
   return plusLines.filter((line) => rowNumber(line) && !before.has(rowNumber(line)));
 }
 
+// How a row's work was reviewed: the agent's reviewer subagent, a human, both, or nobody.
+export const REVIEW_METHODS = ["agent-reviewer", "human", "agent-reviewer + human", "none"];
+
 export function autonomyProblems(changedFiles, addedRows) {
   const touched = changedFiles.filter(significant);
   if (!touched.length) return [];
@@ -297,7 +300,7 @@ export function autonomyProblems(changedFiles, addedRows) {
     ];
   }
   return addedRows.flatMap((row) => {
-    const [n, , level, who, evidence, why] = tableCells(row);
+    const [n, , level, who, evidence, why, review, validity] = tableCells(row);
     const problems = [];
     if (!/^[1-5]\b/.test(level ?? "")) problems.push(`row ${n}: the level must be 1-5 (found "${level ?? ""}")`);
     if (!who) problems.push(`row ${n}: names no one who decided`);
@@ -305,6 +308,14 @@ export function autonomyProblems(changedFiles, addedRows) {
       problems.push(`row ${n}: the evidence points nowhere (give a commit, a run, a file or a command)`);
     }
     if (!why) problems.push(`row ${n}: says nothing about why this level`);
+    // Review method and evidence validity are recorded apart from the level: #52 weakened its evidence (a hand-written
+    // reviewer line) without changing the level, and a number alone could not say so.
+    if (!REVIEW_METHODS.includes(review ?? "")) {
+      problems.push(`row ${n}: the review method must be one of ${REVIEW_METHODS.join(", ")} (found "${review ?? ""}")`);
+    }
+    if (!/^(valid|weakened: \S.*|invalid: \S.*)$/.test(validity ?? "")) {
+      problems.push(`row ${n}: the evidence validity must be valid, or weakened: <why> or invalid: <why> (found "${validity ?? ""}")`);
+    }
     return problems.map((p) => `docs/autonomy-log.md ${p}`);
   });
 }
