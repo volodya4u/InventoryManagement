@@ -23,7 +23,9 @@ docs/qa/trajectory-report.md trace`, not the whole of `docs/qa` (the waivers are
 - Requirements: `docs/requirements.md` — ids `FR-n`, `NFR-n`, `TC-n`, `BC-n`, each MVP FR/NFR row with its evidence and a
   verification class. A row with no class fails `--mode=existence`; use `local-verifiable` (the others, such as `e2e`
   or `pixel-diff`, have no mechanism here and fail it). Open questions `OQ-n`
-  are questions for the owner, not defects: never "fix" what one describes, and record the owner's answer in its row.
+  are questions for the owner, not defects: never "fix" what one describes. An answer follows "Owner decisions" in
+  `openspec/project.md`: the row gets its status, the owner's words, owner, date and reference, then the requirement
+  and its spec say it, then a `@trace` test holds it (`scripts/decisions.mjs` checks the row).
 - Baseline specs: `openspec/specs/<capability>/` describe the shipped behavior, and each requirement cites its FR ids;
   `openspec/project.md` has the layout and rules. Existing behavior changes only through a slice the user approved.
 - Spec track for new work: a feature that changes the schema, an API and a page together gets

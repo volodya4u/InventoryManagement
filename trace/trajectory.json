@@ -114,6 +114,13 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-22-agents-decision-recipe",
+      "reviewEvidence": "missing",
+      "trailerCommits": 0,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-22-decisions-trace-scope",
       "reviewEvidence": "missing",
       "trailerCommits": 1,
@@ -215,6 +222,14 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-22-agents-decision-recipe: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "trailer",
+      "msg": "2026-10-22-agents-decision-recipe: no commit carries a \"Slice: agents-decision-recipe\" trailer"
     },
     {
       "check": "review-evidence",

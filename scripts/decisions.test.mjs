@@ -1,11 +1,12 @@
 // Tests for scripts/decisions.mjs, plus the check on this repository's own open questions (so CI fails a malformed one).
 // Run: node --test scripts/decisions.test.mjs
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, test } from "node:test";
 import { decisionProblems, parseOpenQuestions, repoDecisionProblems } from "./decisions.mjs";
+import { agentsSection } from "./factory-rules-evals.mjs";
 
 const tmp = mkdtempSync(join(tmpdir(), "decisions-"));
 after(() => rmSync(tmp, { recursive: true, force: true }));
@@ -100,6 +101,14 @@ test("a test's @trace is read from its own lines, never from the test above it",
   assert.deepEqual(repoDecisionProblems(java), []);
   write(ts, "frontend/src/app/flow.spec.ts", "describe('flow', () => {\n  it('tagged', () => {});\n  // @trace FR-81\n  it('keeps the stored price', () => {});\n});\n");
   assert.deepEqual(repoDecisionProblems(ts), []);
+});
+
+test("AGENTS.md sends an owner's answer through the decisions recipe and its check", () => {
+  const rules = agentsSection(readFileSync("AGENTS.md", "utf8"));
+  assert.match(rules, /"Owner decisions" in\s+`openspec\/project\.md`/);
+  assert.match(rules, /`scripts\/decisions\.mjs` checks the row/);
+  // The section AGENTS.md names must exist, or the pointer leads nowhere.
+  assert.match(readFileSync("openspec/project.md", "utf8"), /^## Owner decisions\b/m);
 });
 
 test("the repository's own open questions are well formed", () => {
