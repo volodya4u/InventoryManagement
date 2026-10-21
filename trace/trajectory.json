@@ -51,6 +51,20 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-20-git-output-deny-rules",
+      "reviewEvidence": "missing",
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-20-push-branch-entry-tests",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-20-structured-test-evidence",
       "reviewEvidence": "missing",
       "trailerCommits": 2,
@@ -66,6 +80,20 @@
     },
     {
       "slice": "2026-10-21-break-run-no-renames",
+      "reviewEvidence": "missing",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-21-ci-evidence-pipefail",
+      "reviewEvidence": "missing",
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-21-ci-tee-pipefail",
       "reviewEvidence": "missing",
       "trailerCommits": 1,
       "libDomains": [],
@@ -189,6 +217,14 @@
     },
     {
       "check": "review-evidence",
+      "msg": "2026-10-20-git-output-deny-rules: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-20-push-branch-entry-tests: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
       "msg": "2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)"
     },
     {
@@ -198,6 +234,14 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-break-run-no-renames: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-21-ci-evidence-pipefail: review-findings.json is missing (review must have run clean before archive)"
+    },
+    {
+      "check": "review-evidence",
+      "msg": "2026-10-21-ci-tee-pipefail: review-findings.json is missing (review must have run clean before archive)"
     },
     {
       "check": "review-evidence",

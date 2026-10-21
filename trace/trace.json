@@ -2533,22 +2533,6 @@
     {
       "check": "recording-evidence",
       "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"ci-evidence-pipefail\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"ci-tee-pipefail\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"git-output-deny-rules\" is not archived"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"push-branch-entry-tests\" is not archived"
     }
   ]
 }

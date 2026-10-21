@@ -5,8 +5,8 @@ archived slice took: review evidence, `Slice:` trailers, and module scope.
 It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
-Scope: 18 archived slice(s).
-Result: PASS, 25 warning(s)
+Scope: 22 archived slice(s).
+Result: PASS, 29 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
@@ -17,9 +17,13 @@ Result: PASS, 25 warning(s)
 | 2026-10-12-harden-sales-reports-history-tests | **missing** | 1 | **no** | - |
 | 2026-10-12-harden-security-tests | **missing** | 1 | **no** | - |
 | 2026-10-20-gate-status-explicit | **missing** | 3 | yes | - |
+| 2026-10-20-git-output-deny-rules | **missing** | 2 | yes | - |
+| 2026-10-20-push-branch-entry-tests | **missing** | 1 | yes | - |
 | 2026-10-20-structured-test-evidence | **missing** | 2 | yes | - |
 | 2026-10-21-break-run-follow-ups | **missing** | 1 | yes | - |
 | 2026-10-21-break-run-no-renames | **missing** | 1 | yes | - |
+| 2026-10-21-ci-evidence-pipefail | **missing** | 2 | yes | - |
+| 2026-10-21-ci-tee-pipefail | **missing** | 1 | yes | - |
 | 2026-10-21-replayable-break-runs | **missing** | 1 | yes | - |
 | 2026-10-21-review-provenance-local | **missing** | 1 | yes | - |
 | 2026-10-21-review-signed-approval | **missing** | 2 | yes | - |
@@ -53,9 +57,13 @@ None.
 - **review-evidence**: 2026-10-12-harden-security-tests: review-findings.json is missing (review must have run clean before archive)
 - **process**: 2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md
 - **review-evidence**: 2026-10-20-gate-status-explicit: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-20-git-output-deny-rules: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-20-push-branch-entry-tests: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-break-run-follow-ups: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-break-run-no-renames: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-21-ci-evidence-pipefail: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-21-ci-tee-pipefail: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-replayable-break-runs: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-review-provenance-local: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-review-signed-approval: review-findings.json is missing (review must have run clean before archive)
