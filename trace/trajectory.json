@@ -60,7 +60,7 @@
     {
       "slice": "2026-10-21-replayable-break-runs",
       "reviewEvidence": "missing",
-      "trailerCommits": 0,
+      "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
     },
@@ -159,10 +159,6 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-replayable-break-runs: review-findings.json is missing (review must have run clean before archive)"
-    },
-    {
-      "check": "trailer",
-      "msg": "2026-10-21-replayable-break-runs: no commit carries a \"Slice: replayable-break-runs\" trailer"
     },
     {
       "check": "review-evidence",

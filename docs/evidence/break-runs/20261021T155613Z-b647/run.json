@@ -1,0 +1,88 @@
+{
+  "id": "20261021T155613Z-b647",
+  "target": "harness",
+  "selector": "scripts/test-results.test.mjs",
+  "baseTree": "dd9f82b12899d2ae981f0a4c106be0dbfaf1c7c1",
+  "testFiles": {
+    "scripts/test-results.test.mjs": "1b2f17508258ec9baa2f617ebd51cb4e6bb8abe9"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-21T15:56:13.870Z",
+      "code": "4bf6e53e1cbab5ab05953567a18de67205bfec960c09a512470a7b517219ddd9",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "scripts/test-results.test.mjs › junit: Surefire reports give each test as Class#method, with a failure as assertion, an error as error and a skipped test as skipped",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › junit: node:test reports name each test by file and title, nested under its suites, and tell an AssertionError from another error",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › vitest: the JSON report names each test by file and title and tells an AssertionError from another error",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › a report that cannot be read gives no results, so the run is unstructured",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-21T15:56:27.270Z",
+      "code": "9f2e13f707cdf2cc52909ecdda889b4fcfc745dcfa8efd933cb93c195e4d44a7",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "scripts/test-results.test.mjs › junit: Surefire reports give each test as Class#method, with a failure as assertion, an error as error and a skipped test as skipped",
+          "status": "assertion"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › junit: node:test reports name each test by file and title, nested under its suites, and tell an AssertionError from another error",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › vitest: the JSON report names each test by file and title and tells an AssertionError from another error",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › a report that cannot be read gives no results, so the run is unstructured",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-21T15:56:36.607Z",
+      "code": "4bf6e53e1cbab5ab05953567a18de67205bfec960c09a512470a7b517219ddd9",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "scripts/test-results.test.mjs › junit: Surefire reports give each test as Class#method, with a failure as assertion, an error as error and a skipped test as skipped",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › junit: node:test reports name each test by file and title, nested under its suites, and tell an AssertionError from another error",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › vitest: the JSON report names each test by file and title and tells an AssertionError from another error",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/test-results.test.mjs › a report that cannot be read gives no results, so the run is unstructured",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "e0716ae11a968650c116a60287b4a46087bdb02b",
+  "patchSha256": "93c9708f27d19a6b62d2297eb28029bc9ad255a77f73741308dc02d094676362",
+  "patchFiles": [
+    "scripts/test-results.mjs"
+  ]
+}
