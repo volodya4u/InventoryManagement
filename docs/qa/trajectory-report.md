@@ -5,33 +5,34 @@ archived slice took: review evidence, `Slice:` trailers, and module scope.
 It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
-Scope: 22 archived slice(s).
-Result: PASS, 29 warning(s)
+Scope: 23 archived slice(s).
+Result: PASS, 11 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
 | 2026-10-12-harden-frontend-specs | **missing** | **0** | **no** | - |
-| 2026-10-12-harden-infrastructure-tests | **missing** | 1 | **no** | - |
-| 2026-10-12-harden-product-and-production-tests | **missing** | 1 | **no** | - |
-| 2026-10-12-harden-raw-material-tests | **missing** | 1 | **no** | - |
-| 2026-10-12-harden-sales-reports-history-tests | **missing** | 1 | **no** | - |
-| 2026-10-12-harden-security-tests | **missing** | 1 | **no** | - |
-| 2026-10-20-gate-status-explicit | **missing** | 3 | yes | - |
-| 2026-10-20-git-output-deny-rules | **missing** | 2 | yes | - |
-| 2026-10-20-push-branch-entry-tests | **missing** | 1 | yes | - |
-| 2026-10-20-structured-test-evidence | **missing** | 2 | yes | - |
-| 2026-10-21-break-run-follow-ups | **missing** | 1 | yes | - |
-| 2026-10-21-break-run-no-renames | **missing** | 1 | yes | - |
-| 2026-10-21-ci-evidence-pipefail | **missing** | 2 | yes | - |
-| 2026-10-21-ci-tee-pipefail | **missing** | 1 | yes | - |
-| 2026-10-21-replayable-break-runs | **missing** | 1 | yes | - |
-| 2026-10-21-review-provenance-local | **missing** | 1 | yes | - |
-| 2026-10-21-review-signed-approval | **missing** | 2 | yes | - |
-| 2026-10-21-signed-approval-follow-ups | **missing** | 2 | yes | - |
-| 2026-10-21-structured-decisions | **missing** | 1 | yes | - |
-| 2026-10-21-structured-evidence-followups | **missing** | 2 | yes | - |
-| 2026-10-22-agents-decision-recipe | **missing** | 1 | yes | - |
-| 2026-10-22-decisions-trace-scope | **missing** | 1 | yes | - |
+| 2026-10-12-harden-infrastructure-tests | approved (agent log) | 1 | **no** | - |
+| 2026-10-12-harden-product-and-production-tests | approved (agent log) | 1 | **no** | - |
+| 2026-10-12-harden-raw-material-tests | approved (agent log) | 1 | **no** | - |
+| 2026-10-12-harden-sales-reports-history-tests | approved (agent log) | 1 | **no** | - |
+| 2026-10-12-harden-security-tests | approved (agent log) | 1 | **no** | - |
+| 2026-10-20-gate-status-explicit | approved (agent log) | 3 | yes | - |
+| 2026-10-20-git-output-deny-rules | approved (agent log) | 2 | yes | - |
+| 2026-10-20-push-branch-entry-tests | approved (agent log) | 1 | yes | - |
+| 2026-10-20-structured-test-evidence | approved (agent log) | 2 | yes | - |
+| 2026-10-21-break-run-follow-ups | approved (agent log) | 1 | yes | - |
+| 2026-10-21-break-run-no-renames | approved (agent log) | 1 | yes | - |
+| 2026-10-21-ci-evidence-pipefail | approved (agent log) | 2 | yes | - |
+| 2026-10-21-ci-tee-pipefail | approved (agent log) | 1 | yes | - |
+| 2026-10-21-replayable-break-runs | approved (agent log) | 1 | yes | - |
+| 2026-10-21-review-provenance-local | approved (agent log) | 1 | yes | - |
+| 2026-10-21-review-signed-approval | approved (agent log) | 2 | yes | - |
+| 2026-10-21-signed-approval-follow-ups | approved (agent log) | 2 | yes | - |
+| 2026-10-21-structured-decisions | approved (agent log) | 1 | yes | - |
+| 2026-10-21-structured-evidence-followups | **not approved (agent log)** | 2 | yes | - |
+| 2026-10-22-agents-decision-recipe | approved (agent log) | 1 | yes | - |
+| 2026-10-22-decisions-trace-scope | approved (agent log) | 1 | yes | - |
+| 2026-10-22-trajectory-review-from-log | **missing** | **0** | yes | - |
 
 ## Cross-slice module overlap
 
@@ -43,32 +44,14 @@ None.
 
 ## Warnings
 
-- **review-evidence**: 2026-10-12-harden-frontend-specs: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-12-harden-frontend-specs: no review-findings.json, and the agent log's review is missing (review must have run clean before archive)
 - **process**: 2026-10-12-harden-frontend-specs: archived change is missing design.md and/or tasks.md
 - **trailer**: 2026-10-12-harden-frontend-specs: no commit carries a "Slice: harden-frontend-specs" trailer
-- **review-evidence**: 2026-10-12-harden-infrastructure-tests: review-findings.json is missing (review must have run clean before archive)
 - **process**: 2026-10-12-harden-infrastructure-tests: archived change is missing design.md and/or tasks.md
-- **review-evidence**: 2026-10-12-harden-product-and-production-tests: review-findings.json is missing (review must have run clean before archive)
 - **process**: 2026-10-12-harden-product-and-production-tests: archived change is missing design.md and/or tasks.md
-- **review-evidence**: 2026-10-12-harden-raw-material-tests: review-findings.json is missing (review must have run clean before archive)
 - **process**: 2026-10-12-harden-raw-material-tests: archived change is missing design.md and/or tasks.md
-- **review-evidence**: 2026-10-12-harden-sales-reports-history-tests: review-findings.json is missing (review must have run clean before archive)
 - **process**: 2026-10-12-harden-sales-reports-history-tests: archived change is missing design.md and/or tasks.md
-- **review-evidence**: 2026-10-12-harden-security-tests: review-findings.json is missing (review must have run clean before archive)
 - **process**: 2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md
-- **review-evidence**: 2026-10-20-gate-status-explicit: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-20-git-output-deny-rules: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-20-push-branch-entry-tests: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-break-run-follow-ups: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-break-run-no-renames: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-ci-evidence-pipefail: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-ci-tee-pipefail: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-replayable-break-runs: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-review-provenance-local: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-review-signed-approval: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-signed-approval-follow-ups: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-structured-decisions: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-21-structured-evidence-followups: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-22-agents-decision-recipe: review-findings.json is missing (review must have run clean before archive)
-- **review-evidence**: 2026-10-22-decisions-trace-scope: review-findings.json is missing (review must have run clean before archive)
+- **review-evidence**: 2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs): run the reviewer again on the final diff, then commit. (review must have run clean before archive)
+- **review-evidence**: 2026-10-22-trajectory-review-from-log: no review-findings.json, and the agent log's review is missing (review must have run clean before archive)
+- **trailer**: 2026-10-22-trajectory-review-from-log: no commit carries a "Slice: trajectory-review-from-log" trailer

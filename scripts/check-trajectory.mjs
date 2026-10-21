@@ -29,6 +29,9 @@
 import { readdirSync, readFileSync, statSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { addedLogLines, ignoredVerdicts, reviewProblems, reviewVerdicts } from "./check-review.mjs";
+import { treeFingerprintAt } from "./dod-fingerprint.mjs";
 
 const root = process.cwd();
 const flags = new Set(process.argv.slice(2));
@@ -56,6 +59,60 @@ function git(args) {
 const isRepo = git(["rev-parse", "--is-inside-work-tree"]).ok;
 if (!isRepo) warn("git", "not a git work tree — trailer/scope checks skipped");
 
+// ADAPTATION (2026-10-22, owner-approved): this repository reviews with the `reviewer` subagent, whose verdict a hook
+// records in .agent-log/actions.jsonl, not with the review workflow that writes review-findings.json. A slice without
+// that file is reviewed when the pull request that merged it (the first merge on HEAD's first-parent line that brought
+// in the newest commit carrying its trailer) added a verdict that passes the rule pr-evidence applies: the last
+// hook-recorded verdict is APPROVE with 0 blocking, on the branch head's tree (scripts/check-review.mjs).
+// A merged slice's answer never changes, so it is cached per newest trailer commit in the gitignored target/ folder;
+// the cache also holds a hash of this script and check-review.mjs, so a rule change starts it afresh.
+const mainLine = isRepo ? new Set(git(["rev-list", "--first-parent", "HEAD"]).out.split("\n")) : new Set();
+// The newest commit on HEAD with a `Slice: <name>` line, per name, read in one pass (git log lists newest first). The
+// line is matched whole, not as a git trailer: commits here often put it above the attribution, apart from the trailers.
+const newestBySlice = new Map();
+if (isRepo) {
+  for (const entry of git(["log", "HEAD", "--grep=^Slice:", "--format=%H%n%B%x1e"]).out.split("\x1e")) {
+    const [sha, ...body] = entry.trim().split("\n");
+    for (const m of body.join("\n").matchAll(/^Slice:[ \t]*(\S+)[ \t]*$/gm)) if (!newestBySlice.has(m[1])) newestBySlice.set(m[1], sha);
+  }
+}
+const CACHE = "target/trajectory/review-cache.json";
+const RULES = createHash("sha256")
+  .update(readFileSync(new URL(import.meta.url)))
+  .update(readFileSync(new URL("./check-review.mjs", import.meta.url)))
+  .digest("hex");
+const cached = (() => {
+  try {
+    const c = JSON.parse(read(CACHE));
+    return c.rules === RULES ? c.reviews : {};
+  } catch {
+    return {};
+  }
+})();
+const cacheSize = Object.keys(cached).length;
+function agentLogReview(trailerName) {
+  const newest = newestBySlice.get(trailerName);
+  if (!newest) return "missing";
+  if (cached[newest]) return cached[newest];
+  const merge = git(["rev-list", "--merges", "--ancestry-path", "--reverse", `${newest}..HEAD`]).out.split("\n").find((c) => mainLine.has(c));
+  // Not merged yet (the branch of the slice itself): nothing to cache, a later run finds the merge.
+  if (!merge) return "missing";
+  return (cached[newest] = mergedReview(merge));
+}
+function mergedReview(merge) {
+  const [base, head] = git(["rev-parse", `${merge}^1`, `${merge}^2`]).out.split("\n");
+  let lines;
+  try {
+    lines = addedLogLines(base, head);
+  } catch {
+    return "missing";
+  }
+  if (!reviewVerdicts(lines).length && !ignoredVerdicts(lines).length) return "missing";
+  const [problem] = reviewProblems(lines, treeFingerprintAt(root, head));
+  return problem ? `not approved (agent log): ${problem}` : "approved (agent log)";
+}
+const REVIEWED = new Set(["clean", "approved (agent log)"]);
+
 // ---------- discover archived slices ----------
 const archiveAbs = join(root, PATHS.archiveDir);
 const slices = existsSync(archiveAbs)
@@ -81,9 +138,12 @@ for (const slice of slices) {
     } catch {
       reviewEvidence = "unparseable";
     }
+  } else if (isRepo) {
+    reviewEvidence = agentLogReview(trailerName);
   }
-  if (reviewEvidence !== "clean") {
-    gated(flags.has("--release"), "review-evidence", `${slice}: review-findings.json is ${reviewEvidence} (review must have run clean before archive)`);
+  if (!REVIEWED.has(reviewEvidence)) {
+    const what = rf || !isRepo ? `review-findings.json is ${reviewEvidence}` : `no review-findings.json, and the agent log's review is ${reviewEvidence}`;
+    gated(flags.has("--release"), "review-evidence", `${slice}: ${what} (review must have run clean before archive)`);
   }
 
   // 2. process completeness
@@ -146,7 +206,7 @@ Result: ${failures.length === 0 ? "PASS" : `FAIL (${failures.length} failure${fa
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
 ${rows
-  .map((r) => `| ${r.slice} | ${r.reviewEvidence === "clean" ? "clean" : `**${r.reviewEvidence}**`} | ${r.trailerCommits || "**0**"} | ${ok(r.processComplete)} | ${r.libDomains.join(", ") || "-"} |`)
+  .map((r) => `| ${r.slice} | ${REVIEWED.has(r.reviewEvidence) ? r.reviewEvidence : `**${r.reviewEvidence.split(":")[0]}**`} | ${r.trailerCommits || "**0**"} | ${ok(r.processComplete)} | ${r.libDomains.join(", ") || "-"} |`)
   .join("\n")}
 
 ## Cross-slice module overlap
@@ -161,6 +221,11 @@ ${failures.length ? failures.map((f) => `- **${f.check}**: ${f.msg}`).join("\n")
 
 ${warnings.length ? warnings.map((w) => `- **${w.check}**: ${w.msg}`).join("\n") : "None."}
 `;
+
+if (Object.keys(cached).length !== cacheSize) {
+  mkdirSync(join(root, "target", "trajectory"), { recursive: true });
+  writeFileSync(join(root, CACHE), `${JSON.stringify({ rules: RULES, reviews: cached }, null, 2)}\n`);
+}
 
 const trajectory = {
   generatedBy: "scripts/check-trajectory.mjs",

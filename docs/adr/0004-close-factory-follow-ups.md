@@ -55,6 +55,10 @@ The owner asked for all four in one pull request.
 - `node scripts/check-trajectory.mjs` now lists the six archived slices and warns that each has no `review-findings.json` and no
   `design.md` (ADR-0003 predicted this swap). The review evidence of those slices is the `pr-evidence` job of the pull request that
   merged each one, linked from its row in `docs/autonomy-log.md`; no file was written to satisfy the warning.
+  *Update 2026-10-22 (owner's choice):* still no file is written, but `check-trajectory.mjs` now reads that evidence
+  itself. A slice without `review-findings.json` counts as reviewed when the pull request that merged it recorded the
+  reviewer's APPROVE (0 blocking) on its head tree, by the rule of `scripts/check-review.mjs`
+  (`openspec/changes/archive/2026-10-22-trajectory-review-from-log/`).
 - `trace/ledger.jsonl` stays on disk in existing clones but is no longer tracked; a fresh clone starts with an empty ledger.
 - Still open: the `Slice:` trailer warning of `check-trajectory.mjs` for `harden-frontend-specs`, and the recording-evidence
   warnings, which belong to the factory's Playwright layer this repo does not use.
