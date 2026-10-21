@@ -1,0 +1,13 @@
+diff --git a/scripts/break-replay.mjs b/scripts/break-replay.mjs
+index ae5ed0e..88b45c4 100644
+--- a/scripts/break-replay.mjs
++++ b/scripts/break-replay.mjs
+@@ -55,7 +55,7 @@ export function replayRun(root, id) {
+     for (const id of expected) {
+       const seen = status.get(id) ?? "not run";
+       lines.push(`broken:   ${id}: ${seen}`);
+-      if (seen !== "assertion") problems.push(`${id} was recorded failing on an assertion, but the replay saw ${seen}`);
++      if (seen !== "assertion" && seen !== "pass") problems.push(`${id} was recorded failing on an assertion, but the replay saw ${seen}`);
+     }
+   } finally {
+     const reversed = applyPatch(root, patch, { reverse: true });

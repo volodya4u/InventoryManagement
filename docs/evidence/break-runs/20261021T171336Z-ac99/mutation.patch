@@ -1,0 +1,12 @@
+diff --git a/scripts/break-replay.mjs b/scripts/break-replay.mjs
+index ae5ed0e..4c1ca6b 100644
+--- a/scripts/break-replay.mjs
++++ b/scripts/break-replay.mjs
+@@ -36,7 +36,6 @@ export function replayRun(root, id) {
+   if (!run?.patchSha256) return { problems: [`no recorded break run ${id} under ${EVIDENCE_DIR}`], lines };
+   if (!run.steps.some((s) => s.step === "restore")) return { problems: [`run ${id} was never restored, so it is not complete evidence: there is nothing to replay`], lines };
+   const patch = join(root, EVIDENCE_DIR, id, "mutation.patch");
+-  if (sha256(readFileSync(patch)) !== run.patchSha256) return { problems: ["mutation.patch is not the patch the run recorded"], lines };
+   const expected = (run.steps.find((s) => s.step === "break")?.results ?? []).filter((t) => t.status === "assertion").map((t) => t.id);
+   if (!expected.length) return { problems: ["the recorded break has no test that failed on an assertion"], lines };
+   // A test changed since the run may no longer check what the break broke, so its result here would prove nothing.

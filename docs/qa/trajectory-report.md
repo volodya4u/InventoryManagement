@@ -6,7 +6,7 @@ It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
 Scope: 14 archived slice(s).
-Result: PASS, 22 warning(s)
+Result: PASS, 21 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
@@ -18,7 +18,7 @@ Result: PASS, 22 warning(s)
 | 2026-10-12-harden-security-tests | **missing** | 1 | **no** | - |
 | 2026-10-20-gate-status-explicit | **missing** | 3 | yes | - |
 | 2026-10-20-structured-test-evidence | **missing** | 2 | yes | - |
-| 2026-10-21-break-run-follow-ups | **missing** | **0** | yes | - |
+| 2026-10-21-break-run-follow-ups | **missing** | 1 | yes | - |
 | 2026-10-21-replayable-break-runs | **missing** | 1 | yes | - |
 | 2026-10-21-review-provenance-local | **missing** | 1 | yes | - |
 | 2026-10-21-review-signed-approval | **missing** | 2 | yes | - |
@@ -51,7 +51,6 @@ None.
 - **review-evidence**: 2026-10-20-gate-status-explicit: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-20-structured-test-evidence: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-break-run-follow-ups: review-findings.json is missing (review must have run clean before archive)
-- **trailer**: 2026-10-21-break-run-follow-ups: no commit carries a "Slice: break-run-follow-ups" trailer
 - **review-evidence**: 2026-10-21-replayable-break-runs: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-review-provenance-local: review-findings.json is missing (review must have run clean before archive)
 - **review-evidence**: 2026-10-21-review-signed-approval: review-findings.json is missing (review must have run clean before archive)
