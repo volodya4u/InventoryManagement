@@ -1,0 +1,148 @@
+{
+  "id": "20261021T171745Z-fc51",
+  "target": "harness",
+  "selector": "scripts/break-run.test.mjs",
+  "baseTree": "270418b484083558b1898ce10c2ad332d2ab3c4f",
+  "testFiles": {
+    "scripts/break-run.test.mjs": "ce889dca97abfbc269af7d7a96f9163279d2b372"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-21T17:17:46.327Z",
+      "code": "28362ec655ea5a4524ff99f1eef01c760b13e0f18b6ec12cf23ea04b8d3fef05",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "scripts/break-run.test.mjs › start, break and restore record the patch, the fingerprints and each test's results under one run id",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › a break that edits the test file, changes nothing, or starts from a red test is refused",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay applies the recorded patch, sees the test fail as recorded, and leaves the tree as it was",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › restore accepts a break undone by hand and refuses a tree that is not the start's",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › a break that touches any test path is refused, not only the run's own test file",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay judges the tree by its content as git stores it, so a file git status flags with unchanged content does not fail it",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay refuses a run that was never restored, or whose test file is not the one the run recorded",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay refuses a mutation.patch that is not the patch the run recorded, and changes nothing",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay reports a recorded break that no longer fails its test",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-21T17:19:07.778Z",
+      "code": "1ab306746ddb768c74fb6d31fa8b8c95eb525e024cd26624385e10ed8201d0d2",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "scripts/break-run.test.mjs › start, break and restore record the patch, the fingerprints and each test's results under one run id",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › a break that edits the test file, changes nothing, or starts from a red test is refused",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay applies the recorded patch, sees the test fail as recorded, and leaves the tree as it was",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › restore accepts a break undone by hand and refuses a tree that is not the start's",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › a break that touches any test path is refused, not only the run's own test file",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay judges the tree by its content as git stores it, so a file git status flags with unchanged content does not fail it",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay refuses a run that was never restored, or whose test file is not the one the run recorded",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay refuses a mutation.patch that is not the patch the run recorded, and changes nothing",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay reports a recorded break that no longer fails its test",
+          "status": "assertion"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-21T17:20:20.448Z",
+      "code": "28362ec655ea5a4524ff99f1eef01c760b13e0f18b6ec12cf23ea04b8d3fef05",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "scripts/break-run.test.mjs › start, break and restore record the patch, the fingerprints and each test's results under one run id",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › a break that edits the test file, changes nothing, or starts from a red test is refused",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay applies the recorded patch, sees the test fail as recorded, and leaves the tree as it was",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › restore accepts a break undone by hand and refuses a tree that is not the start's",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › a break that touches any test path is refused, not only the run's own test file",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay judges the tree by its content as git stores it, so a file git status flags with unchanged content does not fail it",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay refuses a run that was never restored, or whose test file is not the one the run recorded",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay refuses a mutation.patch that is not the patch the run recorded, and changes nothing",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/break-run.test.mjs › replay reports a recorded break that no longer fails its test",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "54eaf50f750783c7a7a335d0fc64d2685ad5a32c",
+  "patchSha256": "f1b6e8c3701da47851f7240b034408f2f6c659900fd8b6cda193acb0d99f5a5d",
+  "patchFiles": [
+    "scripts/break-replay.mjs"
+  ]
+}

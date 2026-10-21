@@ -32,7 +32,7 @@ import { parseSpec, prSpecProblems, tableCells, validateSpecs } from "./check-sp
 import { codeFingerprintAt, treeFingerprintAt } from "./dod-fingerprint.mjs";
 import { INPUT_PATHS, RECORD_PATH, inputsFingerprint, recordProblems } from "./eval-record.mjs";
 import { humanApprovalGate, signedApproval } from "./signed-approval.mjs";
-import { sha256 } from "./break-run.mjs";
+import { isTestPath, sha256 } from "./break-run.mjs";
 
 const TOOL_EVENTS = new Set(["PreToolUse", "PostToolUse", "PostToolUseFailure"]);
 // Work that steers or bounds the agent, or a feature with a spec: always worth a row in the autonomy log.
@@ -172,7 +172,7 @@ function statusIn(run, test) {
 }
 
 // Why no break run (scripts/break-run.mjs) proves a hardening criterion, or null when one does: a green start, a break
-// that changed code (not the test file) and failed the criterion's own test on an assertion, and a restore of that same
+// that changed code (no test path, isTestPath) and failed the criterion's own test on an assertion, and a restore of that same
 // patch back to the start's code, green, on the head commit's code. The patch must be committed as it ran: patches maps
 // a run id to the SHA-256 of docs/evidence/break-runs/<run>/mutation.patch at the head commit.
 function breakRunReason(records, test, headCode, patches) {
@@ -190,8 +190,8 @@ function breakRunReason(records, test, headCode, patches) {
           ? "the break did not fail this test on an assertion"
           : brk.code === start.code
             ? "the break changed no code"
-            : (brk.patchFiles ?? []).some((f) => tests.includes(f))
-              ? "the break edits the test file"
+            : (brk.patchFiles ?? []).some((f) => tests.includes(f) || isTestPath(f))
+              ? "the break edits a test or its fixtures"
               : !restore || statusIn(restore, test) !== "pass"
                 ? "it was not restored to green"
                 : restore.patchSha256 !== brk.patchSha256
@@ -456,9 +456,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     [...new Set(records.filter((r) => r.event === "BreakRun").map((r) => r.run))]
       .filter((id) => /^[\w.-]+$/.test(String(id)))
       .flatMap((id) => {
-        // The blob's bytes, untrimmed: the run hashed git's diff output exactly as it wrote it.
+        // The blob's bytes, untrimmed: the run hashed git's diff output exactly as it wrote it. git's complaint about a run
+        // with no committed patch is dropped: the gate names that run itself.
         try {
-          return [[id, sha256(execFileSync("git", ["-C", root, "show", `${head}:docs/evidence/break-runs/${id}/mutation.patch`], { maxBuffer: 64 * 1024 * 1024 }))]];
+          const show = ["-C", root, "show", `${head}:docs/evidence/break-runs/${id}/mutation.patch`];
+          return [[id, sha256(execFileSync("git", show, { maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] }))]];
         } catch {
           return [];
         }
