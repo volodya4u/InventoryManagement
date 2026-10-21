@@ -10,6 +10,7 @@ import {
   dodProblems,
   evalsProblems,
   gateStatus,
+  humanApprovalRow,
   newRows,
   parseGateWaiver,
   redGreenGate,
@@ -361,4 +362,28 @@ test("the report shows PASS, FAIL, N/A and WAIVED in their own words", () => {
   assert.match(text, /AssertionError: a \\\| b/);
   assert.match(text, /\| harness scripts\/a\.test\.mjs \| ❌ assertion \| 1 assertion \| AssertionError: a \\\| b \| yes \|/);
   assert.match(text, /\| backend FlowTest \| ✅ pass \| unstructured \(does not count\) \|  \| no \|/);
+});
+
+test("the report shows the Human approval row after Review: FAIL in CI without a signature, N/A locally, PASS when signed", () => {
+  const missing = { state: "missing", tag: "approve/abc", ignored: [] };
+  const valid = { state: "valid", tag: "approve/abc", signer: "owner@example.com", ignored: [] };
+  const table = (row) =>
+    report({
+      base: "origin/main",
+      head: "abc1234",
+      gates: [{ name: "Review", applies: true, problems: [], detail: "APPROVE on the head commit's files" }, row],
+      dodRuns: [],
+      testRuns: [],
+      reviews: [],
+      headCode: "y",
+      headTree: "z",
+      activity: { sessions: 1, modes: {}, executed: 0, failed: 0, blocked: [] },
+    });
+  // GitHub sets GITHUB_ACTIONS=true in every job; anything else is a local run.
+  const ci = table(humanApprovalRow(missing, { GITHUB_ACTIONS: "true" }));
+  assert.match(ci, /\| Review \| ✅ PASS: [^\n]*\|\n\| Human approval \| ❌ FAIL: No signed approval of the head commit \(approve\/abc\): [^\n]*node scripts\/approve-pr\.mjs <pr>/);
+  assert.match(table(humanApprovalRow(missing, {})), /\| Human approval \| ➖ N\/A: checked in CI: /);
+  assert.match(table(humanApprovalRow(missing, { GITHUB_ACTIONS: "false" })), /\| Human approval \| ➖ N\/A: /);
+  assert.match(table(humanApprovalRow(valid, { GITHUB_ACTIONS: "true" })), /\| Human approval \| ✅ PASS: approve\/abc signed by owner@example\.com \|/);
+  assert.match(table(humanApprovalRow({ state: "invalid", tag: "approve/abc", reason: "no signature found", ignored: [] }, {})), /\| Human approval \| ❌ FAIL: approve\/abc is not a valid signed approval: no signature found\. \|/);
 });
