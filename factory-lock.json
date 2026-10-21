@@ -1,10 +1,10 @@
 {
-  "createdAt": "2026-10-20T16:08:35.349Z",
-  "gitHead": "b3962ebabbcd0a232cbe5118319d1c1a0701ddb5",
+  "createdAt": "2026-10-21T06:27:21.415Z",
+  "gitHead": "ba83edd37fd96ce6393ba373a2f6ee59b452e1df",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
-    ".github/workflows/ci.yml": "88d7fbc5f3870968e87ae85c585638e5e395402e6069c7a457857788c93906f6",
+    ".github/workflows/ci.yml": "037c8661e5147c5da497e03f9e6be8d5eca89e429bc34d9c777fd8dc19389b47",
     ".github/workflows/factory-gates.yml": "1390ac9ac5ed417e38b4256d880fb12047c9f547c2b33333ada5bb7de693f2b3",
     ".github/workflows/pr-description.yml": "95c40b66bfc61a724a3d774537074f48e1348de1ae4c8deca6c958350077a0a5",
     "quality/process-baseline.json": "c4138cf68d31420931034e59d580cc4db6fdd08550de95347c7396bd9b2923d5",
@@ -21,8 +21,8 @@
     "scripts/check-pr-description.mjs": "c3e69741a6cb4adfc6d7bda1565913b70606b7839e5191ea09011a4614894ebb",
     "scripts/check-pr-description.test.mjs": "7deacaae484e64e0109e2467852f34df0e7593c766387f74a0406020f0398acb",
     "scripts/check-process-ratchet.mjs": "a824c3bf4a36e4c1979c09d899242dbe4ac1cdf6e08bf227fca5b4772f331a03",
-    "scripts/check-review.mjs": "c6ee1c6334e887fb6ee35639e0c69c5f983a8e51bf26653e80b7dc5994e5b3df",
-    "scripts/check-review.test.mjs": "95b3900717ca569727246fa41a7d3d51b2b3353a13a751f05daf9e86d11cf86a",
+    "scripts/check-review.mjs": "e518dbe308d82812c8c8ab9a6f34e67091f103872a5c58ef2c46caa3d7f306d8",
+    "scripts/check-review.test.mjs": "cbcbabde938bab9f68e99926ec33b308f84a454edfe57b6dfd7e13d07932cfbe",
     "scripts/check-specs.mjs": "fad89135a0879dda4c1906243b9d8a6fbb4720b25e17e364f761f842bac0218b",
     "scripts/check-specs.test.mjs": "324a3a04274a57902965059335718144c532cff7d675d18bc19249694a978f09",
     "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
@@ -40,6 +40,7 @@
     "check-factory-integrity.mjs: .github/workflows/ joins the soft tier (drift is a warning plus a ledger event) because Dependabot github-actions bumps auto-merge and edit those files; scripts and .githooks stay hard-locked (ADR-0002)",
     "ADR-0004: scripts/gate-status.mjs restores the hook-owned reports and trace/*.json that its release variants rewrite (scripts/generated-files.mjs, imported next to hooks-pre-commit.mjs); factory-gates.yml gains a pinned openspec validate --strict step; scripts/check-trace-scanners.test.mjs joins the lock because its name matches scripts/check-*.mjs",
     "ADR-0005 (slice 1, gate-status-explicit): scripts/check-specs.mjs accepts scripts/*.test.mjs › \"title\" references and checks the acceptance tables of active OpenSpec slice proposals, and in a pull request of each proposal the branch adds; scripts/check-specs.test.mjs pins it",
-    "ADR-0005 (slice 2, structured-test-evidence): scripts/check-specs.mjs prSpecProblems diffs with -M and checks only archived proposals the branch adds (validateSpecs checks the active ones); scripts/check-specs.test.mjs pins it"
+    "ADR-0005 (slice 2, structured-test-evidence): scripts/check-specs.mjs prSpecProblems diffs with -M and checks only archived proposals the branch adds (validateSpecs checks the active ones); scripts/check-specs.test.mjs pins it",
+    "ADR-0005 (slice 3 step A, review-provenance-local): scripts/check-review.mjs counts a verdict only on a hook-recorded reviewer line (toolu_ id, its PreToolUse line, the reviewer's hand-back or Agent call) and an APPROVE only with blocking === 0; scripts/check-review.test.mjs pins it, with the #52 replay"
   ]
 }
