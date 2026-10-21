@@ -2540,6 +2540,10 @@
     },
     {
       "check": "active-changes",
+      "msg": "active change \"ci-tee-pipefail\" is not archived"
+    },
+    {
+      "check": "active-changes",
       "msg": "active change \"git-output-deny-rules\" is not archived"
     },
     {
