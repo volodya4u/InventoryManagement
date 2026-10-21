@@ -4,7 +4,7 @@
 // Instead it is shown red by breaking the code it tests:
 //   node scripts/break-run.mjs start <target> <selector>   runs the test (it must be green), snapshots the tree, prints
 //                                                          the run id
-//   (edit the code under test by hand: the controlled break; never the test file)
+//   (edit the code under test by hand: the controlled break; never a test or its fixtures, see isTestPath)
 //   node scripts/break-run.mjs break <run-id>              saves the edit as a patch, runs the test (red expected)
 //   node scripts/break-run.mjs restore <run-id>            reverses the patch, checks the tree is the start's again,
 //                                                          runs the test (green expected)
@@ -26,6 +26,10 @@ import { appendRecord } from "./loop-record.mjs";
 import { executeRun, normalizeSelector, validSelector } from "./test-run.mjs";
 
 export const EVIDENCE_DIR = "docs/evidence/break-runs";
+// A test, or a file tests read (resources, fixtures): a break that edits one changes what is checked, not the code
+// under test. Not only the run's own test file: a fixture another test reads, or a shared test helper, counts too.
+const TEST_PATH = /(^|\/)src\/test\/|\.(spec|test)\.ts$|\.test\.mjs$|(^|\/)(tests?|__tests__|fixtures|__fixtures__|__mocks__|testdata|test-data)\//;
+export const isTestPath = (path) => TEST_PATH.test(String(path).replace(/\\/g, "/"));
 const NOT_SNAPSHOT = ["docs/evidence/break-runs", ".agent-log"];
 
 const git = (root, args, env) => execFileSync("git", ["-C", root, ...args], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env }).trimEnd();
@@ -33,13 +37,14 @@ const git = (root, args, env) => execFileSync("git", ["-C", root, ...args], { en
 export const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
 // The working tree as a git tree object, the way `git add -A` would store it, through a throwaway index so the real one
-// is untouched. The evidence folder and the agent log are left out: they change while the run goes on.
-export function snapshot(root) {
+// is untouched. The evidence folder and the agent log are left out: they change while the run goes on. With
+// { worktree: false }, HEAD's tree with the same paths left out: what a clean working tree snapshots to.
+export function snapshot(root, { worktree = true } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "break-run-index-"));
   try {
     const env = { ...process.env, GIT_INDEX_FILE: join(dir, "index") };
     git(root, ["read-tree", "HEAD"], env);
-    git(root, ["add", "-A"], env);
+    if (worktree) git(root, ["add", "-A"], env);
     // Dropped after the add, not excluded from it: git refuses a pathspec that names an ignored path.
     git(root, ["rm", "-r", "-q", "--cached", "--ignore-unmatch", "--", ...NOT_SNAPSHOT], env);
     return git(root, ["write-tree"], env);
@@ -83,8 +88,8 @@ export function breakRun(root, id) {
   const broken = snapshot(root);
   const files = git(root, ["diff", "--name-only", run.baseTree, broken]).split("\n").filter(Boolean);
   if (!files.length) return { ok: false, problem: "no code changed since the start: make the controlled break in the code under test first" };
-  const tests = files.filter((f) => Object.hasOwn(run.testFiles ?? {}, f));
-  if (tests.length) return { ok: false, problem: `the break edits the test file ${tests.join(", ")}: break the code under test, never the test` };
+  const tests = files.filter((f) => Object.hasOwn(run.testFiles ?? {}, f) || isTestPath(f));
+  if (tests.length) return { ok: false, problem: `the break edits the test file ${tests.join(", ")}: break the code under test, never a test or its fixtures` };
   // git's bytes as they are: trimming would drop a blank last context line (" \n") and corrupt the patch.
   const patch = execFileSync("git", ["-C", root, "diff", "--binary", run.baseTree, broken], { maxBuffer: 64 * 1024 * 1024 });
   writeFileSync(join(runDir(root, id), "mutation.patch"), patch);

@@ -63,8 +63,8 @@ checkout.
 ## On a Windows checkout
 The first real run was on this repository's CRLF checkout (`core.autocrlf=true`), run `20261021T155613Z-b647`. It broke
 `scripts/test-results.mjs`, which the parser tests then failed, restored it, and replayed cleanly. One quirk showed up:
-after `restore`, `git status` can list a restored file as modified when its content is byte for byte the start's (its
-blob id equals HEAD's, and `git diff` is empty). `git apply -R` rewrote it with different line endings.
+after `restore`, `git status` can list a restored file as modified when its content is the start's as git stores it
+(its blob id), and `git diff` is empty. `git apply -R` rewrote it with different line endings.
 `git checkout -- <file>` clears the flag. The restore's snapshot comparison and the gate compare content, so they are
 not affected. The replay is affected: it checks for a clean tree with `git status`, before applying the patch and
 after reversing it, so the same flag can make it report a tree that is not as it was. That would be a false failure,

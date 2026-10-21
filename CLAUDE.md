@@ -30,7 +30,7 @@
 - A test that pins behaviour that already exists cannot go red first. Mark its slice's `proposal.md` with a
   `Kind: hardening` line and show each test red with a recorded controlled break, never an unrecorded hand edit:
   1. `node scripts/break-run.mjs start <target> <selector>`, which must be green;
-  2. break the code under test by hand (never the test file);
+  2. break the code under test by hand (never a test or its fixtures: `break` refuses any test path);
   3. `node scripts/break-run.mjs break <run-id>`, which must be red on an assertion;
   4. `node scripts/break-run.mjs restore <run-id>`, which must be green on the start's code.
 

@@ -340,6 +340,14 @@ test("hardening: only a slice marked Kind: hardening accepts break runs, and it 
   assert.deepEqual(breaks(redGreen), []);
 });
 
+test("hardening: a break run whose patch touches any test path, not only the criterion's test file, does not count", () => {
+  for (const path of ["src/test/resources/seed.sql", "frontend/src/app/other.spec.ts", "scripts/fixtures/report.xml"]) {
+    const [start, broken, restore] = fullBreakRun();
+    const patchFiles = ["src/main/java/com/x/Flow.java", path];
+    assert.match(breaks([start, { ...broken, patchFiles }, { ...restore, patchFiles }]).join(" "), /the break edits a test or its fixtures/, path);
+  }
+});
+
 const row = (level, who, evidence, why = "Harness change") => `| 29 | Some work | ${level} | ${who} | ${evidence} | ${why} |`;
 
 test("autonomy: a harness or boundary change needs an added row; product code alone does not", () => {
