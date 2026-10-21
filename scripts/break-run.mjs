@@ -86,7 +86,8 @@ export function breakRun(root, id) {
   if (!run) return { ok: false, problem: `no break run ${id} under ${EVIDENCE_DIR}` };
   if (run.steps.some((s) => s.step !== "start")) return { ok: false, problem: `run ${id} already has its break: restore it, then start a new run for another break` };
   const broken = snapshot(root);
-  const files = git(root, ["diff", "--name-only", run.baseTree, broken]).split("\n").filter(Boolean);
+  // Both sides of a rename: with rename detection, a fixture moved out of its test folder lists only the new path.
+  const files = git(root, ["diff", "--name-only", "--no-renames", run.baseTree, broken]).split("\n").filter(Boolean);
   if (!files.length) return { ok: false, problem: "no code changed since the start: make the controlled break in the code under test first" };
   const tests = files.filter((f) => Object.hasOwn(run.testFiles ?? {}, f) || isTestPath(f));
   if (tests.length) return { ok: false, problem: `the break edits the test file ${tests.join(", ")}: break the code under test, never a test or its fixtures` };
@@ -119,7 +120,7 @@ export function restoreRun(root, id) {
   }
   const after = snapshot(root);
   if (after !== run.baseTree) {
-    const files = git(root, ["diff", "--name-only", run.baseTree, after]).split("\n").filter(Boolean);
+    const files = git(root, ["diff", "--name-only", "--no-renames", run.baseTree, after]).split("\n").filter(Boolean);
     return { ok: false, problem: `after reversing the patch the tree is not the start's (${files.join(", ")})` };
   }
   const { record } = executeRun(root, run.target, run.selector);
