@@ -139,7 +139,9 @@ cost - returned cost) and `netGrossProfit` (gross profit - reversed profit) (FR-
 ### Requirement: New Sale form
 
 The New Sale form SHALL fill the unit price from the product's selling price, start at one unit, and not post a sale
-needing more units than the stock holds; posting sends trimmed notes, closes the dialog and reloads (FR-112).
+needing more units than the stock holds. It SHALL reject a unit price with more than two decimals in the form and show
+"Enter a unit price of 0 or more, with at most two decimals." under the field. Posting sends trimmed notes, closes the
+dialog and reloads (FR-112).
 
 #### Scenario: Defaults
 - **WHEN** a product is chosen in the form
@@ -148,6 +150,10 @@ needing more units than the stock holds; posting sends trimmed notes, closes the
 #### Scenario: Over stock
 - **WHEN** the quantity exceeds the stock
 - **THEN** the sale is not posted
+
+#### Scenario: Unit price with three decimals
+- **WHEN** a unit price of 30.555 is entered and Save is attempted
+- **THEN** the sale is not posted and the unit price field shows the two-decimal guidance
 
 ### Requirement: Sales page calculations
 

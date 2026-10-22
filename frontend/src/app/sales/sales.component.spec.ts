@@ -159,6 +159,29 @@ describe('SalesComponent', () => {
   });
 
   // @trace FR-112
+  it('does not post a sale whose unit price has more than two decimals', () => {
+    setup();
+    flushLoad([], [product()]);
+    component.openCreate();
+    const row = component.itemControls[0];
+    row.controls.productId.setValue(1);
+    component.productChanged(0);
+
+    row.controls.unitPrice.setValue(30.555);
+    expect(row.controls.unitPrice.valid).toBe(false);
+    component.submit();
+    fixture.detectChanges();
+    requests.expectNone({ method: 'POST', url: '/api/sales' });
+    const priceInput = fixture.nativeElement.querySelector('#sale-price-0') as HTMLInputElement;
+    expect(priceInput.parentElement?.querySelector('.invalid-feedback')?.textContent).toContain(
+      'Enter a unit price of 0 or more, with at most two decimals.',
+    );
+
+    row.controls.unitPrice.setValue(30.55);
+    expect(row.controls.unitPrice.valid).toBe(true);
+  });
+
+  // @trace FR-112
   it('posts the sale with trimmed notes, then closes the dialog and reloads', () => {
     setup();
     flushLoad([], [product()]);

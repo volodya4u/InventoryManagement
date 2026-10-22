@@ -1489,6 +1489,7 @@
       "tests": [
         "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",
+        "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts"
       ],
       "recordings": []
@@ -2533,6 +2534,10 @@
     {
       "check": "recording-evidence",
       "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"sale-price-two-decimals\" is not archived"
     },
     {
       "check": "active-changes",
