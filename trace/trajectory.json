@@ -156,6 +156,20 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-22-sale-price-two-decimals",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-22-trajectory-cache-tests",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-22-trajectory-review-from-log",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
