@@ -1,0 +1,13 @@
+diff --git a/scripts/check-trajectory.mjs b/scripts/check-trajectory.mjs
+index cd57366..af587b7 100644
+--- a/scripts/check-trajectory.mjs
++++ b/scripts/check-trajectory.mjs
+@@ -95,7 +95,7 @@ const cached = (() => {
+   if (cacheTracked) return {};
+   try {
+     const c = JSON.parse(read(CACHE));
+-    return c.rules === RULES ? c.reviews : {};
++    return c.reviews;
+   } catch {
+     return {};
+   }

@@ -1,0 +1,112 @@
+{
+  "id": "20261022T145142Z-6808",
+  "target": "harness",
+  "selector": "scripts/check-trajectory.test.mjs",
+  "baseTree": "11726bfa5dc227457294a29332981174c0840a53",
+  "testFiles": {
+    "scripts/check-trajectory.test.mjs": "9c66f90d27590cbab90383e00d95d9917e2b30ba"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-22T14:51:43.188Z",
+      "code": "d1baa63ca1a2410ef899613e659e85f812d9ceaaebaf17f9d6ff5e2fd1fda713",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "scripts/check-trajectory.test.mjs › an archived slice counts as reviewed when its pull request recorded the reviewer's APPROVE on the branch head",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › an archived slice is not counted as reviewed on a verdict that is stale, open or not recorded by the hook",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a git error while reading a merged slice's agent log reads missing and is not cached",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a tree fingerprint that throws reads missing instead of crashing the generator",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a cache written under other rules is discarded",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a warm run reads a merged slice's answer from the cache",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-22T14:52:51.351Z",
+      "code": "15ded690bfb28dc3de48f1cb666a78af927f1a1239ede972065a0afc3806287e",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "scripts/check-trajectory.test.mjs › an archived slice counts as reviewed when its pull request recorded the reviewer's APPROVE on the branch head",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › an archived slice is not counted as reviewed on a verdict that is stale, open or not recorded by the hook",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a git error while reading a merged slice's agent log reads missing and is not cached",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a tree fingerprint that throws reads missing instead of crashing the generator",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a cache written under other rules is discarded",
+          "status": "assertion"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a warm run reads a merged slice's answer from the cache",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-22T14:53:55.663Z",
+      "code": "d1baa63ca1a2410ef899613e659e85f812d9ceaaebaf17f9d6ff5e2fd1fda713",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "scripts/check-trajectory.test.mjs › an archived slice counts as reviewed when its pull request recorded the reviewer's APPROVE on the branch head",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › an archived slice is not counted as reviewed on a verdict that is stale, open or not recorded by the hook",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a git error while reading a merged slice's agent log reads missing and is not cached",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a tree fingerprint that throws reads missing instead of crashing the generator",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a cache written under other rules is discarded",
+          "status": "pass"
+        },
+        {
+          "id": "scripts/check-trajectory.test.mjs › a warm run reads a merged slice's answer from the cache",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "e970a87ba7e8d462deeb4d348957dd2085b6449a",
+  "patchSha256": "d85971d1b619c2b1960d192b2d15a7bb4f7110f311fbab91a1954d33fa834fc5",
+  "patchFiles": [
+    "scripts/check-trajectory.mjs"
+  ]
+}
