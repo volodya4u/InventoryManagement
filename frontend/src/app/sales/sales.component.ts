@@ -492,7 +492,11 @@ export class SalesComponent implements OnInit {
         Validators.min(1),
         Validators.pattern(/^\d+$/),
       ]),
-      unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+      unitPrice: new FormControl<number | null>(null, [
+        Validators.required,
+        Validators.min(0),
+        Validators.pattern(/^\d+(\.\d{1,2})?$/),
+      ]),
     });
   }
 
