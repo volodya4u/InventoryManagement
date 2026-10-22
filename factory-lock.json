@@ -1,6 +1,6 @@
 {
-  "createdAt": "2026-10-21T23:04:51.003Z",
-  "gitHead": "5d85375580b6520838769bfd8731e2b28c3806f8",
+  "createdAt": "2026-10-22T07:23:08.565Z",
+  "gitHead": "c4f3dec54f1d101f730d0652609aecf1791ae73c",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
@@ -28,8 +28,8 @@
     "scripts/check-specs.test.mjs": "324a3a04274a57902965059335718144c532cff7d675d18bc19249694a978f09",
     "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
     "scripts/check-traceability.mjs": "5c5203555db344c2410bca4cab07e11fc662785ed2abf19500f228cab3315775",
-    "scripts/check-trajectory.mjs": "9d63d6ddb70b6c4b50c29e98724a07b2b3b06134010544d2dcf68db2e57bb658",
-    "scripts/check-trajectory.test.mjs": "ab3ece43e7206841073032ce8c1b753377eb4da72a74cb4389d0143b1dd8466a",
+    "scripts/check-trajectory.mjs": "5a647bfe34807334468904015944f541c03fdefbab622d916e65b8c4cac3dfa0",
+    "scripts/check-trajectory.test.mjs": "75caf7442ed20f5455b56a38274944d1484c5ba7db8921fa130b301fcbcc465f",
     "scripts/gate-status.mjs": "f7c41d592f7805c60f39d020265ae151008fad679eb0f240c06e75dd37e2a53a"
   },
   "adaptations": [
@@ -47,6 +47,7 @@
     "Housekeeping re-seal (owner-approved 2026-10-22): .github/workflows/ci.yml takes the reviewed pipefail defaults of #98 (1d59673), and .github/workflows/human-approval.yml (ADR-0005 slice 3 step B, #99) joins the lock's soft tier; no gate script or hook changed",
     "trajectory-review-from-log (owner-approved 2026-10-22): scripts/check-trajectory.mjs counts a slice without review-findings.json as reviewed when the pull request that merged it recorded the reviewer's APPROVE (0 blocking) on its head tree, by the rule of scripts/check-review.mjs, cached per merged slice in target/; scripts/check-trajectory.test.mjs pins it and joins the lock because its name matches scripts/check-*.mjs",
     "trajectory-review-from-log, review round 2 (owner-approved 2026-10-22): a slice whose newest Slice: commit is on the first-parent line reads missing, so no later pull request lends it an approval; cache entries count only while their merge is on that line, the cache hash covers dod-fingerprint.mjs, and git errors and a tracked cache file are not trusted",
-    "trajectory-review-from-log, review round 3 (owner-approved 2026-10-22): merges are taken from main's first-parent line (origin/main, else main, else HEAD) and must be reachable from HEAD, so a branch that merged main does not pass its own merge off as a slice's pull request; a failing tree fingerprint reads missing"
+    "trajectory-review-from-log, review round 3 (owner-approved 2026-10-22): merges are taken from main's first-parent line (origin/main, else main, else HEAD) and must be reachable from HEAD, so a branch that merged main does not pass its own merge off as a slice's pull request; a failing tree fingerprint reads missing",
+    "trajectory-review-from-log, review round 4 (owner-approved 2026-10-22): with neither origin/main nor main, every slice without review-findings.json reads missing and nothing is cached, instead of falling back to HEAD's line; the Slice: lookup uses --topo-order"
   ]
 }

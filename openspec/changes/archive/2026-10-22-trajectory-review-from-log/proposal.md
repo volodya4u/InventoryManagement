@@ -12,8 +12,10 @@ check read the agent log instead.
 
 ## What Changes
 - **Review evidence from the agent log.** When a slice has no `review-findings.json`, `check-trajectory.mjs` finds the
-  pull request that merged it: the first merge on `HEAD`'s first-parent line that brought in the newest commit carrying
-  its `Slice:` trailer. On the agent-log lines that pull request added, it applies the rule `pr-evidence` applies
+  pull request that merged it: the first merge on `main`'s first-parent line (`origin/main`, else `main`; with neither, the slice reads `missing`),
+  reachable from `HEAD`, that descends from the newest commit carrying its `Slice:` line. A slice whose newest `Slice:`
+  commit is itself on that line (pushed to `main`, or squash-merged) reads `missing`, so no later pull request lends it
+  an approval. On the agent-log lines the pull request added, it applies the rule `pr-evidence` applies
   (`reviewProblems` in `scripts/check-review.mjs`, against `treeFingerprintAt` of the branch head):
   - the last hook-recorded verdict is `APPROVE` with 0 blocking findings, and its tree is the head's: the slice reads
     `approved (agent log)` and no longer warns;

@@ -64,23 +64,24 @@ if (!isRepo) warn("git", "not a git work tree — trailer/scope checks skipped")
 // that file is reviewed when the pull request that merged it (the first merge on main's first-parent line, reachable
 // from HEAD, that brought in the newest commit carrying its trailer) added a verdict that passes the rule pr-evidence
 // applies: the last hook-recorded verdict is APPROVE with 0 blocking, on the branch head's tree (scripts/check-review.mjs).
-// The line is main's (origin/main, else main, else HEAD), not HEAD's: on a branch that merged main, HEAD's own merge of
-// main would otherwise pass for the pull request and lend the slice the verdicts of everything main gained since.
+// The line is main's (origin/main, else main), not HEAD's: on a branch that merged main, HEAD's own merge of main would
+// otherwise pass for the pull request and lend the slice the verdicts of everything main gained since. With neither
+// ref, main's line is unknown, so every such slice reads missing and nothing is cached.
 // A commit that is itself on main's first-parent line (pushed to main, or a squash merge) was brought in by no pull
 // request merge, so it reads missing: a later, unrelated merge descends from it too and must not lend its approval.
 // A merged slice's answer never changes, so it is cached per newest trailer commit in the gitignored target/ folder,
 // with the merge it came from. An entry counts only while that merge is on main's line and reachable from HEAD; the cache
 // holds a hash of this script, check-review.mjs and dod-fingerprint.mjs, so a rule change starts it afresh; and a cache
 // file that git tracks (committed by a branch) is ignored.
-const lineRef = isRepo ? (["origin/main", "main"].find((r) => git(["rev-parse", "--verify", "-q", `${r}^{commit}`]).ok) ?? "HEAD") : "HEAD";
-const mainLine = isRepo ? new Set(git(["rev-list", "--first-parent", lineRef]).out.split("\n")) : new Set();
+const lineRef = isRepo ? ["origin/main", "main"].find((r) => git(["rev-parse", "--verify", "-q", `${r}^{commit}`]).ok) : undefined;
+const mainLine = lineRef ? new Set(git(["rev-list", "--first-parent", lineRef]).out.split("\n")) : new Set();
 const reachable = isRepo ? new Set(git(["rev-list", "HEAD"]).out.split("\n")) : new Set();
 const merged = (c) => mainLine.has(c) && reachable.has(c);
-// The newest commit on HEAD with a `Slice: <name>` line, per name, read in one pass (git log lists newest first). The
+// The newest commit on HEAD with a `Slice: <name>` line, per name, read in one pass (--topo-order lists descendants first, whatever the clocks say). The
 // line is matched whole, not as a git trailer: commits here often put it above the attribution, apart from the trailers.
 const newestBySlice = new Map();
 if (isRepo) {
-  for (const entry of git(["log", "HEAD", "--grep=^Slice:", "--format=%H%n%B%x1e"]).out.split("\x1e")) {
+  for (const entry of git(["log", "HEAD", "--topo-order", "--grep=^Slice:", "--format=%H%n%B%x1e"]).out.split("\x1e")) {
     const [sha, ...body] = entry.trim().split("\n");
     for (const m of body.join("\n").matchAll(/^Slice:[ \t]*(\S+)[ \t]*$/gm)) if (!newestBySlice.has(m[1])) newestBySlice.set(m[1], sha);
   }
@@ -102,7 +103,7 @@ const cached = (() => {
 let cacheChanged = false;
 function agentLogReview(trailerName) {
   const newest = newestBySlice.get(trailerName);
-  if (!newest || mainLine.has(newest)) return "missing";
+  if (!lineRef || !newest || mainLine.has(newest)) return "missing";
   const hit = cached[newest];
   if (hit && merged(hit.merge)) return hit.review;
   const merge = git(["rev-list", "--merges", "--ancestry-path", "--topo-order", "--reverse", `${newest}..HEAD`]).out.split("\n").find(merged);

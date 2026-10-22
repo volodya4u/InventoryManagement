@@ -3,7 +3,7 @@
 // Run: node --test scripts/check-trajectory.test.mjs
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, test } from "node:test";
@@ -35,10 +35,10 @@ const verdict = (n, { tree, verdict = "APPROVE", blocking = 0, hook = true }) =>
 
 // A repository whose main merges branch claude/<slice> (one commit with the Slice trailer, then the log commit) with a
 // merge commit, as GitHub merges a pull request. `logFor(tree)` gives the agent-log lines the branch adds.
-function repo(name, logFor, { findings } = {}) {
+function repo(name, logFor, { findings, base = "main" } = {}) {
   const root = join(tmp, name);
   mkdirSync(root);
-  git(root, "init", "-q", "-b", "main");
+  git(root, "init", "-q", "-b", base);
   write(root, ".agent-log/actions.jsonl", "");
   write(root, "README.md", "x\n");
   git(root, "add", "-A");
@@ -54,7 +54,7 @@ function repo(name, logFor, { findings } = {}) {
   write(root, ".agent-log/actions.jsonl", `${logFor(tree)}\n`);
   git(root, "add", "-A");
   git(root, "commit", "-q", "-m", "Fold the review into the agent log");
-  git(root, "switch", "-q", "main");
+  git(root, "switch", "-q", base);
   git(root, "merge", "-q", "--no-ff", "-m", "Merge pull request #1 from claude/demo", "claude/demo");
   return root;
 }
@@ -143,6 +143,16 @@ test("an archived slice is not counted as reviewed on a verdict that is stale, o
   git(later, "commit", "-q", "-m", "Work on b");
   git(later, "merge", "-q", "--no-ff", "-m", "Merge main into claude/b", "main");
   assert.match(evidence(later).review, /^not approved \(agent log\): The reviewer's last verdict is CHANGES REQUESTED/);
+  // With neither origin/main nor main, main's line is unknown: HEAD's own line could hold a branch's merge of the base, so
+  // every slice reads missing and nothing is cached, even for a pull request that recorded an APPROVE.
+  const trunk = repo("no-main-ref", (tree) => verdict(1, { tree }), { base: "trunk" });
+  git(trunk, "switch", "-q", "-c", "claude/b", "trunk~1");
+  write(trunk, "scripts/b.mjs", "export const b = 1;\n");
+  git(trunk, "add", "-A");
+  git(trunk, "commit", "-q", "-m", "Work on b");
+  git(trunk, "merge", "-q", "--no-ff", "-m", "Merge trunk into claude/b", "trunk");
+  assert.deepEqual(evidence(trunk), { review: "missing", warned: true });
+  assert.equal(existsSync(join(trunk, "target/trajectory/review-cache.json")), false);
   // A cache entry whose merge is not on this history, or a cache file someone committed, is not believed. A cold run
   // of a slice with no verdict writes the cache; a planted entry then claims an approval for it.
   const planted = repo("planted", () => "");
