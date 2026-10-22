@@ -157,7 +157,7 @@
     },
     {
       "slice": "2026-10-22-trajectory-review-from-log",
-      "reviewEvidence": "missing",
+      "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
@@ -201,10 +201,6 @@
     {
       "check": "review-evidence",
       "msg": "2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs) (review must have run clean before archive)"
-    },
-    {
-      "check": "review-evidence",
-      "msg": "2026-10-22-trajectory-review-from-log: no review-findings.json, and the agent log's review is missing (review must have run clean before archive)"
     }
   ]
 }

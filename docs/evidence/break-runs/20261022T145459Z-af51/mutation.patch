@@ -1,0 +1,13 @@
+diff --git a/scripts/check-trajectory.mjs b/scripts/check-trajectory.mjs
+index cd57366..84b2ec8 100644
+--- a/scripts/check-trajectory.mjs
++++ b/scripts/check-trajectory.mjs
+@@ -104,7 +104,7 @@ let cacheChanged = false;
+ function agentLogReview(trailerName) {
+   const newest = newestBySlice.get(trailerName);
+   if (!lineRef || !newest || mainLine.has(newest)) return "missing";
+-  const hit = cached[newest];
++  const hit = undefined;
+   if (hit && merged(hit.merge)) return hit.review;
+   const merge = git(["rev-list", "--merges", "--ancestry-path", "--topo-order", "--reverse", `${newest}..HEAD`]).out.split("\n").find(merged);
+   // Not merged yet (the branch of the slice itself): nothing to cache, a later run finds the merge.

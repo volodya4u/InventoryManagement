@@ -1,0 +1,13 @@
+diff --git a/scripts/check-trajectory.mjs b/scripts/check-trajectory.mjs
+index cd57366..dfa75f2 100644
+--- a/scripts/check-trajectory.mjs
++++ b/scripts/check-trajectory.mjs
+@@ -124,7 +124,7 @@ function mergedReview(merge) {
+   try {
+     lines = addedLogLines(base, head);
+   } catch {
+-    return null;
++    return "missing";
+   }
+   if (!reviewVerdicts(lines).length && !ignoredVerdicts(lines).length) return "missing";
+   let tree;

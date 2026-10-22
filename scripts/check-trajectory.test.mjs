@@ -3,7 +3,7 @@
 // Run: node --test scripts/check-trajectory.test.mjs
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, test } from "node:test";
@@ -169,4 +169,55 @@ test("an archived slice is not counted as reviewed on a verdict that is stale, o
   git(planted, "add", "-f", "target/trajectory/review-cache.json");
   git(planted, "commit", "-q", "-m", "Commit a cache");
   assert.equal(evidence(planted).review, "missing", "a cache file tracked by git");
+});
+
+// A loose object of a repository, moved aside so git cannot read it, and a function that puts it back.
+const hideObject = (root, rev) => {
+  const sha = git(root, "rev-parse", rev);
+  const path = join(root, ".git", "objects", sha.slice(0, 2), sha.slice(2));
+  renameSync(path, `${path}.hidden`);
+  return () => renameSync(`${path}.hidden`, path);
+};
+const cachePath = (root) => join(root, "target/trajectory/review-cache.json");
+// A cache entry for the slice's newest trailer commit, merged by `merge`, claiming an approval; `rules` defaults to the
+// hash a run of the script wrote.
+const plantApproval = (root, merge, rules) => {
+  const newest = git(root, "log", "-n", "1", "--grep=^Slice:", "--format=%H");
+  rules ??= JSON.parse(readFileSync(cachePath(root), "utf8")).rules;
+  writeFileSync(cachePath(root), JSON.stringify({ rules, reviews: { [newest]: { merge, review: "approved (agent log)" } } }));
+};
+
+test("a git error while reading a merged slice's agent log reads missing and is not cached", () => {
+  const root = repo("git-error", (tree) => verdict(1, { tree }));
+  const unhide = hideObject(root, "HEAD^2:.agent-log/actions.jsonl");
+  assert.deepEqual(evidence(root), { review: "missing", warned: true });
+  assert.equal(existsSync(cachePath(root)), false, "the git error is not written to the cache");
+  // Once git can read the log again, the next run gives the real answer, not a cached "missing".
+  unhide();
+  assert.equal(evidence(root).review, "approved (agent log)");
+});
+
+test("a tree fingerprint that throws reads missing instead of crashing the generator", () => {
+  const root = repo("fingerprint-error", (tree) => verdict(1, { tree }));
+  // The branch head's scripts/ folder: git ls-tree -r needs it, the agent-log diff does not.
+  hideObject(root, "HEAD^2:scripts");
+  let result;
+  assert.doesNotThrow(() => (result = evidence(root)), "the generator must not crash on a failing fingerprint");
+  assert.deepEqual(result, { review: "missing", warned: true });
+  assert.equal(existsSync(cachePath(root)), false, "the fingerprint failure is not written to the cache");
+});
+
+test("a cache written under other rules is discarded", () => {
+  const root = repo("rules-changed", () => "");
+  assert.equal(evidence(root).review, "missing");
+  plantApproval(root, git(root, "rev-parse", "HEAD"), "a hash of rules that changed since");
+  assert.equal(evidence(root).review, "missing");
+});
+
+test("a warm run reads a merged slice's answer from the cache", () => {
+  const root = repo("warm-read", () => "");
+  assert.equal(evidence(root).review, "missing");
+  // An entry for the real pull request merge, under the current rules, changes the answer: the run read the cache.
+  plantApproval(root, git(root, "rev-parse", "HEAD"));
+  assert.equal(evidence(root).review, "approved (agent log)");
 });

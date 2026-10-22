@@ -1,0 +1,18 @@
+diff --git a/scripts/check-trajectory.mjs b/scripts/check-trajectory.mjs
+index cd57366..f19b25d 100644
+--- a/scripts/check-trajectory.mjs
++++ b/scripts/check-trajectory.mjs
+@@ -127,12 +127,7 @@ function mergedReview(merge) {
+     return null;
+   }
+   if (!reviewVerdicts(lines).length && !ignoredVerdicts(lines).length) return "missing";
+-  let tree;
+-  try {
+-    tree = treeFingerprintAt(root, head);
+-  } catch {
+-    return null;
+-  }
++  const tree = treeFingerprintAt(root, head);
+   const [problem] = reviewProblems(lines, tree);
+   // Only the reason: the gate's advice ("run the reviewer again") cannot be followed once the slice has merged.
+   return problem ? `not approved (agent log): ${problem.split(":")[0]}` : "approved (agent log)";
