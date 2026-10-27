@@ -1,0 +1,53 @@
+{
+  "id": "20261027T184916Z-2d2e",
+  "target": "backend",
+  "selector": "InventoryFlowIntegrationTest#reportsAmountsWithoutCurrencyCodes",
+  "baseTree": "2d1d95b70e54e573678dd49dd1d3b2f20eb8b11b",
+  "testFiles": {
+    "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java": "0355fcf4b69860833c4e856a4d4bb2a213a08b0b"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-27T18:49:17.837Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "InventoryFlowIntegrationTest#reportsAmountsWithoutCurrencyCodes",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-27T18:58:10.742Z",
+      "code": "4a78ec61d86442c5380e0f01d184f7f117edc17f42cf040524e193c6acbcc11e",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "InventoryFlowIntegrationTest#reportsAmountsWithoutCurrencyCodes",
+          "status": "assertion"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-27T18:59:16.411Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "InventoryFlowIntegrationTest#reportsAmountsWithoutCurrencyCodes",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "95275ab4584bcc2fe57c54fdadea2abf69cb9ffe",
+  "patchSha256": "d5f2b7806f2f55de51335d772f64d24485a9cd3e609030b78e9fe041c5abe5e7",
+  "patchFiles": [
+    "src/main/java/com/flowershop/inventory/reports/MonthlySalesReportDto.java",
+    "src/main/java/com/flowershop/inventory/reports/MonthlySalesReportService.java"
+  ]
+}

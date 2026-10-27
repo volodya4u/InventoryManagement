@@ -1,0 +1,28 @@
+diff --git a/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportDto.java b/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportDto.java
+index f4ff659..680420b 100644
+--- a/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportDto.java
++++ b/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportDto.java
+@@ -27,7 +27,8 @@ public record MonthlySalesReportDto(
+         List<DailySummary> dailySummaries,
+         List<ProductSummary> productSummaries,
+         List<SaleSummary> sales,
+-        List<ReturnSummary> returns) {
++        List<ReturnSummary> returns,
++        String currencyCode) {
+ 
+     public record PaymentSummary(
+             PaymentMethod paymentMethod,
+diff --git a/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportService.java b/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportService.java
+index 38bc887..39f5565 100644
+--- a/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportService.java
++++ b/src/main/java/com/flowershop/inventory/reports/MonthlySalesReportService.java
+@@ -74,7 +74,8 @@ public class MonthlySalesReportService {
+                 repository.findDailySummaries(start, endExclusive),
+                 repository.findProductSummaries(start, endExclusive),
+                 repository.findSales(start, endExclusive),
+-                repository.findReturns(start, endExclusive));
++                repository.findReturns(start, endExclusive),
++                "UAH");
+     }
+ 
+     private YearMonth parseMonth(String monthValue) {

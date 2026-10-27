@@ -1,0 +1,150 @@
+{
+  "id": "20261027T184736Z-e4c2",
+  "target": "frontend",
+  "selector": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
+  "baseTree": "2d1d95b70e54e573678dd49dd1d3b2f20eb8b11b",
+  "testFiles": {
+    "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts": "e727338f4c883a8f4a20a570f8b44c783b02a8b4"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-27T18:47:38.068Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > loads the current month on open",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows report dates on their API calendar day",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > reloads for another month and ignores a cleared month picker",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows the API error and drops the previous report",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > exports sales and returns as a UTF-8 CSV with escaped quotes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > does not export a month without sales or returns",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > links a sale number to that sale on the Sales page",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows amounts as UAH with two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows the currency symbol on display, never the currency code",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-27T18:53:30.546Z",
+      "code": "02d2777a78a23d03c06b404e278d15a607b926d89d36c56ab4ab8fef3dce31c3",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > loads the current month on open",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows report dates on their API calendar day",
+          "status": "assertion"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > reloads for another month and ignores a cleared month picker",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows the API error and drops the previous report",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > exports sales and returns as a UTF-8 CSV with escaped quotes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > does not export a month without sales or returns",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > links a sale number to that sale on the Sales page",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows amounts as UAH with two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows the currency symbol on display, never the currency code",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-27T18:55:01.605Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > loads the current month on open",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows report dates on their API calendar day",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > reloads for another month and ignores a cleared month picker",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows the API error and drops the previous report",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > exports sales and returns as a UTF-8 CSV with escaped quotes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > does not export a month without sales or returns",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > links a sale number to that sale on the Sales page",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows amounts as UAH with two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts › MonthlySalesReportComponent > shows the currency symbol on display, never the currency code",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "2f684131cc02a7878ef1f0bf6d029143402608d6",
+  "patchSha256": "352e9817a2a7836bbddccb99fd2e096e9ef119e14c95ed54b0194f35d8ce7701",
+  "patchFiles": [
+    "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.html",
+    "frontend/src/app/sales/sales.component.html",
+    "frontend/src/app/stock-movements/stock-movements.component.html"
+  ]
+}

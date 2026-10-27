@@ -97,6 +97,7 @@ describe('SalesComponent', () => {
   }
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     requests.verify();
     TestBed.resetTestingModule();
   });
@@ -265,6 +266,95 @@ describe('SalesComponent', () => {
     expect(component.canReturn(sale({ status: 'CANCELLED' }))).toBe(false);
     expect(component.canCancel(sale({ status: 'COMPLETED' }))).toBe(true);
     expect(component.canCancel(sale({ status: 'PARTIALLY_RETURNED' }))).toBe(false);
+  });
+
+  // @trace NFR-19
+  it('guards sales write forms and shows API errors', () => {
+    setup();
+    flushLoad([sale()], [product()]);
+
+    component.openCreate();
+    component.submit();
+    requests.expectNone({ method: 'POST', url: '/api/sales' });
+    const row = component.itemControls[0];
+    row.controls.productId.setValue(1);
+    component.productChanged(0);
+    component.submit();
+    requests
+      .expectOne({ method: 'POST', url: '/api/sales' })
+      .flush({ detail: 'Sale failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Sale failed.');
+    component.closeDialog();
+
+    component.openReturn(sale());
+    component.submitReturn();
+    requests.expectNone({ method: 'POST', url: '/api/sales/7/returns' });
+    component.returnItemControls[0].controls.quantity.setValue(1);
+    component.submitReturn();
+    requests
+      .expectOne({ method: 'POST', url: '/api/sales/7/returns' })
+      .flush({ detail: 'Return failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Return failed.');
+    component.closeReturnDialog();
+
+    component.openCancellation(sale());
+    component.cancellationForm.controls.reason.setValue('');
+    component.submitCancellation();
+    requests.expectNone({ method: 'POST', url: '/api/sales/7/cancellation' });
+    component.cancellationForm.controls.reason.setValue('Other');
+    component.submitCancellation();
+    requests
+      .expectOne({ method: 'POST', url: '/api/sales/7/cancellation' })
+      .flush({ detail: 'Cancellation failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Cancellation failed.');
+  });
+
+  // @trace NFR-21
+  it('shows readable English sale dates and keeps ISO form values', () => {
+    vi.stubEnv('TZ', 'Europe/Kyiv');
+    setup();
+    const datedSale = sale({
+      saleDate: '2026-09-10',
+      returns: [
+        {
+          id: 3,
+          returnNumber: 'R-0003',
+          returnDate: '2026-09-12',
+          operationType: 'RETURN',
+          reason: 'Damaged',
+          notes: '',
+          totalRefund: 30,
+          totalCost: 10,
+          grossProfitReversal: 20,
+          items: [],
+          createdAt: '2026-09-12T10:00:00Z',
+        },
+      ],
+    });
+    flushLoad([datedSale], [product()]);
+    const listDate = fixture.nativeElement.querySelector('tbody tr td:nth-child(2)') as HTMLElement;
+    expect(listDate.textContent).toContain('Sep 10, 2026');
+
+    component.openDetails(datedSale);
+    fixture.detectChanges();
+    const detailDate = fixture.nativeElement.querySelector(
+      '.sale-detail-dialog .dialog-subtitle',
+    ) as HTMLElement;
+    const returnDate = fixture.nativeElement.querySelector(
+      '.return-history__heading span',
+    ) as HTMLElement;
+    expect(detailDate.textContent).toContain('Sep 10, 2026');
+    expect(returnDate.textContent).toContain('Sep 12, 2026');
+    component.closeDetails();
+
+    component.openCreate();
+    component.form.controls.saleDate.setValue('2026-09-10');
+    fixture.detectChanges();
+    const dateInput = fixture.nativeElement.querySelector('#sale-date') as HTMLInputElement;
+    expect(dateInput.value).toBe('2026-09-10');
   });
 });
 

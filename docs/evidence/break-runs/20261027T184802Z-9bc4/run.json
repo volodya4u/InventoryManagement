@@ -1,0 +1,138 @@
+{
+  "id": "20261027T184802Z-9bc4",
+  "target": "frontend",
+  "selector": "frontend/src/app/stock-movements/stock-movements.component.spec.ts",
+  "baseTree": "2d1d95b70e54e573678dd49dd1d3b2f20eb8b11b",
+  "testFiles": {
+    "frontend/src/app/stock-movements/stock-movements.component.spec.ts": "c211992ffa3f665deea34b5755cb46b4faea03d4"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-27T18:48:03.235Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > loads the first page of all inventory",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > shows movement dates on their API calendar day",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > sends only the filters that are set, trims the search, and starts again at page 0",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > pages forward and back only within the result",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > ignores paging clicks while a page is loading",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > clears the filters and the page on reset",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > shows the API error and drops the old result",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > describes the visible range and which rows link to a sale",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-27T18:53:59.478Z",
+      "code": "02d2777a78a23d03c06b404e278d15a607b926d89d36c56ab4ab8fef3dce31c3",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > loads the first page of all inventory",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > shows movement dates on their API calendar day",
+          "status": "assertion"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > sends only the filters that are set, trims the search, and starts again at page 0",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > pages forward and back only within the result",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > ignores paging clicks while a page is loading",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > clears the filters and the page on reset",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > shows the API error and drops the old result",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > describes the visible range and which rows link to a sale",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-27T18:55:31.423Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > loads the first page of all inventory",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > shows movement dates on their API calendar day",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > sends only the filters that are set, trims the search, and starts again at page 0",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > pages forward and back only within the result",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > ignores paging clicks while a page is loading",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > clears the filters and the page on reset",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > shows the API error and drops the old result",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/stock-movements/stock-movements.component.spec.ts › StockMovementsComponent > describes the visible range and which rows link to a sale",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "2f684131cc02a7878ef1f0bf6d029143402608d6",
+  "patchSha256": "352e9817a2a7836bbddccb99fd2e096e9ef119e14c95ed54b0194f35d8ce7701",
+  "patchFiles": [
+    "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.html",
+    "frontend/src/app/sales/sales.component.html",
+    "frontend/src/app/stock-movements/stock-movements.component.html"
+  ]
+}

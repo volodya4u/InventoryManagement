@@ -277,6 +277,57 @@ describe('ProductsComponent', () => {
     requests.expectOne({ method: 'DELETE', url: '/api/products/1' }).flush(null);
     expect(component.items()).toHaveLength(0);
   });
+
+  // @trace NFR-19
+  it('guards product write forms and shows API errors', () => {
+    setup([product()], [rawMaterial()]);
+
+    component.openCreate();
+    component.submit();
+    requests.expectNone({ method: 'POST', url: '/api/products' });
+    component.form.patchValue({ sku: 'NEW-ROSE', name: 'New Rose' });
+    component.recipeControls[0].setValue({ rawMaterialId: 1, quantityPerUnit: 1 });
+    component.submit();
+    requests
+      .expectOne({ method: 'POST', url: '/api/products' })
+      .flush({ detail: 'Product save failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Product save failed.');
+
+    component.openProduction(product());
+    component.submitProduction();
+    requests.expectNone({ method: 'POST', url: '/api/products/1/production' });
+    component.productionForm.controls.quantity.setValue(1);
+    component.submitProduction();
+    requests
+      .expectOne({ method: 'POST', url: '/api/products/1/production' })
+      .flush({ detail: 'Production failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Production failed.');
+
+    component.openStockOperation(product(), 'WRITE_OFF');
+    component.submitStockOperation();
+    requests.expectNone({ method: 'POST', url: '/api/products/1/write-offs' });
+    component.stockOperationForm.controls.quantity.setValue(1);
+    component.submitStockOperation();
+    requests
+      .expectOne({ method: 'POST', url: '/api/products/1/write-offs' })
+      .flush({ detail: 'Product write-off failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Product write-off failed.');
+
+    component.openStockOperation(product(), 'ADJUSTMENT');
+    component.stockOperationForm.controls.quantity.setValue(-1);
+    component.submitStockOperation();
+    requests.expectNone({ method: 'POST', url: '/api/products/1/adjustments' });
+    component.stockOperationForm.controls.quantity.setValue(3);
+    component.submitStockOperation();
+    requests
+      .expectOne({ method: 'POST', url: '/api/products/1/adjustments' })
+      .flush({ detail: 'Product adjustment failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Product adjustment failed.');
+  });
 });
 
 describe('ProductsComponent amounts', () => {

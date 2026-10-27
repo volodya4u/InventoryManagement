@@ -91,6 +91,7 @@ describe('MonthlySalesReportComponent', () => {
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     requests.verify();
     TestBed.resetTestingModule();
     vi.useRealTimers();
@@ -108,6 +109,49 @@ describe('MonthlySalesReportComponent', () => {
     expect(component.loading()).toBe(false);
     expect(component.report()?.revenue).toBe(60);
     expect(fixture.nativeElement.textContent).toContain('S-0007');
+  });
+
+  // @trace NFR-21
+  it('shows report dates on their API calendar day', () => {
+    vi.stubEnv('TZ', 'Europe/Kyiv');
+    expectReport('2026-01').flush(
+      report({
+        dailySummaries: [
+          {
+            saleDate: '2026-01-10',
+            salesCount: 1,
+            returnCount: 0,
+            unitsSold: 3,
+            unitsReturned: 0,
+            grossRevenue: 90,
+            refunds: 0,
+            revenue: 90,
+            totalCost: 10,
+            grossProfit: 80,
+          },
+        ],
+      }),
+    );
+    fixture.detectChanges();
+
+    const shown: string = fixture.nativeElement.textContent;
+    expect(shown).toContain('January 1, 2026');
+    expect(shown).toContain('January 31, 2026');
+    const sections = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('section'));
+    const daySection = sections.find(
+      (section) => section.querySelector('h2')?.textContent?.trim() === 'Sales by Day',
+    );
+    expect(daySection?.querySelector('tbody tr td')?.textContent).toContain('Jan 10, 2026');
+    const saleSection = sections.find(
+      (section) => section.querySelector('h2')?.textContent?.trim() === 'Sales Documents',
+    );
+    expect(saleSection?.querySelector('tbody tr td:nth-child(2)')?.textContent).toContain('Jan 10');
+    const returnSection = sections.find(
+      (section) => section.querySelector('h2')?.textContent?.trim() === 'Returns & Cancellations',
+    );
+    expect(returnSection?.querySelector('tbody tr td:nth-child(4)')?.textContent).toContain(
+      'Jan 12, 2026',
+    );
   });
 
   // @trace FR-144

@@ -87,11 +87,11 @@ product and sales lists and the report documents are returned unpaginated; only 
 
 ### Requirement: Usability and accessibility
 
-Destructive deletes SHALL ask for confirmation, API errors SHALL be shown in the UI through `apiErrorMessage`, and forms
+Destructive deletes SHALL ask for confirmation, API errors SHALL be shown in the UI through `apiErrorMessage`, and write forms
 SHALL validate before sending (NFR-19). The templates carry ARIA attributes and labels but no accessibility target or
 automated gate exists (NFR-20).
 
-> GAP: delete confirmations are not asserted; accessibility target unknown (see docs/requirements.md OQ-15).
+> The raw-materials, products and sales component specs assert invalid submissions send no request and server errors appear in their write dialogs; login and change-password specs cover their forms. Delete confirmations are asserted by FR-55 and FR-86. Accessibility remains without a target or gate (see docs/requirements.md OQ-15).
 
 #### Scenario: API error shown
 - **WHEN** an API call fails with an error message
@@ -99,11 +99,11 @@ automated gate exists (NFR-20).
 
 ### Requirement: Localization and display currency
 
-The UI, messages and code SHALL be English only (`<html lang="en">`); amounts SHALL display as UAH with 2 decimals and
-dates as ISO `YYYY-MM-DD`; stored names work in any alphabet (NFR-21). Stored amounts SHALL carry no currency code
+The UI, messages and code SHALL be English only (`<html lang="en">`); amounts SHALL display as UAH with 2 decimals.
+Date inputs and API values SHALL use ISO `YYYY-MM-DD`, while Sales, Monthly Sales and Stock History SHALL show readable English dates on the same calendar day; stored names work in any alphabet (NFR-21). Stored amounts SHALL carry no currency code
 (NFR-22).
 
-> Covered by slice `harden-frontend-specs`: `monthly-sales-report.component.spec.ts` asserts the UAH display (symbol shown, never the currency code; see docs/requirements.md OQ-14). NFR-21 and NFR-22 stay PARTIAL: no frontend spec asserts `<html lang="en">`, the ISO date display, or that the API sends amounts without a currency code.
+> `InventoryFlowIntegrationTest` asserts the entry document's language, numeric monthly-sales API amounts and no currency-code property or database column. Sales, Monthly Sales and Stock History component specs assert readable dates retain the API calendar day; the report spec asserts the UAH display (symbol shown, never the currency code; see docs/requirements.md OQ-14).
 
 #### Scenario: Non-Latin search
 - **WHEN** a name stored in Cyrillic is searched in stock history

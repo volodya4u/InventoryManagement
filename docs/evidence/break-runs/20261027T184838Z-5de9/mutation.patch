@@ -1,0 +1,11 @@
+diff --git a/frontend/src/index.html b/frontend/src/index.html
+index b56fa87..cc99135 100644
+--- a/frontend/src/index.html
++++ b/frontend/src/index.html
+@@ -1,5 +1,5 @@
+ <!doctype html>
+-<html lang="en">
++<html lang="uk">
+   <head>
+     <meta charset="utf-8" />
+     <title>Flower Shop Inventory</title>
