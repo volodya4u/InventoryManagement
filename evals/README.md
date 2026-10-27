@@ -10,7 +10,8 @@ CI instead: `scripts/check-evals.mjs` (via `node --test`) confirms the suite is 
 ## When to run
 
 Run them, and commit `evals/record.json`, when you change `.claude/agents/reviewer.md`, a skill under
-`.agents/skills/<skill>/`, `AGENTS.md`, or an eval case. `scripts/eval-record.mjs` runs all three suites and writes
+`.agents/skills/<skill>/` or `.claude/skills/<skill>/`, an OpenSpec command under `.claude/commands/opsx/`,
+`AGENTS.md`, or an eval case. `scripts/eval-record.mjs` runs all three suites and writes
 the record: the model used, the judge model, the per-case scores (with / without the plugin and the delta), and the
 git-blob fingerprint of those inputs. `pr-evidence` recomputes that fingerprint for the head commit; if it differs,
 the scores are stale and the gate fails, so a reviewer or rules change cannot land on old numbers.

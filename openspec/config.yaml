@@ -1,0 +1,30 @@
+schema: spec-driven
+
+context: |
+  Flower Shop Inventory is a local, single-shop application. Follow AGENTS.md for the project rules and
+  openspec/project.md for the baseline layout and owner-decision recipe. The shipped behavior is described in
+  openspec/specs/ and docs/requirements.md; an open OQ-n is an owner question, not a defect to fix.
+  Trust Level 1 requires a human decision before changing more than one file or running a command outside
+  .claude/settings.json's allow-list. Do not treat generated workflow permissions as that decision.
+  A feature changing schema, API, and page together uses docs/specs/ and human approval; a smaller behavior or
+  tooling slice uses openspec/changes/. Follow the Factory evidence chain in AGENTS.md.
+
+rules:
+  proposal:
+    - 'Include an ## Acceptance criteria table with Given / When / Then and the exact test for each criterion.'
+    - State affected baseline specs and requirement IDs, or explain why a tooling-only change has neither.
+  specs:
+    - Cite the governed FR IDs from docs/requirements.md and preserve existing baseline behavior unless approved.
+  tasks:
+    - Plan an assertion-based red then green scripts/test-run.mjs record for every new or changed criterion.
+    - Include Factory checks, the full Definition of done, a fresh read-only review, and PR evidence.
+
+operations:
+  apply:
+    guidance:
+      - Follow .agents/skills/test-first-loop/SKILL.md for a behavior change and finish its red-to-green loop.
+      - Run the Factory checks listed in AGENTS.md, then node scripts/dod.mjs before review.
+  archive:
+    guidance:
+      - Refuse an archived change with an unchecked task; confirm the baseline specs reflect what shipped.
+      - Keep the review and evidence record with the completed change.
