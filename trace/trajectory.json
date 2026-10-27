@@ -175,6 +175,13 @@
       "trailerCommits": 1,
       "libDomains": [],
       "processComplete": true
+    },
+    {
+      "slice": "2026-10-27-openspec-harness-setup",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 3,
+      "libDomains": [],
+      "processComplete": true
     }
   ],
   "overlaps": [],
