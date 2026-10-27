@@ -1,17 +1,20 @@
 {
-  "createdAt": "2026-10-22T14:42:52.109Z",
-  "gitHead": "ff7e82b1a1506fefd46abd5cba29837b5df6bdbf",
+  "createdAt": "2026-10-27T20:53:05.338Z",
+  "gitHead": "77f413bf0c1bd17bc48bdd645092e8c37b00adfd",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
-    ".github/workflows/ci.yml": "7ab233b46d1b116e1c86251348c54c1b57d225d6c06a6ca4a1d4c850bc3cd9a6",
+    ".github/workflows/ci.yml": "b105f1db565d3029034fb0c20fc4ff83c15f62ec26e0a552ea85c810ec544cd5",
     ".github/workflows/factory-gates.yml": "1390ac9ac5ed417e38b4256d880fb12047c9f547c2b33333ada5bb7de693f2b3",
     ".github/workflows/human-approval.yml": "9d04513cfe819672c7f5af7ca346ad03e7f55de9e3e58b5aedd8e1d8459b2a01",
     ".github/workflows/pr-description.yml": "95c40b66bfc61a724a3d774537074f48e1348de1ae4c8deca6c958350077a0a5",
+    "quality/coverage-backend-baseline.json": "69c25a82a264e161e5e8dcc8bd77067724eaf0039b286cc4eba6bedb15d54acf",
+    "quality/coverage-frontend-baseline.json": "eaa5fd1eb929a260c655ad0aab83b36a71a07faefe70e976f20b0124ffb66c15",
     "quality/process-baseline.json": "c4138cf68d31420931034e59d580cc4db6fdd08550de95347c7396bd9b2923d5",
     "quality/telemetry.config.json": "db4b77dfac7e3a8d267359aaa94b42b2033b99e138ce6ba387f5e3d490922cb7",
     "scripts/check-acceptance-methods.mjs": "b8fb263dea450b38c876a828b26a68edd2cc30a82f2bd152ebcf652d50e58713",
-    "scripts/check-coverage-ratchet.mjs": "59c72ea1d727bc5f14009f29c5bf488c81fcf63275596d67ba78c1170633f46e",
+    "scripts/check-coverage-ratchet.mjs": "60138210c33f9f6b66061bc810e974f3db5248c293f69ba6d4e8bbf5032e566d",
+    "scripts/check-coverage-ratchet.test.mjs": "c496fede507bfe21710592530e7402ebc7bff4a68cdf015d2a7f318b462b7594",
     "scripts/check-docs-lookup.mjs": "126647fe0a810c3f244a8d4b220287644e9dfe18544397df1dc2e6fa4a3900ac",
     "scripts/check-docs-lookup.test.mjs": "1d09ce5b580bae985ccf98ee4408145e8436532cb6c5d2ad1464b47fc92860b0",
     "scripts/check-eval-ratchet.mjs": "0a996c69ee12d6cb14aebe240bbca1f3460f362430bc7fe71276fb4c87c4d4c8",
@@ -30,13 +33,13 @@
     "scripts/check-traceability.mjs": "5c5203555db344c2410bca4cab07e11fc662785ed2abf19500f228cab3315775",
     "scripts/check-trajectory.mjs": "5a647bfe34807334468904015944f541c03fdefbab622d916e65b8c4cac3dfa0",
     "scripts/check-trajectory.test.mjs": "232a51941bb3b325c6922786204c1ac278b86f9f4a13e86d514882da20eea339",
-    "scripts/gate-status.mjs": "f7c41d592f7805c60f39d020265ae151008fad679eb0f240c06e75dd37e2a53a"
+    "scripts/gate-status.mjs": "fb28d568605555c2181384089fc600c7f08a1ca588f3ef5a6ec7c8ea45cb22c2"
   },
   "adaptations": [
     "additive onboarding (ADR-0001): installed only pure-Node checks (traceability, trajectory, coverage/eval ratchets, acceptance, process ratchet, integrity, ledger, correct, gate-status); Playwright/JS-app scripts, .claude/* and package.json deliberately not installed (.githooks and a factory-gates workflow were added later by ADR-0002)",
     "check-traceability and check-acceptance-methods adapted to this repo: also scan frontend/src and count *Test.java/*Tests.java as tests for @trace tags",
     "quality/telemetry.config.json: local-verifiable mechanism declared as scripts/dod.mjs (weak existence check); repo has no root package.json",
-    "check-coverage-ratchet and check-eval-ratchet installed because gate-status calls them, but not applicable here (no JS coverage or eval artifacts): they report NOT-EARNED",
+    "check-eval-ratchet installed because gate-status calls them, but not applicable here (no eval artifacts in its format): it reports NOT-EARNED; check-coverage-ratchet was not applicable either until ADR-0006",
     "lock also covers pre-existing repo gates scripts/check-*.mjs and .github/workflows/*.yml as found at onboarding",
     "ADR-0002: .githooks/pre-commit and commit-msg (adapted hooks: no ESLint/tsc, warn-only trailers) and .github/workflows/factory-gates.yml (integrity hard gate, Dependabot skipped) added and locked in the same commit as the wiring; ci.yml and .claude/settings.json unchanged",
     "check-factory-integrity.mjs: .github/workflows/ joins the soft tier (drift is a warning plus a ledger event) because Dependabot github-actions bumps auto-merge and edit those files; scripts and .githooks stay hard-locked (ADR-0002)",
@@ -49,6 +52,7 @@
     "trajectory-review-from-log, review round 2 (owner-approved 2026-10-22): a slice whose newest Slice: commit is on the first-parent line reads missing, so no later pull request lends it an approval; cache entries count only while their merge is on that line, the cache hash covers dod-fingerprint.mjs, and git errors and a tracked cache file are not trusted",
     "trajectory-review-from-log, review round 3 (owner-approved 2026-10-22): merges are taken from main's first-parent line (origin/main, else main, else HEAD) and must be reachable from HEAD, so a branch that merged main does not pass its own merge off as a slice's pull request; a failing tree fingerprint reads missing",
     "trajectory-review-from-log, review round 4 (owner-approved 2026-10-22): with neither origin/main nor main, every slice without review-findings.json reads missing and nothing is cached, instead of falling back to HEAD's line; the Slice: lookup uses --topo-order",
-    "trajectory-cache-tests (owner-approved 2026-10-22): scripts/check-trajectory.test.mjs pins the error and cache paths of the agent-log review evidence (a git error and a failing tree fingerprint read missing and are not cached, a cache under other rules is discarded, a warm run reads the cache); scripts/check-trajectory.mjs is unchanged"
+    "trajectory-cache-tests (owner-approved 2026-10-22): scripts/check-trajectory.test.mjs pins the error and cache paths of the agent-log review evidence (a git error and a failing tree fingerprint read missing and are not cached, a cache under other rules is discarded, a warm run reads the cache); scripts/check-trajectory.mjs is unchanged",
+    "coverage-ratchet (owner-approved 2026-10-27, ADR-0006): scripts/check-coverage-ratchet.mjs gains --summary/--baseline/--label/--require (defaults unchanged; waiver check name coverage-ratchet:<label>), scripts/gate-status.mjs folds coverageBackend and coverageFrontend into G5, and scripts/check-coverage-ratchet.test.mjs joins the lock because its name matches scripts/check-*.mjs; the baselines quality/coverage-backend-baseline.json and quality/coverage-frontend-baseline.json join the quality tier"
   ]
 }

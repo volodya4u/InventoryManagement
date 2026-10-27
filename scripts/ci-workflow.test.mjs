@@ -151,3 +151,22 @@ test("a workflow default or a step-level shell: bash enables pipefail", () => {
   const unspaced = workflow("", "", "", "make|tee out.log");
   assert.ok(TEE.test(workflowSteps(unspaced).find((s) => s.name === "Piped").run[0]), "a pipe into tee without spaces is found");
 });
+
+test("build-and-test ratchets backend and frontend coverage", () => {
+  const steps = workflowSteps(ciWorkflow());
+  const names = steps.map((s) => s.name);
+  const frontendTests = steps.find((s) => s.name === "Frontend unit tests");
+  assert.match(frontendTests?.run.join("\n") ?? "", /^pnpm exec ng test --watch=false --coverage /m, "frontend tests collect coverage");
+  const at = names.indexOf("Coverage ratchet");
+  assert.ok(at > names.indexOf("Frontend test-run guard"), `a "Coverage ratchet" step follows the frontend guard (steps: ${names.join(", ")})`);
+  const [convert, ...ratchets] = steps[at].run;
+  assert.equal(convert, "node scripts/jacoco-summary.mjs", "the JaCoCo report is converted first");
+  const sides = ratchets.map((line) => {
+    assert.match(line, /^node scripts\/check-coverage-ratchet\.mjs /);
+    const args = Object.fromEntries([...line.matchAll(/--(\w+)(?:=(\S+))?/g)].map(([, k, v]) => [k, v ?? true]));
+    assert.equal(args.require, true, `${line} requires coverage`);
+    assert.ok(args.summary && args.baseline, `${line} names its summary and baseline`);
+    return args.label;
+  });
+  assert.deepEqual(sides, ["backend", "frontend"]);
+});

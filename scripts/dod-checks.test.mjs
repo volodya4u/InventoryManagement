@@ -202,3 +202,23 @@ test("a generator that could not start, or no generator at all, is a failure", (
   });
   assert.deepEqual(generatedReportsVerdict([]), { ok: false, result: "no report generator ran" });
 });
+
+test("coverage verdict needs both sides to pass", async () => {
+  // The ratchet labels its findings, not its Scope and Result lines, which gate-status.mjs reads.
+  // Imported here, not above, so the other tests of this file still run when the export is missing.
+  const { coverageVerdict } = await import("./dod-checks.mjs");
+  assert.equal(typeof coverageVerdict, "function", "dod-checks.mjs exports coverageVerdict");
+  const side = (label, result, lines = "OK    lines 81.5% (baseline 81.5%)") =>
+    `Scope: 4 coverage metric(s)\n${label}: ${lines}\nResult: ${result}\n`;
+  assert.deepEqual(coverageVerdict(side("backend", "PASS") + side("frontend", "PASS")), {
+    ok: true,
+    result: "backend lines 81.5%, frontend lines 81.5%",
+  });
+  assert.equal(coverageVerdict(side("backend", "PASS") + side("frontend", "FAIL")).ok, false);
+  assert.equal(coverageVerdict(side("backend", "PASS")).ok, false, "a side that did not report fails");
+  assert.equal(coverageVerdict("").ok, false);
+  assert.match(
+    coverageVerdict(side("backend", "PASS") + side("frontend", "FAIL", "FAIL  coverage ratchet: lines dropped 80% -> 70%")).result,
+    /frontend: lines dropped 80% -> 70%/,
+  );
+});

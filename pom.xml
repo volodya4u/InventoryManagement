@@ -23,6 +23,7 @@
         <node.version>v24.15.0</node.version>
         <pnpm.version>11.9.0</pnpm.version>
         <skip.frontend>false</skip.frontend>
+        <jacoco.version>0.8.15</jacoco.version>
     </properties>
 
     <dependencies>
@@ -61,6 +62,14 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- JaCoCo's runtime agent, put on Surefire's argLine below like Mockito's (ADR-0006) -->
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <version>${jacoco.version}</version>
+            <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -148,9 +157,27 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <!-- Mockito as a Java agent instead of self-attaching, which JDK 21+ warns about (Mockito javadoc 0.3).
-                         No @{argLine}: nothing defines argLine here, and the unresolved token reaches java as an @argfile -->
-                    <argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+                         No @{argLine}: nothing defines argLine here, and the unresolved token reaches java as an @argfile.
+                         JaCoCo's agent is set here instead of by prepare-agent, whose absolute destfile breaks -javaagent
+                         when the checkout path is not ASCII on Windows; the relative one resolves against ${basedir} -->
+                    <argLine>-javaagent:${org.jacoco:org.jacoco.agent:jar:runtime}=destfile=target/jacoco.exec,append=false -javaagent:${org.mockito:mockito-core:jar}</argLine>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <!-- Backend coverage for the ratchet (ADR-0006): verify writes target/site/jacoco/jacoco.xml from
+                     target/jacoco.exec, which the agent on Surefire's argLine above records -->
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

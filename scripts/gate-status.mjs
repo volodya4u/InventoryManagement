@@ -63,7 +63,15 @@ const GATE_COMMANDS = {
   traceability: { script: "check-traceability", args: [] },
   trajectory: { script: "check-trajectory", args: [] },
   recordings: { script: "check-recordings", args: [] },
-  coverage: { script: "check-coverage-ratchet", args: [] },
+  // One ratchet per side (ADR-0006); no --require: the dashboard reports what is on disk.
+  coverageBackend: {
+    script: "check-coverage-ratchet",
+    args: ["--summary=target/site/jacoco/coverage-summary.json", "--baseline=quality/coverage-backend-baseline.json", "--label=backend"],
+  },
+  coverageFrontend: {
+    script: "check-coverage-ratchet",
+    args: ["--summary=frontend/coverage/frontend/coverage-summary.json", "--baseline=quality/coverage-frontend-baseline.json", "--label=frontend"],
+  },
   evals: { script: "check-eval-ratchet", args: [] },
   acceptanceExistence: { script: "check-acceptance-methods", args: ["--mode=existence"] },
   acceptanceArtifact: { script: "check-acceptance-methods", args: ["--mode=artifact"] },
@@ -199,7 +207,7 @@ const GATES = [
   { g: "G2", desc: "baseline specs", keys: ["traceability"] },
   { g: "G3", desc: "capability plan + acceptance methods exist", keys: ["acceptanceExistence"], fixed: (fold) => worst(has("docs/mvp-capability-plan.md") ? "needs sign-off" : "FAIL", fold) },
   { g: "G4", desc: "per-slice", keys: ["traceability", "trajectory", "acceptanceArtifact", "integrity"] },
-  { g: "G5", desc: "hardening (coverage)", keys: ["coverage"] },
+  { g: "G5", desc: "hardening (coverage)", keys: ["coverageBackend", "coverageFrontend"] },
   { g: "G6", desc: "QA proof", keys: ["recordings", "evals", "acceptanceArtifact", "visual"] },
   { g: "G7", desc: "release", keys: ["traceabilityRelease", "trajectoryRelease", "recordings", "acceptanceArtifact", "integrity"] },
   { g: "G8", desc: "UAT (trace regressions)", keys: ["traceability"] },

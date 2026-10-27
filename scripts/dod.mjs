@@ -16,6 +16,8 @@ import { join } from "node:path";
 import {
   backendVerdict,
   checkExitCode,
+  COVERAGE_SIDES,
+  coverageVerdict,
   exitColumn,
   expectedTestClasses,
   findFiles,
@@ -37,6 +39,11 @@ const frontend = join(root, "frontend");
 const pinned = pinnedNodePath(root);
 const ansi = /\x1b\[[0-9;]*m/g;
 const sh = (cmd, args) => spawnSync(cmd, args, { cwd: root, encoding: "utf8", shell: process.platform === "win32" });
+// The coverage ratchet's arguments per side, as in CI's "Coverage ratchet" step.
+const coverageArgs = {
+  backend: ["--summary=target/site/jacoco/coverage-summary.json", "--baseline=quality/coverage-backend-baseline.json", "--label=backend", "--require"],
+  frontend: ["--summary=frontend/coverage/frontend/coverage-summary.json", "--baseline=quality/coverage-frontend-baseline.json", "--label=frontend", "--require"],
+};
 // The top level of scripts/ only, like the shell glob in the CI step.
 const harnessTests = readdirSync(join(root, "scripts"))
   .filter((name) => name.endsWith(".test.mjs"))
@@ -84,14 +91,30 @@ const checks = [
   },
   {
     name: "Frontend unit tests",
-    label: "ng test --watch=false (in frontend/)",
+    label: "ng test --watch=false --coverage (in frontend/)",
     run: () =>
-      spawnSync(frontendNode(root), [join(frontend, "node_modules", "@angular", "cli", "bin", "ng.js"), "test", "--watch=false"], {
+      spawnSync(frontendNode(root), [join(frontend, "node_modules", "@angular", "cli", "bin", "ng.js"), "test", "--watch=false", "--coverage"], {
         cwd: frontend,
         encoding: "utf8",
         env: { ...process.env, NG_CLI_ANALYTICS: "false" },
       }),
     verdict: (out) => frontendVerdict(out, findFiles(join(frontend, "src"), specFilePattern).length),
+  },
+  {
+    // ADR-0006: the backend's JaCoCo report as a summary, then each side against its committed baseline, as in CI.
+    name: "Coverage ratchet",
+    label: "node scripts/jacoco-summary.mjs; node scripts/check-coverage-ratchet.mjs --label=backend|frontend --require",
+    run: () => {
+      const runs = [["jacoco-summary.mjs"], ...COVERAGE_SIDES.map((side) => ["check-coverage-ratchet.mjs", ...coverageArgs[side]])];
+      let stdout = "";
+      for (const [script, ...args] of runs) {
+        const r = spawnSync(process.execPath, [join(root, "scripts", script), ...args], { cwd: root, encoding: "utf8" });
+        stdout += `${r.stderr ?? ""}${r.stdout ?? ""}${r.error ? String(r.error) : ""}`;
+        if (r.status !== 0) return { status: r.status, stdout };
+      }
+      return { status: 0, stdout };
+    },
+    verdict: coverageVerdict,
   },
   {
     // Dynamic context: the angular-cli MCP server agents use answers list_projects (scripts/mcp-smoke.mjs).

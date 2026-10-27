@@ -110,6 +110,29 @@ export function mcpSmokeVerdict(output) {
   return line ? { ok: true, result: line } : { ok: false, result: "the angular-cli MCP server gave no list_projects answer" };
 }
 
+// The coverage ratchet's backend and frontend runs (ADR-0006), one after the other, each run's stderr before its stdout
+// so its FAIL lines precede its "Result:" line; its findings carry its --label. Done only when both sides ran and passed.
+export const COVERAGE_SIDES = ["backend", "frontend"];
+export function coverageVerdict(output) {
+  const runs = [...String(output).matchAll(/([\s\S]*?)^Result: (\S+)/gm)].map(([, text, result]) => ({
+    side: /^(?!Scope:)(\w+): /m.exec(text)?.[1],
+    result,
+    text,
+  }));
+  const bySide = Object.fromEntries(runs.map((run) => [run.side, run]));
+  // A failed side first: the DoD stops after it, so the other side never reports.
+  const failed = COVERAGE_SIDES.filter((side) => bySide[side] && bySide[side].result !== "PASS");
+  if (failed.length) {
+    const why = (side) => /^\w+: FAIL\s+(?:coverage ratchet: )?(.+)$/m.exec(bySide[side].text)?.[1] ?? bySide[side].result;
+    return { ok: false, result: failed.map((side) => `${side}: ${why(side)}`).join("; ") };
+  }
+  const missing = COVERAGE_SIDES.filter((side) => !bySide[side]);
+  if (missing.length) return { ok: false, result: `no ${missing.join(" or ")} ratchet result` };
+  // "OK    lines 81.5% (baseline 81.5%)" or "INFO  lines improved 80% -> 81.5% — ..."
+  const lines = (side) => /^\w+: (?:OK\s+lines|INFO\s+lines improved [\d.]+% ->) ([\d.]+)%/m.exec(bySide[side].text)?.[1];
+  return { ok: true, result: COVERAGE_SIDES.map((side) => `${side} lines ${lines(side)}%`).join(", ") };
+}
+
 // The generated reports the pre-commit hook rewrites (scripts/hooks-pre-commit.mjs), regenerated before the code is
 // fingerprinted. Each run is { script, status } as spawnSync reports it.
 export function generatedReportsVerdict(runs) {
