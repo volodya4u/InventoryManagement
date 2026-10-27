@@ -1,0 +1,15 @@
+{
+  "clean": true,
+  "recovered": "2026-10-27",
+  "note": "Recovered from the agent log, not produced by a review run on this date. The commit of pull request #69 carries no Slice trailer, so scripts/check-trajectory.mjs cannot find the review through the trailer; the verdicts below are in the .agent-log/actions.jsonl lines that commit added.",
+  "pullRequest": 69,
+  "mergeCommit": "99e6753",
+  "headCommit": "863b6b5",
+  "headTree": "27fbc0f72ed51a7a3d207cce6d87cf4484b464e3c798118b845846f4d9d05a5d",
+  "reviews": [
+    { "ts": "2026-10-10T23:44:25Z", "verdict": "CHANGES REQUESTED", "blocking": 7, "tree": "9cdc911c4357377d4d511121fa00653fa510682b6c9746f20ddde621f799bddf" },
+    { "ts": "2026-10-10T23:48:36Z", "verdict": "APPROVE", "blocking": 0, "tree": "f1ffdb4165766a4c7ec6dae4a109b8c019a39c61c983b8e3602b0f704df50cf9" },
+    { "ts": "2026-10-10T23:53:08Z", "verdict": "APPROVE", "blocking": 0, "tree": "27fbc0f72ed51a7a3d207cce6d87cf4484b464e3c798118b845846f4d9d05a5d" }
+  ],
+  "check": "The last APPROVE's tree equals the head tree of pull request #69. Replay: reviewProblems(addedLogLines(<merge>^1, <merge>^2), treeFingerprintAt(root, <merge>^2)) from scripts/check-review.mjs and scripts/dod-fingerprint.mjs returns no problem for merge 99e6753."
+}

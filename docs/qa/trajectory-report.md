@@ -5,17 +5,17 @@ archived slice took: review evidence, `Slice:` trailers, and module scope.
 It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
-Scope: 26 archived slice(s).
-Result: PASS, 9 warning(s)
+Scope: 27 archived slice(s).
+Result: PASS, 2 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
-| 2026-10-12-harden-frontend-specs | **missing** | **0** | **no** | - |
-| 2026-10-12-harden-infrastructure-tests | approved (agent log) | 1 | **no** | - |
-| 2026-10-12-harden-product-and-production-tests | approved (agent log) | 1 | **no** | - |
-| 2026-10-12-harden-raw-material-tests | approved (agent log) | 1 | **no** | - |
-| 2026-10-12-harden-sales-reports-history-tests | approved (agent log) | 1 | **no** | - |
-| 2026-10-12-harden-security-tests | approved (agent log) | 1 | **no** | - |
+| 2026-10-12-harden-frontend-specs | clean | **0** | yes | - |
+| 2026-10-12-harden-infrastructure-tests | approved (agent log) | 1 | yes | - |
+| 2026-10-12-harden-product-and-production-tests | approved (agent log) | 1 | yes | - |
+| 2026-10-12-harden-raw-material-tests | approved (agent log) | 1 | yes | - |
+| 2026-10-12-harden-sales-reports-history-tests | approved (agent log) | 1 | yes | - |
+| 2026-10-12-harden-security-tests | approved (agent log) | 1 | yes | - |
 | 2026-10-20-gate-status-explicit | approved (agent log) | 3 | yes | - |
 | 2026-10-20-git-output-deny-rules | approved (agent log) | 2 | yes | - |
 | 2026-10-20-push-branch-entry-tests | approved (agent log) | 1 | yes | - |
@@ -35,6 +35,7 @@ Result: PASS, 9 warning(s)
 | 2026-10-22-sale-price-two-decimals | approved (agent log) | 1 | yes | - |
 | 2026-10-22-trajectory-cache-tests | approved (agent log) | 1 | yes | - |
 | 2026-10-22-trajectory-review-from-log | approved (agent log) | 1 | yes | - |
+| 2026-10-27-nfr-evidence-hardening | approved (agent log) | 2 | yes | - |
 | 2026-10-27-openspec-harness-setup | approved (agent log) | 3 | yes | - |
 
 ## Cross-slice module overlap
@@ -47,12 +48,5 @@ None.
 
 ## Warnings
 
-- **review-evidence**: 2026-10-12-harden-frontend-specs: no review-findings.json, and the agent log's review is missing (review must have run clean before archive)
-- **process**: 2026-10-12-harden-frontend-specs: archived change is missing design.md and/or tasks.md
 - **trailer**: 2026-10-12-harden-frontend-specs: no commit carries a "Slice: harden-frontend-specs" trailer
-- **process**: 2026-10-12-harden-infrastructure-tests: archived change is missing design.md and/or tasks.md
-- **process**: 2026-10-12-harden-product-and-production-tests: archived change is missing design.md and/or tasks.md
-- **process**: 2026-10-12-harden-raw-material-tests: archived change is missing design.md and/or tasks.md
-- **process**: 2026-10-12-harden-sales-reports-history-tests: archived change is missing design.md and/or tasks.md
-- **process**: 2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md
 - **review-evidence**: 2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs) (review must have run clean before archive)
