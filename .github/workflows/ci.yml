@@ -59,11 +59,19 @@ jobs:
         working-directory: frontend
         run: |
           export PATH="$GITHUB_WORKSPACE/target/frontend-tooling/node:$PATH"
-          pnpm exec ng test --watch=false 2>&1 | tee "$GITHUB_WORKSPACE/target/frontend-test.log"
+          pnpm exec ng test --watch=false --coverage 2>&1 | tee "$GITHUB_WORKSPACE/target/frontend-test.log"
 
       # Like the backend guard: fail when Vitest exited 0 but ran fewer spec files than exist on disk.
       - name: Frontend test-run guard
         run: node scripts/ci-test-guard.mjs frontend target/frontend-test.log
+
+      # No coverage metric may drop below its committed baseline, on either side (ADR-0006). mvn verify wrote the JaCoCo
+      # report and the step above the frontend summary; --require fails a side whose summary or baseline is missing.
+      - name: Coverage ratchet
+        run: |
+          node scripts/jacoco-summary.mjs
+          node scripts/check-coverage-ratchet.mjs --summary=target/site/jacoco/coverage-summary.json --baseline=quality/coverage-backend-baseline.json --label=backend --require
+          node scripts/check-coverage-ratchet.mjs --summary=frontend/coverage/frontend/coverage-summary.json --baseline=quality/coverage-frontend-baseline.json --label=frontend --require
 
       # Dynamic context: the angular-cli MCP server that .mcp.json starts for agents answers list_projects, and the
       # answer goes to the job summary. A broken server fails the build, Dependabot auto-merge included (a human

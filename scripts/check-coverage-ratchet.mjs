@@ -18,11 +18,22 @@
 //
 // Wire as: "check:coverage": "node scripts/check-coverage-ratchet.mjs"
 // Requires vitest coverage reporter "json-summary" in vitest.config.
+//
+// Per-side options (ADR-0006: this repo ratchets its backend and frontend separately):
+//   --summary=<path> --baseline=<path>   read/write these instead of the two defaults below
+//   --label=<name>                       prefix each finding (not Scope/Result, which gate-status reads) and make the
+//                                        waiver check name "coverage-ratchet:<name>"
+//   --require                            a missing summary or baseline is FAIL, not SKIP-pending (CI and the DoD)
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
-const SUMMARY = "coverage/coverage-summary.json";
-const BASELINE = "quality/coverage-baseline.json";
+const option = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
+const SUMMARY = option("summary") ?? "coverage/coverage-summary.json";
+const BASELINE = option("baseline") ?? "quality/coverage-baseline.json";
+const LABEL = option("label");
+const REQUIRE = process.argv.includes("--require");
+const CHECK = LABEL ? `coverage-ratchet:${LABEL}` : "coverage-ratchet";
+const tag = LABEL ? `${LABEL}: ` : "";
 const METRICS = ["lines", "statements", "functions", "branches"];
 const TOLERANCE = 0.1; // percentage points of float noise allowed
 const WAIVER_DIR = "docs/qa/waivers";
@@ -46,8 +57,14 @@ function waivedMetrics(check) {
 }
 
 if (!existsSync(SUMMARY)) {
+  if (REQUIRE) {
+    console.error(`${tag}FAIL  ${SUMMARY} not found — this run requires coverage; run the tests with coverage first.`);
+    console.log("Scope: 0 coverage metric(s)");
+    console.log("Result: FAIL");
+    process.exit(1);
+  }
   // Graceful before coverage has ever been generated (pre-baseline): SKIP, don't fail.
-  console.warn(`SKIP  ${SUMMARY} not found — no coverage yet (run \`npm run test:coverage\`). Nothing to ratchet.`);
+  console.warn(`${tag}SKIP  ${SUMMARY} not found — no coverage yet (run \`npm run test:coverage\`). Nothing to ratchet.`);
   console.log("Scope: 0 coverage metric(s)");
   console.log("Result: SKIP-pending");
   process.exit(0);
@@ -61,7 +78,12 @@ console.log(`Scope: ${METRICS.length} coverage metric(s)`);
 // LOWER floor with exit 0 — the direction guard would only exist while the
 // baseline file existed. Creation requires an explicit --update and is loud.
 if (!process.argv.includes("--update") && !existsSync(BASELINE)) {
-  console.warn(`WARN  ${BASELINE} not found — no committed baseline to ratchet against. Create it EXPLICITLY with --update (and commit + review the diff); a compare run never mints a baseline.`);
+  if (REQUIRE) {
+    console.error(`${tag}FAIL  ${BASELINE} not found — this run requires a committed baseline. Create it EXPLICITLY with --update (and commit + review the diff).`);
+    console.log("Result: FAIL");
+    process.exit(1);
+  }
+  console.warn(`${tag}WARN  ${BASELINE} not found — no committed baseline to ratchet against. Create it EXPLICITLY with --update (and commit + review the diff); a compare run never mints a baseline.`);
   console.log("Result: SKIP-pending");
   process.exit(0);
 }
@@ -74,30 +96,30 @@ if (process.argv.includes("--update")) {
     // loosened silently (LOOP.md's "quality can only go up").
     const baseline = JSON.parse(readFileSync(BASELINE, "utf8"));
     let refused = false;
-    const waived = waivedMetrics("coverage-ratchet");
+    const waived = waivedMetrics(CHECK);
     for (const m of METRICS) {
       const was = baseline[m] ?? 0;
       const now = current[m] ?? 0;
       if (now + TOLERANCE < was) {
         if (waived.has(m)) {
-          console.warn(`WARN  ${m} loosened ${was}% -> ${now}% under an explicit waiver in ${WAIVER_DIR}/`);
+          console.warn(`${tag}WARN  ${m} loosened ${was}% -> ${now}% under an explicit waiver in ${WAIVER_DIR}/`);
         } else {
-          console.error(`FAIL  coverage ratchet: --update would LOWER ${m} ${was}% -> ${now}% — the ratchet is tighten-only`);
+          console.error(`${tag}FAIL  coverage ratchet: --update would LOWER ${m} ${was}% -> ${now}% — the ratchet is tighten-only`);
           refused = true;
         }
       }
     }
     if (refused) {
       console.error(`      To loosen intentionally, add a waiver file under ${WAIVER_DIR}/ naming the metric, e.g.`);
-      console.error(`      ${WAIVER_DIR}/loosen-coverage.json: {"check":"coverage-ratchet","metrics":["<metric>"],"reason":"..."}`);
+      console.error(`      ${WAIVER_DIR}/loosen-coverage.json: {"check":"${CHECK}","metrics":["<metric>"],"reason":"..."}`);
       console.log("Result: FAIL");
       process.exit(1);
     }
   }
-  mkdirSync("quality", { recursive: true });
+  mkdirSync(dirname(BASELINE), { recursive: true });
   writeFileSync(BASELINE, `${JSON.stringify(current, null, 2)}\n`);
-  if (!existed) console.warn(`WARN  baseline created from current values — commit ${BASELINE} and review the diff (the floor is whatever coverage exists right now)`);
-  console.log(`baseline ${existed ? "updated" : "created"}: ${JSON.stringify(current)}`);
+  if (!existed) console.warn(`${tag}WARN  baseline created from current values — commit ${BASELINE} and review the diff (the floor is whatever coverage exists right now)`);
+  console.log(`${tag}baseline ${existed ? "updated" : "created"}: ${JSON.stringify(current)}`);
   console.log("Result: PASS");
   process.exit(0);
 }
@@ -108,12 +130,12 @@ for (const m of METRICS) {
   const was = baseline[m] ?? 0;
   const now = current[m] ?? 0;
   if (now + TOLERANCE < was) {
-    console.error(`FAIL  coverage ratchet: ${m} dropped ${was}% -> ${now}%`);
+    console.error(`${tag}FAIL  coverage ratchet: ${m} dropped ${was}% -> ${now}%`);
     failed = true;
   } else if (now > was + TOLERANCE) {
-    console.log(`INFO  ${m} improved ${was}% -> ${now}% — run with --update to ratchet the baseline`);
+    console.log(`${tag}INFO  ${m} improved ${was}% -> ${now}% — run with --update to ratchet the baseline`);
   } else {
-    console.log(`OK    ${m} ${now}% (baseline ${was}%)`);
+    console.log(`${tag}OK    ${m} ${now}% (baseline ${was}%)`);
   }
 }
 console.log(`Result: ${failed ? "FAIL" : "PASS"}`);
