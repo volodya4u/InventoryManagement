@@ -18,6 +18,8 @@ import com.flowershop.inventory.auth.UserRepository;
 import jakarta.servlet.http.Cookie;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -436,6 +438,46 @@ class InventoryFlowIntegrationTest {
                         .session(session))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("Month must use the YYYY-MM format"));
+    }
+
+    // @trace NFR-22
+    @Test
+    void reportsAmountsWithoutCurrencyCodes() throws Exception {
+        var login = login(testPassword).andExpect(status().isOk()).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+
+        jdbcTemplate.update("""
+                INSERT INTO product
+                    (sku, name, description, quantity, price, markup_percentage, average_unit_cost)
+                VALUES ('ROSE-BOX-001', 'Rose Box', '', 10, 250, 50, 150)
+                """);
+        insertSale("SALE-20260705-0001", "2026-07-05", "CARD", "480", "300", "180", "2", "240");
+
+        var response = mockMvc.perform(get("/api/reports/monthly-sales")
+                        .param("month", "2026-07")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.revenue").value(480))
+                .andExpect(jsonPath("$.sales[0].revenue").value(480))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(response).doesNotContain("currency", "Currency", "UAH");
+
+        var tables = jdbcTemplate.queryForList(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+                String.class);
+        for (var table : tables) {
+            var columns = jdbcTemplate.queryForList("PRAGMA table_info('" + table + "')");
+            assertThat(columns)
+                    .as("currency columns in %s", table)
+                    .noneMatch(column -> String.valueOf(column.get("name")).toLowerCase().contains("currency"));
+        }
+    }
+
+    // @trace NFR-21
+    @Test
+    void declaresEnglishAsTheDocumentLanguage() throws Exception {
+        var entryDocument = Files.readString(Path.of("frontend/src/index.html"));
+        assertThat(entryDocument).contains("<html lang=\"en\">");
     }
 
     @Test

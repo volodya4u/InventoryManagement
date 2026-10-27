@@ -1,0 +1,280 @@
+{
+  "id": "20261027T184644Z-fa61",
+  "target": "frontend",
+  "selector": "frontend/src/app/sales/sales.component.spec.ts",
+  "baseTree": "2d1d95b70e54e573678dd49dd1d3b2f20eb8b11b",
+  "testFiles": {
+    "frontend/src/app/sales/sales.component.spec.ts": "4b7e95a608c319d1970a71b1b21994279033bd6d"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-27T18:46:45.793Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > loads sales and products and opens the sale named in ?saleId",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > totals net revenue, cost and profit after returns",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > fills the unit price from the product and starts at one unit",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > does not post a sale that needs more units than the stock holds",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > does not post a sale whose unit price has more than two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > posts the sale with trimmed notes, then closes the dialog and reloads",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > reverses the recorded line cost in proportion, exactly on the last unit",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > offers only items with units left and blocks returning more than that",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > asks for a quantity instead of posting an empty return",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > allows returns for completed and partly returned sales, cancellation only for completed",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > guards sales write forms and shows API errors",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > shows readable English sale dates and keeps ISO form values",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > prices each sale line without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > totals the sale form without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > totals a return without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 2.18 of a 4.35 line cost when 1 of 2 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 2.17 of a 4.35 line cost when 1 of 2 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 0.04 of a 0.07 line cost when 3 of 6 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 0.15 of a 0.29 line cost when 3 of 6 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > sums the net totals of all sales without floating-point drift",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-27T18:50:50.969Z",
+      "code": "dcf73c0861f548799e7970ddb791fa173d879495550b370c25bdd89def86903c",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > loads sales and products and opens the sale named in ?saleId",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > totals net revenue, cost and profit after returns",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > fills the unit price from the product and starts at one unit",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > does not post a sale that needs more units than the stock holds",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > does not post a sale whose unit price has more than two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > posts the sale with trimmed notes, then closes the dialog and reloads",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > reverses the recorded line cost in proportion, exactly on the last unit",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > offers only items with units left and blocks returning more than that",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > asks for a quantity instead of posting an empty return",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > allows returns for completed and partly returned sales, cancellation only for completed",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > guards sales write forms and shows API errors",
+          "status": "assertion"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > shows readable English sale dates and keeps ISO form values",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > prices each sale line without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > totals the sale form without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > totals a return without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 2.18 of a 4.35 line cost when 1 of 2 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 2.17 of a 4.35 line cost when 1 of 2 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 0.04 of a 0.07 line cost when 3 of 6 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 0.15 of a 0.29 line cost when 3 of 6 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > sums the net totals of all sales without floating-point drift",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-27T18:52:18.680Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > loads sales and products and opens the sale named in ?saleId",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > totals net revenue, cost and profit after returns",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > fills the unit price from the product and starts at one unit",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > does not post a sale that needs more units than the stock holds",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > does not post a sale whose unit price has more than two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > posts the sale with trimmed notes, then closes the dialog and reloads",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > reverses the recorded line cost in proportion, exactly on the last unit",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > offers only items with units left and blocks returning more than that",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > asks for a quantity instead of posting an empty return",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > allows returns for completed and partly returned sales, cancellation only for completed",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > guards sales write forms and shows API errors",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent > shows readable English sale dates and keeps ISO form values",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > prices each sale line without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > totals the sale form without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > totals a return without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 2.18 of a 4.35 line cost when 1 of 2 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 2.17 of a 4.35 line cost when 1 of 2 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 0.04 of a 0.07 line cost when 3 of 6 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > reverses 0.15 of a 0.29 line cost when 3 of 6 units come back",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/sales/sales.component.spec.ts › SalesComponent amounts > sums the net totals of all sales without floating-point drift",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "34c1812715f2892e9333714f38e55d9c3e05e81c",
+  "patchSha256": "953f3e696d130d67694c758adcb875316e0ccf56263723472883aae8818cb3fc",
+  "patchFiles": [
+    "frontend/src/app/core/api-error.ts"
+  ]
+}

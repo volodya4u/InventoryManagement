@@ -119,7 +119,7 @@
               track movement.inventoryType + '-' + movement.movementId
             ) {
               <tr>
-                <td class="date-column">{{ movement.occurredAt | date: 'MMM d, y' : 'UTC' }}</td>
+                <td class="date-column">{{ movement.occurredAt | date: 'MMM d, y' }}</td>
                 <td>
                   <span class="inventory-badge">{{
                     inventoryTypeLabel(movement.inventoryType)

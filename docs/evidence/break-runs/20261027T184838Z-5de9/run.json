@@ -1,0 +1,52 @@
+{
+  "id": "20261027T184838Z-5de9",
+  "target": "backend",
+  "selector": "InventoryFlowIntegrationTest#declaresEnglishAsTheDocumentLanguage",
+  "baseTree": "2d1d95b70e54e573678dd49dd1d3b2f20eb8b11b",
+  "testFiles": {
+    "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java": "0355fcf4b69860833c4e856a4d4bb2a213a08b0b"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-27T18:48:39.875Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "InventoryFlowIntegrationTest#declaresEnglishAsTheDocumentLanguage",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-27T18:56:20.499Z",
+      "code": "d7bb8f11a9f279fb4b3c2ab31976a3e93c90e998ef1605702ef3ab6abae79d75",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "InventoryFlowIntegrationTest#declaresEnglishAsTheDocumentLanguage",
+          "status": "assertion"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-27T18:57:01.400Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "InventoryFlowIntegrationTest#declaresEnglishAsTheDocumentLanguage",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "045529e6de63147484b220a1b9b0c050ba3a26b6",
+  "patchSha256": "27435870e98350c8f4e8942cf32da7896974dfbc7975aac5beaefe15249c9d35",
+  "patchFiles": [
+    "frontend/src/index.html"
+  ]
+}

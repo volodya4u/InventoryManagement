@@ -41,8 +41,8 @@
   <section class="surface-card empty-state">Loading monthly sales report...</section>
 } @else if (report(); as report) {
   <section class="report-period" aria-label="Report period">
-    {{ report.periodStart | date: 'longDate' : 'UTC' }} -
-    {{ report.periodEnd | date: 'longDate' : 'UTC' }}
+    {{ report.periodStart | date: 'longDate' }} -
+    {{ report.periodEnd | date: 'longDate' }}
   </section>
 
   <section class="summary-grid" aria-label="Monthly totals">
@@ -224,7 +224,7 @@
             <tbody>
               @for (day of report.dailySummaries; track day.saleDate) {
                 <tr>
-                  <td>{{ day.saleDate | date: 'MMM d, y' : 'UTC' }}</td>
+                  <td>{{ day.saleDate | date: 'MMM d, y' }}</td>
                   <td class="text-end">{{ day.salesCount }}</td>
                   <td class="text-end">{{ day.returnCount }}</td>
                   <td class="text-end">{{ day.unitsSold | number: '1.0-2' }}</td>
@@ -269,7 +269,7 @@
                       {{ sale.saleNumber }}
                     </a>
                   </td>
-                  <td>{{ sale.saleDate | date: 'MMM d' : 'UTC' }}</td>
+                  <td>{{ sale.saleDate | date: 'MMM d' }}</td>
                   <td>{{ saleStatusLabel(sale.status) }}</td>
                   <td>{{ paymentMethodLabel(sale.paymentMethod) }}</td>
                   <td class="text-end">
@@ -328,7 +328,7 @@
                       {{ saleReturn.saleNumber }}
                     </a>
                   </td>
-                  <td>{{ saleReturn.returnDate | date: 'MMM d, y' : 'UTC' }}</td>
+                  <td>{{ saleReturn.returnDate | date: 'MMM d, y' }}</td>
                   <td>{{ paymentMethodLabel(saleReturn.paymentMethod) }}</td>
                   <td class="text-end">{{ saleReturn.unitsReturned | number: '1.0-2' }}</td>
                   <td class="text-end">

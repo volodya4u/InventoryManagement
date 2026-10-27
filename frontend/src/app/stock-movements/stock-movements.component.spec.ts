@@ -71,6 +71,7 @@ describe('StockMovementsComponent', () => {
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     requests.verify();
     TestBed.resetTestingModule();
   });
@@ -84,6 +85,15 @@ describe('StockMovementsComponent', () => {
 
     expect(component.loading()).toBe(false);
     expect(fixture.nativeElement.textContent).toContain('Rose Box');
+  });
+
+  // @trace NFR-21
+  it('shows movement dates on their API calendar day', () => {
+    vi.stubEnv('TZ', 'Europe/Kyiv');
+    expectHistory().flush(history({ movements: [movement({ occurredAt: '2026-09-10' })] }));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Sep 10, 2026');
   });
 
   // @trace FR-135

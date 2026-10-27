@@ -61,7 +61,7 @@
               <td>
                 <span class="sale-number">{{ sale.saleNumber }}</span>
               </td>
-              <td>{{ sale.saleDate | date: 'mediumDate' : 'UTC' }}</td>
+              <td>{{ sale.saleDate | date: 'mediumDate' }}</td>
               <td>
                 <span
                   class="sale-status"
@@ -347,7 +347,7 @@
         <div>
           <h2 id="sale-detail-title">{{ sale.saleNumber }}</h2>
           <div class="dialog-subtitle">
-            {{ sale.saleDate | date: 'mediumDate' : 'UTC' }} ·
+            {{ sale.saleDate | date: 'mediumDate' }} ·
             {{ paymentMethodLabel(sale.paymentMethod) }} ·
             <span
               class="sale-status"
@@ -455,7 +455,7 @@
                           ? 'Cancellation'
                           : 'Product Return'
                       }}
-                      · {{ saleReturn.returnDate | date: 'mediumDate' : 'UTC' }} ·
+                      · {{ saleReturn.returnDate | date: 'mediumDate' }} ·
                       {{ saleReturn.reason }}
                     </span>
                   </div>

@@ -1,0 +1,160 @@
+{
+  "id": "20261027T184549Z-491f",
+  "target": "frontend",
+  "selector": "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
+  "baseTree": "2d1d95b70e54e573678dd49dd1d3b2f20eb8b11b",
+  "testFiles": {
+    "frontend/src/app/raw-materials/raw-materials.component.spec.ts": "c2da853997b248b51819c30d5e945d9ae46563b1"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-27T18:45:50.684Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values a write-off of a fractional quantity without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values a stock adjustment without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > keeps a stock adjustment finer than four decimal places",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values initial stock without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > totals a receipt without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > totals the stock value of all raw materials without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent low-stock badge > marks a raw material below its reorder level",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > asks before deleting and sends nothing when the answer is no",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > deletes the raw material and drops its row when the answer is yes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > guards raw material write forms and shows API errors",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-27T18:49:54.346Z",
+      "code": "dcf73c0861f548799e7970ddb791fa173d879495550b370c25bdd89def86903c",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values a write-off of a fractional quantity without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values a stock adjustment without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > keeps a stock adjustment finer than four decimal places",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values initial stock without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > totals a receipt without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > totals the stock value of all raw materials without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent low-stock badge > marks a raw material below its reorder level",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > asks before deleting and sends nothing when the answer is no",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > deletes the raw material and drops its row when the answer is yes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > guards raw material write forms and shows API errors",
+          "status": "assertion"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-27T18:51:20.138Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values a write-off of a fractional quantity without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values a stock adjustment without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > keeps a stock adjustment finer than four decimal places",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > values initial stock without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > totals a receipt without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent amounts > totals the stock value of all raw materials without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent low-stock badge > marks a raw material below its reorder level",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > asks before deleting and sends nothing when the answer is no",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > deletes the raw material and drops its row when the answer is yes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/raw-materials/raw-materials.component.spec.ts › RawMaterialsComponent delete confirmation > guards raw material write forms and shows API errors",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "34c1812715f2892e9333714f38e55d9c3e05e81c",
+  "patchSha256": "953f3e696d130d67694c758adcb875316e0ccf56263723472883aae8818cb3fc",
+  "patchFiles": [
+    "frontend/src/app/core/api-error.ts"
+  ]
+}

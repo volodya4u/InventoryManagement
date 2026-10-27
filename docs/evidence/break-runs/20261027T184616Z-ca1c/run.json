@@ -1,0 +1,244 @@
+{
+  "id": "20261027T184616Z-ca1c",
+  "target": "frontend",
+  "selector": "frontend/src/app/products/products.component.spec.ts",
+  "baseTree": "2d1d95b70e54e573678dd49dd1d3b2f20eb8b11b",
+  "testFiles": {
+    "frontend/src/app/products/products.component.spec.ts": "cab4b49d4105579c603320cf112ff83e2edddc6a"
+  },
+  "steps": [
+    {
+      "step": "start",
+      "ts": "2026-10-27T18:46:17.284Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > requires a recipe, and an initial unit cost when there is opening stock",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > rejects a markup or advertising cost with more than two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > prices a new product from its recipe, advertising cost and markup",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > counts production needs without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > posts production when the materials are enough, then reloads",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > blocks a write-off larger than the stock",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > sends an adjustment as the counted quantity and updates the row in place",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > creates a product with its opening stock, initial unit cost and recipe",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > edits a product without resending its quantity or initial unit cost",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > asks before deleting a product and sends nothing when the answer is no",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > deletes the product and drops its row when the answer is yes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > guards product write forms and shows API errors",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > estimates the unit cost of a recipe without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > previews the selling price the server calculates",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > prefills the initial unit cost rounded half up to cents",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > costs a production run without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > values stock without floating-point drift",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "break",
+      "ts": "2026-10-27T18:50:22.201Z",
+      "code": "dcf73c0861f548799e7970ddb791fa173d879495550b370c25bdd89def86903c",
+      "kind": "assertion",
+      "results": [
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > requires a recipe, and an initial unit cost when there is opening stock",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > rejects a markup or advertising cost with more than two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > prices a new product from its recipe, advertising cost and markup",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > counts production needs without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > posts production when the materials are enough, then reloads",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > blocks a write-off larger than the stock",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > sends an adjustment as the counted quantity and updates the row in place",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > creates a product with its opening stock, initial unit cost and recipe",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > edits a product without resending its quantity or initial unit cost",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > asks before deleting a product and sends nothing when the answer is no",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > deletes the product and drops its row when the answer is yes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > guards product write forms and shows API errors",
+          "status": "assertion"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > estimates the unit cost of a recipe without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > previews the selling price the server calculates",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > prefills the initial unit cost rounded half up to cents",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > costs a production run without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > values stock without floating-point drift",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "step": "restore",
+      "ts": "2026-10-27T18:51:49.137Z",
+      "code": "401f7ea0ad87e9ec7a723255e9732582aef65753e52b310680676795e37d36f2",
+      "kind": "pass",
+      "results": [
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > requires a recipe, and an initial unit cost when there is opening stock",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > rejects a markup or advertising cost with more than two decimals",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > prices a new product from its recipe, advertising cost and markup",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > counts production needs without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > posts production when the materials are enough, then reloads",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > blocks a write-off larger than the stock",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > sends an adjustment as the counted quantity and updates the row in place",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > creates a product with its opening stock, initial unit cost and recipe",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > edits a product without resending its quantity or initial unit cost",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > asks before deleting a product and sends nothing when the answer is no",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > deletes the product and drops its row when the answer is yes",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent > guards product write forms and shows API errors",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > estimates the unit cost of a recipe without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > previews the selling price the server calculates",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > prefills the initial unit cost rounded half up to cents",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > costs a production run without floating-point drift",
+          "status": "pass"
+        },
+        {
+          "id": "frontend/src/app/products/products.component.spec.ts › ProductsComponent amounts > values stock without floating-point drift",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "brokenTree": "34c1812715f2892e9333714f38e55d9c3e05e81c",
+  "patchSha256": "953f3e696d130d67694c758adcb875316e0ccf56263723472883aae8818cb3fc",
+  "patchFiles": [
+    "frontend/src/app/core/api-error.ts"
+  ]
+}

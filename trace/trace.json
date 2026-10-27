@@ -808,6 +808,7 @@
     {
       "id": "FR-55",
       "specs": [
+        "openspec/specs/app-shell-routing/spec.md",
         "openspec/specs/raw-materials/spec.md"
       ],
       "planned": true,
@@ -1186,6 +1187,7 @@
     {
       "id": "FR-86",
       "specs": [
+        "openspec/specs/app-shell-routing/spec.md",
         "openspec/specs/products/spec.md"
       ],
       "planned": true,
@@ -2534,6 +2536,10 @@
     {
       "check": "recording-evidence",
       "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"nfr-evidence-hardening\" is not archived"
     }
   ]
 }

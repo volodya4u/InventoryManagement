@@ -223,4 +223,55 @@ describe('RawMaterialsComponent delete confirmation', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).not.toContain('Red Rose');
   });
+
+  // @trace NFR-19
+  it('guards raw material write forms and shows API errors', () => {
+    const component = fixture.componentInstance;
+    const material = rawMaterial({});
+
+    component.openCreate();
+    component.submit();
+    requests.expectNone({ method: 'POST', url: '/api/raw-materials' });
+    component.form.controls.name.setValue('White Rose');
+    component.submit();
+    requests
+      .expectOne({ method: 'POST', url: '/api/raw-materials' })
+      .flush({ detail: 'Material save failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Material save failed.');
+
+    component.openReceipt(material);
+    component.submitReceipt();
+    requests.expectNone({ method: 'POST', url: '/api/raw-materials/1/receipts' });
+    component.receiptForm.patchValue({ receivedQuantity: 2, unitPurchaseCost: 3 });
+    component.submitReceipt();
+    requests
+      .expectOne({ method: 'POST', url: '/api/raw-materials/1/receipts' })
+      .flush({ detail: 'Receipt failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Receipt failed.');
+
+    component.openStockOperation(material, 'WRITE_OFF');
+    component.submitStockOperation();
+    requests.expectNone({ method: 'POST', url: '/api/raw-materials/1/write-offs' });
+    component.stockOperationForm.controls.quantity.setValue(1);
+    component.submitStockOperation();
+    requests
+      .expectOne({ method: 'POST', url: '/api/raw-materials/1/write-offs' })
+      .flush({ detail: 'Write-off failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Write-off failed.');
+
+    component.openStockOperation(material, 'ADJUSTMENT');
+    component.stockOperationForm.controls.quantity.setValue(-1);
+    component.submitStockOperation();
+    requests.expectNone({ method: 'POST', url: '/api/raw-materials/1/adjustments' });
+    component.stockOperationForm.controls.quantity.setValue(80);
+    component.submitStockOperation();
+    requests
+      .expectOne({ method: 'POST', url: '/api/raw-materials/1/adjustments' })
+      .flush({ detail: 'Adjustment failed.' }, { status: 409, statusText: 'Conflict' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Adjustment failed.');
+  });
 });
