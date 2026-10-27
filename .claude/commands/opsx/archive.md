@@ -97,9 +97,9 @@ In both branches, never create the root as a side effect: do not run `openspec i
    other markers, including unfamiliar ones, remain incomplete.
 
    **If incomplete tasks found:**
-   - Display warning showing count of incomplete tasks
-   - Prompt user for confirmation to continue
-   - Proceed if user confirms
+   - Display the count of incomplete tasks and stop before archiving.
+   - Ask for the implementation and evidence to be completed, or for the owner to explicitly revise the plan.
+   - Do not check a task solely to permit archive; this project's traceability gate rejects archived changes with unchecked tasks.
 
    **If `totalTasks` is zero:** Proceed without a task-related warning.
 
@@ -185,7 +185,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Schema that was used
    - Archive location
    - Spec sync status (synced / sync skipped / no delta specs)
-   - Note about any warnings (incomplete artifacts/tasks)
+   - Note about any non-task warnings (for example, incomplete artifacts or skipped spec sync)
 
 **Output On Success**
 
@@ -225,7 +225,6 @@ All artifacts complete. All tasks complete.
 
 **Warnings:**
 - Archived with 2 incomplete artifacts
-- Archived with 3 incomplete tasks
 - Delta spec sync was skipped (user chose to skip)
 
 Review the archive if this was not intentional.
@@ -250,7 +249,7 @@ Target archive directory already exists.
 **Guardrails**
 - Announce the selected change; prompt for selection when it is ambiguous
 - Use artifact graph (openspec status --json) for completion checking
-- Don't block archive on warnings - just inform and confirm
+- Other warnings may be confirmed; incomplete tasks always block archive in this project.
 - Preserve .openspec.yaml when moving to archive (it moves with the directory)
 - Show clear summary of what happened
 - If sync is requested, run the `/opsx:sync` workflow inline (agent-driven)

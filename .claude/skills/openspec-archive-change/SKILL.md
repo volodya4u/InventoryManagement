@@ -101,9 +101,9 @@ In both branches, never create the root as a side effect: do not run `openspec i
    other markers, including unfamiliar ones, remain incomplete.
 
    **If incomplete tasks found:**
-   - Display warning showing count of incomplete tasks
-   - Ask the user to confirm they want to proceed
-   - Proceed if user confirms
+   - Display the count of incomplete tasks and stop before archiving.
+   - Ask for the implementation and evidence to be completed, or for the owner to explicitly revise the plan.
+   - Do not check a task solely to permit archive; this project's traceability gate rejects archived changes with unchecked tasks.
 
    **If `totalTasks` is zero:** Proceed without a task-related warning.
 
@@ -189,7 +189,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Schema that was used
    - Archive location
    - Whether specs were synced (if applicable)
-   - Note about any warnings (incomplete artifacts/tasks)
+   - Note about any non-task warnings (for example, incomplete artifacts or skipped spec sync)
 
 **Output On Success**
 
@@ -201,13 +201,13 @@ In both branches, never create the root as a side effect: do not run `openspec i
 **Archived to:** the archive path derived from `planningHome.changesDir`/<target-name>/
 **Specs:** <"✓ Synced to main specs" only if the step 4 verification passed; otherwise "No delta specs" or "Sync skipped">
 
-<"All artifacts complete. All tasks complete." — or, if archived with warnings, list them instead (e.g. "Archived with 2 incomplete tasks")>
+<"All artifacts complete. All tasks complete." — or list any non-task warnings>
 ```
 
 **Guardrails**
 - Announce the selected change; prompt for selection when it is ambiguous
 - Use artifact graph (openspec status --json) for completion checking
-- Don't block archive on warnings - just inform and confirm
+- Other warnings may be confirmed; incomplete tasks always block archive in this project.
 - Preserve .openspec.yaml when moving to archive (it moves with the directory)
 - Show clear summary of what happened
 - If sync is requested, run the `openspec-sync-specs` workflow inline (agent-driven)

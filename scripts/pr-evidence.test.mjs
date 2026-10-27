@@ -400,6 +400,9 @@ test("evals: the gate fires only when an eval-relevant input changed on the bran
   assert.match(evalsProblems([".claude/agents/reviewer.md"], record, { "AGENTS.md": "bbb" }).join(" "), /changed since|is no longer covered|is new/);
   // A skill case changed, no record at all: fails.
   assert.match(evalsProblems([".agents/skills/test-first-loop/evals/x/prompt.md"], null, { "AGENTS.md": "aaa" }).join(" "), /no evals\/record\.json/);
+  // OpenSpec's Claude-specific instructions and command adapters are independent eval inputs too.
+  assert.match(evalsProblems([".claude/skills/openspec-archive-change/SKILL.md"], null, { "AGENTS.md": "aaa" }).join(" "), /no evals\/record\.json/);
+  assert.match(evalsProblems([".claude/commands/opsx/archive.md"], null, { "AGENTS.md": "aaa" }).join(" "), /no evals\/record\.json/);
 });
 
 test("blocked actions: a proposal without a result, except the last commit, whose result folds into the next one", () => {

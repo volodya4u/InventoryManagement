@@ -19,5 +19,13 @@ focused test catches the line if a future `openspec update` restores it, making 
 
 Add two self-contained cases to each new skill's `evals/` folder, with prompts and graders that test the workflow's
 core boundary. Sync them to `.claude/skills/` while preserving the Claude-specific `SKILL.md` content. Run
-`scripts/eval-record.mjs`, the Factory checks and `dod.mjs`.
+`scripts/eval-record.mjs`, the Factory checks and `dod.mjs`. The eval fingerprint includes both skill trees and the
+Claude OpenSpec command adapters because their instructions can change independently.
 The fresh read-only reviewer checks the entire diff before the pull request.
+
+## Archive boundary
+
+OpenSpec's generated archive workflow treats incomplete tasks as a warning. This project's traceability gate rejects
+an archived change with an unchecked task, so the Codex skill, Claude skill and Claude command stop before archiving
+until implementation and evidence are complete or the owner explicitly revises the plan. The focused harness assertion
+guards all three entry points against a later OpenSpec update restoring the permissive behavior.

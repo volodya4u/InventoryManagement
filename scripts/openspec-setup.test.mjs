@@ -63,3 +63,17 @@ test('OpenSpec skills have eval cases and target-specific instructions', () => {
   assert.match(read('.agents/skills/openspec-apply-change/SKILL.md'), /\$openspec-archive-change/);
   assert.match(read('.claude/skills/openspec-apply-change/SKILL.md'), /\/opsx:archive/);
 });
+
+test('OpenSpec archive refuses unchecked tasks in every target', () => {
+  const paths = [
+    '.agents/skills/openspec-archive-change/SKILL.md',
+    '.claude/skills/openspec-archive-change/SKILL.md',
+    '.claude/commands/opsx/archive.md',
+  ];
+  for (const path of paths) {
+    const content = read(path);
+    assert.match(content, /\*\*If incomplete tasks found:\*\*[\s\S]*?stop before archiving/, path);
+    assert.doesNotMatch(content, /Archived with \d+ incomplete tasks/, path);
+    assert.doesNotMatch(content, /incomplete artifacts\/tasks/, path);
+  }
+});

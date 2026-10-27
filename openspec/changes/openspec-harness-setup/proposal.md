@@ -25,6 +25,8 @@ gate will accept them.
 | 2 | Given the shared OpenSpec workflow files, when Codex or Claude Code loads them, then none preapproves OpenSpec CLI commands outside the repository allow-list | `scripts/openspec-setup.test.mjs` › "OpenSpec workflows do not preapprove CLI commands" |
 | 3 | Given the six OpenSpec skills shared with Codex and Claude Code, when the harness checks them, then every skill has two well-formed eval cases in both locations, while each tool keeps its own invocation syntax | `scripts/openspec-setup.test.mjs` › "OpenSpec skills have eval cases and target-specific instructions" |
 | 4 | Given a skill sync run, when OpenSpec has generated different instructions for Codex and Claude Code, then the sync preserves both versions and mirrors the shared eval cases | `scripts/skills-sync.test.mjs` › "sync preserves OpenSpec target instructions and mirrors their evals" |
+| 5 | Given an OpenSpec change with unchecked tasks, when archive is requested through any generated target, then the workflow stops before archiving until the work is completed or the plan is revised | `scripts/openspec-setup.test.mjs` › "OpenSpec archive refuses unchecked tasks in every target" |
+| 6 | Given independently maintained Claude OpenSpec skills and commands, when either changes, then the Evals gate requires a fresh score record covering those files | `scripts/pr-evidence.test.mjs` › "evals: the gate fires only when an eval-relevant input changed on the branch" |
 
 ## Impact
 

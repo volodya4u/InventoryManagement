@@ -38,3 +38,19 @@ test('sync preserves OpenSpec target instructions and mirrors their evals', () =
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('sync refuses a missing Claude OpenSpec skill instead of copying Codex instructions', () => {
+  const root = mkdtempSync(join(tmpdir(), 'openspec-skills-sync-missing-'));
+  try {
+    const shared = '.agents/skills/openspec-propose';
+    const claude = '.claude/skills/openspec-propose';
+    write(root, `${shared}/SKILL.md`, 'generatedBy: "1.15.0"\nUse $openspec-propose.\n');
+
+    const run = spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8' });
+    assert.notEqual(run.status, 0, 'sync should refuse a missing Claude target');
+    assert.match(run.stderr, /Claude OpenSpec skill.*missing/i);
+    assert.ok(!existsSync(join(root, claude, 'SKILL.md')));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

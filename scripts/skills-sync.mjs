@@ -21,7 +21,11 @@ for (const name of readdirSync(src)) {
   const claudeText = existsSync(join(to, "SKILL.md")) ? readFileSync(join(to, "SKILL.md"), "utf8") : "";
   // OpenSpec generates different invocation text for Codex and Claude Code. Preserve both and copy only the
   // project's eval cases; ordinary project skills still use the shared .agents/skills/ source in full.
-  if (name.startsWith("openspec-") && /generatedBy:/.test(sharedText) && /generatedBy:/.test(claudeText)) {
+  if (name.startsWith("openspec-") && /generatedBy:/.test(sharedText)) {
+    if (!/generatedBy:/.test(claudeText)) {
+      console.error(`Claude OpenSpec skill ${name} is missing; regenerate it before syncing evals.`);
+      process.exit(2);
+    }
     const fromEvals = join(from, "evals");
     const toEvals = join(to, "evals");
     rmSync(toEvals, { recursive: true, force: true });
