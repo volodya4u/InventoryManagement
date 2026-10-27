@@ -3,45 +3,45 @@
   "slices": [
     {
       "slice": "2026-10-12-harden-frontend-specs",
-      "reviewEvidence": "missing",
+      "reviewEvidence": "clean",
       "trailerCommits": 0,
       "libDomains": [],
-      "processComplete": false
+      "processComplete": true
     },
     {
       "slice": "2026-10-12-harden-infrastructure-tests",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
       "libDomains": [],
-      "processComplete": false
+      "processComplete": true
     },
     {
       "slice": "2026-10-12-harden-product-and-production-tests",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
       "libDomains": [],
-      "processComplete": false
+      "processComplete": true
     },
     {
       "slice": "2026-10-12-harden-raw-material-tests",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
       "libDomains": [],
-      "processComplete": false
+      "processComplete": true
     },
     {
       "slice": "2026-10-12-harden-sales-reports-history-tests",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
       "libDomains": [],
-      "processComplete": false
+      "processComplete": true
     },
     {
       "slice": "2026-10-12-harden-security-tests",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
       "libDomains": [],
-      "processComplete": false
+      "processComplete": true
     },
     {
       "slice": "2026-10-20-gate-status-explicit",
@@ -177,6 +177,13 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-27-nfr-evidence-hardening",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-27-openspec-harness-setup",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 3,
@@ -188,36 +195,8 @@
   "failures": [],
   "warnings": [
     {
-      "check": "review-evidence",
-      "msg": "2026-10-12-harden-frontend-specs: no review-findings.json, and the agent log's review is missing (review must have run clean before archive)"
-    },
-    {
-      "check": "process",
-      "msg": "2026-10-12-harden-frontend-specs: archived change is missing design.md and/or tasks.md"
-    },
-    {
       "check": "trailer",
       "msg": "2026-10-12-harden-frontend-specs: no commit carries a \"Slice: harden-frontend-specs\" trailer"
-    },
-    {
-      "check": "process",
-      "msg": "2026-10-12-harden-infrastructure-tests: archived change is missing design.md and/or tasks.md"
-    },
-    {
-      "check": "process",
-      "msg": "2026-10-12-harden-product-and-production-tests: archived change is missing design.md and/or tasks.md"
-    },
-    {
-      "check": "process",
-      "msg": "2026-10-12-harden-raw-material-tests: archived change is missing design.md and/or tasks.md"
-    },
-    {
-      "check": "process",
-      "msg": "2026-10-12-harden-sales-reports-history-tests: archived change is missing design.md and/or tasks.md"
-    },
-    {
-      "check": "process",
-      "msg": "2026-10-12-harden-security-tests: archived change is missing design.md and/or tasks.md"
     },
     {
       "check": "review-evidence",
