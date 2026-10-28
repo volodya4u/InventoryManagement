@@ -13,6 +13,12 @@ updates:
       angular:
         patterns:
           - "@angular/*"
+      # @vitest/coverage-v8 pins vitest as an exact peer, and the coverage ratchet runs in CI (ADR-0006), so update them
+      # together.
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
     # Angular majors need migrations: run `ng update` instead.
     ignore:
       - dependency-name: "@angular/*"
