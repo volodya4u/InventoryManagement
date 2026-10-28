@@ -35,6 +35,9 @@ We adopt what is there. The stack is not migrated, and the factory adapts to it 
   Wiring any of those is a separate, human-approved change.
 - No factory agents, workflows or tool adapters (`.cursor`, Copilot, Codex) are copied. The plugin provides its
   agents natively, and the repo already has its own `reviewer` and `.codex/`.
+  *Correction 2026-10-28:* no `.codex/` was ever committed to this repository (`git log --all -- .codex` is empty), so
+  the repo has no Codex adapter, not one of its own. No adapter is added; `docs/current-state.md` lists what is not
+  installed.
 - The copied check scripts are pure Node but were written for a JS app, so two were adapted to this layout: `check-traceability.mjs` and
   `check-acceptance-methods.mjs` now also scan `frontend/src` and count `*Test.java` / `*Tests.java` as tests when they look for
   `@trace <id>` tags (without that, no JUnit or Angular test could ever be traced). `quality/telemetry.config.json` declares
