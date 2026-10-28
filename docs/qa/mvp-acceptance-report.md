@@ -74,17 +74,20 @@ closed:
 1. **No recordings.** The release check requires every requirement to be named in a recording manifest, and none exists.
    Producing them needs a browser automation tool, which is a new dependency and needs the owner's approval.
 2. **Two documented process gaps** in `docs/qa/historical-gaps.md` (a missing `Slice:` trailer on a merged commit, and a slice
-   merged without a review on its final tree). They cannot be repaired afterwards, and the trajectory check has no approved
-   way to waive them (retro finding PD-5).
+   merged without a review on its final tree) cannot be repaired afterwards. They are waived, not fixed: ADR-0009 lets the
+   trajectory check waive a slice with an approval, the two files `docs/qa/waivers/2026-10-28-trajectory-*.md` do so, and
+   `node scripts/check-trajectory.mjs --release` passes with two WAIVED lines. This is no longer a reason for G7 to be red;
+   it stays here because a waiver is an exception the owner approved, not a pass.
 3. **The manual run is not done.** `docs/qa/manual-test-plan.md` has no results.
 4. **Owner decisions are open:** OQ-3 to OQ-16 are `open` in `docs/requirements.md`, and the risks in
    `docs/qa/risk-register.md` marked **Decision** need an answer.
 5. **Signed approval is not configured** (no hardware-backed key in `quality/allowed-signers`); today the owner's merge is the
    approval.
-6. **Process findings PD-4 to PD-8** from the retro of 2026-10-28 are not addressed (see risk R-16). They are in `docs/qa/process-defects.json`, which is gitignored (ADR-0008) and so
-   not in a fresh clone; PD-1, PD-2, PD-3 and PD-9 are recorded in `openspec/changes/archive/2026-10-28-improve-PD-*`.
+6. **Process findings PD-4, PD-6, PD-7 and PD-8** from the retro of 2026-10-28 are not addressed (see risk R-16). They are in `docs/qa/process-defects.json`, which is gitignored (ADR-0008) and so
+   not in a fresh clone; PD-1, PD-2, PD-3 and PD-9 are recorded in `openspec/changes/archive/2026-10-28-improve-PD-*`, and PD-5
+   in `openspec/changes/improve-PD-5` until it is archived.
 
-Items 3 and 4 need only the owner. Item 1 needs an approved dependency; item 2 needs an approved change to a gate script.
+Items 3 and 4 need only the owner. Item 1 needs an approved dependency.
 
 ## 6. Decision
 

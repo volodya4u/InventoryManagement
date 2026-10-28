@@ -17,7 +17,8 @@
 //
 // Usage:
 //   node scripts/check-trajectory.mjs                 # report + exit code
-//   node scripts/check-trajectory.mjs --release       # missing evidence/trailer = FAIL
+//   node scripts/check-trajectory.mjs --release       # missing design.md/tasks.md = FAIL too (a missing trailer or review
+//                                                     # is a FAIL in every mode unless a slice waiver covers it, ADR-0009)
 //   node scripts/check-trajectory.mjs --strict-scope  # cross-slice module overlap = FAIL
 //   node scripts/check-trajectory.mjs --check-fresh   # committed report must match
 //
@@ -139,6 +140,37 @@ function mergedReview(merge) {
 }
 const REVIEWED = new Set(["clean", "approved (agent log)"]);
 
+// ADAPTATION (2026-10-28, owner-approved, improve-PD-5 and ADR-0009): a `trailer` or `review-evidence` finding of an archived
+// slice is a failure unless an open slice waiver covers it, in every mode. A slice waiver is a docs/qa/waivers/*.md with
+// `Status: open`, `Gate: Trajectory`, an `Approval:` line, a `Slices:` line listing archived slice folders by their exact
+// name and a `Checks:` line naming which of `trailer` and `review-evidence` it covers. Mentioning a slice, or a requirement
+// id, waives nothing, and `process` cannot be waived. A waived finding is reported as WAIVED (console, report, JSON), never
+// as a pass. Same field reader as pr-evidence.mjs's waivers.
+const field = (text, name) => new RegExp(`^[ \\t]*(?:-[ \\t]*)?(?:\\*\\*)?${name}:(?:\\*\\*)?[ \\t]*(.*?)[ \\t]*$`, "im").exec(text)?.[1] ?? "";
+const WAIVABLE = new Set(["trailer", "review-evidence"]);
+const sliceWaivers = new Map(); // `${slice}|${check}` -> { path, approval }
+const waiverDirAbs = join(root, "docs", "qa", "waivers");
+if (existsSync(waiverDirAbs)) {
+  for (const f of readdirSync(waiverDirAbs).sort()) {
+    if (!f.endsWith(".md") || f.startsWith(".")) continue;
+    const path = `docs/qa/waivers/${f}`;
+    const text = (read(path) ?? "").replace(/\r\n?/g, "\n");
+    const approval = field(text, "Approval");
+    if (field(text, "Status").toLowerCase() !== "open" || !/^trajectory$/i.test(field(text, "Gate")) || !approval) continue;
+    const list = (name) => field(text, name).replaceAll("`", "").split(/[,;]/).map((x) => x.trim()).filter(Boolean);
+    const checks = list("Checks").filter((c) => WAIVABLE.has(c));
+    for (const s of list("Slices")) {
+      for (const c of checks) if (!sliceWaivers.has(`${s}|${c}`)) sliceWaivers.set(`${s}|${c}`, { path, approval });
+    }
+  }
+}
+const waived = [];
+function sliceFinding(check, slice, msg) {
+  const w = sliceWaivers.get(`${slice}|${check}`);
+  if (w) waived.push({ check, slice, msg, waiver: w.path, approval: w.approval });
+  else fail(check, msg);
+}
+
 // ---------- discover archived slices ----------
 const archiveAbs = join(root, PATHS.archiveDir);
 const slices = existsSync(archiveAbs)
@@ -169,7 +201,7 @@ for (const slice of slices) {
   }
   if (!REVIEWED.has(reviewEvidence)) {
     const what = rf || !isRepo ? `review-findings.json is ${reviewEvidence}` : `no review-findings.json, and the agent log's review is ${reviewEvidence}`;
-    gated(flags.has("--release"), "review-evidence", `${slice}: ${what} (review must have run clean before archive)`);
+    sliceFinding("review-evidence", slice, `${slice}: ${what} (review must have run clean before archive)`);
   }
 
   // 2. process completeness
@@ -199,7 +231,7 @@ for (const slice of slices) {
         domainToSlices.get(d).push(slice);
       }
     }
-    if (trailerCommits === 0) gated(flags.has("--release"), "trailer", `${slice}: no commit carries a "Slice: ${trailerName}" trailer`);
+    if (trailerCommits === 0) sliceFinding("trailer", slice, `${slice}: no commit carries a "Slice: ${trailerName}" trailer`);
   }
 
   rows.push({ slice, reviewEvidence, trailerCommits, libDomains, processComplete });
@@ -227,7 +259,7 @@ It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
 Scope: ${slices.length} archived slice(s).
-Result: ${failures.length === 0 ? "PASS" : `FAIL (${failures.length} failure${failures.length === 1 ? "" : "s"})`}${warnings.length ? `, ${warnings.length} warning(s)` : ""}
+Result: ${failures.length === 0 ? "PASS" : `FAIL (${failures.length} failure${failures.length === 1 ? "" : "s"})`}${warnings.length ? `, ${warnings.length} warning(s)` : ""}${waived.length ? `, ${waived.length} waived` : ""}
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
 |---|---|---|---|---|
@@ -242,6 +274,12 @@ ${overlaps.length ? overlaps.map((o) => `- \`lib/${o.domain}/\` touched by: ${o.
 ## Failures
 
 ${failures.length ? failures.map((f) => `- **${f.check}**: ${f.msg}`).join("\n") : "None."}
+
+## Waived
+
+Findings that an open slice waiver covers. They are exceptions, not passes: each names the waiver and who approved it.
+
+${waived.length ? waived.map((w) => `- **${w.check}**: ${w.msg} — waiver \`${w.waiver}\`, approval: ${w.approval}`).join("\n") : "None."}
 
 ## Warnings
 
@@ -258,6 +296,7 @@ const trajectory = {
   slices: rows,
   overlaps,
   failures,
+  waived,
   warnings,
 };
 
@@ -273,8 +312,9 @@ if (flags.has("--check-fresh")) {
 }
 
 for (const w of warnings) console.warn(`WARN  [${w.check}] ${w.msg}`);
+for (const w of waived) console.warn(`WAIVED [${w.check}] ${w.msg} — waiver ${w.waiver}, approval: ${w.approval}`);
 for (const f of failures) console.error(`FAIL  [${f.check}] ${f.msg}`);
 console.log(`\nScope: ${slices.length} archived slice(s)`);
 if (!flags.has("--check-fresh")) console.log(`wrote ${PATHS.reportOut} and ${PATHS.jsonOut}`);
-console.log(`Result: ${failures.length ? "FAIL" : "PASS"}${warnings.length ? `, ${warnings.length} warning(s)` : ""}`);
+console.log(`Result: ${failures.length ? "FAIL" : "PASS"}${warnings.length ? `, ${warnings.length} warning(s)` : ""}${waived.length ? `, ${waived.length} waived` : ""}`);
 process.exit(failures.length ? 1 : 0);

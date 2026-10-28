@@ -2,7 +2,7 @@
 // pull request whose agent-log lines hold the reviewer's verdict on the branch head counts as reviewed.
 // Run: node --test scripts/check-trajectory.test.mjs
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -59,10 +59,12 @@ function repo(name, logFor, { findings, base = "main" } = {}) {
   return root;
 }
 
+// The script exits 1 for an unwaived gap but writes trace/trajectory.json first; `warned` means a review-evidence finding was
+// raised at all, whether as a warning or as a failure.
 const evidence = (root) => {
-  execFileSync(process.execPath, [SCRIPT], { cwd: root, encoding: "utf8" });
-  const { slices, warnings } = JSON.parse(readFileSync(join(root, "trace", "trajectory.json"), "utf8"));
-  return { review: slices[0].reviewEvidence, warned: warnings.some((w) => w.check === "review-evidence") };
+  spawnSync(process.execPath, [SCRIPT], { cwd: root, encoding: "utf8" });
+  const { slices, warnings, failures } = JSON.parse(readFileSync(join(root, "trace", "trajectory.json"), "utf8"));
+  return { review: slices[0].reviewEvidence, warned: [...warnings, ...failures].some((w) => w.check === "review-evidence") };
 };
 
 test("an archived slice counts as reviewed when its pull request recorded the reviewer's APPROVE on the branch head", () => {
@@ -220,4 +222,97 @@ test("a warm run reads a merged slice's answer from the cache", () => {
   // An entry for the real pull request merge, under the current rules, changes the answer: the run read the cache.
   plantApproval(root, git(root, "rev-parse", "HEAD"));
   assert.equal(evidence(root).review, "approved (agent log)");
+});
+
+// --- slice waivers (PD-5) ---------------------------------------------------------------------------------------------
+
+const SLICE = "2026-10-22-demo";
+// A repository with one archived slice that no commit's Slice trailer names (so it has no trailer and no review).
+function gapRepo(name) {
+  const root = join(tmp, name);
+  mkdirSync(root);
+  git(root, "init", "-q", "-b", "main");
+  write(root, `openspec/changes/archive/${SLICE}/design.md`, "# Design\n");
+  write(root, `openspec/changes/archive/${SLICE}/tasks.md`, "- [x] 1. Do it.\n");
+  git(root, "add", "-A");
+  git(root, "commit", "-q", "-m", "Do the demo without a trailer");
+  return root;
+}
+// A waiver file; a field left out (null) is not written.
+const waiverText = ({ status = "open", gate = "Trajectory", slices = SLICE, checks = "trailer, review-evidence", approval = "volodya4u, in chat on 2026-10-28" } = {}) =>
+  ["# Waiver: a historical trajectory gap", "", status && `Status: ${status}`, gate && `Gate: ${gate}`, slices && `Slices: ${slices}`, checks && `Checks: ${checks}`, approval && `Approval: ${approval}`, "", "The gap cannot be repaired."]
+    .filter((line) => typeof line === "string")
+    .join("\n");
+const waive = (root, text, file = "gap.md") => write(root, `docs/qa/waivers/${file}`, `${text}\n`);
+const run = (root, ...flags) => {
+  const r = spawnSync(process.execPath, [SCRIPT, ...flags], { cwd: root, encoding: "utf8" });
+  return { status: r.status, out: `${r.stdout}${r.stderr}` };
+};
+
+test("fails per-slice for an unwaived missing trailer", () => {
+  const { status, out } = run(gapRepo("no-trailer"));
+  assert.equal(status, 1, out);
+  assert.match(out, /FAIL {2}\[trailer\]/);
+});
+
+test("fails per-slice for an unwaived stale review", () => {
+  const { status, out } = run(repo("stale-review", () => verdict(1, { tree: "a tree the reviewer saw before the last change" })));
+  assert.equal(status, 1, out);
+  assert.match(out, /FAIL {2}\[review-evidence\]/);
+});
+
+test("reports a slice waiver as WAIVED in both modes", () => {
+  const root = gapRepo("waived");
+  waive(root, waiverText());
+  for (const flags of [[], ["--release"]]) {
+    const { status, out } = run(root, ...flags);
+    assert.equal(status, 0, `${flags.join(" ")}: ${out}`);
+    assert.match(out, /WAIVED \[trailer\]/);
+    assert.match(out, /WAIVED \[review-evidence\]/);
+    assert.doesNotMatch(out, /FAIL/);
+  }
+  const { waived } = JSON.parse(readFileSync(join(root, "trace", "trajectory.json"), "utf8"));
+  assert.deepEqual(waived.map((w) => w.check).sort(), ["review-evidence", "trailer"]);
+});
+
+test("does not let a requirement waiver or a mention cover a slice", () => {
+  const root = gapRepo("mention");
+  // Names a requirement and not the slice, and a waiver that mentions the slice in prose without a Slices: line.
+  waive(root, waiverText({ slices: null }).replace("The gap", "FR-1 is waived. The gap"), "requirement.md");
+  waive(root, waiverText({ slices: null }).replace("The gap", `Unlike ${SLICE}, the gap`), "mention.md");
+  const { status, out } = run(root);
+  assert.equal(status, 1, out);
+  assert.match(out, /FAIL {2}\[trailer\]/);
+});
+
+test("ignores a closed or unapproved slice waiver", () => {
+  for (const [name, text] of [
+    ["closed", waiverText({ status: "closed" })],
+    ["no-status", waiverText({ status: null })],
+    ["no-approval", waiverText({ approval: null })],
+    ["no-checks", waiverText({ checks: null })],
+    ["other-gate", waiverText({ gate: "Red -> green" })],
+  ]) {
+    const root = gapRepo(`ignored-${name}`);
+    waive(root, text);
+    const { status, out } = run(root);
+    assert.equal(status, 1, `${name}: ${out}`);
+  }
+});
+
+test("covers only the checks a waiver lists", () => {
+  // Both findings exist (no trailer, no review). Waiving the trailer alone leaves the review finding failing, and
+  // `process` is not a check a waiver can list.
+  const root = gapRepo("one-check");
+  waive(root, waiverText({ checks: "trailer" }));
+  const only = run(root);
+  assert.equal(only.status, 1, only.out);
+  assert.match(only.out, /WAIVED \[trailer\]/);
+  assert.match(only.out, /FAIL {2}\[review-evidence\]/);
+  const process = gapRepo("process-not-waivable");
+  rmSync(join(process, "openspec/changes/archive", SLICE, "design.md"));
+  waive(process, waiverText({ checks: "trailer, review-evidence, process" }));
+  const missing = run(process, "--release");
+  assert.equal(missing.status, 1, missing.out);
+  assert.match(missing.out, /FAIL {2}\[process\]/);
 });
