@@ -176,7 +176,16 @@ function computeMetrics(events, contracts, corrections) {
   const vacuous = events.filter(
     (e) => e.exitCode === 0 && e.scope_n === 0 && (e.meta?.productCode === true || e.meta?.notEarned === true),
   );
-  const notEarned = events.filter((e) => e.event === "not-earned" || e.result === "NOT-EARNED" || e.meta?.notEarned === true);
+  // NOT-EARNED facts: one per gate that a gate-status event records as NOT-EARNED in meta.gates (PD-2), and one for an
+  // event that carries a top-level marker but no per-gate data.
+  const notEarnedByGate = {};
+  let notEarnedCount = 0;
+  for (const e of events) {
+    const gates = Object.entries(e.meta?.gates ?? {}).filter(([, verdict]) => verdict === "NOT-EARNED");
+    const marked = e.event === "not-earned" || e.result === "NOT-EARNED" || e.meta?.notEarned === true;
+    for (const [gate] of gates) notEarnedByGate[gate] = (notEarnedByGate[gate] ?? 0) + 1;
+    notEarnedCount += Math.max(gates.length, marked ? 1 : 0);
+  }
 
   // Per-class warning trend: first half vs second half of the event stream.
   const trend = {};
@@ -284,7 +293,7 @@ function computeMetrics(events, contracts, corrections) {
   return {
     vacuousPasses: { count: vacuous.length, events: vacuous.map((e) => ({ ts: e.ts ?? null, check: e.check ?? null })) },
     warningsByClass,
-    notEarned: { count: notEarned.length },
+    notEarned: { count: notEarnedCount, byGate: notEarnedByGate },
     warningTrendByClass: trend,
     retriesPerCheck,
     redToGreenLatency: {
@@ -413,7 +422,7 @@ function main() {
     metrics: metrics ?? {
       vacuousPasses: { count: 0, events: [] },
       warningsByClass: {},
-      notEarned: { count: 0 },
+      notEarned: { count: 0, byGate: {} },
       warningTrendByClass: {},
       retriesPerCheck: {},
       redToGreenLatency: { perCheck: {}, overallAvgMs: null },
@@ -447,7 +456,7 @@ ${
     : `| Metric | Value |
 |---|---|
 | Vacuous passes (exit 0, scope 0, product code) | **${m.vacuousPasses.count}** ${m.vacuousPasses.count ? "⚠" : ""} |
-| NOT-EARNED events | ${m.notEarned.count} |
+| NOT-EARNED gate results | ${m.notEarned.count}${Object.keys(m.notEarned.byGate).length ? ` (${Object.entries(m.notEarned.byGate).map(([g, n]) => `${g}: ${n}`).join(", ")})` : ""} |
 | Waivers (ledger + contracts) | ${m.waivers.total} |
 | Claim divergence (events + unmet contracts) | ${m.claimDivergence.total} |
 | Open corrections | ${m.corrections.open} of ${m.corrections.total} |
