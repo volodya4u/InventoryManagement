@@ -2540,6 +2540,10 @@
     {
       "check": "active-changes",
       "msg": "active change \"improve-PD-2\" is not archived"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"improve-PD-3\" is not archived"
     }
   ]
 }

@@ -109,3 +109,33 @@ test("reports zero NOT-EARNED when every gate is earned", () => {
   const d = digestFor("ne-none", { ledger: [gateRun({ G5: "PASS", G6: "PASS" })] });
   assert.equal(d.metrics.notEarned.count, 0);
 });
+
+// --- PD-3: waived is not tested --------------------------------------------------------------------------------------
+
+const contractsFile = (entries) =>
+  JSON.stringify({ generatedBy: "test", mode: "artifact", contracts: Object.fromEntries(entries.map(([id, status]) => [id, [{ method: "local-verifiable", status }]])) });
+
+test("counts a waived contract as waived, not tested", () => {
+  const d = digestFor("cov", {
+    ledger: [gateRun({ G6: "PASS" })],
+    files: { "trace/acceptance-contracts.json": contractsFile([["FR-1", "artifact-ok"], ["FR-2", "artifact-ok"], ["NFR-15", "waived"]]) },
+  });
+  assert.deepEqual(d.acceptanceCoverage, { covered: 3, declared: 3, tested: 2, waived: 1, uncovered: 0 });
+});
+
+test("counts every open waiver file", () => {
+  const d = digestFor("waivers-open", {
+    ledger: [gateRun({ G6: "PASS" })],
+    files: { "docs/qa/waivers/a-NFR-15.md": "# Waiver\n\nStatus: open\n", "docs/qa/waivers/b-NFR-17.md": "# Waiver\n\nStatus: open\n" },
+  });
+  assert.equal(d.metrics.waivers.files, 2);
+  assert.equal(d.metrics.waivers.total, 2);
+});
+
+test("ignores closed waivers", () => {
+  const d = digestFor("waivers-closed", {
+    ledger: [gateRun({ G6: "PASS" })],
+    files: { "docs/qa/waivers/a-NFR-15.md": "# Waiver\n\nStatus: open\n", "docs/qa/waivers/b-NFR-17.md": "# Waiver\n\nStatus: closed\n" },
+  });
+  assert.equal(d.metrics.waivers.files, 1);
+});
