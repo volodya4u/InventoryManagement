@@ -234,3 +234,11 @@ test("eval ratchet verdict needs a PASS on at least one case", async () => {
   assert.equal(evalRatchetVerdict("").ok, false);
   assert.match(evalRatchetVerdict(run("FAIL", 27, "FAIL  eval ratchet: reviewer dropped 100 -> 83.3\n")).result, /reviewer dropped 100 -> 83.3/);
 });
+
+test("eval ratchet verdict quotes the script's reason when there is no result", async () => {
+  const { evalRatchetVerdict } = await import("./dod-checks.mjs");
+  const stale = evalRatchetVerdict("evals/results/latest.json is stale: run node scripts/eval-summary.mjs\n");
+  assert.equal(stale.ok, false);
+  assert.match(stale.result, /evals\/results\/latest\.json is stale/);
+  assert.equal(evalRatchetVerdict("").result, "the eval ratchet gave no result, not PASS", "no output, nothing to quote");
+});
