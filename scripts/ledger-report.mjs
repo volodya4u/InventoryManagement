@@ -35,7 +35,7 @@
 // The digest itself NEVER crashes: every input is parsed tolerantly.
 //
 // Copy to scripts/ledger-report.mjs. Run: node scripts/ledger-report.mjs
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
@@ -139,33 +139,29 @@ function readCorrections() {
   return out;
 }
 
-// Product-code-presence heuristic (same spirit as the three-valued gate
-// semantics): does any conventional product dir hold at least one code file?
+// Product-code-presence rule. Mirrors hasProductCode() in scripts/gate-status.mjs (same directories, same extensions, no
+// depth limit, test and spec files excluded) so the digest and the ledger events it reads agree on what product code is
+// (PD-1). scripts/ledger-report.test.mjs runs both scripts on the same trees; change the two together.
 function productCodePresent() {
-  const CODE_DIRS = ["src", "app", "lib", "server", "api", "pages", "components"];
-  const CODE_EXT = /\.(m?[jt]sx?|py|go|rs|java|rb|php|cs|vue|svelte)$/i;
-  const walk = (dir, depth) => {
-    if (depth > 4) return false;
+  const IMPL_DIRS = ["app", "src", "lib", "pages", "components", "server", "api"];
+  const IMPL_EXT = /\.(mjs|cjs|js|jsx|ts|tsx|vue|svelte|py|go|rb|rs|java|cs|php)$/i;
+  const stack = IMPL_DIRS.map((d) => join(root, d)).filter((p) => existsSync(p));
+  while (stack.length) {
+    const dir = stack.pop();
     let entries = [];
     try {
-      entries = readdirSync(dir);
+      entries = readdirSync(dir, { withFileTypes: true });
     } catch {
-      return false;
+      continue;
     }
-    for (const e of entries) {
-      if (e === "node_modules" || e.startsWith(".")) continue;
-      const p = join(dir, e);
-      try {
-        if (statSync(p).isDirectory()) {
-          if (walk(p, depth + 1)) return true;
-        } else if (CODE_EXT.test(e)) return true;
-      } catch {
-        /* unreadable entry — skip */
-      }
+    for (const entry of entries) {
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+      const p = join(dir, entry.name);
+      if (entry.isDirectory()) stack.push(p);
+      else if (IMPL_EXT.test(entry.name) && !/\.(test|spec)\./.test(entry.name)) return true;
     }
-    return false;
-  };
-  return CODE_DIRS.some((d) => existsSync(join(root, d)) && walk(join(root, d), 0));
+  }
+  return false;
 }
 
 // --- metric computation -----------------------------------------------------

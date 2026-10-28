@@ -2536,6 +2536,10 @@
     {
       "check": "recording-evidence",
       "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"improve-PD-1\" is not archived"
     }
   ]
 }

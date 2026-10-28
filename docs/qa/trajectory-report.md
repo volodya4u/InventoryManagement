@@ -38,7 +38,7 @@ Result: PASS, 2 warning(s)
 | 2026-10-27-coverage-ratchet | approved (agent log) | 2 | yes | - |
 | 2026-10-27-nfr-evidence-hardening | approved (agent log) | 2 | yes | - |
 | 2026-10-27-openspec-harness-setup | approved (agent log) | 3 | yes | - |
-| 2026-10-28-dod-eval-diagnostics | approved (agent log) | 2 | yes | - |
+| 2026-10-28-dod-eval-diagnostics | approved (agent log) | 3 | yes | - |
 | 2026-10-28-eval-ratchet | approved (agent log) | 1 | yes | - |
 | 2026-10-28-process-ratchet | approved (agent log) | 1 | yes | - |
 | 2026-10-28-test-first-break-run | approved (agent log) | 1 | yes | - |
