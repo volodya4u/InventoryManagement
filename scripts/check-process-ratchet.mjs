@@ -57,10 +57,12 @@ const PATHS = {
   changesDir: "openspec/changes",
   waiversDir: "docs/qa/waivers",
 };
-const PRODUCT_DIRS = ["app", "src", "lib", "components", "pages", "server"];
-const TEST_DIRS = ["lib", "tests", "test", "app", "src", "components", "evals"];
+// Adapted to this repository's layout (docs/adr/0008-adapt-process-ratchet.md): the Angular app is under frontend/src, and
+// the Java tests (src/test/java) are *Test.java / *Tests.java classes, so their @trace tags count as test annotations.
+const PRODUCT_DIRS = ["app", "src", "frontend/src", "lib", "components", "pages", "server"];
+const TEST_DIRS = ["lib", "tests", "test", "app", "src", "frontend/src", "components", "evals"];
 const CODE_EXT = /\.(js|jsx|ts|tsx|mjs|cjs|py|go|rs|java|rb|php|vue|svelte)$/;
-const IS_TEST_FILE = /\.(test|spec|eval)\.(ts|tsx|js|jsx|mjs)$/;
+const IS_TEST_FILE = /(\.(test|spec|eval)\.(ts|tsx|js|jsx|mjs)|Tests?\.java)$/;
 
 const failures = [];
 const warnings = [];

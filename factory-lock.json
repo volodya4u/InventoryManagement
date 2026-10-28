@@ -1,16 +1,17 @@
 {
-  "createdAt": "2026-10-27T20:53:05.338Z",
-  "gitHead": "77f413bf0c1bd17bc48bdd645092e8c37b00adfd",
+  "createdAt": "2026-10-28T14:34:44.245Z",
+  "gitHead": "712c8df628c02b06d2038e468dfac6b81a706fe4",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
-    ".github/workflows/ci.yml": "b105f1db565d3029034fb0c20fc4ff83c15f62ec26e0a552ea85c810ec544cd5",
+    ".github/workflows/ci.yml": "1e5817faee05856a51076b26d737dc86af6a2060fe7c914de85161522475078e",
     ".github/workflows/factory-gates.yml": "1390ac9ac5ed417e38b4256d880fb12047c9f547c2b33333ada5bb7de693f2b3",
     ".github/workflows/human-approval.yml": "9d04513cfe819672c7f5af7ca346ad03e7f55de9e3e58b5aedd8e1d8459b2a01",
     ".github/workflows/pr-description.yml": "95c40b66bfc61a724a3d774537074f48e1348de1ae4c8deca6c958350077a0a5",
     "quality/coverage-backend-baseline.json": "69c25a82a264e161e5e8dcc8bd77067724eaf0039b286cc4eba6bedb15d54acf",
     "quality/coverage-frontend-baseline.json": "eaa5fd1eb929a260c655ad0aab83b36a71a07faefe70e976f20b0124ffb66c15",
-    "quality/process-baseline.json": "c4138cf68d31420931034e59d580cc4db6fdd08550de95347c7396bd9b2923d5",
+    "quality/eval-baseline.json": "8a1edc28bf3e9dbf4a0e1a49c1bcee54759716fcc5b4f9b9a5028d03e4413736",
+    "quality/process-baseline.json": "d27069d8e710ab00bee31672b333378fb2cfca7b31879f6a18a1168ca83ea9e2",
     "quality/telemetry.config.json": "db4b77dfac7e3a8d267359aaa94b42b2033b99e138ce6ba387f5e3d490922cb7",
     "scripts/check-acceptance-methods.mjs": "b8fb263dea450b38c876a828b26a68edd2cc30a82f2bd152ebcf652d50e58713",
     "scripts/check-coverage-ratchet.mjs": "60138210c33f9f6b66061bc810e974f3db5248c293f69ba6d4e8bbf5032e566d",
@@ -24,7 +25,8 @@
     "scripts/check-factory-integrity.test.mjs": "2f84637e547d513ee0f64c94f789b5af1c5fcd18ce2a98bf8fa02ce4e6a15eb5",
     "scripts/check-pr-description.mjs": "c3e69741a6cb4adfc6d7bda1565913b70606b7839e5191ea09011a4614894ebb",
     "scripts/check-pr-description.test.mjs": "7deacaae484e64e0109e2467852f34df0e7593c766387f74a0406020f0398acb",
-    "scripts/check-process-ratchet.mjs": "a824c3bf4a36e4c1979c09d899242dbe4ac1cdf6e08bf227fca5b4772f331a03",
+    "scripts/check-process-ratchet.mjs": "39e6b54666b0212e7d69ddcb02c7091a81b14bc995edf1d2b49abd2510595404",
+    "scripts/check-process-ratchet.test.mjs": "4d1cb6b16379267b4e70acfa5aaa8db037b7f5a16440e56b21bb1e15b344e8ff",
     "scripts/check-review.mjs": "e518dbe308d82812c8c8ab9a6f34e67091f103872a5c58ef2c46caa3d7f306d8",
     "scripts/check-review.test.mjs": "cbcbabde938bab9f68e99926ec33b308f84a454edfe57b6dfd7e13d07932cfbe",
     "scripts/check-specs.mjs": "fad89135a0879dda4c1906243b9d8a6fbb4720b25e17e364f761f842bac0218b",
@@ -53,6 +55,8 @@
     "trajectory-review-from-log, review round 3 (owner-approved 2026-10-22): merges are taken from main's first-parent line (origin/main, else main, else HEAD) and must be reachable from HEAD, so a branch that merged main does not pass its own merge off as a slice's pull request; a failing tree fingerprint reads missing",
     "trajectory-review-from-log, review round 4 (owner-approved 2026-10-22): with neither origin/main nor main, every slice without review-findings.json reads missing and nothing is cached, instead of falling back to HEAD's line; the Slice: lookup uses --topo-order",
     "trajectory-cache-tests (owner-approved 2026-10-22): scripts/check-trajectory.test.mjs pins the error and cache paths of the agent-log review evidence (a git error and a failing tree fingerprint read missing and are not cached, a cache under other rules is discarded, a warm run reads the cache); scripts/check-trajectory.mjs is unchanged",
-    "coverage-ratchet (owner-approved 2026-10-27, ADR-0006): scripts/check-coverage-ratchet.mjs gains --summary/--baseline/--label/--require (defaults unchanged; waiver check name coverage-ratchet:<label>), scripts/gate-status.mjs folds coverageBackend and coverageFrontend into G5, and scripts/check-coverage-ratchet.test.mjs joins the lock because its name matches scripts/check-*.mjs; the baselines quality/coverage-backend-baseline.json and quality/coverage-frontend-baseline.json join the quality tier"
+    "coverage-ratchet (owner-approved 2026-10-27, ADR-0006): scripts/check-coverage-ratchet.mjs gains --summary/--baseline/--label/--require (defaults unchanged; waiver check name coverage-ratchet:<label>), scripts/gate-status.mjs folds coverageBackend and coverageFrontend into G5, and scripts/check-coverage-ratchet.test.mjs joins the lock because its name matches scripts/check-*.mjs; the baselines quality/coverage-backend-baseline.json and quality/coverage-frontend-baseline.json join the quality tier",
+    "eval-ratchet (owner-approved 2026-10-28, ADR-0007): .github/workflows/ci.yml gains an Eval ratchet step and quality/eval-baseline.json is committed; check-eval-ratchet.mjs itself is unchanged and the baseline joins the lock in this re-seal",
+    "process-ratchet (owner-approved 2026-10-28, ADR-0008): scripts/check-process-ratchet.mjs counts frontend/src and *Test.java/*Tests.java for its product-code and @trace scans, scripts/check-process-ratchet.test.mjs joins the lock, and quality/process-baseline.json is earned from a local run"
   ]
 }

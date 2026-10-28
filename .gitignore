@@ -23,6 +23,10 @@ trace/acceptance-contracts.json
 
 # appended to by every run of scripts/gate-status.mjs and the factory checks; local telemetry, nothing validates it (ADR-0003)
 trace/ledger.jsonl
+# process-health digest of the local ledger (node scripts/ledger-report.mjs): machine-specific, never committed
+trace/process-health.json
+docs/qa/process-health.md
+docs/qa/process-defects.json
 
 # eval run outputs (local gate; see evals/README.md)
 evals/results/*
