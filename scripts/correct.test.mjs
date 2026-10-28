@@ -44,6 +44,12 @@ test("maps every id a waiver names", () => {
   assert.deepEqual(c.mappedReqIds, ["NFR-15", "NFR-16"]);
 });
 
+test("drops ids the correction schema does not accept", () => {
+  const [c] = detect("schema", "# Waiver\n\nStatus: open\n\n- TC-3 and BC-2 are named here.\n");
+  assert.deepEqual(c.mappedReqIds, ["BC-2"]);
+});
+
+// A control that holds before and after the fix: a waiver with no requirement id keeps the old values.
 test("keeps the old values for a waiver that names no requirement", () => {
   const [c] = detect("none", "# Waiver\n\nStatus: open\n\n- Something was waived, with no requirement id in the text.\n");
   assert.deepEqual(c.mappedReqIds, []);

@@ -34,7 +34,7 @@ it, and a waiver for a check that does not exist (NFR-17, 18, 20) is filed as a 
 | 1 | Given a waiver for NFR-17 that says it has no mechanism, when `--detect` runs, then the correction maps `NFR-17`, has failureMode `missing-check` and gate `G3` | `scripts/correct.test.mjs` › "maps a no-mechanism waiver to its id and the existence gate" |
 | 2 | Given a waiver for NFR-15 that says no test asserts it, when `--detect` runs, then the correction maps `NFR-15`, has failureMode `skipped-convention` and gate `G4` | `scripts/correct.test.mjs` › "maps a missing-test waiver to the artifact gate" |
 | 3 | Given a waiver that names two requirement ids, when `--detect` runs, then the correction maps both | `scripts/correct.test.mjs` › "maps every id a waiver names" |
-| 4 | Given a waiver that names no requirement id, when `--detect` runs, then the correction keeps empty `mappedReqIds`, a null gate and `skipped-convention` | `scripts/correct.test.mjs` › "keeps the old values for a waiver that names no requirement" |
+| 4 | Given a waiver that names `TC-3` and `BC-2`, when `--detect` runs, then only `BC-2` is mapped, because the correction schema accepts FR, NFR and BC ids only | `scripts/correct.test.mjs` › "drops ids the correction schema does not accept" |
 
 ## Expected metric movement
 

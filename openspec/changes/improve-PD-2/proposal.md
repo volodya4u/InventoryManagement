@@ -27,7 +27,7 @@ per-gate data; it does, so the defect is in the digest and not in `gate-status.m
 | - | ------------------- | ---- |
 | 1 | Given one gate-status event whose gate G6 is NOT-EARNED, when ledger-report runs, then `notEarned.count` is 1 and `notEarned.byGate.G6` is 1 | `scripts/ledger-report.test.mjs` › "counts a per-gate NOT-EARNED inside a gate-status event" |
 | 2 | Given two events that each have G6 NOT-EARNED, when ledger-report runs, then `notEarned.count` is 2 | `scripts/ledger-report.test.mjs` › "counts NOT-EARNED per run" |
-| 3 | Given an event in which every gate is earned, when ledger-report runs, then `notEarned.count` is 0 | `scripts/ledger-report.test.mjs` › "reports zero NOT-EARNED when every gate is earned" |
+| 3 | Given one event whose gates carry PASS, WAIVED, needs sign-off and two NOT-EARNED verdicts, when ledger-report runs, then only the two NOT-EARNED gates are counted | `scripts/ledger-report.test.mjs` › "counts only the NOT-EARNED gates among mixed verdicts" |
 
 ## Expected metric movement
 

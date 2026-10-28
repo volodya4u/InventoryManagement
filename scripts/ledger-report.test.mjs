@@ -105,6 +105,13 @@ test("counts NOT-EARNED per run", () => {
   assert.equal(d.metrics.notEarned.count, 2);
 });
 
+test("counts only the NOT-EARNED gates among mixed verdicts", () => {
+  const d = digestFor("ne-mixed", { ledger: [gateRun({ G1: "needs sign-off", G4: "PASS", G5: "WAIVED", G6: "NOT-EARNED", G7: "NOT-EARNED" })] });
+  assert.equal(d.metrics.notEarned.count, 2);
+  assert.deepEqual(d.metrics.notEarned.byGate, { G6: 1, G7: 1 });
+});
+
+// A control that holds before and after the fix: no NOT-EARNED gate, no count.
 test("reports zero NOT-EARNED when every gate is earned", () => {
   const d = digestFor("ne-none", { ledger: [gateRun({ G5: "PASS", G6: "PASS" })] });
   assert.equal(d.metrics.notEarned.count, 0);
