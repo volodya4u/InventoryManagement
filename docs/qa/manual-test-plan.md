@@ -6,8 +6,9 @@ is empty, and a case counts as passed only when someone has ticked it and signed
 
 This plan is the manual half of the evidence. The automated half is the test suite that `node scripts/dod.mjs` runs;
 `docs/qa/traceability-report.md` (generated) maps each requirement to the tests that carry its `@trace` tag. The
-requirements that have no automated test are listed in `docs/qa/waivers/`; the cases marked **Manual only** below are the
-ones that stand in for them.
+requirements that have no automated test are listed in `docs/qa/waivers/`. The cases marked **Manual only** below cannot
+be run by the automated suite: some stand in for a waived requirement, and MT-07 is manual because the real 8-hour
+session timeout cannot be waited out in a test.
 
 ## Before you start
 
@@ -15,7 +16,11 @@ ones that stand in for them.
   copy `flower-shop-local.db` somewhere safe, and run the plan against a new empty database (move the original away so the
   app creates a new one, then restore it afterwards). The case list assumes an empty database.
 - **Start the app:** `Start OnlineStore.cmd`, or `mvn "-Dskip.frontend=true" spring-boot:run` plus `pnpm start` in `frontend/`
-  (README). Open `http://localhost:8081` (or `http://localhost:4200` for the development server).
+  (README). The script needs `target\inventory-0.1.0-SNAPSHOT.jar` already built (`mvn package`), Chrome at
+  `C:\Program Files\Google\Chrome\Application\chrome.exe`, and `APP_ADMIN_INITIAL_PASSWORD` set in the environment it is
+  started from. Open `http://localhost:8081` (or `http://localhost:4200` for the development server).
+- **Form checks come first.** Where the form blocks an input, the server rule behind it is checked by the automated tests,
+  not by this case; the case shows what the tester sees.
 - **Sign-in:** the only user is the administrator. Its name is `admin` unless `APP_ADMIN_INITIAL_USERNAME` says otherwise,
   and its password is the value given to `APP_ADMIN_INITIAL_PASSWORD` when the empty database was first started. Do not write
   that password in this file or in the run record.
@@ -26,9 +31,9 @@ Reference data used by the cases (create it in section 3 and 4):
 
 | Raw material | Unit | Opening quantity | Opening unit cost | Reorder level |
 |---|---|---|---|---|
-| Rose | BUNCH | 20 | 50.00 | 5 |
-| Ribbon | METER | 10 | 8.00 | 0 |
-| Wrapping paper | PIECE | 30 | 3.00 | 0 |
+| Rose | Bunch | 20 | 50.00 | 5 |
+| Ribbon | Meter | 10 | 8.00 | 0 |
+| Wrapping paper | Piece | 30 | 3.00 | 0 |
 
 Product: SKU `BQ-001`, name `Rose bouquet`, recipe 1 Rose + 2 Ribbon + 1 Wrapping paper per unit, markup 30, advertising
 cost 0, opening quantity 0.
@@ -37,10 +42,10 @@ cost 0, opening quantity 0.
 
 ### MT-01 Sign in and sign out
 **Covers:** FR-1, FR-3, FR-8, FR-9, FR-20, FR-21
-**Steps:** 1. Open the app; you land on the sign-in page with the username filled in as `admin`. 2. Enter a wrong password and
-press Sign in. 3. Enter the right password and press Sign in. 4. Use Sign out in the menu.
-**Expected:** Step 2 shows "Invalid username or password" and stays on the sign-in page. Step 3 opens the dashboard. Step 4
-returns to the sign-in page.
+**Steps:** 1. Open the app; you land on the Administrator Sign In page with the username filled in as `admin`. 2. Enter a wrong
+password and press Sign In. 3. Enter the right password and press Sign In. 4. Use Sign Out in the menu.
+**Expected:** Step 2 shows "Invalid username or password" and stays on the sign-in page. Step 3 opens the dashboard (the
+page titled Inventory Overview). Step 4 returns to the sign-in page.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-02 The password reveal toggle
@@ -56,8 +61,8 @@ that differs; a new password equal to the current one. Then change it correctly 
 characters. Sign in with the new password.
 **Expected:** Each wrong attempt keeps you signed in and shows its own message. The page checks two of them itself before
 sending anything: a short new password shows "The password must be between 10 and 64 characters." and a different confirmation
-shows "The passwords do not match." The other two come from the server: "Current password is incorrect" and "New password must
-be different from current password". The correct change ends the session, shows "Password changed successfully. Sign in with
+shows "The passwords do not match." The other two come from the server: "Current password is incorrect" (FR-10) and "New password must
+be different from current password" (FR-13). The correct change ends the session, shows "Password changed successfully. Sign in with
 your new password.", and only the new password works afterwards.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
@@ -86,8 +91,8 @@ reload each of those pages, plus `/stock-movements`, `/products` and `/change-pa
 ### MT-07 Session expiry (**Manual only**)
 **Covers:** FR-23, FR-24, FR-26, NFR-3
 **Steps:** The real timeout is 8 hours of inactivity, so this case is run once, with patience: sign in, leave the page untouched
-for more than 8 hours (or ask a developer to run the app with a shortened `server.servlet.session.timeout` for this run and
-note it in the record), then press a menu item.
+for more than 8 hours (or ask a developer to start the app with a shortened `server.servlet.session.timeout` set on the command line or in the
+environment for this run, not by editing `application*.yml`, and note it in the record), then press a menu item.
 **Expected:** You are sent to the sign-in page, which says "Your session has ended. Please sign in again." (FR-26).
 **Result:** ☐ Pass ☐ Fail ☐ Not run — notes: ______
 
@@ -109,17 +114,18 @@ cost (Rose 1,000.00; Ribbon 80.00; Wrapping paper 90.00). Stock History (section
 ### MT-10 Raw material input rules
 **Covers:** FR-42, FR-43, FR-44, FR-56
 **Steps:** Try to add: a raw material with no name; a name of 121 characters; an initial quantity above zero with no unit cost;
-a second raw material named `Rose`.
-**Expected:** The first three are refused with a message that names the problem. The fourth is accepted, because names do not
-have to be unique (decision OQ-3 is still open; see the risk register).
+a second raw material named `Rose` (with quantity 0).
+**Expected:** The name field stops accepting characters at 120, so a 121-character name cannot be entered (the API refuses it
+too, FR-42). The no-name and the quantity-without-cost attempts are refused with a message that names the problem. The
+fourth is accepted, because names do not have to be unique (decision OQ-3 is still open; see the risk register).
 **Result:** ☐ Pass ☐ Fail — notes: ______
-**Then:** delete the duplicate `Rose` (accept the confirmation) before going on, so the later cases find only one Rose.
+**Then:** delete the duplicate `Rose` that has zero quantity (accept the confirmation) before going on, so the later cases find only one Rose.
 
 ### MT-11 Receipt, write-off and adjustment
 **Covers:** FR-61, FR-62, FR-63, FR-64, FR-65, FR-66, FR-67, FR-69
-**Steps:** 1. Record a receipt of 10 Rose bunches at 60.00. 2. Write off 2 Ribbon metres with the reason "cut too short".
+**Steps:** 1. Record a receipt of 10 Rose bunches at 60.00. 2. Write off 2 Ribbon metres with the reason Damaged and the note "cut too short".
 3. Try to write off 500 Ribbon. 4. Adjust Wrapping paper to 28, then try to adjust it to 28 again.
-**Expected:** Rose is now 30 at an average cost of 53.3333 (shown rounded as the page shows it): (20 × 50 + 10 × 60) / 30.
+**Expected:** Rose is now 30 at an average cost that the page shows as ₴53.33 (the stored value is 53.3333): (20 × 50 + 10 × 60) / 30.
 Ribbon is 8. For the 500 write-off the page shows "The write-off quantity exceeds available stock." and sends nothing, so
 the quantity stays 8 (the server's own "Insufficient raw material stock" is the safety net behind it). Wrapping paper becomes 28,
 and for the second adjustment to 28 the page shows "The counted quantity already matches the recorded stock." and disables Save Adjustment,
@@ -143,7 +149,7 @@ answering "Cancel" to the confirmation and then accepting.
 
 ### MT-14 Pictures
 **Covers:** FR-70, FR-71, FR-74, FR-75
-**Steps:** On a raw material, upload a small PNG, then try a `.gif`, then a JPG larger than 2 MB, then save the record again
+**Steps:** On a raw material, upload a small PNG, then try a `.gif` (the file picker hides it unless you choose "All files"), then a JPG larger than 2 MB, then save the record again
 without choosing a file.
 **Expected:** The PNG is accepted and shown. The GIF is refused with "Select a JPG, JPEG, or PNG file." The large file is
 refused with "The image size cannot exceed 2 MB." Saving again keeps the picture. There is no way to remove a picture once set (OQ-11).
@@ -176,7 +182,7 @@ back in a red alert that names the SKU, "A product with SKU “…” already ex
 **Steps:** 1. In Raw Materials record a receipt of 20 Ribbon at 8.00 (Ribbon is now 28). 2. Produce 5 `Rose bouquet`.
 3. Look at Raw Materials. 4. Try to produce 1000.
 **Expected:** Step 2 succeeds and the dialog's production cost is the cost recorded. Rose is 25, Ribbon 18 and Wrapping paper
-23, and the product quantity is 5. In step 4 the dialog's table shows "Missing" with the shortfall against each raw material that is short, the Produce button is
+23, and the product quantity is 5. In step 4 the dialog's table shows "Missing" with the shortfall against each raw material that is short, the Produce Product button is
 disabled, nothing is sent, and no quantity changes (the server's refusal of a short batch, FR-89, is the safety net behind it).
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
@@ -195,7 +201,7 @@ so nothing is sent (the server's "Actual stock already matches…" is the safety
 
 ### MT-19 Make a sale
 **Covers:** FR-101, FR-102, FR-103, FR-104, FR-105, FR-106, FR-107, FR-108, FR-112
-**Steps:** In Sales add a sale of 2 bouquets, payment CARD, today's date. Note the unit price the form fills in.
+**Steps:** In Sales add a sale of 2 bouquets, payment Card, today's date. Note the unit price the form fills in.
 **Expected:** The unit price is filled from the product's selling price, 94.03. The sale gets a number like
 `SALE-YYYYMMDD-0001`, status Completed, with revenue 188.06 and a cost and gross profit. Product stock falls from 5 to 3. If you
 enter a quantity above the stock (try 10), the page shows "The requested quantity exceeds the available Product stock.", the
@@ -213,14 +219,14 @@ Complete Sale button is disabled, and nothing is sent (the server's "Insufficien
 ### MT-21 Partial and full return
 **Covers:** FR-114, FR-115, FR-116, FR-118, FR-119, FR-122, FR-123, FR-126
 **Steps:** 1. On the 2-bouquet sale return 1 unit with a reason. 2. Try to return 2 more. 3. Return the last unit.
-**Expected:** After step 1 the sale is Partially returned, a document `RET-YYYYMMDD-0001` exists, the refund is one unit at the
+**Expected:** After step 1 the sale is Partially Returned, a document `RET-YYYYMMDD-0001` exists, the refund is one unit at the
 price actually charged, and product stock is back up from 3 to 4. In step 2 the page shows "Exceeds available quantity." under
 the line and does not accept it (the server's "exceeds the remaining…" is the safety net). After step 3
 the sale is Returned, product stock is 5, and no more returns are offered.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-22 Cancel a sale
-**Covers:** FR-124, FR-125, FR-117
+**Covers:** FR-124, FR-126, FR-117 (FR-125 is the API rule behind FR-126)
 **Steps:** Make a new sale of 1 bouquet. Try to cancel it with a date before the sale date. Cancel it with today's date.
 Then try to cancel a sale that has had a return.
 **Expected:** The early date is not accepted (the date field has the sale date as its lower limit, but the form does not rely on
@@ -234,18 +240,19 @@ server's "Only a completed sale without previous returns can be cancelled" is th
 ### MT-23 Dashboard figures
 **Covers:** FR-37, FR-38, FR-39, FR-40
 **Steps:** Open the dashboard after sections 3 to 6. Compare it with the lists.
-**Expected:** Raw material types and product types match the list lengths; product units match the sum of product
-quantities; the Sales card counts Completed and Partially returned sales only (not Cancelled or Returned); the Low Stock
-card counts raw materials at or below a reorder level above zero.
+**Expected:** The Raw Material Types and Product Types cards match the list lengths; Finished Product Units matches the sum
+of product quantities; the Sales card counts Completed and Partially Returned sales only (not Cancelled or Returned); the
+Low Stock card counts raw materials at or below a reorder level above zero.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 8. Monthly report
 
 ### MT-24 Monthly sales report
 **Covers:** FR-136, FR-137, FR-138, FR-140, FR-142, FR-144
-**Steps:** Open the Monthly Sales report for the current month. Pick another month, then clear the picker.
-**Expected:** Revenue equals gross sales minus refunds for the month; returns and cancellations count in the month of their own
-date; payment methods always list CASH, CARD and BANK_TRANSFER (zero where unused). Another month reloads; clearing the
+**Steps:** Open Reports in the menu, then Monthly Sales, for the current month. Pick another month, then clear the picker.
+**Expected:** Net Revenue equals gross sales minus refunds for the month; returns and cancellations count in the month of their
+own date; payment methods always list Cash, Card and Bank Transfer (zero where unused; the API names are CASH, CARD and
+BANK_TRANSFER). Another month reloads; clearing the
 picker changes nothing.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
@@ -260,10 +267,12 @@ mark), and every cell is quoted.
 
 ### MT-26 Filters, search and paging
 **Covers:** FR-127, FR-128, FR-129, FR-130, FR-131, FR-132, FR-133, FR-135
-**Steps:** Open Stock History. Filter by Raw material, then Product; search `rose` and then a Ukrainian name if you have one;
-set From later than To; page through the list.
+**Steps:** Open Stock History. Set the Inventory filter to Raw Materials, then Products (the default is All Inventory); type
+`rose` in Item and then a Ukrainian name if you have one; set From later than To; page through the list. Press Apply after
+changing a filter; the list does not reload before that.
 **Expected:** Newest movements first; filters narrow the list; the search matches names and SKUs in any alphabet; a From date
-after To shows "From date cannot be later than To date"; the totals at the top cover the whole filtered result, not only the
+after To shows "From date cannot be later than To date" (the server's message, in the page's error alert; the form does not
+check it); the totals at the top cover the whole filtered result, not only the
 visible page.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
