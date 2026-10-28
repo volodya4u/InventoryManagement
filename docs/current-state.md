@@ -7,7 +7,7 @@
 
 - **Date:** 2026-10-28 (Europe/Kyiv)
 - **Branch when written:** `claude/qa-proof-pack-followup`, on top of the merge of [#134](https://github.com/volodya4u/InventoryManagement/pull/134) (the QA proof pack); it adds this file and aligns the proof pack with what the pages show
-- **Active OpenSpec change:** `improve-PD-5` (trajectory slice waivers, ADR-0009) until it is archived; archive it in its own pull request after it merges. No other change is active.
+- **Active OpenSpec change:** none; `openspec/changes/` holds only `archive/`
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
   accepted: no manual case has been run and the owner has not signed `docs/qa/mvp-acceptance-report.md`.
