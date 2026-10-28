@@ -84,8 +84,7 @@ closed:
 5. **Signed approval is not configured** (no hardware-backed key in `quality/allowed-signers`); today the owner's merge is the
    approval.
 6. **Process findings PD-4, PD-6, PD-7 and PD-8** from the retro of 2026-10-28 are not addressed (see risk R-16). They are in `docs/qa/process-defects.json`, which is gitignored (ADR-0008) and so
-   not in a fresh clone; PD-1, PD-2, PD-3 and PD-9 are recorded in `openspec/changes/archive/2026-10-28-improve-PD-*`, and PD-5
-   in `openspec/changes/improve-PD-5` until it is archived.
+   not in a fresh clone; PD-1, PD-2, PD-3, PD-5 and PD-9 are recorded in `openspec/changes/archive/*-improve-PD-*`.
 
 Items 3 and 4 need only the owner. Item 1 needs an approved dependency.
 
