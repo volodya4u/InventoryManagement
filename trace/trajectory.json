@@ -177,6 +177,13 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-27-coverage-ratchet",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 2,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-27-nfr-evidence-hardening",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 2,

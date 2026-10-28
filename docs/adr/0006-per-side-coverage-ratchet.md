@@ -15,7 +15,7 @@ Angular frontend whose coverage tools write different formats. Both scripts are 
 
 - Collect coverage on both sides: JaCoCo in `mvn verify` (its runtime agent on Surefire's `argLine` with a relative output
   file, because `prepare-agent`'s absolute one breaks `-javaagent` under a non-ASCII checkout path on Windows), Vitest's V8
-  provider through `ng test --coverage` (`openspec/changes/coverage-ratchet/design.md`).
+  provider through `ng test --coverage` (`openspec/changes/archive/2026-10-27-coverage-ratchet/design.md`).
 - Keep one ratchet script and give it options (`--summary`, `--baseline`, `--label`, `--require`); the defaults are
   unchanged. Each side has its own baseline under `quality/`.
 - Enforce the ratchet in CI (`build-and-test`) and in `node scripts/dod.mjs` with `--require`; `gate-status.mjs` reports both
