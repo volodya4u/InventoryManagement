@@ -7,7 +7,7 @@
 
 - **Date:** 2026-10-28 (Europe/Kyiv)
 - **Branch when written:** `claude/qa-proof-pack-followup`, on top of the merge of [#134](https://github.com/volodya4u/InventoryManagement/pull/134) (the QA proof pack); it adds this file and aligns the proof pack with what the pages show
-- **Active OpenSpec change:** none; `openspec/changes/` holds only `archive/`
+- **Active OpenSpec change:** `improve-PD-5` (trajectory slice waivers, ADR-0009) until it is archived; archive it in its own pull request after it merges. No other change is active.
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
   accepted: no manual case has been run and the owner has not signed `docs/qa/mvp-acceptance-report.md`.
@@ -18,7 +18,7 @@
   - The release gate is red, and the reasons are listed — evidence: `docs/qa/mvp-acceptance-report.md` (section 5) and
     `node scripts/gate-status.mjs`
   - Five non-functional requirements are waived, not passed — evidence: `docs/qa/waivers/`
-  - Two process gaps stay open on purpose — evidence: `docs/qa/historical-gaps.md`
+  - Two process gaps cannot be repaired and are waived, not fixed — evidence: `docs/qa/historical-gaps.md`, ADR-0009 and `docs/qa/waivers/2026-10-28-trajectory-*.md`
   - Risks that need an owner decision are marked **Decision** — evidence: `docs/qa/risk-register.md`
 
 This file has no phase or gate line on purpose. `scripts/gate-status.mjs` compares such a line with the computed gate
@@ -33,7 +33,7 @@ owner's decision, recorded in an ADR, not a handoff edit.
 3. `openspec/project.md` and `openspec/specs/`: the accepted behaviour, one folder per capability.
 4. `docs/specs/`: feature specs for changes that touch the schema, an API and a page together.
 5. `docs/mvp-capability-plan.md`: the capability list and the order of slices.
-6. `docs/adr/`: architecture and process decisions (ADR-0001 to ADR-0008).
+6. `docs/adr/`: architecture and process decisions (ADR-0001 to ADR-0009).
 7. `docs/qa/`: the proof pack, the generated traceability and trajectory reports, and the waivers.
 8. `docs/autonomy-log.md`: the trust level of each piece of agent work and who decided it.
 
