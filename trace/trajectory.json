@@ -200,7 +200,7 @@
     {
       "slice": "2026-10-28-dod-eval-diagnostics",
       "reviewEvidence": "approved (agent log)",
-      "trailerCommits": 2,
+      "trailerCommits": 3,
       "libDomains": [],
       "processComplete": true
     },
