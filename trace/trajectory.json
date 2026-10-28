@@ -205,6 +205,13 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-28-process-ratchet",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-28-test-first-break-run",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
