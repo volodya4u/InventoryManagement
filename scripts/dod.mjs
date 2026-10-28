@@ -18,6 +18,7 @@ import {
   checkExitCode,
   COVERAGE_SIDES,
   coverageVerdict,
+  evalRatchetVerdict,
   exitColumn,
   expectedTestClasses,
   findFiles,
@@ -115,6 +116,21 @@ const checks = [
       return { status: 0, stdout };
     },
     verdict: coverageVerdict,
+  },
+  {
+    // ADR-0007: the committed eval summary must match the record, then each suite's score against its baseline, as in CI.
+    name: "Eval ratchet",
+    label: "node scripts/eval-summary.mjs --check; node scripts/check-eval-ratchet.mjs",
+    run: () => {
+      let stdout = "";
+      for (const script of ["eval-summary.mjs", "check-eval-ratchet.mjs"]) {
+        const r = spawnSync(process.execPath, [join(root, "scripts", script), ...(script === "eval-summary.mjs" ? ["--check"] : [])], { cwd: root, encoding: "utf8" });
+        stdout += `${r.stderr ?? ""}${r.stdout ?? ""}${r.error ? String(r.error) : ""}`;
+        if (r.status !== 0) return { status: r.status, stdout };
+      }
+      return { status: 0, stdout };
+    },
+    verdict: evalRatchetVerdict,
   },
   {
     // Dynamic context: the angular-cli MCP server agents use answers list_projects (scripts/mcp-smoke.mjs).

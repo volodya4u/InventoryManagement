@@ -133,6 +133,19 @@ export function coverageVerdict(output) {
   return { ok: true, result: COVERAGE_SIDES.map((side) => `${side} lines ${lines(side)}%`).join(", ") };
 }
 
+// The eval ratchet (scripts/check-eval-ratchet.mjs), run after `eval-summary.mjs --check` as in CI. Its stderr comes
+// before its stdout, so a FAIL line precedes the "Result:" line. Only a PASS on at least one case counts: the ratchet
+// itself exits 0 on "SKIP-pending", and a pass on no case is not evidence.
+export function evalRatchetVerdict(output) {
+  const text = String(output);
+  const result = /^Result: (\S+)/m.exec(text)?.[1];
+  const cases = Number(/^Scope: (\d+) eval case/m.exec(text)?.[1] ?? 0);
+  if (result === "FAIL") return { ok: false, result: /^FAIL\s+(?:eval ratchet: )?(.+)$/m.exec(text)?.[1] ?? "the eval ratchet failed" };
+  if (result !== "PASS") return { ok: false, result: `the eval ratchet gave ${result ?? "no result"}, not PASS` };
+  if (cases === 0) return { ok: false, result: "the eval ratchet passed on no case" };
+  return { ok: true, result: `${cases} eval cases, none below its baseline` };
+}
+
 // The generated reports the pre-commit hook rewrites (scripts/hooks-pre-commit.mjs), regenerated before the code is
 // fingerprinted. Each run is { script, status } as spawnSync reports it.
 export function generatedReportsVerdict(runs) {

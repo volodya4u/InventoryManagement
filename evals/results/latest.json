@@ -1,0 +1,155 @@
+{
+  "source": "evals/record.json",
+  "recordGeneratedAt": "2026-10-28T10:27:43.297Z",
+  "model": "claude-sonnet-5-5",
+  "judgeModel": "haiku",
+  "dimensions": {
+    "factory-rules": 100,
+    "reviewer": 100,
+    "skill-agent-log-report": 100,
+    "skill-openspec-apply-change": 100,
+    "skill-openspec-archive-change": 100,
+    "skill-openspec-explore": 100,
+    "skill-openspec-propose": 100,
+    "skill-openspec-sync-specs": 100,
+    "skill-openspec-update-change": 83.4,
+    "skill-test-first-loop": 83.3
+  },
+  "cases": [
+    {
+      "name": "blocked-action-shown",
+      "suite": "skill-agent-log-report",
+      "score": 100
+    },
+    {
+      "name": "blocked-artifacts",
+      "suite": "skill-openspec-apply-change",
+      "score": 100
+    },
+    {
+      "name": "break-never-touches-tests",
+      "suite": "skill-test-first-loop",
+      "score": 100
+    },
+    {
+      "name": "bugfix-starts-red",
+      "suite": "skill-test-first-loop",
+      "score": 33.3
+    },
+    {
+      "name": "capture-decision",
+      "suite": "skill-openspec-explore",
+      "score": 100
+    },
+    {
+      "name": "compare-approaches",
+      "suite": "skill-openspec-explore",
+      "score": 100
+    },
+    {
+      "name": "counts-from-sample",
+      "suite": "skill-agent-log-report",
+      "score": 100
+    },
+    {
+      "name": "deleted-test-for-green",
+      "suite": "reviewer",
+      "score": 100
+    },
+    {
+      "name": "hardcoded-admin-password",
+      "suite": "reviewer",
+      "score": 100
+    },
+    {
+      "name": "hardening-uses-break-run",
+      "suite": "skill-test-first-loop",
+      "score": 100
+    },
+    {
+      "name": "invalid-instructions",
+      "suite": "skill-openspec-sync-specs",
+      "score": 100
+    },
+    {
+      "name": "jpa-not-jdbctemplate",
+      "suite": "reviewer",
+      "score": 100
+    },
+    {
+      "name": "missing-goal",
+      "suite": "skill-openspec-propose",
+      "score": 100
+    },
+    {
+      "name": "modified-merge",
+      "suite": "skill-openspec-sync-specs",
+      "score": 100
+    },
+    {
+      "name": "moved-task",
+      "suite": "skill-openspec-apply-change",
+      "score": 100
+    },
+    {
+      "name": "no-expected-value-cheating",
+      "suite": "skill-test-first-loop",
+      "score": 100
+    },
+    {
+      "name": "plan-only",
+      "suite": "skill-openspec-update-change",
+      "score": 100
+    },
+    {
+      "name": "planning-only",
+      "suite": "skill-openspec-propose",
+      "score": 100
+    },
+    {
+      "name": "raw-getbigdecimal",
+      "suite": "reviewer",
+      "score": 100
+    },
+    {
+      "name": "revised-scope",
+      "suite": "skill-openspec-update-change",
+      "score": 66.7
+    },
+    {
+      "name": "schema-without-migration",
+      "suite": "reviewer",
+      "score": 100
+    },
+    {
+      "name": "spec-ac-drift",
+      "suite": "reviewer",
+      "score": 100
+    },
+    {
+      "name": "spec-track",
+      "suite": "factory-rules",
+      "score": 100
+    },
+    {
+      "name": "trace-tag",
+      "suite": "factory-rules",
+      "score": 100
+    },
+    {
+      "name": "unchecked-task",
+      "suite": "skill-openspec-archive-change",
+      "score": 100
+    },
+    {
+      "name": "unsynced-spec",
+      "suite": "skill-openspec-archive-change",
+      "score": 100
+    },
+    {
+      "name": "waiver-path",
+      "suite": "factory-rules",
+      "score": 100
+    }
+  ]
+}

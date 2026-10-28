@@ -25,6 +25,7 @@ trace/acceptance-contracts.json
 trace/ledger.jsonl
 
 # eval run outputs (local gate; see evals/README.md)
-evals/results/
+evals/results/*
+!evals/results/latest.json
 .agents/skills/*/evals/results/
 .claude/skills/*/evals/results/

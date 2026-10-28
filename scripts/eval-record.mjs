@@ -9,11 +9,12 @@
 // Usage (from the repo root): node scripts/eval-record.mjs [--model <id>]
 //   --model pins the agent model (the default is the CLI's logged-in model, recorded as "default").
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { blobsOf } from "./dod-fingerprint.mjs";
+import { LATEST_PATH, render, suitesOf, summarize } from "./eval-summary.mjs";
 
 // The files the scores depend on. A change to any of them makes the record stale.
 export const INPUT_PATHS = [".claude/agents/reviewer.md", "AGENTS.md", ".agents/skills", ".claude/skills", ".claude/commands/opsx", "evals/reviewer", "evals/factory-rules"];
@@ -92,7 +93,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const run = runEval(root, model, runs);
   const record = buildRecord({ model, run, inputs: stableInputs(before, inputsFingerprint(root)) });
   writeFileSync(join(root, RECORD_PATH), JSON.stringify(record, null, 2) + "\n");
-  console.error(`\nWrote ${RECORD_PATH} (model ${record.model}, judge ${record.judgeModel}).`);
+  mkdirSync(dirname(join(root, LATEST_PATH)), { recursive: true });
+  writeFileSync(join(root, LATEST_PATH), render(summarize(record, suitesOf(root))));
+  console.error(`\nWrote ${RECORD_PATH} and ${LATEST_PATH} (model ${record.model}, judge ${record.judgeModel}).`);
   for (const [name, s] of Object.entries(record.cases)) {
     console.error(`  ${name}: ${s.score}${s.delta !== undefined ? ` (Δ ${s.delta})` : ""}`);
   }
