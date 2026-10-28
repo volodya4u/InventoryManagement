@@ -171,12 +171,42 @@ const parseTs = (ts) => {
   return Number.isFinite(n) ? n : null;
 };
 
+// Open waiver files under docs/qa/waivers (PD-3). Same status rule as check-acceptance-methods.mjs: the first Status: /
+// State: line decides, a closed-class value does not count, and no status means open.
+const CLOSED_WAIVER_STATUS = new Set(["closed", "resolved", "expired", "revoked", "withdrawn", "done"]);
+function countOpenWaiverFiles() {
+  const dir = join(root, "docs", "qa", "waivers");
+  if (!existsSync(dir)) return 0;
+  let open = 0;
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith(".md") || f.startsWith(".")) continue;
+    let body = "";
+    try {
+      body = readFileSync(join(dir, f), "utf8");
+    } catch {
+      continue;
+    }
+    const m = body.match(/^\s*(?:>?\s*)?(?:\*\*|_)?\s*(?:status|state)\s*(?:\*\*|_)?\s*[:=]\s*`?\s*([A-Za-z-]+)/im);
+    if (!CLOSED_WAIVER_STATUS.has(m ? m[1].toLowerCase() : "open")) open += 1;
+  }
+  return open;
+}
+
 function computeMetrics(events, contracts, corrections) {
   // Vacuous passes: exit 0 on scope 0 while product code exists (the disease).
   const vacuous = events.filter(
     (e) => e.exitCode === 0 && e.scope_n === 0 && (e.meta?.productCode === true || e.meta?.notEarned === true),
   );
-  const notEarned = events.filter((e) => e.event === "not-earned" || e.result === "NOT-EARNED" || e.meta?.notEarned === true);
+  // NOT-EARNED facts: one per gate that a gate-status event records as NOT-EARNED in meta.gates (PD-2), and one for an
+  // event that carries a top-level marker but no per-gate data.
+  const notEarnedByGate = {};
+  let notEarnedCount = 0;
+  for (const e of events) {
+    const gates = Object.entries(e.meta?.gates ?? {}).filter(([, verdict]) => verdict === "NOT-EARNED");
+    const marked = e.event === "not-earned" || e.result === "NOT-EARNED" || e.meta?.notEarned === true;
+    for (const [gate] of gates) notEarnedByGate[gate] = (notEarnedByGate[gate] ?? 0) + 1;
+    notEarnedCount += Math.max(gates.length, marked ? 1 : 0);
+  }
 
   // Per-class warning trend: first half vs second half of the event stream.
   const trend = {};
@@ -236,6 +266,7 @@ function computeMetrics(events, contracts, corrections) {
   // Waivers: ledger waiver events + waived acceptance contracts.
   const waiverEvents = events.filter((e) => e.event === "waiver" || e.meta?.waiver === true).length;
   const contractWaivers = contracts.items.filter(contractWaived).length;
+  const waiverFiles = countOpenWaiverFiles();
 
   // Claim divergence: explicit divergence events + declared-but-unmet contracts.
   const divergenceEvents = events.filter((e) => e.event === "claim-divergence" || e.meta?.claimDivergence === true).length;
@@ -284,14 +315,14 @@ function computeMetrics(events, contracts, corrections) {
   return {
     vacuousPasses: { count: vacuous.length, events: vacuous.map((e) => ({ ts: e.ts ?? null, check: e.check ?? null })) },
     warningsByClass,
-    notEarned: { count: notEarned.length },
+    notEarned: { count: notEarnedCount, byGate: notEarnedByGate },
     warningTrendByClass: trend,
     retriesPerCheck,
     redToGreenLatency: {
       perCheck: redToGreen,
       overallAvgMs: allLatencies.length ? Math.round(allLatencies.reduce((s, x) => s + x, 0) / allLatencies.length) : null,
     },
-    waivers: { ledgerEvents: waiverEvents, contractWaivers, total: waiverEvents + contractWaivers },
+    waivers: { ledgerEvents: waiverEvents, contractWaivers, files: waiverFiles, total: waiverEvents + waiverFiles },
     claimDivergence: {
       ledgerEvents: divergenceEvents,
       unmetContracts: unmetContracts.length,
@@ -388,11 +419,20 @@ function main() {
   // entry, covered = entries whose mechanism/artifact is ok (or waived — a
   // human-signed waiver is a visible disposition, not a gap). Computed here
   // because check-process-ratchet's guard 3 / --update read it from this file.
+  // `covered` stays tested + waived because check-process-ratchet.mjs reads it; `tested`, `waived` and `uncovered` tell the
+  // two apart (PD-3).
   const acceptanceCoverage = contracts.present
-    ? {
-        covered: contracts.items.filter((c) => contractCovered(c) || contractWaived(c)).length,
-        declared: contracts.items.length,
-      }
+    ? (() => {
+        const tested = contracts.items.filter((c) => contractCovered(c) && !contractWaived(c)).length;
+        const waived = contracts.items.filter(contractWaived).length;
+        return {
+          covered: tested + waived,
+          declared: contracts.items.length,
+          tested,
+          waived,
+          uncovered: contracts.items.length - tested - waived,
+        };
+      })()
     : null;
   const health = {
     generatedAt: new Date().toISOString(),
@@ -413,11 +453,11 @@ function main() {
     metrics: metrics ?? {
       vacuousPasses: { count: 0, events: [] },
       warningsByClass: {},
-      notEarned: { count: 0 },
+      notEarned: { count: 0, byGate: {} },
       warningTrendByClass: {},
       retriesPerCheck: {},
       redToGreenLatency: { perCheck: {}, overallAvgMs: null },
-      waivers: { ledgerEvents: 0, contractWaivers: 0, total: 0 },
+      waivers: { ledgerEvents: 0, contractWaivers: 0, files: 0, total: 0 },
       claimDivergence: { ledgerEvents: 0, unmetContracts: 0, unmet: [], total: 0 },
       uncommittedWork: null,
       corrections: { total: corrections.length, open: 0, openIds: [] },
@@ -447,8 +487,9 @@ ${
     : `| Metric | Value |
 |---|---|
 | Vacuous passes (exit 0, scope 0, product code) | **${m.vacuousPasses.count}** ${m.vacuousPasses.count ? "⚠" : ""} |
-| NOT-EARNED events | ${m.notEarned.count} |
-| Waivers (ledger + contracts) | ${m.waivers.total} |
+| NOT-EARNED gate results | ${m.notEarned.count}${Object.keys(m.notEarned.byGate).length ? ` (${Object.entries(m.notEarned.byGate).map(([g, n]) => `${g}: ${n}`).join(", ")})` : ""} |
+| Waivers (ledger events + open waiver files) | ${m.waivers.total} |
+| Acceptance contracts (tested / waived / uncovered of declared) | ${acceptanceCoverage ? `${acceptanceCoverage.tested} / ${acceptanceCoverage.waived} / ${acceptanceCoverage.uncovered} of ${acceptanceCoverage.declared}` : "no contracts file"} |
 | Claim divergence (events + unmet contracts) | ${m.claimDivergence.total} |
 | Open corrections | ${m.corrections.open} of ${m.corrections.total} |
 | Red→green latency (overall avg) | ${fmtMs(m.redToGreenLatency.overallAvgMs)} |

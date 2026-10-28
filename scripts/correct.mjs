@@ -127,12 +127,23 @@ export function detectAutoCorrections(root = process.cwd()) {
       const abs = join(waiverDir, f);
       if (!statSync(abs).isFile() || f.startsWith(".")) continue;
       const rel = `docs/qa/waivers/${f}`;
+      // What the waiver says about itself (PD-9): the requirement ids it names (the correction schema accepts FR, NFR and
+      // BC only) and whether the verification mechanism is missing (G3, the existence check) or only a test (G4).
+      let body = "";
+      try {
+        body = readFileSync(abs, "utf8");
+      } catch {
+        /* unreadable waiver: keep the defaults */
+      }
+      const mappedReqIds = [...new Set(body.match(/\b(?:FR|NFR|BC)-\d+\b/g) ?? [])];
+      const noMechanism = /has no mechanism/i.test(body);
       events.push({
         type: "waiver-created",
         path: rel,
         autoKey: `waiver-created:${rel}`,
-        gateIds: [],
-        suggestedFailureMode: "skipped-convention",
+        mappedReqIds,
+        gateIds: mappedReqIds.length ? [noMechanism ? "G3" : "G4"] : [],
+        suggestedFailureMode: noMechanism ? "missing-check" : "skipped-convention",
         suggestedUtterance: `AUTO: waiver created (${rel}) — an evidence requirement was waived; record why and disposition this correction.`,
       });
     }
@@ -304,7 +315,7 @@ function runDetect(root, schema) {
       ts: new Date().toISOString(),
       utterance: ev.suggestedUtterance,
       contradictedClaim: null,
-      mappedReqIds: [],
+      mappedReqIds: ev.mappedReqIds ?? [],
       gateThatShouldHaveCaught: ev.gateIds[0] ?? null,
       failureMode: ev.suggestedFailureMode,
       failureModeSource: "detector",

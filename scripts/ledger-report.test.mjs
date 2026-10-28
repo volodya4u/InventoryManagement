@@ -72,3 +72,77 @@ test("keeps SKIP-pending for an empty ledger when src holds only tests", () => {
   assert.match(out, /Result: SKIP-pending/);
   assert.equal(status, 0, out);
 });
+
+// --- PD-2: NOT-EARNED gates inside gate-status events --------------------------------------------------------------
+
+// A gate-status event as gate-status.mjs writes it: each gate's verdict is in meta.gates.
+const gateRun = (gates, ts = "2026-10-28T10:00:00.000Z") =>
+  JSON.stringify({ ts, event: "gate-status-run", check: "gate-status", exitCode: 1, scope_n: 9, meta: { gates, productCode: true } });
+
+// A project with a ledger (and any other files), the digest generated, and its parsed process-health.json.
+function digestFor(name, { ledger = [], files = {} } = {}) {
+  const root = project(name, []);
+  const put = (path, text) => {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), text);
+  };
+  put("trace/ledger.jsonl", ledger.map((l) => `${l}\n`).join(""));
+  for (const [path, text] of Object.entries(files)) put(path, text);
+  run("ledger-report.mjs", root);
+  return digest(root);
+}
+
+test("counts a per-gate NOT-EARNED inside a gate-status event", () => {
+  const d = digestFor("ne-one", { ledger: [gateRun({ G5: "PASS", G6: "NOT-EARNED" })] });
+  assert.equal(d.metrics.notEarned.count, 1);
+  assert.equal(d.metrics.notEarned.byGate.G6, 1);
+});
+
+test("counts NOT-EARNED per run", () => {
+  const d = digestFor("ne-two", {
+    ledger: [gateRun({ G6: "NOT-EARNED" }, "2026-10-28T10:00:00.000Z"), gateRun({ G6: "NOT-EARNED" }, "2026-10-28T11:00:00.000Z")],
+  });
+  assert.equal(d.metrics.notEarned.count, 2);
+});
+
+test("counts only the NOT-EARNED gates among mixed verdicts", () => {
+  const d = digestFor("ne-mixed", { ledger: [gateRun({ G1: "needs sign-off", G4: "PASS", G5: "WAIVED", G6: "NOT-EARNED", G7: "NOT-EARNED" })] });
+  assert.equal(d.metrics.notEarned.count, 2);
+  assert.deepEqual(d.metrics.notEarned.byGate, { G6: 1, G7: 1 });
+});
+
+// A control that holds before and after the fix: no NOT-EARNED gate, no count.
+test("reports zero NOT-EARNED when every gate is earned", () => {
+  const d = digestFor("ne-none", { ledger: [gateRun({ G5: "PASS", G6: "PASS" })] });
+  assert.equal(d.metrics.notEarned.count, 0);
+});
+
+// --- PD-3: waived is not tested --------------------------------------------------------------------------------------
+
+const contractsFile = (entries) =>
+  JSON.stringify({ generatedBy: "test", mode: "artifact", contracts: Object.fromEntries(entries.map(([id, status]) => [id, [{ method: "local-verifiable", status }]])) });
+
+test("counts a waived contract as waived, not tested", () => {
+  const d = digestFor("cov", {
+    ledger: [gateRun({ G6: "PASS" })],
+    files: { "trace/acceptance-contracts.json": contractsFile([["FR-1", "artifact-ok"], ["FR-2", "artifact-ok"], ["NFR-15", "waived"]]) },
+  });
+  assert.deepEqual(d.acceptanceCoverage, { covered: 3, declared: 3, tested: 2, waived: 1, uncovered: 0 });
+});
+
+test("counts every open waiver file", () => {
+  const d = digestFor("waivers-open", {
+    ledger: [gateRun({ G6: "PASS" })],
+    files: { "docs/qa/waivers/a-NFR-15.md": "# Waiver\n\nStatus: open\n", "docs/qa/waivers/b-NFR-17.md": "# Waiver\n\nStatus: open\n" },
+  });
+  assert.equal(d.metrics.waivers.files, 2);
+  assert.equal(d.metrics.waivers.total, 2);
+});
+
+test("ignores closed waivers", () => {
+  const d = digestFor("waivers-closed", {
+    ledger: [gateRun({ G6: "PASS" })],
+    files: { "docs/qa/waivers/a-NFR-15.md": "# Waiver\n\nStatus: open\n", "docs/qa/waivers/b-NFR-17.md": "# Waiver\n\nStatus: closed\n" },
+  });
+  assert.equal(d.metrics.waivers.files, 1);
+});
