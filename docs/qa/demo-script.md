@@ -31,8 +31,9 @@ shows as ₴53.33 (the stored value is 53.3333), which is (20 × 50 + 10 × 60) 
 ## Scene 4 — A product whose price is calculated (proves FR-76, FR-79, FR-81, FR-82)
 Create the product `BQ-001` "Rose bouquet": 1 Rose, 2 Ribbon and 1 Wrapping paper per unit, markup 30, advertising cost 0,
 opening quantity 0.
-**Show:** the live preview of the recipe cost (72.3333) and the selling price (94.03, which is 72.3333 × 1.3) while the form is
-filled in. Point out that there is no field to type a price: it is always cost plus markup, and it stays as saved if a material's cost changes later (decision OQ-1).
+**Show:** the live preview of the recipe cost displayed as ₴72.33 (the unrounded calculation value is 72.3333) and the selling
+price displayed as ₴94.03 (72.3333 × 1.3, rounded to cents) while the form is filled in. Point out that there is no field to
+type a price: it is always cost plus markup, and it stays as saved if a material's cost changes later (decision OQ-1).
 
 ## Scene 5 — Production (proves FR-88, FR-89, FR-90, FR-92, FR-94)
 Open the production dialog for the bouquet and produce 5. Then try to produce 1000.
