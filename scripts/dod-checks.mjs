@@ -141,7 +141,11 @@ export function evalRatchetVerdict(output) {
   const result = /^Result: (\S+)/m.exec(text)?.[1];
   const cases = Number(/^Scope: (\d+) eval case/m.exec(text)?.[1] ?? 0);
   if (result === "FAIL") return { ok: false, result: /^FAIL\s+(?:eval ratchet: )?(.+)$/m.exec(text)?.[1] ?? "the eval ratchet failed" };
-  if (result !== "PASS") return { ok: false, result: `the eval ratchet gave ${result ?? "no result"}, not PASS` };
+  if (result !== "PASS") {
+    // No "Result:" line means a script stopped before the ratchet ran (a stale summary, a missing baseline): quote why.
+    const reason = result ? "" : text.split(/\r?\n/).find((line) => line.trim())?.trim().slice(0, 160);
+    return { ok: false, result: `the eval ratchet gave ${result ?? "no result"}, not PASS${reason ? `: ${reason}` : ""}` };
+  }
   if (cases === 0) return { ok: false, result: "the eval ratchet passed on no case" };
   return { ok: true, result: `${cases} eval cases, none below its baseline` };
 }

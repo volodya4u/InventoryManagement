@@ -7,7 +7,7 @@
 ## Context
 
 ADR-0001 installed `scripts/check-process-ratchet.mjs` because `gate-status.mjs` calls it. It has reported NOT-EARNED since.
-The ratchet has five guards (`openspec/changes/process-ratchet/design.md`). Its scanner looked for product code and `@trace`
+The ratchet has five guards (`openspec/changes/archive/2026-10-28-process-ratchet/design.md`). Its scanner looked for product code and `@trace`
 tags in `app`, `src`, `lib`, ... and in `*.test|spec|eval.<js|ts>` files, so it never saw `frontend/src` or the JUnit
 classes, and the dead-@trace guard said "no @trace annotations yet". The guards on vacuous passes, acceptance-contract
 coverage and warning budgets read `trace/process-health.json`, a digest of the local, gitignored telemetry ledger
