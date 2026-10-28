@@ -3,6 +3,13 @@
 Trust level 1 ("Assistant"): propose, then wait for a human decision before changing more
 than one file or running anything that is not on the allow-list in `.claude/settings.json`.
 
+## Where to start
+
+- Read `docs/current-state.md` first in a new session: a handoff map of where the project stands, what is open and what
+  only the owner decides. It is a map, not a source of truth, so check each line against the file or command it points
+  to, and update it when you finish a piece of work. This file and `docs/requirements.md` stay the rules and the
+  requirements.
+
 ## Commands
 
 - `mvn -B -ntp verify` — backend tests; also installs the pinned Node and pnpm into `target/frontend-tooling`
