@@ -1,0 +1,18 @@
+{
+  "id": "COR-7",
+  "ts": "2026-10-28T21:28:15.628Z",
+  "utterance": "AUTO: waiver created (docs/qa/waivers/2026-10-28-trajectory-structured-evidence-followups.md) — an evidence requirement was waived; record why and disposition this correction.",
+  "contradictedClaim": null,
+  "mappedReqIds": [],
+  "gateThatShouldHaveCaught": null,
+  "failureMode": "skipped-convention",
+  "failureModeSource": "detector",
+  "source": "auto-waiver",
+  "autoKey": "waiver-created:docs/qa/waivers/2026-10-28-trajectory-structured-evidence-followups.md",
+  "disposition": {
+    "status": "waived",
+    "by": "volodya4u (asked in chat on 2026-10-28 to continue with PD-5 and the waivers; recorded by claude)",
+    "ts": "2026-10-28T21:28:36.331Z",
+    "note": "historical-only: no reviewer ran on the final merged tree of #95 and a review today would be for a different tree; see docs/qa/historical-gaps.md and the waiver"
+  }
+}

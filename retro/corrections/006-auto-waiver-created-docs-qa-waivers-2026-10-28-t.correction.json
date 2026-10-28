@@ -1,0 +1,18 @@
+{
+  "id": "COR-6",
+  "ts": "2026-10-28T21:28:15.623Z",
+  "utterance": "AUTO: waiver created (docs/qa/waivers/2026-10-28-trajectory-harden-frontend-specs.md) — an evidence requirement was waived; record why and disposition this correction.",
+  "contradictedClaim": null,
+  "mappedReqIds": [],
+  "gateThatShouldHaveCaught": null,
+  "failureMode": "skipped-convention",
+  "failureModeSource": "detector",
+  "source": "auto-waiver",
+  "autoKey": "waiver-created:docs/qa/waivers/2026-10-28-trajectory-harden-frontend-specs.md",
+  "disposition": {
+    "status": "waived",
+    "by": "volodya4u (asked in chat on 2026-10-28 to continue with PD-5 and the waivers; recorded by claude)",
+    "ts": "2026-10-28T21:28:36.329Z",
+    "note": "historical-only: the missing Slice trailer of a merged commit cannot be added without rewriting history; see docs/qa/historical-gaps.md and the waiver"
+  }
+}
