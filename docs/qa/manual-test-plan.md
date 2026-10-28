@@ -161,10 +161,11 @@ refused with "The image size cannot exceed 2 MB." Saving again keeps the picture
 **Covers:** FR-76, FR-79, FR-81, FR-82, FR-84, FR-52
 **Steps:** 1. In Products add the product from the reference data. Watch the preview while you fill the recipe and the markup.
 2. Go to Raw Materials and try to delete Rose.
-**Expected:** Step 1: the preview shows the recipe unit cost 72.3333 (Rose 53.3333 + 2 × Ribbon 8.00 + Wrapping paper 3.00) and a
-selling price of 94.03, which is (recipe cost + advertising cost) × (1 + markup / 100) = 72.3333 × 1.3 rounded to cents, with
-no way to type the price; after saving, the list shows the same price. Step 2: the delete is
-refused with a message that names the product recipe that uses Rose.
+**Expected:** Step 1: the preview shows the recipe unit cost as ₴72.33. Its unrounded calculation value is 72.3333
+(Rose 53.3333 + 2 × Ribbon 8.00 + Wrapping paper 3.00). The selling price is displayed as ₴94.03, calculated as
+(recipe cost + advertising cost) × (1 + markup / 100) = 72.3333 × 1.3 rounded to cents, with no way to type the price;
+after saving, the list shows the same price. Step 2: the delete is refused with a message that names the product recipe
+that uses Rose.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-16 Product input rules
