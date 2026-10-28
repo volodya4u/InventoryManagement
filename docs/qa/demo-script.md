@@ -29,18 +29,20 @@ page.
 ## Scene 4 — A product whose price is calculated (proves FR-76, FR-79, FR-81, FR-82)
 Create the product `BQ-001` "Rose bouquet": 1 Rose, 2 Ribbon and 1 Wrapping paper per unit, markup 30, advertising cost 0,
 opening quantity 0.
-**Show:** the live preview of the recipe cost and the selling price while the form is filled in. Point out that there is no
+**Show:** the live preview of the recipe cost (72.3333) and the selling price (94.03, which is 72.3333 × 1.3) while the form is
+filled in. Point out that there is no
 field to type a price: it is always cost plus markup, and it stays as saved if a material's cost changes later (decision OQ-1).
 
 ## Scene 5 — Production (proves FR-88, FR-89, FR-90, FR-92, FR-94)
 Open the production dialog for the bouquet and produce 5. Then try to produce 1000.
 **Show:** the dialog counting the materials needed and the cost before posting; after posting, Rose 25, Ribbon 20, Wrapping
-paper 25 and 5 bouquets in stock. The 1000 attempt is refused and names the short materials, and nothing changes.
+paper 25 and 5 bouquets in stock. For the 1000 attempt, the dialog marks each short material "Missing" with the shortfall and disables the button, so nothing is
+sent and nothing changes.
 
 ## Scene 6 — A sale (proves FR-101, FR-103, FR-104, FR-105, FR-107, FR-108, FR-112)
 Make a sale of 2 bouquets by card.
 **Show:** the unit price filled from the product, the sale number `SALE-YYYYMMDD-0001`, status Completed, the revenue, cost and
-gross profit, and the bouquet stock down to 3. Try to sell 10 and show the refusal.
+gross profit, and the bouquet stock down to 3. Try to sell 10: the page shows "The requested quantity exceeds the available Product stock." and the Save button is disabled.
 
 ## Scene 7 — A return and a cancellation (proves FR-114, FR-119, FR-121, FR-122, FR-123, FR-124)
 Return 1 bouquet from that sale, then make a second sale of 1 bouquet and cancel it.

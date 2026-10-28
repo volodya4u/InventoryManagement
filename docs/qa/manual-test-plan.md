@@ -40,7 +40,7 @@ cost 0, opening quantity 0.
 **Steps:** 1. Open the app; you land on the sign-in page with the username filled in as `admin`. 2. Enter a wrong password and
 press Sign in. 3. Enter the right password and press Sign in. 4. Use Sign out in the menu.
 **Expected:** Step 2 shows "Invalid username or password" and stays on the sign-in page. Step 3 opens the dashboard. Step 4
-returns to the sign-in page, and the browser's Back button does not show the dashboard again.
+returns to the sign-in page.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-02 The password reveal toggle
@@ -54,10 +54,11 @@ returns to the sign-in page, and the browser's Back button does not show the das
 **Steps:** Open Change Password. Try, one at a time: a wrong current password; a new password of 9 characters; a confirmation
 that differs; a new password equal to the current one. Then change it correctly to a new password of at least 10
 characters. Sign in with the new password.
-**Expected:** Each wrong attempt shows its own message ("Current password is incorrect", "New password must be between 10 and
-64 characters", "New password confirmation does not match", "New password must be different from current password") and keeps
-you signed in. The correct change ends the session, shows "Password changed successfully. Sign in with your new password.",
-and only the new password works afterwards.
+**Expected:** Each wrong attempt keeps you signed in and shows its own message. The page checks two of them itself before
+sending anything: a short new password shows "The password must be between 10 and 64 characters." and a different confirmation
+shows "The passwords do not match." The other two come from the server: "Current password is incorrect" and "New password must
+be different from current password". The correct change ends the session, shows "Password changed successfully. Sign in with
+your new password.", and only the new password works afterwards.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-04 A password change ends other sessions
@@ -119,8 +120,9 @@ have to be unique (decision OQ-3 is still open; see the risk register).
 **Steps:** 1. Record a receipt of 10 Rose bunches at 60.00. 2. Write off 2 Ribbon metres with the reason "cut too short".
 3. Try to write off 500 Ribbon. 4. Adjust Wrapping paper to 28, then try to adjust it to 28 again.
 **Expected:** Rose is now 30 at an average cost of 53.3333 (shown rounded as the page shows it): (20 × 50 + 10 × 60) / 30.
-Ribbon is 8. The 500 write-off is refused with "Insufficient raw material stock". Wrapping paper becomes 28, and the second
-adjustment to 28 is refused with "Actual stock already matches the recorded raw material stock".
+Ribbon is 8. For the 500 write-off the page shows "The write-off quantity exceeds available stock." and sends nothing, so
+the quantity stays 8 (the server's own "Insufficient raw material stock" is the safety net behind it). Wrapping paper becomes 28,
+and the second adjustment to 28 is refused with "Actual stock already matches the recorded raw material stock".
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-12 Reorder level and the low-stock badge
@@ -143,7 +145,7 @@ answering "Cancel" to the confirmation and then accepting.
 **Steps:** On a raw material, upload a small PNG, then try a `.gif`, then a JPG larger than 2 MB, then save the record again
 without choosing a file.
 **Expected:** The PNG is accepted and shown. The GIF is refused with "Select a JPG, JPEG, or PNG file." The large file is
-refused with a 2 MB message. Saving again keeps the picture. There is no way to remove a picture once set (OQ-11).
+refused with "The image size cannot exceed 2 MB." Saving again keeps the picture. There is no way to remove a picture once set (OQ-11).
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 4. Products and production
@@ -152,8 +154,9 @@ refused with a 2 MB message. Saving again keeps the picture. There is no way to 
 **Covers:** FR-76, FR-79, FR-81, FR-82, FR-84, FR-52
 **Steps:** 1. In Products add the product from the reference data. Watch the preview while you fill the recipe and the markup.
 2. Go to Raw Materials and try to delete Rose.
-**Expected:** Step 1: the preview shows the recipe unit cost and a selling price computed as the recipe cost plus advertising
-cost plus 30 percent markup, with no way to type the price; after saving, the list shows the same price. Step 2: the delete is
+**Expected:** Step 1: the preview shows the recipe unit cost 72.3333 (Rose 53.3333 + 2 × Ribbon 8.00 + Wrapping paper 3.00) and a
+selling price of 94.03, which is (recipe cost + advertising cost) × (1 + markup / 100) = 72.3333 × 1.3 rounded to cents, with
+no way to type the price; after saving, the list shows the same price. Step 2: the delete is
 refused with a message that names the product recipe that uses Rose.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
@@ -170,16 +173,18 @@ quantity 0.
 **Steps:** 1. In Raw Materials record a receipt of 20 Ribbon at 8.00 (Ribbon is now 28). 2. Produce 5 `Rose bouquet`.
 3. Look at Raw Materials. 4. Try to produce 1000.
 **Expected:** Step 2 succeeds and the dialog's production cost is the cost recorded. Rose is 25, Ribbon 18 and Wrapping paper
-23, and the product quantity is 5. Step 4 is refused, names the raw materials that are short, and changes no quantity.
+23, and the product quantity is 5. In step 4 the dialog's table shows "Missing" with the shortfall against each raw material that is short, the Produce button is
+disabled, nothing is sent, and no quantity changes (the server's refusal of a short batch, FR-89, is the safety net behind it).
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-18 Product write-off and adjustment
 **Covers:** FR-95, FR-96, FR-97, FR-98, FR-99, FR-100
 **Steps:** (The product has 5 bouquets after MT-17.) 1. Write off 1 bouquet with a reason (stock becomes 4). 2. Try to write off
 50. 3. Try a write-off of 1.5. 4. Adjust the quantity to 5, as if a recount found one more. 5. Adjust it to 5 again.
-**Expected:** Steps 1 and 4 succeed and leave the stock at 4 and then 5, and both show up in Stock History. Step 2 is refused
-("Insufficient product stock"); step 3 is refused ("must be a whole number"); step 5 is refused ("Actual stock already
-matches…"). The stock is 5 when you finish.
+**Expected:** Steps 1 and 4 succeed and leave the stock at 4 and then 5, and both show up in Stock History. In step 2 the page
+shows "The write-off quantity exceeds available Product stock." and sends nothing; in step 3 it shows "Enter a positive whole
+number." and sends nothing (the server's "Insufficient product stock" and "must be a whole number" are the safety net behind
+them); step 5 is refused with "Actual stock already matches…". The stock is 5 when you finish.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 5. Sales
@@ -187,9 +192,10 @@ matches…"). The stock is 5 when you finish.
 ### MT-19 Make a sale
 **Covers:** FR-101, FR-102, FR-103, FR-104, FR-105, FR-106, FR-107, FR-108, FR-112
 **Steps:** In Sales add a sale of 2 bouquets, payment CARD, today's date. Note the unit price the form fills in.
-**Expected:** The unit price is filled from the product's selling price. The sale gets a number like `SALE-YYYYMMDD-0001`,
-status Completed, with revenue, cost and gross profit. Product stock falls from 5 to 3. Selling a quantity above the stock is
-refused with "Insufficient product stock" and nothing changes.
+**Expected:** The unit price is filled from the product's selling price, 94.03. The sale gets a number like
+`SALE-YYYYMMDD-0001`, status Completed, with revenue 188.06 and a cost and gross profit. Product stock falls from 5 to 3. If you
+enter a quantity above the stock (try 10), the page shows "The requested quantity exceeds the available Product stock.", the
+Save button is disabled, and nothing is sent (the server's "Insufficient product stock" is the safety net behind it).
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-20 A sale cannot be edited
