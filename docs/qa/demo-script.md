@@ -15,7 +15,7 @@ added later, each scene below is the script for one clip, and the sentence under
 
 ## Scene 1 — Sign in (proves FR-1, FR-3, FR-20, FR-21, FR-9)
 Open the app. Sign in with a wrong password, then the right one. At the end of the demo, sign out.
-**Show:** the message "Invalid username or password" for the wrong attempt; the dashboard after the right one.
+**Show:** the message "Invalid username or password." for the wrong attempt; the dashboard after the right one.
 
 ## Scene 2 — Raw materials and stock value (proves FR-42, FR-45, FR-46, FR-47, FR-48)
 Add Rose (bunch, 20 at 50.00, reorder level 5), Ribbon (metre, 10 at 8.00) and Wrapping paper (piece, 30 at 3.00).

@@ -39,7 +39,7 @@ cost 0, opening quantity 0.
 **Covers:** FR-1, FR-3, FR-8, FR-9, FR-20, FR-21
 **Steps:** 1. Open the app; you land on the sign-in page with the username filled in as `admin`. 2. Enter a wrong password and
 press Sign in. 3. Enter the right password and press Sign in. 4. Use Sign out in the menu.
-**Expected:** Step 2 shows "Invalid username or password" and stays on the sign-in page. Step 3 opens the dashboard. Step 4
+**Expected:** Step 2 shows "Invalid username or password." and stays on the sign-in page. Step 3 opens the dashboard. Step 4
 returns to the sign-in page.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
@@ -122,7 +122,8 @@ have to be unique (decision OQ-3 is still open; see the risk register).
 **Expected:** Rose is now 30 at an average cost of 53.3333 (shown rounded as the page shows it): (20 × 50 + 10 × 60) / 30.
 Ribbon is 8. For the 500 write-off the page shows "The write-off quantity exceeds available stock." and sends nothing, so
 the quantity stays 8 (the server's own "Insufficient raw material stock" is the safety net behind it). Wrapping paper becomes 28,
-and the second adjustment to 28 is refused with "Actual stock already matches the recorded raw material stock".
+and for the second adjustment to 28 the page shows "The counted quantity already matches the recorded stock." and disables Save,
+so nothing is sent (the server's "Actual stock already matches the recorded raw material stock" is the safety net behind it).
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-12 Reorder level and the low-stock badge
@@ -164,8 +165,10 @@ refused with a message that names the product recipe that uses Rose.
 **Covers:** FR-77, FR-78, FR-79
 **Steps:** Try: a second product with SKU `bq-001`; a markup of 12.345; a product with an empty recipe; a recipe item with
 quantity 0.
-**Expected:** Every attempt is refused with a message that names the problem. The duplicate SKU message names the SKU
-(SKUs are unique regardless of letter case).
+**Expected:** Nothing is saved, and each attempt shows its own message. The markup shows "Enter a markup percentage between 0 and
+999999.99, with at most two decimals." The empty recipe shows "Add at least one raw material to the recipe." The recipe item with
+quantity 0 shows "Select a material and enter a quantity greater than zero." The duplicate SKU is sent to the server and comes
+back in a red alert that names the SKU, "A product with SKU “…” already exists." (SKUs are unique regardless of letter case).
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-17 Produce a batch
@@ -184,7 +187,8 @@ disabled, nothing is sent, and no quantity changes (the server's refusal of a sh
 **Expected:** Steps 1 and 4 succeed and leave the stock at 4 and then 5, and both show up in Stock History. In step 2 the page
 shows "The write-off quantity exceeds available Product stock." and sends nothing; in step 3 it shows "Enter a positive whole
 number." and sends nothing (the server's "Insufficient product stock" and "must be a whole number" are the safety net behind
-them); step 5 is refused with "Actual stock already matches…". The stock is 5 when you finish.
+them); in step 5 the page shows "The counted quantity already matches the recorded Product stock." and disables Save, so
+nothing is sent (the server's "Actual stock already matches…" is the safety net). The stock is 5 when you finish.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 5. Sales
@@ -210,7 +214,8 @@ Save button is disabled, and nothing is sent (the server's "Insufficient product
 **Covers:** FR-114, FR-115, FR-116, FR-118, FR-119, FR-122, FR-123, FR-126
 **Steps:** 1. On the 2-bouquet sale return 1 unit with a reason. 2. Try to return 2 more. 3. Return the last unit.
 **Expected:** After step 1 the sale is Partially returned, a document `RET-YYYYMMDD-0001` exists, the refund is one unit at the
-price actually charged, and product stock is back up from 3 to 4. Step 2 is refused ("exceeds the remaining…"). After step 3
+price actually charged, and product stock is back up from 3 to 4. In step 2 the page shows "Exceeds available quantity." under
+the line and does not accept it (the server's "exceeds the remaining…" is the safety net). After step 3
 the sale is Returned, product stock is 5, and no more returns are offered.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
@@ -218,8 +223,10 @@ the sale is Returned, product stock is 5, and no more returns are offered.
 **Covers:** FR-124, FR-125, FR-117
 **Steps:** Make a new sale of 1 bouquet. Try to cancel it with a date before the sale date. Cancel it with today's date.
 Then try to cancel a sale that has had a return.
-**Expected:** The early date is refused. The new sale takes stock from 5 to 4; the cancellation restores it to 5 and marks the
-sale Cancelled. The sale from MT-21 (it has returns) cannot be cancelled ("Only a completed sale without previous returns can be cancelled").
+**Expected:** The early date is not accepted (the date field's lower limit is the sale date, so the browser or the dialog flags
+it; write down how). The new sale takes stock from 5 to 4; the cancellation restores it to 5 and marks the sale Cancelled. The
+sale from MT-21 (it has returns) has no Cancel Sale button at all, because the page offers it only for a Completed sale (the
+server's "Only a completed sale without previous returns can be cancelled" is the safety net).
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 7. Dashboard
