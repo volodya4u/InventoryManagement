@@ -219,6 +219,27 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-28-improve-PD-2",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-28-improve-PD-3",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-28-improve-PD-9",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-28-process-ratchet",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,

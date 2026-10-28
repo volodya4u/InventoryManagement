@@ -5,7 +5,7 @@ archived slice took: review evidence, `Slice:` trailers, and module scope.
 It does NOT verify test-first ordering or test integrity (not derivable from
 one-commit-per-slice history) — those are graded by the trajectory-eval workflow.
 
-Scope: 33 archived slice(s).
+Scope: 36 archived slice(s).
 Result: PASS, 2 warning(s)
 
 | Slice | Review evidence | Trailer commits | design+tasks | lib domains touched |
@@ -41,6 +41,9 @@ Result: PASS, 2 warning(s)
 | 2026-10-28-dod-eval-diagnostics | approved (agent log) | 3 | yes | - |
 | 2026-10-28-eval-ratchet | approved (agent log) | 1 | yes | - |
 | 2026-10-28-improve-PD-1 | approved (agent log) | 4 | yes | - |
+| 2026-10-28-improve-PD-2 | approved (agent log) | 1 | yes | - |
+| 2026-10-28-improve-PD-3 | approved (agent log) | 1 | yes | - |
+| 2026-10-28-improve-PD-9 | approved (agent log) | 1 | yes | - |
 | 2026-10-28-process-ratchet | approved (agent log) | 1 | yes | - |
 | 2026-10-28-test-first-break-run | approved (agent log) | 1 | yes | - |
 
