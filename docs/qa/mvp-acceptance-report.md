@@ -32,7 +32,7 @@ baseline spec for the capability. "Owner" is for your decision after reading the
 | session-lifetime | FR-23 to FR-32 | MT-05, MT-06, MT-07 (manual only) | ☐ Accept ☐ Reject |
 | app-shell-routing | FR-33 to FR-36 | MT-05, MT-08, MT-27 | ☐ Accept ☐ Reject |
 | dashboard | FR-37 to FR-41 | MT-12, MT-23 | ☐ Accept ☐ Reject |
-| raw-materials | FR-42 to FR-56 | MT-09, MT-10, MT-13 | ☐ Accept ☐ Reject |
+| raw-materials | FR-42 to FR-56 | MT-09, MT-10, MT-13, MT-15 | ☐ Accept ☐ Reject |
 | reorder-level | FR-57 to FR-60 | MT-12 | ☐ Accept ☐ Reject |
 | raw-material-stock | FR-61 to FR-69 | MT-11 | ☐ Accept ☐ Reject |
 | images | FR-70 to FR-75 | MT-14 | ☐ Accept ☐ Reject |

@@ -87,7 +87,7 @@ reload each of those pages, plus `/stock-movements`, `/products` and `/change-pa
 **Steps:** The real timeout is 8 hours of inactivity, so this case is run once, with patience: sign in, leave the page untouched
 for more than 8 hours (or ask a developer to run the app with a shortened `server.servlet.session.timeout` for this run and
 note it in the record), then press a menu item.
-**Expected:** You are sent to the sign-in page, which says "Your session has expired" (the exact wording is in FR-26).
+**Expected:** You are sent to the sign-in page, which says "Your session has ended. Please sign in again." (FR-26).
 **Result:** ☐ Pass ☐ Fail ☐ Not run — notes: ______
 
 ### MT-08 Health check
@@ -111,7 +111,8 @@ cost (Rose 1,000.00; Ribbon 80.00; Wrapping paper 90.00). Stock History (section
 a second raw material named `Rose`.
 **Expected:** The first three are refused with a message that names the problem. The fourth is accepted, because names do not
 have to be unique (decision OQ-3 is still open; see the risk register).
-**Result:** ☐ Pass ☐ Fail — notes: ______ (delete the duplicate `Rose` afterwards, see MT-13)
+**Result:** ☐ Pass ☐ Fail — notes: ______
+**Then:** delete the duplicate `Rose` (accept the confirmation) before going on, so the later cases find only one Rose.
 
 ### MT-11 Receipt, write-off and adjustment
 **Covers:** FR-61, FR-62, FR-63, FR-64, FR-65, FR-66, FR-67, FR-69
@@ -130,11 +131,11 @@ below 40. After setting 5 the badge and the extra count disappear. Quantity and 
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-13 Edit rules and deleting a raw material
-**Covers:** FR-49, FR-50, FR-52, FR-54, FR-55
+**Covers:** FR-49, FR-50, FR-54, FR-55
 **Steps:** 1. Edit Rose and try to change its unit. 2. Add a raw material `Test stem` with no stock and delete it, first
-answering "Cancel" to the confirmation and then accepting. 3. After MT-15 has created the product, try to delete Rose.
+answering "Cancel" to the confirmation and then accepting.
 **Expected:** Step 1: the unit cannot be changed while Rose has stock. Step 2: Cancel keeps the record, accepting removes it.
-Step 3: refused with a message that names the product recipe that uses it.
+(Deleting a raw material that a product recipe uses is checked in MT-15, once the product exists.)
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-14 Pictures
@@ -148,10 +149,12 @@ refused with a 2 MB message. Saving again keeps the picture. There is no way to 
 ## 4. Products and production
 
 ### MT-15 Create the product and see its price
-**Covers:** FR-76, FR-79, FR-81, FR-82, FR-84
-**Steps:** In Products add the product from the reference data. Watch the preview while you fill the recipe and the markup.
-**Expected:** The preview shows the recipe unit cost and a selling price computed as the recipe cost plus advertising cost
-plus 30 percent markup, with no way to type the price. After saving, the list shows the same price.
+**Covers:** FR-76, FR-79, FR-81, FR-82, FR-84, FR-52
+**Steps:** 1. In Products add the product from the reference data. Watch the preview while you fill the recipe and the markup.
+2. Go to Raw Materials and try to delete Rose.
+**Expected:** Step 1: the preview shows the recipe unit cost and a selling price computed as the recipe cost plus advertising
+cost plus 30 percent markup, with no way to type the price; after saving, the list shows the same price. Step 2: the delete is
+refused with a message that names the product recipe that uses Rose.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-16 Product input rules
@@ -172,10 +175,11 @@ quantity 0.
 
 ### MT-18 Product write-off and adjustment
 **Covers:** FR-95, FR-96, FR-97, FR-98, FR-99, FR-100
-**Steps:** Write off 1 bouquet with a reason. Try to write off 50. Try a write-off of 1.5. Adjust the quantity to the count you
-actually have, then to the same number again.
-**Expected:** The 50 is refused ("Insufficient product stock"); 1.5 is refused ("must be a whole number"); the equal
-adjustment is refused ("Actual stock already matches…"). Valid ones change the quantity and show up in Stock History.
+**Steps:** (The product has 5 bouquets after MT-17.) 1. Write off 1 bouquet with a reason (stock becomes 4). 2. Try to write off
+50. 3. Try a write-off of 1.5. 4. Adjust the quantity to 5, as if a recount found one more. 5. Adjust it to 5 again.
+**Expected:** Steps 1 and 4 succeed and leave the stock at 4 and then 5, and both show up in Stock History. Step 2 is refused
+("Insufficient product stock"); step 3 is refused ("must be a whole number"); step 5 is refused ("Actual stock already
+matches…"). The stock is 5 when you finish.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 5. Sales
@@ -184,7 +188,7 @@ adjustment is refused ("Actual stock already matches…"). Valid ones change the
 **Covers:** FR-101, FR-102, FR-103, FR-105, FR-106, FR-107, FR-108, FR-112
 **Steps:** In Sales add a sale of 2 bouquets, payment CARD, today's date. Note the unit price the form fills in.
 **Expected:** The unit price is filled from the product's selling price. The sale gets a number like `SALE-YYYYMMDD-0001`,
-status Completed, with revenue, cost and gross profit. Product stock falls by 2. Selling a quantity above the stock is
+status Completed, with revenue, cost and gross profit. Product stock falls from 5 to 3. Selling a quantity above the stock is
 refused with "Insufficient product stock" and nothing changes.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
@@ -200,16 +204,16 @@ refused with "Insufficient product stock" and nothing changes.
 **Covers:** FR-114, FR-115, FR-116, FR-118, FR-119, FR-122, FR-123, FR-126
 **Steps:** 1. On the 2-bouquet sale return 1 unit with a reason. 2. Try to return 2 more. 3. Return the last unit.
 **Expected:** After step 1 the sale is Partially returned, a document `RET-YYYYMMDD-0001` exists, the refund is one unit at the
-price actually charged, and product stock is back up by 1. Step 2 is refused ("exceeds the remaining…"). After step 3 the sale
-is Returned and offers no more returns.
+price actually charged, and product stock is back up from 3 to 4. Step 2 is refused ("exceeds the remaining…"). After step 3
+the sale is Returned, product stock is 5, and no more returns are offered.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ### MT-22 Cancel a sale
 **Covers:** FR-124, FR-125, FR-117
 **Steps:** Make a new sale of 1 bouquet. Try to cancel it with a date before the sale date. Cancel it with today's date.
 Then try to cancel a sale that has had a return.
-**Expected:** The early date is refused. The cancellation restores stock and marks the sale Cancelled. A sale with a return
-cannot be cancelled ("Only a completed sale without prior returns…").
+**Expected:** The early date is refused. The new sale takes stock from 5 to 4; the cancellation restores it to 5 and marks the
+sale Cancelled. The sale from MT-21 (it has returns) cannot be cancelled ("Only a completed sale without prior returns…").
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 7. Dashboard

@@ -34,8 +34,8 @@ field to type a price: it is always cost plus markup, and it stays as saved if a
 
 ## Scene 5 — Production (proves FR-88, FR-89, FR-90, FR-92, FR-94)
 Open the production dialog for the bouquet and produce 5. Then try to produce 1000.
-**Show:** the dialog counting the materials needed and the cost before posting; after posting, Rose 25, Ribbon 18, Wrapping
-paper 23 and 5 bouquets in stock. The 1000 attempt is refused and names the short materials, and nothing changes.
+**Show:** the dialog counting the materials needed and the cost before posting; after posting, Rose 25, Ribbon 20, Wrapping
+paper 25 and 5 bouquets in stock. The 1000 attempt is refused and names the short materials, and nothing changes.
 
 ## Scene 6 — A sale (proves FR-101, FR-103, FR-105, FR-107, FR-108, FR-112)
 Make a sale of 2 bouquets by card.
