@@ -73,6 +73,13 @@ jobs:
           node scripts/check-coverage-ratchet.mjs --summary=target/site/jacoco/coverage-summary.json --baseline=quality/coverage-backend-baseline.json --label=backend --require
           node scripts/check-coverage-ratchet.mjs --summary=frontend/coverage/frontend/coverage-summary.json --baseline=quality/coverage-frontend-baseline.json --label=frontend --require
 
+      # No eval dimension may score below its committed baseline (ADR-0007). The summary is derived from the committed
+      # evals/record.json, so this needs no model call; --check fails when it is stale or the baseline is missing.
+      - name: Eval ratchet
+        run: |
+          node scripts/eval-summary.mjs --check
+          node scripts/check-eval-ratchet.mjs
+
       # Dynamic context: the angular-cli MCP server that .mcp.json starts for agents answers list_projects, and the
       # answer goes to the job summary. A broken server fails the build, Dependabot auto-merge included (a human
       # decision, docs/autonomy-log.md), instead of silently leaving agents on stale model memory.

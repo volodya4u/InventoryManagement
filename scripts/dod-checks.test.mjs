@@ -222,3 +222,15 @@ test("coverage verdict needs both sides to pass", async () => {
     /frontend: lines dropped 80% -> 70%/,
   );
 });
+
+test("eval ratchet verdict needs a PASS on at least one case", async () => {
+  // Imported here, not above, so the other tests of this file still run when the export is missing.
+  const { evalRatchetVerdict } = await import("./dod-checks.mjs");
+  assert.equal(typeof evalRatchetVerdict, "function", "dod-checks.mjs exports evalRatchetVerdict");
+  const run = (result, scope = 27, lines = "OK    reviewer 100 (baseline 100)\n") => `Scope: ${scope} eval case(s)\n${lines}Result: ${result}\n`;
+  assert.deepEqual(evalRatchetVerdict(run("PASS")), { ok: true, result: "27 eval cases, none below its baseline" });
+  assert.equal(evalRatchetVerdict(run("SKIP-pending", 0, "")).ok, false, "a skipped ratchet is not a pass");
+  assert.equal(evalRatchetVerdict(run("PASS", 0)).ok, false, "a pass on no case is not evidence");
+  assert.equal(evalRatchetVerdict("").ok, false);
+  assert.match(evalRatchetVerdict(run("FAIL", 27, "FAIL  eval ratchet: reviewer dropped 100 -> 83.3\n")).result, /reviewer dropped 100 -> 83.3/);
+});

@@ -2539,6 +2539,10 @@
     },
     {
       "check": "active-changes",
+      "msg": "active change \"eval-ratchet\" is not archived"
+    },
+    {
+      "check": "active-changes",
       "msg": "active change \"test-first-break-run\" is not archived"
     }
   ]

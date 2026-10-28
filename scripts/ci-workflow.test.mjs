@@ -170,3 +170,15 @@ test("build-and-test ratchets backend and frontend coverage", () => {
   });
   assert.deepEqual(sides, ["backend", "frontend"]);
 });
+
+test("build-and-test ratchets the eval scores after the coverage", () => {
+  const steps = workflowSteps(ciWorkflow());
+  const names = steps.map((s) => s.name);
+  const at = names.indexOf("Eval ratchet");
+  assert.ok(at > names.indexOf("Coverage ratchet"), `an "Eval ratchet" step follows the coverage ratchet (steps: ${names.join(", ")})`);
+  assert.deepEqual(
+    steps[at].run,
+    ["node scripts/eval-summary.mjs --check", "node scripts/check-eval-ratchet.mjs"],
+    "the committed summary is checked against the record, then the scores against the baseline",
+  );
+});

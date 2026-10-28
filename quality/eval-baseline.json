@@ -1,0 +1,12 @@
+{
+  "factory-rules": 100,
+  "reviewer": 100,
+  "skill-agent-log-report": 100,
+  "skill-openspec-apply-change": 100,
+  "skill-openspec-archive-change": 100,
+  "skill-openspec-explore": 100,
+  "skill-openspec-propose": 100,
+  "skill-openspec-sync-specs": 100,
+  "skill-openspec-update-change": 83.4,
+  "skill-test-first-loop": 83.3
+}

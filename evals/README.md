@@ -47,6 +47,15 @@ claude plugin eval --eval-dir evals --judge-model haiku .
 key). Results land in `evals/<...>/results/` (gitignored). Scaffolding scripts and real MCP servers stay off unless
 you pass `--scaffold` / `--allow-real-servers`.
 
+## Ratchet
+
+`node scripts/eval-record.mjs` also writes `evals/results/latest.json`, the record summed up per suite (the reviewer cases,
+the factory-rules cases, one dimension per skill) as the mean case score on a 0-100 scale. CI and `node scripts/dod.mjs`
+run `node scripts/eval-summary.mjs --check` and then `node scripts/check-eval-ratchet.mjs`: no suite may score below
+`quality/eval-baseline.json`. Commit the summary with the record, and raise the floor with
+`node scripts/check-eval-ratchet.mjs --update` after a better record. To lower it on purpose, see
+`docs/adr/0007-ratchet-eval-scores.md`.
+
 ## Should the reviewer use a different model than the author?
 
 The reviewer is `model: inherit`, so it shares the author's blind spots. To decide whether to pin it to a different
