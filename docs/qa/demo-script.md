@@ -15,7 +15,7 @@ added later, each scene below is the script for one clip, and the sentence under
 
 ## Scene 1 — Sign in (proves FR-1, FR-3, FR-20, FR-21, FR-9)
 Open the app. Sign in with a wrong password, then the right one. At the end of the demo, sign out.
-**Show:** the message "Invalid username or password." for the wrong attempt; the dashboard after the right one.
+**Show:** the message "Invalid username or password" for the wrong attempt; the dashboard after the right one.
 
 ## Scene 2 — Raw materials and stock value (proves FR-42, FR-45, FR-46, FR-47, FR-48)
 Add Rose (bunch, 20 at 50.00, reorder level 5), Ribbon (metre, 10 at 8.00) and Wrapping paper (piece, 30 at 3.00).
@@ -42,7 +42,7 @@ sent and nothing changes.
 ## Scene 6 — A sale (proves FR-101, FR-103, FR-104, FR-105, FR-107, FR-108, FR-112)
 Make a sale of 2 bouquets by card.
 **Show:** the unit price filled from the product, the sale number `SALE-YYYYMMDD-0001`, status Completed, the revenue, cost and
-gross profit, and the bouquet stock down to 3. Try to sell 10: the page shows "The requested quantity exceeds the available Product stock." and the Save button is disabled.
+gross profit, and the bouquet stock down to 3. Try to sell 10: the page shows "The requested quantity exceeds the available Product stock." and the Complete Sale button is disabled.
 
 ## Scene 7 — A return and a cancellation (proves FR-114, FR-119, FR-121, FR-122, FR-123, FR-124)
 Return 1 bouquet from that sale, then make a second sale of 1 bouquet and cancel it.
