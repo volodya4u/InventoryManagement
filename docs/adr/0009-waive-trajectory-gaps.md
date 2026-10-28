@@ -15,9 +15,9 @@ requirement id but not a slice, so the two documented gaps were red in `--releas
 
 ## Decision
 
-- **A slice waiver.** A `docs/qa/waivers/*.md` file with `Status: open`, `Gate: Trajectory`, an `Approval:` line and a
-  `Slices:` line (exact archived folder names) waives the `trailer` and `review-evidence` findings of those slices, and only
-  those. A mention of a slice, or a requirement id, waives nothing.
+- **A slice waiver.** A `docs/qa/waivers/*.md` file with `Status: open`, `Gate: Trajectory`, an `Approval:` line, a
+  `Slices:` line (exact archived folder names) and a `Checks:` line (`trailer`, `review-evidence` or both) waives those checks
+  for those slices, and only those. A mention of a slice, or a requirement id, waives nothing, and `process` cannot be waived.
 - **A waived finding is reported, not hidden.** It prints as `WAIVED` with the waiver's path and approval, in the console, in a
   "Waived" section of `docs/qa/trajectory-report.md` and in `trace/trajectory.json`, in both modes.
 - **An unwaived finding fails in every mode,** not only under `--release`. `process` (a missing `design.md` or `tasks.md`) and

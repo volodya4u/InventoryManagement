@@ -239,8 +239,8 @@ function gapRepo(name) {
   return root;
 }
 // A waiver file; a field left out (null) is not written.
-const waiverText = ({ status = "open", gate = "Trajectory", slices = SLICE, approval = "volodya4u, in chat on 2026-10-28" } = {}) =>
-  ["# Waiver: a historical trajectory gap", "", status && `Status: ${status}`, gate && `Gate: ${gate}`, slices && `Slices: ${slices}`, approval && `Approval: ${approval}`, "", "The gap cannot be repaired."]
+const waiverText = ({ status = "open", gate = "Trajectory", slices = SLICE, checks = "trailer, review-evidence", approval = "volodya4u, in chat on 2026-10-28" } = {}) =>
+  ["# Waiver: a historical trajectory gap", "", status && `Status: ${status}`, gate && `Gate: ${gate}`, slices && `Slices: ${slices}`, checks && `Checks: ${checks}`, approval && `Approval: ${approval}`, "", "The gap cannot be repaired."]
     .filter((line) => typeof line === "string")
     .join("\n");
 const waive = (root, text, file = "gap.md") => write(root, `docs/qa/waivers/${file}`, `${text}\n`);
@@ -290,6 +290,7 @@ test("ignores a closed or unapproved slice waiver", () => {
     ["closed", waiverText({ status: "closed" })],
     ["no-status", waiverText({ status: null })],
     ["no-approval", waiverText({ approval: null })],
+    ["no-checks", waiverText({ checks: null })],
     ["other-gate", waiverText({ gate: "Red -> green" })],
   ]) {
     const root = gapRepo(`ignored-${name}`);
@@ -297,4 +298,21 @@ test("ignores a closed or unapproved slice waiver", () => {
     const { status, out } = run(root);
     assert.equal(status, 1, `${name}: ${out}`);
   }
+});
+
+test("covers only the checks a waiver lists", () => {
+  // Both findings exist (no trailer, no review). Waiving the trailer alone leaves the review finding failing, and
+  // `process` is not a check a waiver can list.
+  const root = gapRepo("one-check");
+  waive(root, waiverText({ checks: "trailer" }));
+  const only = run(root);
+  assert.equal(only.status, 1, only.out);
+  assert.match(only.out, /WAIVED \[trailer\]/);
+  assert.match(only.out, /FAIL {2}\[review-evidence\]/);
+  const process = gapRepo("process-not-waivable");
+  rmSync(join(process, "openspec/changes/archive", SLICE, "design.md"));
+  waive(process, waiverText({ checks: "trailer, review-evidence, process" }));
+  const missing = run(process, "--release");
+  assert.equal(missing.status, 1, missing.out);
+  assert.match(missing.out, /FAIL {2}\[process\]/);
 });

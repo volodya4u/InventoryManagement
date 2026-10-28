@@ -21,15 +21,16 @@ run and failures only under `--release`. That has two bad effects:
 ## What Changes
 
 - **`scripts/check-trajectory.mjs`** (gate-locked; `factory-lock.json` is re-sealed in the same commit, ADR-0009):
-  - A **slice waiver** is a `docs/qa/waivers/*.md` file with `Status: open`, `Gate: Trajectory`, an `Approval:` line and a
-    `Slices:` line listing archived slice folders by their exact name. It waives the `trailer` and `review-evidence` findings
-    of the listed slices and nothing else (not `process`, not any requirement). The `Slices:` line is required: a waiver that
-    only mentions a slice, or only a requirement id, waives nothing.
+  - A **slice waiver** is a `docs/qa/waivers/*.md` file with `Status: open`, `Gate: Trajectory`, an `Approval:` line, a
+    `Slices:` line listing archived slice folders by their exact name and a `Checks:` line naming which of `trailer` and
+    `review-evidence` it covers. It waives exactly those checks for exactly those slices and nothing else (not the other
+    check, not `process`, not any requirement). The `Slices:` and `Checks:` lines are required: a waiver that only mentions a
+    slice, or only a requirement id, waives nothing.
   - A waived finding is reported as **WAIVED** with the waiver's path, in the console, in `docs/qa/trajectory-report.md`
     (new "Waived" section) and in `trace/trajectory.json` (`waived`), in both modes. It is never a pass and never silent.
   - An **unwaived** `trailer` or `review-evidence` finding is now a **failure in both modes** (it was a warning without
     `--release`). `process` (missing `design.md` or `tasks.md`) and the scope checks keep their current gating.
-- **`scripts/check-trajectory.test.mjs`** gets five tests; the shared `evidence` helper reads the generated JSON even when
+- **`scripts/check-trajectory.test.mjs`** gets six tests; the shared `evidence` helper reads the generated JSON even when
   the run exits 1.
 - **Two waivers** for the two documented gaps are added in the same pull request, so `main` stays green (PD-5 is only safe
   together with them). Each has a correction under `retro/corrections/` with the owner's disposition.
@@ -44,7 +45,8 @@ run and failures only under `--release`. That has two bad effects:
 | 2 | Given an archived slice whose last APPROVE was on an older tree and no waiver, when the check runs without flags, then it fails on `review-evidence` | `scripts/check-trajectory.test.mjs` › "fails per-slice for an unwaived stale review" |
 | 3 | Given an open `Gate: Trajectory` waiver with an `Approval:` and the slice in `Slices:`, when the check runs per-slice and with `--release`, then both exit 0 and print WAIVED | `scripts/check-trajectory.test.mjs` › "reports a slice waiver as WAIVED in both modes" |
 | 4 | Given a waiver that names only a requirement id, or a slice only in its prose, when the check runs, then the slice's finding still fails | `scripts/check-trajectory.test.mjs` › "does not let a requirement waiver or a mention cover a slice" |
-| 5 | Given a slice waiver whose `Status:` is closed, or that has no `Approval:`, when the check runs, then the slice's finding still fails | `scripts/check-trajectory.test.mjs` › "ignores a closed or unapproved slice waiver" |
+| 5 | Given a slice waiver whose `Status:` is closed or missing, or that has no `Approval:`, no `Checks:` line or another `Gate:`, when the check runs, then the slice's finding still fails | `scripts/check-trajectory.test.mjs` › "ignores a closed or unapproved slice waiver" |
+| 6 | Given a slice with both findings and a waiver whose `Checks:` lists only `trailer`, when the check runs, then `trailer` is WAIVED and `review-evidence` fails; and `process` stays a failure even if a waiver lists it | `scripts/check-trajectory.test.mjs` › "covers only the checks a waiver lists" |
 
 ## Expected metric movement
 

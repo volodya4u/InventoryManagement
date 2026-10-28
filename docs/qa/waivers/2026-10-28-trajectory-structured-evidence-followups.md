@@ -3,7 +3,8 @@
 Status: open
 Gate: Trajectory
 Slices: 2026-10-21-structured-evidence-followups
-Approval: volodya4u, in chat on 2026-10-28 ("Please continue with PD-5 and the waivers"), after reading `docs/qa/historical-gaps.md`
+Checks: review-evidence
+Approval: volodya4u, in chat on 2026-10-28: "Please continue with PD-5 and the waivers"
 
 - **Finding waived:** `review-evidence`. The agent log's review of this slice is not approved: files changed after the
   reviewer's last APPROVE, so its recorded tree differs from the merged one.
@@ -14,7 +15,7 @@ Approval: volodya4u, in chat on 2026-10-28 ("Please continue with PD-5 and the w
   `docs/autonomy-log.md` and generated report, trace and log files.
 - **Why it cannot be repaired:** no reviewer ran on the final tree, and a review run today would be a verdict for a different
   tree, not the missing one. The rule (a review counts only for the tree it saw) is right and is not changed.
-- **Scope:** this one finding on this one slice. It waives no other slice, no other check (`trailer`, `process`) and no
-  requirement. New slices get no such waiver and fail the check if their review does not match the merged tree.
+- **Scope:** the `Checks:` line above, on this one slice: the `review-evidence` check only. It waives no other slice, not
+  `trailer` (the check reads that separately), not `process`, and no requirement. New slices get no such waiver and fail the check if their review does not match the merged tree.
 - **Release:** closes when the owner decides the slice no longer needs the exception. While open it shows as WAIVED in
   `docs/qa/trajectory-report.md`, never as a pass.

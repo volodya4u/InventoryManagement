@@ -59,8 +59,8 @@ None.
 
 Findings that an open slice waiver covers. They are exceptions, not passes: each names the waiver and who approved it.
 
-- **trailer**: 2026-10-12-harden-frontend-specs: no commit carries a "Slice: harden-frontend-specs" trailer — waiver `docs/qa/waivers/2026-10-28-trajectory-harden-frontend-specs.md`, approval: volodya4u, in chat on 2026-10-28 ("Please continue with PD-5 and the waivers"), after reading `docs/qa/historical-gaps.md`
-- **review-evidence**: 2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs) (review must have run clean before archive) — waiver `docs/qa/waivers/2026-10-28-trajectory-structured-evidence-followups.md`, approval: volodya4u, in chat on 2026-10-28 ("Please continue with PD-5 and the waivers"), after reading `docs/qa/historical-gaps.md`
+- **trailer**: 2026-10-12-harden-frontend-specs: no commit carries a "Slice: harden-frontend-specs" trailer — waiver `docs/qa/waivers/2026-10-28-trajectory-harden-frontend-specs.md`, approval: volodya4u, in chat on 2026-10-28: "Please continue with PD-5 and the waivers"
+- **review-evidence**: 2026-10-21-structured-evidence-followups: no review-findings.json, and the agent log's review is not approved (agent log): Files changed after the reviewer's last APPROVE (its recorded tree differs) (review must have run clean before archive) — waiver `docs/qa/waivers/2026-10-28-trajectory-structured-evidence-followups.md`, approval: volodya4u, in chat on 2026-10-28: "Please continue with PD-5 and the waivers"
 
 ## Warnings
 

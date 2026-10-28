@@ -8,13 +8,14 @@ the check, the waiver format and the two waivers ship together.
 ## The waiver format is explicit on purpose
 `check-acceptance-methods.mjs` waives every requirement id a waiver mentions, which is convenient for requirements and wrong
 for slices: a sentence such as "unlike `2026-10-21-structured-evidence-followups`" would waive it. A slice waiver therefore needs
-a `Slices:` line (exact archived folder names, comma separated), a `Gate: Trajectory` line, an `Approval:` line and
-`Status: open`. A waiver with no `Status:` line is not open, as for the Red → green waivers in `pr-evidence.mjs`: an
+a `Slices:` line (exact archived folder names, comma separated), a `Checks:` line (which of `trailer` and `review-evidence`),
+a `Gate: Trajectory` line, an `Approval:` line and `Status: open`. The `Checks:` line was added after review: without it a
+waiver for one finding silently covered the other too, which the waiver files said it did not. A waiver with no `Status:` line is not open, as for the Red → green waivers in `pr-evidence.mjs`: an
 exception must say that it is one. The field reader is a copy of `pr-evidence.mjs`'s `field`, not an import, because both
 scripts run on import.
 
 ## What a waiver covers
-Only the `trailer` and `review-evidence` findings, only for the listed slices. `process` (a missing `design.md` or `tasks.md`)
+Only the `trailer` and `review-evidence` checks named on its `Checks:` line, only for the listed slices. `process` (a missing `design.md` or `tasks.md`)
 is repairable and is not waivable. A waived slice that later gains a clean review or a trailer simply stops producing a
 finding; the waiver then does nothing and can be closed.
 

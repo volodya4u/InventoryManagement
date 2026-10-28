@@ -142,11 +142,13 @@ const REVIEWED = new Set(["clean", "approved (agent log)"]);
 
 // ADAPTATION (2026-10-28, owner-approved, improve-PD-5 and ADR-0009): a `trailer` or `review-evidence` finding of an archived
 // slice is a failure unless an open slice waiver covers it, in every mode. A slice waiver is a docs/qa/waivers/*.md with
-// `Status: open`, `Gate: Trajectory`, an `Approval:` line and a `Slices:` line listing archived slice folders by their exact
-// name; mentioning a slice, or a requirement id, waives nothing. It covers those two checks only, not `process`. A waived
-// finding is reported as WAIVED (console, report, JSON), never as a pass. Same field reader as pr-evidence.mjs's waivers.
+// `Status: open`, `Gate: Trajectory`, an `Approval:` line, a `Slices:` line listing archived slice folders by their exact
+// name and a `Checks:` line naming which of `trailer` and `review-evidence` it covers. Mentioning a slice, or a requirement
+// id, waives nothing, and `process` cannot be waived. A waived finding is reported as WAIVED (console, report, JSON), never
+// as a pass. Same field reader as pr-evidence.mjs's waivers.
 const field = (text, name) => new RegExp(`^[ \\t]*(?:-[ \\t]*)?(?:\\*\\*)?${name}:(?:\\*\\*)?[ \\t]*(.*?)[ \\t]*$`, "im").exec(text)?.[1] ?? "";
-const sliceWaivers = new Map(); // archived slice folder -> { path, approval }
+const WAIVABLE = new Set(["trailer", "review-evidence"]);
+const sliceWaivers = new Map(); // `${slice}|${check}` -> { path, approval }
 const waiverDirAbs = join(root, "docs", "qa", "waivers");
 if (existsSync(waiverDirAbs)) {
   for (const f of readdirSync(waiverDirAbs).sort()) {
@@ -155,14 +157,16 @@ if (existsSync(waiverDirAbs)) {
     const text = (read(path) ?? "").replace(/\r\n?/g, "\n");
     const approval = field(text, "Approval");
     if (field(text, "Status").toLowerCase() !== "open" || !/^trajectory$/i.test(field(text, "Gate")) || !approval) continue;
-    for (const s of field(text, "Slices").replaceAll("`", "").split(/[,;]/).map((x) => x.trim()).filter(Boolean)) {
-      if (!sliceWaivers.has(s)) sliceWaivers.set(s, { path, approval });
+    const list = (name) => field(text, name).replaceAll("`", "").split(/[,;]/).map((x) => x.trim()).filter(Boolean);
+    const checks = list("Checks").filter((c) => WAIVABLE.has(c));
+    for (const s of list("Slices")) {
+      for (const c of checks) if (!sliceWaivers.has(`${s}|${c}`)) sliceWaivers.set(`${s}|${c}`, { path, approval });
     }
   }
 }
 const waived = [];
 function sliceFinding(check, slice, msg) {
-  const w = sliceWaivers.get(slice);
+  const w = sliceWaivers.get(`${slice}|${check}`);
   if (w) waived.push({ check, slice, msg, waiver: w.path, approval: w.approval });
   else fail(check, msg);
 }
