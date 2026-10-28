@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T13:09:18.820Z",
+  "generatedAt": "2026-10-28T10:27:43.297Z",
   "model": "claude-sonnet-5-5",
   "judgeModel": "haiku",
   "cli": "2.1.310",
@@ -41,9 +41,13 @@
     ".agents/skills/openspec-update-change/evals/plan-only/prompt.md": "7a87188a451ab0acf15b9158344a4ef5c2d7fcb2",
     ".agents/skills/openspec-update-change/evals/revised-scope/graders/criteria.md": "bc8e9e6dbc0aa5eb4feada5ee2e3d1a9c1673e4b",
     ".agents/skills/openspec-update-change/evals/revised-scope/prompt.md": "8215562cfdeded3c218fdac189985f07faca4c31",
-    ".agents/skills/test-first-loop/SKILL.md": "a5523950d210221b5874bda40385fa3f9c1045f8",
+    ".agents/skills/test-first-loop/SKILL.md": "0f6d8b36e218304dce5a6bdfb4d27f9028ccb080",
+    ".agents/skills/test-first-loop/evals/break-never-touches-tests/graders/criteria.md": "8cc6ac1fe696ccf5f1163c723ccdd0eef31b283e",
+    ".agents/skills/test-first-loop/evals/break-never-touches-tests/prompt.md": "c2ba794a7e1b5b8f00afd9633719479c9d65bc25",
     ".agents/skills/test-first-loop/evals/bugfix-starts-red/graders/criteria.md": "04a2ef3b3a50ee9b2de7ee4498a7e56d1cea50aa",
     ".agents/skills/test-first-loop/evals/bugfix-starts-red/prompt.md": "973da156adb21f142e6e4bc3d835250887fe5815",
+    ".agents/skills/test-first-loop/evals/hardening-uses-break-run/graders/criteria.md": "be646549ee14d6d616b8018f469323c91cdf3292",
+    ".agents/skills/test-first-loop/evals/hardening-uses-break-run/prompt.md": "407170a58729bbb3012d66917839f6686b67e587",
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
     ".agents/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
     ".claude/agents/reviewer.md": "4773aaf2c57b8ebcf4640da633372461a3fe99e0",
@@ -89,9 +93,13 @@
     ".claude/skills/openspec-update-change/evals/plan-only/prompt.md": "7a87188a451ab0acf15b9158344a4ef5c2d7fcb2",
     ".claude/skills/openspec-update-change/evals/revised-scope/graders/criteria.md": "bc8e9e6dbc0aa5eb4feada5ee2e3d1a9c1673e4b",
     ".claude/skills/openspec-update-change/evals/revised-scope/prompt.md": "8215562cfdeded3c218fdac189985f07faca4c31",
-    ".claude/skills/test-first-loop/SKILL.md": "a5523950d210221b5874bda40385fa3f9c1045f8",
+    ".claude/skills/test-first-loop/SKILL.md": "0f6d8b36e218304dce5a6bdfb4d27f9028ccb080",
+    ".claude/skills/test-first-loop/evals/break-never-touches-tests/graders/criteria.md": "8cc6ac1fe696ccf5f1163c723ccdd0eef31b283e",
+    ".claude/skills/test-first-loop/evals/break-never-touches-tests/prompt.md": "c2ba794a7e1b5b8f00afd9633719479c9d65bc25",
     ".claude/skills/test-first-loop/evals/bugfix-starts-red/graders/criteria.md": "04a2ef3b3a50ee9b2de7ee4498a7e56d1cea50aa",
     ".claude/skills/test-first-loop/evals/bugfix-starts-red/prompt.md": "973da156adb21f142e6e4bc3d835250887fe5815",
+    ".claude/skills/test-first-loop/evals/hardening-uses-break-run/graders/criteria.md": "be646549ee14d6d616b8018f469323c91cdf3292",
+    ".claude/skills/test-first-loop/evals/hardening-uses-break-run/prompt.md": "407170a58729bbb3012d66917839f6686b67e587",
     ".claude/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
     ".claude/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
     "AGENTS.md": "6e6deba006b219213c18a09e8a3e7d2600a57c44",
@@ -172,8 +180,8 @@
     },
     "modified-merge": {
       "score": 1,
-      "scoreWithout": 1,
-      "delta": 0
+      "scoreWithout": 0.6666666666666666,
+      "delta": 0.33333333333333337
     },
     "plan-only": {
       "score": 1,
@@ -181,11 +189,21 @@
       "delta": 0
     },
     "revised-scope": {
-      "score": 1,
+      "score": 0.6666666666666666,
       "scoreWithout": 1,
-      "delta": 0
+      "delta": -0.33333333333333337
+    },
+    "break-never-touches-tests": {
+      "score": 1,
+      "scoreWithout": 0,
+      "delta": 1
     },
     "bugfix-starts-red": {
+      "score": 0.3333333333333333,
+      "scoreWithout": 0,
+      "delta": 0.3333333333333333
+    },
+    "hardening-uses-break-run": {
       "score": 1,
       "scoreWithout": 0,
       "delta": 1
