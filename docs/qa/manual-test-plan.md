@@ -185,7 +185,7 @@ matches…"). The stock is 5 when you finish.
 ## 5. Sales
 
 ### MT-19 Make a sale
-**Covers:** FR-101, FR-102, FR-103, FR-105, FR-106, FR-107, FR-108, FR-112
+**Covers:** FR-101, FR-102, FR-103, FR-104, FR-105, FR-106, FR-107, FR-108, FR-112
 **Steps:** In Sales add a sale of 2 bouquets, payment CARD, today's date. Note the unit price the form fills in.
 **Expected:** The unit price is filled from the product's selling price. The sale gets a number like `SALE-YYYYMMDD-0001`,
 status Completed, with revenue, cost and gross profit. Product stock falls from 5 to 3. Selling a quantity above the stock is
@@ -213,7 +213,7 @@ the sale is Returned, product stock is 5, and no more returns are offered.
 **Steps:** Make a new sale of 1 bouquet. Try to cancel it with a date before the sale date. Cancel it with today's date.
 Then try to cancel a sale that has had a return.
 **Expected:** The early date is refused. The new sale takes stock from 5 to 4; the cancellation restores it to 5 and marks the
-sale Cancelled. The sale from MT-21 (it has returns) cannot be cancelled ("Only a completed sale without prior returns…").
+sale Cancelled. The sale from MT-21 (it has returns) cannot be cancelled ("Only a completed sale without previous returns can be cancelled").
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
 ## 7. Dashboard

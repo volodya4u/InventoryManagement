@@ -37,7 +37,7 @@ Open the production dialog for the bouquet and produce 5. Then try to produce 10
 **Show:** the dialog counting the materials needed and the cost before posting; after posting, Rose 25, Ribbon 20, Wrapping
 paper 25 and 5 bouquets in stock. The 1000 attempt is refused and names the short materials, and nothing changes.
 
-## Scene 6 — A sale (proves FR-101, FR-103, FR-105, FR-107, FR-108, FR-112)
+## Scene 6 — A sale (proves FR-101, FR-103, FR-104, FR-105, FR-107, FR-108, FR-112)
 Make a sale of 2 bouquets by card.
 **Show:** the unit price filled from the product, the sale number `SALE-YYYYMMDD-0001`, status Completed, the revenue, cost and
 gross profit, and the bouquet stock down to 3. Try to sell 10 and show the refusal.
