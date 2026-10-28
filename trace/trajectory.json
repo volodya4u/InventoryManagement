@@ -212,6 +212,13 @@
       "processComplete": true
     },
     {
+      "slice": "2026-10-28-improve-PD-1",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 4,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
       "slice": "2026-10-28-process-ratchet",
       "reviewEvidence": "approved (agent log)",
       "trailerCommits": 1,
