@@ -175,8 +175,9 @@ Three gaps that the review of #92 left open are now closed:
 - **The slice that built it showed one criterion red by hand, as slice 2 did.** The guard that break runs only count for
   hardening slices held before the change, so it was shown red with a controlled break of `pr-evidence.mjs`, then
   restored to its blob id. From now on such breaks go through `break-run.mjs`.
-- **Not yet:** the `test-first-loop` skill still describes only red → green. Changing it needs a paid eval run, so
-  CLAUDE.md carries the how-to for now.
+- **Closed 2026-10-27 (`test-first-break-run`):** the `test-first-loop` skill now carries the controlled-break recipe
+  (`Kind: hardening`, `break-run.mjs start | break | restore`, the replay), with two eval cases; the scores are in
+  `evals/record.json`. CLAUDE.md keeps its copy of the how-to.
 
 ## Decision (slice 6: structured-decisions)
 

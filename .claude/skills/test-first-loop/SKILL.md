@@ -1,11 +1,11 @@
 ---
 name: test-first-loop
-description: Deliver a behaviour change or a bug fix through a closed loop instead of step-by-step prompting - a failing test first, the smallest change that turns it green, the full Definition of done, an independent review, then an evidence report. Use when asked to fix a bug, add or change behaviour, or implement a spec from docs/specs/.
+description: Deliver a behaviour change or a bug fix through a closed loop instead of step-by-step prompting - a failing test first, the smallest change that turns it green, the full Definition of done, an independent review, then an evidence report. Use when asked to fix a bug, add or change behaviour, pin existing behaviour with new tests, or implement a spec from docs/specs/.
 license: MIT
 compatibility: Requires Node.js 20+, Java 21 and Maven. Uses scripts/dod.mjs and, in Claude Code, the reviewer subagent (.claude/agents/reviewer.md).
 metadata:
   author: fwdays-agentic-engineering-crash-course
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Test-first loop
@@ -33,6 +33,17 @@ Run the whole loop yourself; come back to the human only at the exits named belo
    - Frontend: `node scripts/test-run.mjs frontend <path/to/file.spec.ts>`
    - Harness scripts: `node scripts/test-run.mjs harness scripts/<name>.test.mjs`
    - Changing behaviour that has no test yet: first pin today's behaviour with a passing test, then write the failing one.
+   - **A test that only pins behaviour that already exists** (a hardening slice) is green from the start, so it cannot go
+     red first. Never show it red with an unrecorded hand edit. Put a `Kind: hardening` line in the slice's
+     `proposal.md`, then run the controlled break for each test, each step on its own:
+     1. `node scripts/break-run.mjs start <target> <selector>` (the target and selector of `test-run.mjs`); it must be
+        green, and it prints the run id;
+     2. break the code under test by hand. Never a test or its fixtures: `break-run.mjs` refuses any test path;
+     3. `node scripts/break-run.mjs break <run-id>`; it must be red on an assertion, not on a compile error;
+     4. `node scripts/break-run.mjs restore <run-id>`; it must be green on the start's code.
+
+     Commit `docs/evidence/break-runs/<run-id>/` with the work; a reviewer replays it with
+     `node scripts/break-replay.mjs <run-id>`. A slice without the `Kind: hardening` line gets red → green only.
 3. **Green.** Make the smallest change that passes the test, then re-run the same `test-run.mjs` command. Repeat.
 4. **Done.** First run the Factory gates of `.github/workflows/factory-gates.yml` that `AGENTS.md` lists (each on its
    own; `dod.mjs` already runs `check-traceability.mjs` and `check-trajectory.mjs` as the generators of the two
@@ -59,7 +70,7 @@ Run the whole loop yourself; come back to the human only at the exits named belo
 
 - The same failure survives three attempts in a row. Report what you tried and the failure.
 - Getting green would mean deleting, skipping or weakening a test, or changing an expected value to match the code.
-  Never do it on your own.
+  Never do it on your own. A controlled break edits the code under test, never a test or its fixtures.
 - The change needs something on the "Ask before" list in `AGENTS.md`, such as a dependency or a config file.
 - The reviewer and you disagree on a blocking finding.
 
