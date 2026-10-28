@@ -1,6 +1,6 @@
 {
-  "createdAt": "2026-10-28T14:34:44.245Z",
-  "gitHead": "712c8df628c02b06d2038e468dfac6b81a706fe4",
+  "createdAt": "2026-10-28T21:29:39.046Z",
+  "gitHead": "f91682a3cf21f96fd2990338f20cafd63f26c4ff",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
@@ -33,8 +33,8 @@
     "scripts/check-specs.test.mjs": "324a3a04274a57902965059335718144c532cff7d675d18bc19249694a978f09",
     "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
     "scripts/check-traceability.mjs": "5c5203555db344c2410bca4cab07e11fc662785ed2abf19500f228cab3315775",
-    "scripts/check-trajectory.mjs": "5a647bfe34807334468904015944f541c03fdefbab622d916e65b8c4cac3dfa0",
-    "scripts/check-trajectory.test.mjs": "232a51941bb3b325c6922786204c1ac278b86f9f4a13e86d514882da20eea339",
+    "scripts/check-trajectory.mjs": "53f7cf5fd4f3c77b39a40095d043d851f01e52ec3262f6f3c993f894bb7682fa",
+    "scripts/check-trajectory.test.mjs": "19bdb7ecc6a3052accede1bae714acfcc1b882beff62af837d72f7030da17a9e",
     "scripts/gate-status.mjs": "fb28d568605555c2181384089fc600c7f08a1ca588f3ef5a6ec7c8ea45cb22c2"
   },
   "adaptations": [
@@ -57,6 +57,7 @@
     "trajectory-cache-tests (owner-approved 2026-10-22): scripts/check-trajectory.test.mjs pins the error and cache paths of the agent-log review evidence (a git error and a failing tree fingerprint read missing and are not cached, a cache under other rules is discarded, a warm run reads the cache); scripts/check-trajectory.mjs is unchanged",
     "coverage-ratchet (owner-approved 2026-10-27, ADR-0006): scripts/check-coverage-ratchet.mjs gains --summary/--baseline/--label/--require (defaults unchanged; waiver check name coverage-ratchet:<label>), scripts/gate-status.mjs folds coverageBackend and coverageFrontend into G5, and scripts/check-coverage-ratchet.test.mjs joins the lock because its name matches scripts/check-*.mjs; the baselines quality/coverage-backend-baseline.json and quality/coverage-frontend-baseline.json join the quality tier",
     "eval-ratchet (owner-approved 2026-10-28, ADR-0007): .github/workflows/ci.yml gains an Eval ratchet step and quality/eval-baseline.json is committed; check-eval-ratchet.mjs itself is unchanged and the baseline joins the lock in this re-seal",
-    "process-ratchet (owner-approved 2026-10-28, ADR-0008): scripts/check-process-ratchet.mjs counts frontend/src and *Test.java/*Tests.java for its product-code and @trace scans, scripts/check-process-ratchet.test.mjs joins the lock, and quality/process-baseline.json is earned from a local run"
+    "process-ratchet (owner-approved 2026-10-28, ADR-0008): scripts/check-process-ratchet.mjs counts frontend/src and *Test.java/*Tests.java for its product-code and @trace scans, scripts/check-process-ratchet.test.mjs joins the lock, and quality/process-baseline.json is earned from a local run",
+    "improve-PD-5 (owner-approved 2026-10-28, ADR-0009): scripts/check-trajectory.mjs fails an unwaived trailer or review-evidence finding of an archived slice in every mode and honours open slice waivers (Gate: Trajectory, a Slices: line, an Approval: line) as WAIVED, and scripts/check-trajectory.test.mjs covers it"
   ]
 }
