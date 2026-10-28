@@ -7,5 +7,5 @@
   reporter in `frontend/`; create both baselines with `--update` after a green run.
 - [x] 4. Ratchet both sides in `gate-status.mjs` (G5), CI's `build-and-test` job and `scripts/dod.mjs`; re-seal the
   factory lock.
-- [ ] 5. Add the autonomy-log row, run the Factory checks and `node scripts/dod.mjs`, obtain a fresh read-only review and a
+- [x] 5. Add the autonomy-log row, run the Factory checks and `node scripts/dod.mjs`, obtain a fresh read-only review and a
   security review, commit the evidence, verify `pr-evidence`, and open a pull request.
