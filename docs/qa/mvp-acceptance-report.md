@@ -62,6 +62,7 @@ tests were written before it.
 | NFR-19 | Usability (confirmations, error display, form validation) | Automated front-end tests | Has tests (result: `node scripts/dod.mjs`) |
 | NFR-20 | Accessibility | MT-28 (manual) | **Waived** (`…-NFR-20.md`): no accessibility tool, OQ-15 |
 | NFR-21, NFR-22 | Language and currency display | Automated tests tagged with these ids | Has tagged tests (result: `node scripts/dod.mjs`); open decision OQ-14 |
+| NFR-23 | The server listens on this machine only | `LoopbackBindingHttpTest`; MT-29 (manual) | Has tagged tests (result: `node scripts/dod.mjs`); open decisions OQ-6, OQ-13 |
 
 A waiver is a visible exception that the owner approved. It is not a pass: running the manual cases does not close it. A
 waiver is closed only when its evidence exists (the file says what closes each).
