@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.UUID;
 import org.junit.jupiter.api.Assumptions;
@@ -60,7 +62,12 @@ class LoopbackBindingHttpTest {
                         socket.connect(new InetSocketAddress(other, port), 2000);
                     }
                 })
-                .isInstanceOf(IOException.class);
+                // No connection is made. Linux answers with a refusal; Windows drops the packet to an address nothing listens
+                // on, so the attempt times out. Either way the server did not accept it; any other failure (no route, bad
+                // address) says nothing about the bind and fails the test. The first test pins `server.address` itself.
+                .satisfiesAnyOf(
+                        thrown -> assertThat(thrown).isInstanceOf(ConnectException.class),
+                        thrown -> assertThat(thrown).isInstanceOf(SocketTimeoutException.class));
     }
 
     private static InetAddress firstNonLoopbackIpv4() throws Exception {

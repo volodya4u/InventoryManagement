@@ -26,7 +26,7 @@ as its own pull request.
 | # | Given / When / Then | Test |
 | - | ------------------- | ---- |
 | 1 | Given the application started with the default `local` profile, when a client connects to `127.0.0.1` on the server port, then the connection is accepted, and `server.address` is `127.0.0.1` | `LoopbackBindingHttpTest` › `listensOnTheLoopbackAddressInTheLocalProfile` |
-| 2 | Given the same server, when a client connects to this machine's own non-loopback IPv4 address on the server port, then the connection is refused | `LoopbackBindingHttpTest` › `refusesConnectionsOnTheMachinesOtherAddresses` |
+| 2 | Given the same server, when a client connects to this machine's own non-loopback IPv4 address on the server port, then no connection is made (refused, or dropped so that the attempt times out) | `LoopbackBindingHttpTest` › `refusesConnectionsOnTheMachinesOtherAddresses` |
 
 ## Impact
 

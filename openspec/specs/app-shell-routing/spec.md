@@ -122,7 +122,7 @@ Bootstrap 5, Vitest and pnpm (TC-3), and tests on in-memory SQLite run by `mvn -
 
 #### Scenario: Only this machine can connect
 - **WHEN** the JAR runs with profile `local` and a client on another machine, or this machine's other network address, tries to connect to port 8081
-- **THEN** the connection is refused, while `127.0.0.1` answers (NFR-23)
+- **THEN** no connection is made (refused, or dropped so that the attempt times out), while `127.0.0.1` answers (NFR-23)
 
 ### Requirement: Scope exclusions and business constraints
 

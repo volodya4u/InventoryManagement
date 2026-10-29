@@ -236,3 +236,9 @@ Total: **149 MVP FRs across 16 retrofit baseline slices** (no gaps, no duplicate
 ## 7. Sequencing
 
 Per slice: plan, spec if needed, then the repo's `test-first-loop`. These are characterization tests of shipped behavior, so they can pass on first run. To earn red-first evidence, show each new assertion failing against a deliberately broken input (then reverted) via `node scripts/test-run.mjs`, or let the gate mark the slice as retrofit-characterization rather than earned. After each slice: `node scripts/dod.mjs`, then the `reviewer`, then commit. Future-Phase work is not in this plan.
+
+## 8. Changes after this plan
+
+| Change | What |
+|---|---|
+| `bind-loopback` (2026-10-30) | NFR-23: in profile `local` the server listens on 127.0.0.1 only (risk R-09). New work after the baseline, with its own spec change and test; it belongs to no retrofit slice. |

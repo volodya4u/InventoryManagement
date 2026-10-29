@@ -22,7 +22,9 @@ profile (in-memory database, so no file is touched), on a random port. The boots
 a UUID made at run time, not a value written in the repository.
 - Criterion 1 checks the property and a real connection to `127.0.0.1`.
 - Criterion 2 connects to this machine's first non-loopback, non-link-local IPv4 address. On a server bound to every interface
-  that connects; on a loopback-only server it is refused. A machine with no such address (rare) skips the check with a stated
+  that connects; on a loopback-only server it does not: Linux refuses the connection, and Windows drops the packet so the attempt
+  times out (seen on the owner's machine; the same test saw the connection succeed before the change). The test accepts those two
+  outcomes and no other failure. A machine with no such address (rare) skips the check with a stated
   reason; a CI runner has one. Red-first on the old configuration: criterion 1 fails on the missing property, criterion 2 on
   "expecting code to raise a throwable", because the connection succeeded.
 
