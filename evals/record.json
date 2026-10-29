@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T10:27:43.297Z",
+  "generatedAt": "2026-10-29T23:01:08.791Z",
   "model": "claude-sonnet-5-5",
   "judgeModel": "haiku",
   "cli": "2.1.310",
@@ -102,7 +102,7 @@
     ".claude/skills/test-first-loop/evals/hardening-uses-break-run/prompt.md": "407170a58729bbb3012d66917839f6686b67e587",
     ".claude/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
     ".claude/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
-    "AGENTS.md": "6e6deba006b219213c18a09e8a3e7d2600a57c44",
+    "AGENTS.md": "b5d4a7a6420b1b11d35d836209884c4674b3fd41",
     "evals/factory-rules/spec-track/graders/criteria.md": "044400b7c6c08efb2cd1d4ee1c32ef2543c14121",
     "evals/factory-rules/spec-track/prompt.md": "9682a073b3fa1a98ebedf8b05c8e2a12f74e9b5e",
     "evals/factory-rules/trace-tag/graders/criteria.md": "086399eb04972f643fa34462749fc64392c9bf6a",
@@ -150,8 +150,8 @@
     },
     "unsynced-spec": {
       "score": 1,
-      "scoreWithout": 1,
-      "delta": 0
+      "scoreWithout": 0.6666666666666666,
+      "delta": 0.33333333333333337
     },
     "capture-decision": {
       "score": 1,
@@ -189,9 +189,9 @@
       "delta": 0
     },
     "revised-scope": {
-      "score": 0.6666666666666666,
-      "scoreWithout": 1,
-      "delta": -0.33333333333333337
+      "score": 1,
+      "scoreWithout": 0.6666666666666666,
+      "delta": 0.33333333333333337
     },
     "break-never-touches-tests": {
       "score": 1,
@@ -199,9 +199,9 @@
       "delta": 1
     },
     "bugfix-starts-red": {
-      "score": 0.3333333333333333,
+      "score": 0.6666666666666666,
       "scoreWithout": 0,
-      "delta": 0.3333333333333333
+      "delta": 0.6666666666666666
     },
     "hardening-uses-break-run": {
       "score": 1,
