@@ -79,6 +79,34 @@
   --bs-btn-color: #7a5900;
 }
 
+// A wide table scrolls sideways inside its frame. Without a cue a clipped column looks cut off, so a shadow shows on each
+// edge that has more to scroll to: the white strips scroll with the content and cover the shadows at the ends
+// (background-attachment: local), the shadows stay at the edges. The cells are transparent so the frame's background shows.
+.table-responsive {
+  background-color: var(--bs-body-bg);
+  background-image:
+    linear-gradient(to right, var(--bs-body-bg), var(--bs-body-bg)),
+    linear-gradient(to left, var(--bs-body-bg), var(--bs-body-bg)),
+    linear-gradient(to right, rgba(31, 54, 44, 0.22), rgba(31, 54, 44, 0)),
+    linear-gradient(to left, rgba(31, 54, 44, 0.22), rgba(31, 54, 44, 0));
+  background-position:
+    left center,
+    right center,
+    left center,
+    right center;
+  background-repeat: no-repeat;
+  background-size:
+    24px 100%,
+    24px 100%,
+    12px 100%,
+    12px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.table-responsive > .table {
+  --bs-table-bg: transparent;
+}
+
 html,
 body {
   min-height: 100%;

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { Api } from './support/api';
 import { signInAsAdmin } from './support/auth';
 
 const pages: [string, string][] = [
@@ -36,3 +37,29 @@ for (const [name, viewport] of [
     });
   });
 }
+
+// A table too wide for a phone scrolls inside its frame; the frame shows a shadow on each edge with more to scroll to, so
+// the clipped column does not look cut off (the shadows come from the frame's local and fixed backgrounds).
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  // @trace NFR-18
+  test('a table wider than its frame scrolls inside it and shows a shadow where more is hidden', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Cue Rose', quantity: 10, initialUnitCost: 5 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    await expect(page.getByRole('heading', { name: 'Raw Materials', level: 1 })).toBeVisible();
+    const frame = page.locator('.table-responsive').first();
+    const { wider, attachment } = await frame.evaluate((el) => ({
+      wider: el.scrollWidth > el.clientWidth,
+      attachment: getComputedStyle(el).backgroundAttachment,
+    }));
+    expect(wider, 'the table is wider than its frame at 375px').toBe(true);
+    expect(attachment).toBe('local, local, scroll, scroll');
+    // The first column starts at the left edge, so the right edge is where the shadow shows: scrolling to the end moves it.
+    await frame.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+    expect(await frame.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  });
+});
