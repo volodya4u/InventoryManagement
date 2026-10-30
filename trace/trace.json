@@ -2521,10 +2521,5 @@
     }
   ],
   "failures": [],
-  "warnings": [
-    {
-      "check": "active-changes",
-      "msg": "active change \"resolve-retro-pd4-pd6-pd7-pd8\" is not archived"
-    }
-  ]
+  "warnings": []
 }
