@@ -2541,6 +2541,10 @@
     {
       "check": "active-changes",
       "msg": "active change \"bind-loopback\" is not archived"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"playwright-foundation\" is not archived"
     }
   ]
 }

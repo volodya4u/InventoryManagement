@@ -1,6 +1,10 @@
 target/
 frontend/node_modules/
 frontend/dist/
+node_modules/
+# Playwright output (the browser tests, e2e/)
+/test-results/
+/playwright-report/
 /files/
 *.db
 *.db-shm

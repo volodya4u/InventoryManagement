@@ -46,15 +46,18 @@ The names below come from the Project Factory plugin's catalogue; ADR-0001 itsel
 JavaScript-app scripts, "parity, automations, `qa-verify`".
 
 - Scripts that need Playwright or a JavaScript app: `qa-verify`, `record-demos`, `check-recordings`, `check-a11y`,
-  `check-visual-fidelity`, `check-parity-suite`, `parity-block-loop`. A browser automation tool is a new dependency
-  and needs approval; until then the recording column of the traceability report stays empty.
+  `check-visual-fidelity`, `check-parity-suite`, `parity-block-loop`. The owner approved Playwright on 2026-10-30
+  and it is installed (see the last bullet); these scripts are still not, and the recording column of the traceability
+  report stays empty until the recordings are made in the next pull request.
 - `automations/` (drift-watch, dep-audit, ci-triage in the plugin): opt-in and off by default; the folder does not exist
   here.
 - The factory's agents and workflows: the plugin provides them, and the repository uses its own `reviewer` agent.
 - A lessons block in `AGENTS.md` (`BEGIN-FACTORY-LESSONS` in the plugin): ADR-0001 says any such block needs the
   owner's approval; it also changes `AGENTS.md`, so the evals must be re-run.
 - Adapters for Cursor, Copilot and Codex: none are committed.
-- A root `package.json`: none; the Node scripts run with plain `node`.
+- A root `package.json` exists only for the browser tests (`@playwright/test`, `playwright.config.ts`, `e2e/`; the CI
+  `e2e` job runs them). The gate scripts and the harness under `scripts/` still run with plain `node`, and `dod.mjs`
+  does not run the browser tests.
 
 ## Validation commands
 
