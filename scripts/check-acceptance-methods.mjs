@@ -376,6 +376,18 @@ const pkgScripts = pkg.scripts ?? {};
 const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
 const playwrightInstalled = Object.keys(allDeps).some((k) => k === "playwright" || k === "playwright-chromium" || k.startsWith("@playwright/"));
 
+// PD-4: strict release recordings are an acceptance demand even when no row
+// declares the recording verification class. Check their producing mechanism
+// at G3, so a missing producer or checker is not first discovered at G7.
+if (mode === "existence" && /["']--strict-recordings["']/.test(read("scripts/gate-status.mjs") ?? "")) {
+  const missing = ["scripts/record-demos.mjs", "scripts/check-recordings.mjs"].filter((rel) => {
+    const body = read(rel);
+    return body === null || !body.trim() || /not yet configured/i.test(body);
+  });
+  if (!playwrightInstalled) missing.push("@playwright/test in package.json devDependencies");
+  if (missing.length) fail("release-recordings", `G7 requires --strict-recordings, but G3 has no complete recording mechanism: ${missing.join(", ")}`);
+}
+
 function resolveMechanism(spec) {
   let stub = null;
   for (const name of spec.npmScripts ?? []) {

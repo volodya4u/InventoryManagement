@@ -76,7 +76,7 @@
     },
     "disposition": {
       "type": ["object", "null"],
-      "description": "ALWAYS null at intake. Set exactly once when the correction is root-caused: this is the only permitted mutation of a correction artifact.",
+      "description": "ALWAYS null at intake. Set exactly once when the correction is root-caused. A historical disposition may later receive a verified approvalRef without changing its decision.",
       "required": ["status", "by", "ts"],
       "properties": {
         "status": {
@@ -86,7 +86,8 @@
         },
         "by": { "type": "string", "description": "Who dispositioned (human name/handle — never an agent)." },
         "ts": { "type": "string", "description": "ISO-8601 disposition timestamp." },
-        "note": { "type": "string", "description": "Root cause / PD-x link / waiver rationale." }
+        "note": { "type": "string", "description": "Root cause / PD-x link / waiver rationale." },
+        "approvalRef": { "type": "string", "description": "Hardware-signed approve/<commit> tag whose annotation names this correction and decision." }
       }
     }
   }

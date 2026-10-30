@@ -25,8 +25,11 @@
 // scan itself is the evidence, and the output says explicitly what was
 // scanned and found.
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { isDeepStrictEqual } from "node:util";
+import { signedApproval } from "./signed-approval.mjs";
 
 export const FAILURE_MODES = ["vacuous-pass", "missing-check", "skipped-convention", "check-too-weak", "wrong-claim"];
 export const GATE_IDS = ["G0", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8"];
@@ -56,6 +59,7 @@ export const EMBEDDED_SCHEMA = {
         by: { type: "string" },
         ts: { type: "string" },
         note: { type: "string" },
+        approvalRef: { type: "string" },
       },
     },
   },
@@ -339,10 +343,59 @@ function runDetect(root, schema) {
   process.exit(failures.length ? 1 : 0);
 }
 
+// PD-8: this commit is the immutable pre-change set of seven dispositions.
+// A file added afterward cannot claim the legacy warning by backdating ts.
+const APPROVAL_BASELINE = "3c91a1173bc0d992310986605667688f7929160b";
+export function legacyDisposition(root, correction, baseline = APPROVAL_BASELINE) {
+  const r = spawnSync("git", ["-C", root, "show", `${baseline}:${correction.file}`], { encoding: "utf8" });
+  if (r.status !== 0) return false;
+  try {
+    const old = JSON.parse(r.stdout);
+    return old.id === correction.data.id && old.ts === correction.data.ts && old.autoKey === correction.data.autoKey &&
+      isDeepStrictEqual(old.disposition, correction.data.disposition);
+  } catch {
+    return false;
+  }
+}
+export function approvalProblem(root, correction, { base = "origin/main", keyTypes } = {}) {
+  const { id, disposition } = correction.data;
+  const ref = disposition.approvalRef;
+  if (typeof ref !== "string" || !/^approve\/[0-9a-f]{40}$/.test(ref))
+    return "approvalRef must name a hardware-signed approve/<40-hex-commit> tag";
+  let verified;
+  try {
+    verified = signedApproval(root, { base, head: ref.slice("approve/".length), ...(keyTypes ? { keyTypes } : {}) });
+  } catch {
+    return `approvalRef ${ref} does not resolve to a commit`;
+  }
+  if (verified.state !== "valid") return `approvalRef ${ref} is not a verified owner signature (${verified.reason ?? verified.state})`;
+  // Older by fields append an explanatory parenthesis after the owner handle.
+  // The signed principal proves the handle; the trailing prose proves nothing.
+  const owner = disposition.by.match(/^[A-Za-z0-9_.@-]+/)?.[0];
+  if (verified.signer !== owner) return `approvalRef ${ref} was signed by ${verified.signer}, not ${owner ?? disposition.by}`;
+  const tag = spawnSync("git", ["-C", root, "cat-file", "-p", `refs/tags/${ref}`], { encoding: "utf8" });
+  const annotation = tag.status === 0 ? tag.stdout.split(/\r?\n\r?\n/).slice(1).join("\n") : "";
+  if (!annotation.split(/\r?\n/).some((line) => line.trim() === `Correction: ${id}`) ||
+      !annotation.split(/\r?\n/).some((line) => line.trim() === `Decision: ${disposition.status}`))
+    return `approvalRef ${ref} must sign Correction: ${id} and Decision: ${disposition.status}`;
+  return null;
+}
+
+// The baseline is a parameter so a test can use a fixture repository: the real
+// baseline commit is absent from a shallow CI checkout.
+export function approvalVerdict(root, correction, baseline = APPROVAL_BASELINE) {
+  const problem = approvalProblem(root, correction);
+  if (!problem) return null;
+  const { id } = correction.data;
+  if (legacyDisposition(root, correction, baseline)) return { warning: `LEGACY-APPROVAL ${id} (${correction.file}): ${problem}; owner backfill pending` };
+  return { failure: `UNVERIFIED-APPROVAL ${id} (${correction.file}): ${problem}` };
+}
+
 function runCheck(root, schema) {
   const events = detectAutoCorrections(root);
   const corrections = readCorrections(root);
   const failures = [];
+  const warnings = [];
   const recorded = new Set(corrections.map((c) => c.data?.autoKey).filter(Boolean));
   for (const ev of events) {
     if (!recorded.has(ev.autoKey)) {
@@ -359,6 +412,10 @@ function runCheck(root, schema) {
     else if (c.data.disposition === null) {
       const short = c.data.utterance.length > 70 ? `${c.data.utterance.slice(0, 67)}...` : c.data.utterance;
       failures.push(`OPEN-CORRECTION ${c.data.id}: "${short}" (${c.file}) — undispositioned; no gate may pass over it`);
+    } else if (["resolved", "waived"].includes(c.data.disposition.status)) {
+      const verdict = approvalVerdict(root, c);
+      if (verdict?.warning) warnings.push(verdict.warning);
+      else if (verdict?.failure) failures.push(verdict.failure);
     }
   }
   console.log(`Scope: ${events.length + corrections.length} correction signal(s)`);
@@ -366,7 +423,8 @@ function runCheck(root, schema) {
     console.log("scanned retro/corrections/, docs/qa/waivers/, docs/qa/uat/ — no corrections recorded and no auto-correction events detected.");
   }
   for (const f of failures) console.error(`FAIL  ${f}`);
-  console.log(`Result: ${failures.length ? `FAIL (${failures.length})` : "PASS"}`);
+  for (const w of warnings) console.warn(`WARN  ${w}`);
+  console.log(`Result: ${failures.length ? `FAIL (${failures.length})` : "PASS"}${warnings.length ? `, ${warnings.length} warning(s)` : ""}`);
   process.exit(failures.length ? 1 : 0);
 }
 

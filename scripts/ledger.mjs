@@ -100,6 +100,10 @@ export function normalizeEvent(partial = {}, root = process.cwd()) {
       partial.warningsByClass && typeof partial.warningsByClass === "object" && !Array.isArray(partial.warningsByClass)
         ? partial.warningsByClass
         : {},
+    failuresByClass:
+      partial.failuresByClass && typeof partial.failuresByClass === "object" && !Array.isArray(partial.failuresByClass)
+        ? partial.failuresByClass
+        : {},
     scope_n: asNum(partial.scope_n),
     phase: partial.phase !== undefined ? partial.phase : parsePhase(root),
     gitHead: partial.gitHead !== undefined ? partial.gitHead : git.gitHead,

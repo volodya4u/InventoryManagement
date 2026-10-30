@@ -5,20 +5,22 @@
 
 ## Last updated
 
-- **Date:** 2026-10-28 (Europe/Kyiv)
-- **Branch when written:** `claude/qa-proof-pack-followup`, on top of the merge of [#134](https://github.com/volodya4u/InventoryManagement/pull/134) (the QA proof pack); it adds this file and aligns the proof pack with what the pages show
-- **Active OpenSpec change:** none; `openspec/changes/` holds only `archive/`
+- **Date:** 2026-10-30 (Europe/Kyiv)
+- **Branch when written:** `codex/resolve-retro-pd4-pd6-pd7-pd8`, on top of `origin/main` at `3c91a11`
+- **Active OpenSpec change:** `openspec/changes/resolve-retro-pd4-pd6-pd7-pd8/`
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
   accepted: no manual case has been run and the owner has not signed `docs/qa/mvp-acceptance-report.md`.
-- **Next task:** for the owner, run `docs/qa/manual-test-plan.md`, answer the open questions OQ-3 to OQ-16 in
-  `docs/requirements.md`, and decide in section 6 of the acceptance report. For an agent, nothing is queued; take new
-  work only from the owner, through the `test-first-loop` skill.
+- **Next task:** obtain the hook-recorded reviewer verdict for this branch, then ask the owner to enroll a hardware
+  signing key and sign decisions for the seven historical correction dispositions (risk R-16). The owner still needs to run
+  `docs/qa/manual-test-plan.md` and decide in section 6 of the acceptance report.
 - **Claims:**
   - The release gate is red, and the reasons are listed — evidence: `docs/qa/mvp-acceptance-report.md` (section 5) and
     `node scripts/gate-status.mjs`
   - Two non-functional requirements are waived, not passed (NFR-15 performance, NFR-16 availability); the waivers for NFR-17, NFR-18 and NFR-20 are closed — evidence: `docs/qa/waivers/`, ADR-0011
   - Two process gaps cannot be repaired and are waived, not fixed — evidence: `docs/qa/historical-gaps.md`, ADR-0009 and `docs/qa/waivers/2026-10-28-trajectory-*.md`
+  - PD-4, PD-6 and PD-7 have red/green harness tests in the active retro slice; PD-8's new-approval guard is tested,
+    while seven legacy approval references remain unverified — evidence: `scripts/retro-pd*.test.mjs`, risk R-16
   - Risks that need an owner decision are marked **Decision** — evidence: `docs/qa/risk-register.md`
 
 This file has no phase or gate line on purpose. `scripts/gate-status.mjs` compares such a line with the computed gate
