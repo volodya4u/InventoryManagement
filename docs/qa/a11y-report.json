@@ -18,7 +18,7 @@
     "dark"
   ],
   "note": "The application has no dark theme (frontend/src/styles.scss sets color-scheme: light), so the dark pass emulates prefers-color-scheme: dark and shows what a visitor with that preference gets. Automated rules find only part of the accessibility problems; this report does not replace a manual check with a screen reader. The pages are checked with rows in every sale state and a material below its reorder level; dialogs and error messages are not part of what is checked.",
-  "sourceHash": "ccc217509675284629f0b08c3aff9b4eda4e6132f1d643ab8eec180b5a7ffa2e",
+  "sourceHash": "fbf4b3aa6343765f9d0d3b167d88794c8ce377366d2accee19cf4e3db386443a",
   "pages": [
     {
       "route": "change-password",

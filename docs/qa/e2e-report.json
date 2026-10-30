@@ -3,17 +3,17 @@
   "status": "passed",
   "browsers": {
     "chromium": {
-      "passed": 65,
+      "passed": 66,
       "failed": 0,
       "skipped": 3
     },
     "firefox": {
-      "passed": 65,
+      "passed": 66,
       "failed": 0,
       "skipped": 3
     },
     "webkit": {
-      "passed": 65,
+      "passed": 66,
       "failed": 0,
       "skipped": 3
     }

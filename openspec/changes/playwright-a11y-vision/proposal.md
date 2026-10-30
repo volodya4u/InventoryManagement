@@ -25,8 +25,9 @@ the application's stylesheet only where a check found a real defect.
   whole run of every supported browser, so the `e2e` class has an artifact the gate can read.
 - **Defects the checks found, fixed in the stylesheet:** secondary text, the rose accent and the outline success and warning
   buttons failed the 4.5:1 contrast ratio on seven pages; wide tables scrolled inside their frame with no sign of it, so a clipped
-  column looked cut off (a shadow now shows on an edge with more to scroll to); the Raw Materials table was 38 px too wide at
-  768 px and its total label sat off screen on a phone.
+  column looked cut off (a shadow now shows on an edge with more to scroll to); the Raw Materials table was too wide at 768 px in a
+  wide fallback font (header labels now wrap) and its total label sat off screen on a phone; dimmed rows of cancelled and returned
+  sales, a low-stock badge touching a name, and sale dates broken over three lines.
 - **Decisions and waivers:** OQ-8 and OQ-15 answered in `docs/requirements.md` (the OQ-1 path), the NFR-17/18/20 rows rewritten,
   the three waivers set to `Status: closed` with their evidence. ADR-0011; the integrity lock is re-sealed for the two new gate
   scripts.

@@ -9,7 +9,7 @@
     768,
     1280
   ],
-  "sourceHash": "ccc217509675284629f0b08c3aff9b4eda4e6132f1d643ab8eec180b5a7ffa2e",
+  "sourceHash": "fbf4b3aa6343765f9d0d3b167d88794c8ce377366d2accee19cf4e3db386443a",
   "shots": [
     {
       "id": "login-375",
@@ -21,7 +21,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Header bar and sign-in card fit with margins; no overflow, clipping or overlap; fields and full-width button legible; small subtitle and footer text readable.",
+        "notes": "Sign In card fits with margins; nothing cut off or overlapping; high-contrast labels, fields and button; only the small grey footer is low contrast and still legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -35,7 +35,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Card centred with comfortable margins; labels, inputs with Show toggle and the green button legible; footer text small but readable.",
+        "notes": "Card centred and fully inside the viewport; adequate contrast; footer caption and the Show link are small but legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -49,7 +49,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Card centred, nothing clipped or overlapping; grey subtitle and small footer have adequate contrast.",
+        "notes": "Card centred and fully visible; good contrast; small footer text and eyebrow are readable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -63,7 +63,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Header, five stacked stat cards and the Getting Started card with two full-width buttons are intact; dark text on pale tints with good contrast.",
+        "notes": "Header, stacked cards and the Getting Started card fit with no clipping or overlap; links underlined, buttons look like buttons.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -77,7 +77,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Two-column card grid with the last card alone in its row (normal wrap); links underlined, text legible.",
+        "notes": "Two-column card grid, the lone Low Stock card leaves an empty cell (normal wrap); good contrast.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -91,7 +91,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Four cards plus a wrapped fifth; empty space beside it is cosmetic; text legible, links look like links.",
+        "notes": "Five stat cards with the fifth wrapping to a second row, and the Getting Started panel are intact; text legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -100,12 +100,12 @@
       "route": "raw-materials",
       "width": 375,
       "file": "docs/qa/vision/raw-materials-375.png",
-      "sha256": "55a26cb48574dfb3eaae5b06fa8d28dc8e4314ef1c1e81a24b97207dd5638be0",
+      "sha256": "66a0da6f73b3ffa764d27b3077355876d4930b0d8c497cf0c07c5eaffc8cf29d",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table scrolls inside its frame with a right-edge shadow and a clipped header; Low stock badge legible. Nits: very tall rows, faint photo-placeholder letters.",
+        "notes": "Table scrolls inside its frame with a visible grey right-edge shadow; Low stock pill legible; rows are very tall (cosmetic).",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -114,12 +114,12 @@
       "route": "raw-materials",
       "width": 768,
       "file": "docs/qa/vision/raw-materials-768.png",
-      "sha256": "e2f899983ae36a2b5212903682fe31be0d6e245d39ed66480476525e97768fd3",
+      "sha256": "47b833f8f95a2e587cc77ab7506bd0eba5646de835e0dc326bc0e20e5babef40",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table fits its frame with every column visible and aligned; Low stock badges sit below the names without crowding; five action buttons stack legibly; total row visible.",
+        "notes": "All columns, five stacked action buttons, wrapped headers, Low stock badges and the total row visible; the yellow-outlined Adjust Stock text is the faintest; contrast judged by eye only.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -128,12 +128,12 @@
       "route": "raw-materials",
       "width": 1280,
       "file": "docs/qa/vision/raw-materials-1280.png",
-      "sha256": "d9e9084eff67ea0321ee59b9e9e284e5a824a05a9bb1b4c954b148ad3663206c",
+      "sha256": "38433accb58e074d37f7ec97082b8010ae3fb1b1d4a2212b700b3a1c3738ff50",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table, Low stock badges, five stacked action buttons and the total row intact and legible; faintest are the photo-placeholder letter and the gold Adjust Stock text, neither a failure.",
+        "notes": "Full table with total row inside the frame; Low stock badges legible; amber Adjust Stock text and the placeholder initials are the lowest contrast.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -142,12 +142,12 @@
       "route": "products",
       "width": 375,
       "file": "docs/qa/vision/products-375.png",
-      "sha256": "065b49c5dc37d54000c81490cca9ea073f190826a7f40ddc2731feefbeb36c7c",
+      "sha256": "df9106cb7fd163865674587fee0eed33b2c776f34d351bb232407131f4d1f670",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table in a rounded frame with a grey right-edge shadow; the total row shows its label with the value off to the right; the shadow is subtle.",
+        "notes": "Table scrolls inside its frame with a right-edge shadow and a clipped header; wrapped header labels, name, recipe text and SKU chip readable; the total row is intact.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -156,12 +156,12 @@
       "route": "products",
       "width": 768,
       "file": "docs/qa/vision/products-768.png",
-      "sha256": "85001b0492765504ddf8bcd687737eb45fc61a6a2929fe20abbe1afb37e40b9e",
+      "sha256": "cc1fd2ac4b84a0a6bb78ceb1b7313ac53c840614a972b6dbf81fa13266d2b45d",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table scrolls inside its frame with a shadow and a clipped next header; rows, SKU chips and total row legible; recipe lines small (about 11 px).",
+        "notes": "Table scrolls inside its frame with a grey right-edge shadow; clipped action buttons are acceptable; header labels wrap cleanly; recipe lines and SKU text about 10-11 px.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -170,12 +170,12 @@
       "route": "products",
       "width": 1280,
       "file": "docs/qa/vision/products-1280.png",
-      "sha256": "92778d905bee5a2ec282b729831f70947120e4dc7551370e3d1f0abb45c2ad29",
+      "sha256": "25e0e81f7049566818b5910d2536926df1d392871e5bfe4e53b64acca46bbee2",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table fits with the total row; outline action buttons look like buttons; Write Off and Delete are slightly light red but readable.",
+        "notes": "Nine-column table and totals footer render without overlap; outlined buttons look like buttons; small recipe text and SKU chips readable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -184,12 +184,12 @@
       "route": "sales",
       "width": 375,
       "file": "docs/qa/vision/sales-375.png",
-      "sha256": "1326da10dde7bcc48bcf44b77c175b8c33e12711221ba710dfe2419acacbf32a",
+      "sha256": "7f1e6ea7d91177d6d67caf97b6ec549ea7ef1c2ebc741f46428b6b09dd0631ed",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table clips at the right inside its frame with a shadow cue; dates wrap to three lines and dimmed rows of returned and cancelled sales are lighter but readable (cosmetic).",
+        "notes": "Table scrolls inside its frame with a dark right-edge shadow; the shadow is hidden behind the grey striped rows so it looks patchy (minor); header, chips, dates and badges legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -198,12 +198,12 @@
       "route": "sales",
       "width": 768,
       "file": "docs/qa/vision/sales-768.png",
-      "sha256": "5333ddf36f81d161b6f9640c9ce612b4ecafb1a67311c1b802a102b5630259c1",
+      "sha256": "39d196f27f340ebf4665f10a977c8d0d166d0e72b11f3100cb6a56a1ae004a37",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table scrolls inside its frame with a faint but visible shadow after the Net Cost column; the date wraps to three lines (cosmetic).",
+        "notes": "Table cut off at the right inside its frame with a visible grey gradient shadow; dimmed rows and red refunded text legible with adequate contrast.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -212,12 +212,12 @@
       "route": "sales",
       "width": 1280,
       "file": "docs/qa/vision/sales-1280.png",
-      "sha256": "83808074894bb43956d46a7af6912c15ee98eb877e1de3d4b9b4276e5e1a8ce5",
+      "sha256": "daeef117677ee6dbf2940fe116d84a360afa4ba1bd04a01f245b6c4fd0648584",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "All nine columns and the totals row visible; dimmed rows and small red refunded captions are lighter but readable.",
+        "notes": "Full nine-column table with Actions and the totals footer visible; dimmed Products text is lighter grey but readable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -226,12 +226,12 @@
       "route": "stock-movements",
       "width": 375,
       "file": "docs/qa/vision/stock-movements-375.png",
-      "sha256": "6a4e3d2ed019c876b1a34d66bdeacb4cc827ae7022d296a28b290a352616e525",
+      "sha256": "364f639a7cdf981265f69068c18aacc050e41cf0d99c531459100d1730046707",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Filters, cards and header stack cleanly; the table is clipped inside its card with a right-edge shadow.",
+        "notes": "Filter form and cards fit; the table scrolls inside its frame with a dark right-edge shadow showing only Date, Inventory and Item; disabled Previous and Next are faint but look disabled.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -240,12 +240,12 @@
       "route": "stock-movements",
       "width": 768,
       "file": "docs/qa/vision/stock-movements-768.png",
-      "sha256": "46e2266c4539dcbc797a5a503845c10ca7115400fb4f1153bf83e401464fbdbe",
+      "sha256": "1f6e29bfa34ad80d9c3ae90fecb76bd0dba328a9f711ebd3e9978469a63dd8ef",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table clipped at the right inside its frame with a soft shadow; the shadow is faint; text and badges legible.",
+        "notes": "Table clipped on the right after Unit Cost with a visible shadow on its edge; text legible; small grey sublabels faint but acceptable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -254,12 +254,12 @@
       "route": "stock-movements",
       "width": 1280,
       "file": "docs/qa/vision/stock-movements-1280.png",
-      "sha256": "0927b0313a8ef01e0a05704484981cc4f41fd967ec80d837cf5786b1a29ce422",
+      "sha256": "8562cfe6de6b582d5be69d36bf683b9a1f9561fff7c241056fcf881fd1323c8f",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "The Notes column is cut off at the frame edge with a shadow along it; the judge could not confirm the cue closely; text legible.",
+        "notes": "Table clipped at the Notes column with a grey scroll shadow on the right edge; text legible; small sublabels and the disabled Previous button are faint.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -268,12 +268,12 @@
       "route": "reports/monthly-sales",
       "width": 375,
       "file": "docs/qa/vision/reports-monthly-sales-375.png",
-      "sha256": "44c951d89548de53918c21b44cf6256dcf36c1fa6cf6e5fb011eb79b80d71b7b",
+      "sha256": "bf08f6ef091585f801344a4ee6edec31ff27c5f2a02816cc25b25b61279110b7",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Four wide tables clipped inside their own frames with headers cut mid-word; the scroll shadow is subtle at this scale; the Sales by Day date wraps over three lines.",
+        "notes": "Four wide tables clip inside their rounded frames with a shadow on the right edge; the judge saw the page at reduced scale and could not confirm how faint the shadow is.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -282,12 +282,12 @@
       "route": "reports/monthly-sales",
       "width": 768,
       "file": "docs/qa/vision/reports-monthly-sales-768.png",
-      "sha256": "dd11c77b35e153724143dd21a10d6777f654c0bb7e19824e8ff8592a2dfb4fe8",
+      "sha256": "de3be0a7d89aa4b62803e943887f0e0483545c530e6416a33804b64c1b949034",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Products Sold and Returns & Cancellations clip inside their cards with a faint edge shadow; the judge suggests a stronger cue would be safer.",
+        "notes": "Returns and Cancellations table is cut off on the right with a grey scroll shadow; the Date column wraps to three lines there and the month input shows the browser's Ukrainian locale (cosmetic).",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -296,12 +296,12 @@
       "route": "reports/monthly-sales",
       "width": 1280,
       "file": "docs/qa/vision/reports-monthly-sales-1280.png",
-      "sha256": "9600474c6788d7464881fa06acb8938fa2542ea7f1422124823cf1241768929f",
+      "sha256": "82ae280b84a267dca943db1e5f7f7fd26911c36674a811e63f224399c1c485eb",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "KPI cards, payment cards and the four tables sit inside their frames with right-aligned numbers; small grey captions acceptable; the month picker shows the browser's Ukrainian locale text and the last KPI row holds three cards (both non-failing).",
+        "notes": "Six summary cards wrap to a second row; the three payment cards and the four tables sit fully inside their frames with no clipping; the month input shows the browser's Ukrainian locale text (does not affect layout).",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -315,7 +315,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Header, card, three password fields with Show toggles, hint and button intact and legible; no sideways overflow.",
+        "notes": "Dark header and the card with three labelled password fields, Show toggles, helper text and the green button fit and are legible; only the grey helper copy is low-key and readable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -329,7 +329,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Fits without overflow; the card is left-aligned about 620 px wide leaving empty space on the right (a max-width choice).",
+        "notes": "Fits with no overflow; the card spans about 80% of the width leaving empty space on the right (a stylistic choice); good contrast.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -343,7 +343,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Nav, heading, three labelled password inputs with Show toggles, hint and green button legible with good contrast; left-aligned card is acceptable.",
+        "notes": "Header nav, title and the card with three password fields and the green button are intact; good contrast including the helper hint.",
         "judge": "project-factory:vision-judge"
       }
     }

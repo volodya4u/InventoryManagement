@@ -21,12 +21,14 @@ for the file on disk (a hash), and nothing in the frontend changed after the jud
 the report stale, and every screenshot is judged again.
 
 ## What the judges found
-The first round failed three screenshots (Raw Materials at 375 and 768 px, Stock History at 1280 px): a table scrolled inside its
-frame and nothing showed that it did. A shadow on the edge of any `.table-responsive` with more to scroll to fixed the cue; the
-second round still failed Raw Materials at 375 px (its total label sat off screen) and at 768 px (the table was 38 px too wide for
-its frame). Smaller cell padding below 992 px and a left-aligned total label on a phone fixed those, and the third round, with
-all 24 screenshots judged again from nothing, passed. The failing rounds are recorded here, not in the report, which describes the
-tree it was made from.
+Every round judged all 24 screenshots again from nothing, because any change to the frontend makes the report stale. Seven rounds were run. Rounds one, two, four and six failed some screenshots; rounds three and five passed, but each was followed by a frontend change that made its report stale (below), so only the seventh describes the final tree.
+- Rounds one and two: a table scrolled inside its frame and nothing showed that it did; the Raw Materials table was 38 px too wide at 768 px and its total label sat off screen on a phone. A shadow on the edge of any `.table-responsive` with more to scroll to, smaller cell padding below 992 px and a left-aligned total label on a phone fixed those.
+- Round four, once the screenshots held every sale state and a low-stock material: a low-stock badge touching the material's name. A margin fixed it.
+- After the first pull-request run: the CI runner has no Inter or Segoe UI and its wider fallback font made the Raw Materials table 55 px too wide at 768 px, which a forced wide font reproduces locally. Header labels may now wrap below 992 px, and the layout test also checks the table in a wide font.
+- Round six: several judges called the scroll shadow too faint to read as a cue, the dimmed rows of cancelled and returned sales pale, and sale dates broke over three lines on a phone. The shadow is stronger, the dimmed rows darker, the refund caption larger and the date does not wrap.
+- The full end-to-end run, which leaves cancelled and returned sales behind, also found the dimmed rows at 3.8:1; axe now checks every sale state (`everySaleState` in `e2e/support/bouquet.ts`).
+A judge can differ on another run: the judges' own notes on the final round still call the shadow "subtle" in places and say it can be hard to see at a reduced scale. The failing rounds are recorded here, not in the report, which describes the tree it was made from.
+
 
 ## The e2e report
 The `e2e` class of the acceptance-method gate wants a committed artifact with a `status`. Playwright's own JSON report has none and

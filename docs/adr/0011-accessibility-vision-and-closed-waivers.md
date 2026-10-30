@@ -32,7 +32,9 @@ scheme, failing on serious and critical violations), and approved `@axe-core/pla
   `e2e` class has a committed artifact. The gate cannot see how old it is.
 - **What the checks found was fixed in the stylesheet,** each class in its own commit: contrast of secondary text, the rose accent
   and the outline success and warning buttons (seven pages); a shadow on the edge of a wide table that has more to scroll to;
-  cell padding below 992 px and a left-aligned total label on a phone (Raw Materials). Nothing else in the application changed.
+  cell padding, wrapping header labels and a left-aligned total label on a phone (Raw Materials, whose table was too wide at 768 px in a
+  wider fallback font); a margin between a material's name and its low stock badge; darker text on the dimmed rows of cancelled and
+  returned sales; sale dates that no longer wrap. Nothing else in the application changed, and no template but the sale date cell.
 - **The rows and the waivers.** OQ-8 and OQ-15 are `answered` with the owner's words, date and reference, and a test that holds
   each; the NFR-17/18/20 rows say what is checked and how; the three waivers are `Status: closed` with their evidence.
 - **The lock is re-sealed** in the commit that adds the two gate scripts, keeping the earlier adaptation notes and adding one, on
