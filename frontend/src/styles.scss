@@ -254,6 +254,23 @@ textarea {
   vertical-align: middle;
 }
 
+// Below the desktop width the cells give up some side padding, so a table needs less room: Raw Materials needs 772px at
+// 768px with the full padding and fits without it.
+@media (max-width: 991.98px) {
+  .table > :not(caption) > * > * {
+    padding-right: 0.6rem;
+    padding-left: 0.6rem;
+  }
+}
+
+// The total row's label spans five columns and is right-aligned; on a phone the table scrolls, and the right end of the
+// label is off screen, so the label starts at the left edge instead.
+@media (max-width: 575.98px) {
+  .stock-value-total td:first-child {
+    text-align: left !important;
+  }
+}
+
 .table thead th {
   color: var(--pf-muted);
   font-size: 0.76rem;

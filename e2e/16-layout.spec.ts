@@ -63,3 +63,37 @@ test.describe('on a phone', () => {
     expect(await frame.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
   });
 });
+
+// The Raw Materials table is the widest list a tablet must show whole, with its Actions column (the vision judge found the
+// column cut off at 768px), and on a phone its total row must start at the left edge of the scrolling frame.
+test.describe('on a tablet', () => {
+  test.use({ viewport: { width: 768, height: 1024 } });
+
+  // @trace NFR-18
+  test('the raw materials table, with its actions, fits the tablet width', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Tablet Rose', quantity: 10, initialUnitCost: 5 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    await expect(page.getByRole('heading', { name: 'Raw Materials', level: 1 })).toBeVisible();
+    const frame = page.locator('.table-responsive').first();
+    expect(await frame.evaluate((el) => el.scrollWidth - el.clientWidth), 'the table is wider than its frame').toBeLessThanOrEqual(0);
+  });
+});
+
+test.describe('on a phone, the total row', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  // @trace NFR-18
+  test('starts its label at the left edge so the label is visible without scrolling', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Total Rose', quantity: 10, initialUnitCost: 5 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    const label = page.locator('.stock-value-total td').first();
+    await expect(label).toHaveText('Total Raw Materials Stock Value');
+    expect(await label.evaluate((el) => getComputedStyle(el).textAlign)).toBe('left');
+  });
+});
