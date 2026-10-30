@@ -26,7 +26,7 @@ rough token count) before and after a change that adds rules to them.
 | Using a library API | The `context7` MCP server, or `angular-cli` for the installed Angular version (`.mcp.json`) — never model memory |
 | Reviewing a branch | The `reviewer` subagent, which starts with a fresh context of its own |
 | Doing QA or preparing a release | `docs/qa/` and the generated traceability and trajectory reports |
-| Resuming work | `docs/current-state.md`, meant to be read at the start of a session and not imported into `CLAUDE.md`; no rule in `AGENTS.md` or `CLAUDE.md` points to it yet |
+| Resuming work | `docs/current-state.md`, read at the start of a session and not imported into `CLAUDE.md`; the "Where to start" section of `AGENTS.md` points to it |
 | Session start in the cloud | `scripts/session-start.mjs` prints the setup summary (`SessionStart` hook) |
 | Session end after a code change | The `dod-fresh` `Stop` hook injects a reminder only when the code changed since the last green `dod.mjs` |
 
