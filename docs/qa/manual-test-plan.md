@@ -24,7 +24,7 @@ session timeout cannot be waited out in a test.
 - **Sign-in:** the only user is the administrator. Its name is `admin` unless `APP_ADMIN_INITIAL_USERNAME` says otherwise,
   and its password is the value given to `APP_ADMIN_INITIAL_PASSWORD` when the empty database was first started. Do not write
   that password in this file or in the run record.
-- **Browser:** the owner answered OQ-8 on 2026-10-30: current Chrome, Edge, Firefox and Safari on desktop, and current Chrome and Safari on tablet and phone. Firefox and Safari show a plain text box for the Monthly Sales month field, so type the month as `YYYY-MM` there (MT-24). Record the browser and version you used.
+- **Browser:** the owner answered OQ-8 on 2026-10-30: current Chrome, Edge, Firefox and Safari on desktop, and current Chrome and Safari on tablet and phone. Firefox and Safari show a plain text box for the Monthly Sales month field, so type the month as `YYYY-MM` there (MT-24). The browser tests check Safari through WebKit, so a run in real Safari is a manual one. Record the browser and version you used.
 - **Order:** run the sections in order. Later sections reuse the records the earlier ones create.
 
 Reference data used by the cases (create it in section 3 and 4):

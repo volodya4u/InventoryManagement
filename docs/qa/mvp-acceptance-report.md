@@ -84,7 +84,7 @@ whether G7 passes. These are the reasons, in the order they were or would be clo
    `node scripts/check-trajectory.mjs --release` passes with two WAIVED lines. This is no longer a reason for G7 to be red;
    it stays here because a waiver is an exception the owner approved, not a pass.
 3. **The manual run is not done.** `docs/qa/manual-test-plan.md` has no results.
-4. **Owner decisions are open:** OQ-3 to OQ-16 are `open` in `docs/requirements.md`, and the risks in
+4. **Owner decisions are open:** OQ-3 to OQ-16, except OQ-8 and OQ-15 (answered on 2026-10-30), are `open` in `docs/requirements.md`, and the risks in
    `docs/qa/risk-register.md` marked **Decision** need an answer.
 5. **Signed approval is not configured** (no hardware-backed key in `quality/allowed-signers`); today the owner's merge is the
    approval.
