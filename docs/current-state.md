@@ -6,21 +6,25 @@
 ## Last updated
 
 - **Date:** 2026-10-30 (Europe/Kyiv)
-- **Branch when written:** `codex/resolve-retro-pd4-pd6-pd7-pd8`, on top of `origin/main` at `3c91a11`
-- **Active OpenSpec change:** `openspec/changes/resolve-retro-pd4-pd6-pd7-pd8/`
+- **Branch when written:** `claude/archive-retro-pd4-pd6-pd7-pd8`, on top of `origin/main` at `a33d972` (pull request 151 merged)
+- **Active OpenSpec change:** none; the retro slice is archived under `openspec/changes/archive/2026-10-30-resolve-retro-pd4-pd6-pd7-pd8/`
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
   accepted: no manual case has been run and the owner has not signed `docs/qa/mvp-acceptance-report.md`.
-- **Next task:** obtain the hook-recorded reviewer verdict for this branch, then ask the owner to enroll a hardware
-  signing key and sign decisions for the seven historical correction dispositions (risk R-16). The owner still needs to run
-  `docs/qa/manual-test-plan.md` and decide in section 6 of the acceptance report.
+- **Next task (the owner's):** enroll a hardware signing key in `quality/allowed-signers`, sign decisions for the seven
+  historical correction dispositions and backfill their `approvalRef` values (risk R-16); until then `correct --check`
+  warns about them. The owner also still needs to run `docs/qa/manual-test-plan.md` and decide in section 6 of the
+  acceptance report. No agent task is open from the retro slice.
 - **Claims:**
   - The release gate is red, and the reasons are listed — evidence: `docs/qa/mvp-acceptance-report.md` (section 5) and
     `node scripts/gate-status.mjs`
   - Two non-functional requirements are waived, not passed (NFR-15 performance, NFR-16 availability); the waivers for NFR-17, NFR-18 and NFR-20 are closed — evidence: `docs/qa/waivers/`, ADR-0011
   - Two process gaps cannot be repaired and are waived, not fixed — evidence: `docs/qa/historical-gaps.md`, ADR-0009 and `docs/qa/waivers/2026-10-28-trajectory-*.md`
-  - PD-4, PD-6 and PD-7 have red/green harness tests in the active retro slice; PD-8's new-approval guard is tested,
-    while seven legacy approval references remain unverified — evidence: `scripts/retro-pd*.test.mjs`, risk R-16
+  - PD-4, PD-6, PD-7 and PD-8 are done: each has red/green harness tests, and the slice is merged and archived. The seven
+    legacy approval references are not verified yet and wait for the owner's signed decisions — evidence:
+    `scripts/retro-pd*.test.mjs`, risk R-16, `node scripts/correct.mjs --check`
+  - Until a key is enrolled, every new `resolved` or `waived` correction fails `correct --check`, and the waiver recipe in
+    `AGENTS.md` does not yet mention `approvalRef` (updating it needs the evals) — evidence: `scripts/correct.mjs`
   - Risks that need an owner decision are marked **Decision** — evidence: `docs/qa/risk-register.md`
 
 This file has no phase or gate line on purpose. `scripts/gate-status.mjs` compares such a line with the computed gate
@@ -92,5 +96,7 @@ node scripts/pr-evidence.mjs origin/main HEAD
 - The `protect-env` hook blocks a recursive `grep`; use the Grep tool or limit `grep` to named files.
 - The `angular-cli` MCP server can time out at session start (recorded in `README.md`, "Static vs dynamic context");
   the Angular 22 facts agents need most are also in `.claude/rules/frontend.md`.
+- `correct.mjs --check` reads a pinned baseline commit from git history to tell the seven legacy approvals from new
+  ones; a shallow clone lacks it and would fail them instead of warning, so CI jobs that run it need `fetch-depth: 0`.
 - `pnpm` only in `frontend/`, never npm or yarn.
 - The project path on the owner's machine contains non-ASCII characters (a OneDrive folder); quote it in shell commands.
