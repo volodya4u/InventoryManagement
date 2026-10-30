@@ -299,6 +299,20 @@ one.
 fields are announced with their labels.
 **Result:** ☐ Pass ☐ Fail — notes: ______
 
+## 11. Network access
+
+The automated test `LoopbackBindingHttpTest` covers this requirement; the case below confirms it from a second device, which
+a test on one machine cannot do.
+
+### MT-29 Only this machine can reach the app
+**Covers:** NFR-23
+**Steps:** 1. With the app running, find this PC's network address (for example with `ipconfig`, the IPv4 address of the Wi-Fi or
+Ethernet adapter). 2. On this PC open `http://127.0.0.1:8081` and `http://localhost:8081`. 3. On another device on the same
+network (a phone on the same Wi-Fi is enough) open `http://<this PC's address>:8081`.
+**Expected:** Step 2 shows the sign-in page both times. Step 3 does not connect (the browser reports that the site cannot be
+reached, not a sign-in page). The automated test `LoopbackBindingHttpTest` checks the same thing on the machine that runs it.
+**Result:** ☐ Pass ☐ Fail — notes: ______
+
 ## Run record
 
 | Field | Value |

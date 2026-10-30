@@ -112,13 +112,17 @@ Date inputs and API values SHALL use ISO `YYYY-MM-DD`, while Sales, Monthly Sale
 ### Requirement: Technical constraints of the baseline
 
 The product SHALL be Java 21 with Spring Boot 4.1.1 using feature packages under `com.flowershop.inventory.<feature>`
-(TC-1), shipped as one executable JAR with the Angular production build, profile `local` by default on port 8081 with
-database file `flower-shop-local.db` (TC-4), with a JSON API over `/api/**` (TC-5), a frontend of Angular 22 with
+(TC-1), shipped as one executable JAR with the Angular production build, profile `local` by default listening on 127.0.0.1
+only (NFR-23) on port 8081 with database file `flower-shop-local.db` (TC-4), with a JSON API over `/api/**` (TC-5), a frontend of Angular 22 with
 Bootstrap 5, Vitest and pnpm (TC-3), and tests on in-memory SQLite run by `mvn -B -ntp verify` (TC-9).
 
 #### Scenario: Local profile default
 - **WHEN** the JAR is started without a profile argument
 - **THEN** it uses profile `local`, port 8081 and the file database in the project root
+
+#### Scenario: Only this machine can connect
+- **WHEN** the JAR runs with profile `local` and a client on another machine, or this machine's other network address, tries to connect to port 8081
+- **THEN** no connection is made (refused, or the attempt times out), while `127.0.0.1` answers (NFR-23)
 
 ### Requirement: Scope exclusions and business constraints
 

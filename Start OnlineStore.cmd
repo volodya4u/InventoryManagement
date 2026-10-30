@@ -3,7 +3,7 @@ setlocal
 
 set "APP_DIR=%~dp0"
 set "APP_JAR=%APP_DIR%target\inventory-0.1.0-SNAPSHOT.jar"
-set "APP_URL=http://localhost:8081"
+set "APP_URL=http://127.0.0.1:8081"
 set "HEALTH_URL=%APP_URL%/api/health"
 set "CHROME_EXE=C:\Program Files\Google\Chrome\Application\chrome.exe"
 
@@ -25,7 +25,7 @@ if not exist "%CHROME_EXE%" (
 )
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-    "if (-not (Test-NetConnection -ComputerName 'localhost' -Port 8081 -InformationLevel Quiet -WarningAction SilentlyContinue)) { exit 1 } else { exit 0 }"
+    "if (-not (Test-NetConnection -ComputerName '127.0.0.1' -Port 8081 -InformationLevel Quiet -WarningAction SilentlyContinue)) { exit 1 } else { exit 0 }"
 
 if errorlevel 1 (
     start "OnlineStore server" cmd.exe /k "cd /d ""%APP_DIR%"" && java -jar ""%APP_JAR%"""

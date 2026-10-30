@@ -172,6 +172,7 @@
     "NFR-20": "MVP",
     "NFR-21": "MVP",
     "NFR-22": "MVP",
+    "NFR-23": "MVP",
     "TC-1": "MVP",
     "TC-2": "MVP",
     "TC-3": "MVP",
@@ -2536,6 +2537,10 @@
     {
       "check": "recording-evidence",
       "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"bind-loopback\" is not archived"
     }
   ]
 }

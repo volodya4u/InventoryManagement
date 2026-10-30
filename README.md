@@ -139,7 +139,8 @@ Open **Reports -> Monthly Sales** and select a report month. Sales are included 
 
 ## Local Profile
 
-- URL: `http://localhost:8081`
+- URL: `http://localhost:8081` (or `http://127.0.0.1:8081`). The server listens on `127.0.0.1` only, so only this machine can reach it; another device on the network cannot connect.
+- To open it to other devices on purpose, start it with the environment variable `SERVER_ADDRESS` set to the address to listen on (`0.0.0.0` for every interface). Do that only after deciding HTTPS and the `Secure` cookie (open question OQ-13): the app serves plain HTTP and has no login throttling.
 - Default username: `admin`
 - Initial password: supplied through `APP_ADMIN_INITIAL_PASSWORD`
 - Database: `flower-shop-local.db` in the project root
@@ -172,7 +173,7 @@ Start the backend:
 mvn "-Dskip.frontend=true" spring-boot:run
 ```
 
-Start the frontend with a proxy to `localhost:8081`:
+Start the frontend with a proxy to `127.0.0.1:8081`:
 
 ```powershell
 cd frontend
