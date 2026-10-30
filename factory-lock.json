@@ -1,11 +1,11 @@
 {
-  "createdAt": "2026-10-30T16:18:13.263Z",
-  "gitHead": "21232b20f6554cfbd4dd5293408d0a7059f94586",
+  "createdAt": "2026-10-30T18:54:23.313Z",
+  "gitHead": "678b3ad3718da2b78d6e83a7ea5bdaffe4e2cd67",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
     ".github/workflows/ci.yml": "7feefb41880f708ac4e6c03e91e6922c6a346d1f70728177e0e50b0d6e617cca",
-    ".github/workflows/factory-gates.yml": "1390ac9ac5ed417e38b4256d880fb12047c9f547c2b33333ada5bb7de693f2b3",
+    ".github/workflows/factory-gates.yml": "88e5166d312bdabeefed8af7b606a47ea5b792214d8aa8294006ddcced7d1d97",
     ".github/workflows/human-approval.yml": "9d04513cfe819672c7f5af7ca346ad03e7f55de9e3e58b5aedd8e1d8459b2a01",
     ".github/workflows/pr-description.yml": "95c40b66bfc61a724a3d774537074f48e1348de1ae4c8deca6c958350077a0a5",
     "quality/coverage-backend-baseline.json": "69c25a82a264e161e5e8dcc8bd77067724eaf0039b286cc4eba6bedb15d54acf",
@@ -67,6 +67,7 @@
     "process-ratchet (owner-approved 2026-10-28, ADR-0008): scripts/check-process-ratchet.mjs counts frontend/src and *Test.java/*Tests.java for its product-code and @trace scans, scripts/check-process-ratchet.test.mjs joins the lock, and quality/process-baseline.json is earned from a local run",
     "improve-PD-5 (owner-approved 2026-10-28, ADR-0009): scripts/check-trajectory.mjs fails an unwaived trailer or review-evidence finding of an archived slice in every mode and honours open slice waivers (Gate: Trajectory, Slices:, Checks:, Approval:) as WAIVED for exactly the listed slices and checks, and scripts/check-trajectory.test.mjs covers it",
     "recordings (owner-approved 2026-10-30, ADR-0010): scripts/check-traceability.mjs scans e2e/ for @trace tags and accepts docs/qa/recording-exemptions.json (a requirement no page shows, with a reason and covering tests, counts as covered for --strict-recordings), scripts/check-recordings.mjs joins the lock (the plugin reference, with a stale report now failing), and the CI e2e job's timeout in .github/workflows/ci.yml is raised, which re-hashes that file",
-    "a11y-vision (owner-approved 2026-10-30, ADR-0011): scripts/check-a11y.mjs (axe over every page in both colour schemes, verified for routes, violations and freshness) and scripts/check-vision.mjs (the vision-judge report verified for completeness, screenshot hashes and freshness) join the lock"
+    "a11y-vision (owner-approved 2026-10-30, ADR-0011): scripts/check-a11y.mjs (axe over every page in both colour schemes, verified for routes, violations and freshness) and scripts/check-vision.mjs (the vision-judge report verified for completeness, screenshot hashes and freshness) join the lock",
+    "ci-gates (owner-approved 2026-10-30, ADR-0012): .github/workflows/factory-gates.yml gains two steps, check-a11y --check and check-vision, so a stale accessibility or vision report fails the pull request; no gate script changed, and the workflow is in the soft tier, so this re-seal only records its new hash"
   ]
 }

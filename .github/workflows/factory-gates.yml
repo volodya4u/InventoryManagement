@@ -38,6 +38,19 @@ jobs:
       - name: Acceptance artifacts exist
         run: node scripts/check-acceptance-methods.mjs --mode=artifact
 
+      # ADR-0012. The accessibility and vision reports must describe the frontend as it is in this commit: a change under
+      # frontend/src (a unit spec excepted) needs a fresh axe run and a fresh judging round in the same pull request, or
+      # these fail as stale. Neither needs a browser or the JAR; they read the committed reports and the files they name.
+      #   a11y:   pnpm run check:a11y            (builds nothing itself: needs the JAR and Chromium, writes docs/qa/a11y-report.json)
+      #   vision: node scripts/check-vision.mjs capture, judge each screenshot, then node scripts/check-vision.mjs record <verdicts.json>
+      # The vision verdicts are a model's judgement and not deterministic; this step checks that the report is complete,
+      # current, and for the screenshots on disk, not that a judge ran.
+      - name: Accessibility report is current and passes
+        run: node scripts/check-a11y.mjs --check
+
+      - name: Vision report is complete, current and for the screenshots on disk
+        run: node scripts/check-vision.mjs
+
       # ADR-0002 follow-up. Every spec under openspec/specs and every active change under openspec/changes must pass the
       # OpenSpec format check. The CLI is not a repository dependency: it is downloaded from npm at run time, pinned to one
       # version (1.13.2, published 2026-09-23), with its telemetry off. Bump the pin by hand; Dependabot does not see it.
