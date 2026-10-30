@@ -48,14 +48,18 @@
 }
 
 .sale-row-muted > td {
-  color: var(--pf-muted);
+  color: #46524c;
   background: #fafafa;
+}
+
+.sale-date {
+  white-space: nowrap;
 }
 
 .refund-note {
   display: block;
   color: var(--pf-rose);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 

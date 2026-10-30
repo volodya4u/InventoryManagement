@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { Api } from './support/api';
 import { signInAsAdmin } from './support/auth';
+import { everySaleState } from './support/bouquet';
 
 const pages: [string, string][] = [
   ['/dashboard', 'Inventory Overview'],
@@ -119,5 +120,26 @@ test.describe('on a desktop', () => {
       return el.getBoundingClientRect().left - name.right;
     });
     expect(gap, 'the badge touches the name').toBeGreaterThanOrEqual(4);
+  });
+});
+
+test.describe('on a phone, the sales list', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  // @trace NFR-18
+  test('keeps a sale date on one line instead of breaking it over three', async ({ page, baseURL }) => {
+    await everySaleState(baseURL!, 'DATE');
+    await signInAsAdmin(page);
+    await page.goto('/sales');
+    const date = page.locator('tbody tr .sale-date').first();
+    await expect(date).toBeVisible();
+    expect(await date.evaluate((el) => getComputedStyle(el).whiteSpace)).toBe('nowrap');
+    // The text itself is one line box, wherever the rest of the row is tall.
+    const lines = await date.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
+    });
+    expect(lines, 'the date wraps').toBe(1);
   });
 });
