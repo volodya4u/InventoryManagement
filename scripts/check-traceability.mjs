@@ -25,7 +25,16 @@
 // Run in pre-commit (fast) and CI (with --check-fresh and release flags).
 import { readdirSync, readFileSync, statSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { emit } from "./ledger.mjs";
+
+// PD-7 telemetry is fail-open: an absent or broken ledger helper must not
+// prevent the traceability check from reporting its actual findings.
+let emitLedger = () => {};
+try {
+  const telemetry = await import("./ledger.mjs");
+  if (typeof telemetry.emit === "function") emitLedger = telemetry.emit;
+} catch {
+  /* telemetry unavailable; the deterministic check still runs */
+}
 
 const root = process.cwd();
 const flags = new Set(process.argv.slice(2));
@@ -305,15 +314,19 @@ function finish() {
     for (const item of items) counts[item.check] = (counts[item.check] ?? 0) + 1;
     return counts;
   };
-  emit({
-    event: "check-run",
-    check: "traceability",
-    exitCode: failures.length ? 1 : 0,
-    scope_n: mvpFRs.length,
-    failures: failures.length,
-    warnings: warnings.length,
-    warningsByClass: byClass(warnings),
-    failuresByClass: byClass(failures),
-  }, { root });
+  try {
+    emitLedger({
+      event: "check-run",
+      check: "traceability",
+      exitCode: failures.length ? 1 : 0,
+      scope_n: mvpFRs.length,
+      failures: failures.length,
+      warnings: warnings.length,
+      warningsByClass: byClass(warnings),
+      failuresByClass: byClass(failures),
+    }, { root });
+  } catch {
+    /* telemetry must never change this check's result */
+  }
   process.exit(failures.length ? 1 : 0);
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -36,4 +36,16 @@ test('a freshness run emits exactly one additional event', () => {
   const before = events().length;
   run('--check-fresh');
   assert.equal(events().length, before + 1);
+});
+
+test('traceability still reports requirements when the telemetry helper is unavailable', () => {
+  const isolated = join(root, 'isolated');
+  mkdirSync(join(isolated, 'scripts'), { recursive: true });
+  mkdirSync(join(isolated, 'docs'), { recursive: true });
+  copyFileSync(script, join(isolated, 'scripts', 'check-traceability.mjs'));
+  writeFileSync(join(isolated, 'docs', 'requirements.md'), '| FR-1 | MVP | One flow |\n');
+  const result = spawnSync(process.execPath, [join(isolated, 'scripts', 'check-traceability.mjs'), '--release'], { cwd: isolated, encoding: 'utf8' });
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stdout + result.stderr, /traceability: 1 MVP FRs checked/);
+  assert.doesNotMatch(result.stdout + result.stderr, /ERR_MODULE_NOT_FOUND/);
 });

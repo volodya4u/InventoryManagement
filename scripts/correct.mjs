@@ -356,19 +356,22 @@ function legacyDisposition(root, correction) {
     return false;
   }
 }
-function approvalProblem(root, correction) {
+export function approvalProblem(root, correction, { base = "origin/main", keyTypes } = {}) {
   const { id, disposition } = correction.data;
   const ref = disposition.approvalRef;
   if (typeof ref !== "string" || !/^approve\/[0-9a-f]{40}$/.test(ref))
     return "approvalRef must name a hardware-signed approve/<40-hex-commit> tag";
   let verified;
   try {
-    verified = signedApproval(root, { base: "origin/main", head: ref.slice("approve/".length) });
+    verified = signedApproval(root, { base, head: ref.slice("approve/".length), ...(keyTypes ? { keyTypes } : {}) });
   } catch {
     return `approvalRef ${ref} does not resolve to a commit`;
   }
   if (verified.state !== "valid") return `approvalRef ${ref} is not a verified owner signature (${verified.reason ?? verified.state})`;
-  if (verified.signer !== disposition.by) return `approvalRef ${ref} was signed by ${verified.signer}, not ${disposition.by}`;
+  // Older by fields append an explanatory parenthesis after the owner handle.
+  // The signed principal proves the handle; the trailing prose proves nothing.
+  const owner = disposition.by.match(/^[A-Za-z0-9_.@-]+/)?.[0];
+  if (verified.signer !== owner) return `approvalRef ${ref} was signed by ${verified.signer}, not ${owner ?? disposition.by}`;
   const tag = spawnSync("git", ["-C", root, "cat-file", "-p", `refs/tags/${ref}`], { encoding: "utf8" });
   const annotation = tag.status === 0 ? tag.stdout.split(/\r?\n\r?\n/).slice(1).join("\n") : "";
   if (!annotation.split(/\r?\n/).some((line) => line.trim() === `Correction: ${id}`) ||

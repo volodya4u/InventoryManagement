@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
+import * as correctionModule from './correct.mjs';
 
 const project = process.cwd();
 const script = join(project, 'scripts', 'correct.mjs');
@@ -40,4 +41,29 @@ test('preexisting dispositions remain warnings until backfilled', () => {
   const result = check(project);
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.match(result.stdout + result.stderr, /LEGACY-APPROVAL/);
+});
+
+test('a signed owner decision with matching annotation verifies a historical by value', () => {
+  assert.equal(typeof correctionModule.approvalProblem, 'function');
+  const repo = join(root, 'signed-repo');
+  const key = join(root, 'owner-key');
+  mkdirSync(join(repo, 'quality'), { recursive: true });
+  execFileSync('ssh-keygen', ['-q', '-t', 'ed25519', '-N', '', '-f', key]);
+  const publicKey = readFileSync(`${key}.pub`, 'utf8').trim();
+  writeFileSync(join(repo, 'quality', 'allowed-signers'), `volodya4u namespaces="git" ${publicKey}\n`);
+  const git = (...args) => execFileSync('git', ['-C', repo, '-c', 'user.name=Owner', '-c', 'user.email=owner@example.com', ...args], { encoding: 'utf8' }).trim();
+  git('init', '-q', '-b', 'main');
+  git('add', '-A');
+  git('commit', '-qm', 'baseline');
+  const head = git('rev-parse', 'HEAD');
+  const ref = `approve/${head}`;
+  const sign = (decision) => git('-c', 'gpg.format=ssh', '-c', `user.signingkey=${key}`, 'tag', '-s', '-m', 'Correction: COR-8', '-m', `Decision: ${decision}`, ref, head);
+  sign('waived');
+  const item = { data: { id: 'COR-8', disposition: { status: 'waived', by: 'volodya4u (confirmed in chat)', approvalRef: ref } } };
+  const verify = (value) => correctionModule.approvalProblem(repo, value, { base: 'main', keyTypes: ['ssh-ed25519'] });
+  assert.equal(verify(item), null);
+  assert.match(verify({ data: { ...item.data, disposition: { ...item.data.disposition, by: 'someone-else' } } }), /not someone-else/);
+  git('tag', '-d', ref);
+  sign('resolved');
+  assert.match(verify(item), /Decision: waived/);
 });

@@ -94,7 +94,8 @@ closed:
    gitignored `docs/qa/process-defects.json` (ADR-0008); the other process fixes are committed under
    `openspec/changes/archive/*-improve-PD-*`.
 
-Items 3 and 4 need only the owner. Item 1 needs an approved dependency.
+Items 3 and 4 need the owner. The dependency for item 1 is installed; confirm its recorded evidence with the release gate.
+The historical approval references in item 6 need an owner signing key and signed decisions.
 
 ## 6. Decision
 

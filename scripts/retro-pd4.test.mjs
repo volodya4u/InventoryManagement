@@ -25,10 +25,21 @@ function check() {
 }
 
 test('G3 fails when strict recordings have no producer or checker', () => {
-  const result = check();
+  let result = check();
   assert.equal(result.status, 1, result.stdout + result.stderr);
   assert.match(result.stdout + result.stderr, /record-demos/);
   assert.match(result.stdout + result.stderr, /check-recordings/);
+
+  put('scripts/record-demos.mjs', 'console.log("record");\n');
+  result = check();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stdout + result.stderr, /check-recordings/);
+
+  rmSync(join(root, 'scripts', 'record-demos.mjs'));
+  put('scripts/check-recordings.mjs', 'console.log("check");\n');
+  result = check();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stdout + result.stderr, /record-demos/);
 });
 
 test('G3 passes when the strict recordings producer and checker exist', () => {
