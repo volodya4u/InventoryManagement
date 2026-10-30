@@ -62,9 +62,9 @@ class LoopbackBindingHttpTest {
                         socket.connect(new InetSocketAddress(other, port), 2000);
                     }
                 })
-                // No connection is made. Linux answers with a refusal; Windows drops the packet to an address nothing listens
-                // on, so the attempt times out. Either way the server did not accept it; any other failure (no route, bad
-                // address) says nothing about the bind and fails the test. The first test pins `server.address` itself.
+                // No connection is made: a refusal, or a timeout (seen on Windows; the cause is the operating system's, not
+                // asserted here). Either way the server did not accept it; any other failure (no route, bad address) says
+                // nothing about the bind and fails the test. The first test pins `server.address` itself.
                 .satisfiesAnyOf(
                         thrown -> assertThat(thrown).isInstanceOf(ConnectException.class),
                         thrown -> assertThat(thrown).isInstanceOf(SocketTimeoutException.class));
