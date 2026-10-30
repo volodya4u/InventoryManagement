@@ -1,6 +1,6 @@
 {
-  "createdAt": "2026-10-30T18:54:23.313Z",
-  "gitHead": "678b3ad3718da2b78d6e83a7ea5bdaffe4e2cd67",
+  "createdAt": "2026-10-30T19:40:25.985Z",
+  "gitHead": "5f8b4d784e74ce5b13a93162e1731b33943489a5",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
@@ -15,7 +15,7 @@
     "quality/telemetry.config.json": "db4b77dfac7e3a8d267359aaa94b42b2033b99e138ce6ba387f5e3d490922cb7",
     "scripts/check-a11y.mjs": "4af88d6b1a7560868dbfdcc33293b6cb88760f668be105c79be740302221456c",
     "scripts/check-a11y.test.mjs": "dd52ec9c0df47d845695095ec75f4cae8365323ee7d0dca2edef4de0fadaf698",
-    "scripts/check-acceptance-methods.mjs": "b8fb263dea450b38c876a828b26a68edd2cc30a82f2bd152ebcf652d50e58713",
+    "scripts/check-acceptance-methods.mjs": "cfd0b28b17e6473bc9137f2932502a71d2974062b8d1a982e657ab65ad7c7658",
     "scripts/check-coverage-ratchet.mjs": "60138210c33f9f6b66061bc810e974f3db5248c293f69ba6d4e8bbf5032e566d",
     "scripts/check-coverage-ratchet.test.mjs": "c496fede507bfe21710592530e7402ebc7bff4a68cdf015d2a7f318b462b7594",
     "scripts/check-docs-lookup.mjs": "126647fe0a810c3f244a8d4b220287644e9dfe18544397df1dc2e6fa4a3900ac",
@@ -37,37 +37,14 @@
     "scripts/check-specs.mjs": "fad89135a0879dda4c1906243b9d8a6fbb4720b25e17e364f761f842bac0218b",
     "scripts/check-specs.test.mjs": "324a3a04274a57902965059335718144c532cff7d675d18bc19249694a978f09",
     "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
-    "scripts/check-traceability.mjs": "7028063fd23e04211c8316e3c1176514fe37c7bb0acd7fa313ff34f681323f6e",
+    "scripts/check-traceability.mjs": "c13393fa2dfa98796602e5dbaad8c1f90976e9a9e4320add0cad437c64883f90",
     "scripts/check-trajectory.mjs": "6a6d9f23e3d8f09ca86d502f61200223549a26f8ae2ff0c91298aed1028da1e7",
     "scripts/check-trajectory.test.mjs": "1a6e9aea5f5c54358e9d1b5a10e1433a382396217ac7f9d595f897e9872b87fd",
     "scripts/check-vision.mjs": "0e1faaf04e8ddf6d28475c80d5494b0e832ced0826f54ce97ee5861d6e10b542",
     "scripts/check-vision.test.mjs": "b9eebb5ec66917867ed5b5d10b4536f3ee538384a35e83a6919150e073aef9d9",
-    "scripts/gate-status.mjs": "fb28d568605555c2181384089fc600c7f08a1ca588f3ef5a6ec7c8ea45cb22c2"
+    "scripts/gate-status.mjs": "5ba134116b0da32a4434fde1b491d9d837c5c8fd29b500e2c76f3e55f3ca279b"
   },
   "adaptations": [
-    "additive onboarding (ADR-0001): installed only pure-Node checks (traceability, trajectory, coverage/eval ratchets, acceptance, process ratchet, integrity, ledger, correct, gate-status); Playwright/JS-app scripts, .claude/* and package.json deliberately not installed (.githooks and a factory-gates workflow were added later by ADR-0002)",
-    "check-traceability and check-acceptance-methods adapted to this repo: also scan frontend/src and count *Test.java/*Tests.java as tests for @trace tags",
-    "quality/telemetry.config.json: local-verifiable mechanism declared as scripts/dod.mjs (weak existence check); repo has no root package.json",
-    "check-eval-ratchet installed because gate-status calls them, but not applicable here (no eval artifacts in its format): it reports NOT-EARNED; check-coverage-ratchet was not applicable either until ADR-0006",
-    "lock also covers pre-existing repo gates scripts/check-*.mjs and .github/workflows/*.yml as found at onboarding",
-    "ADR-0002: .githooks/pre-commit and commit-msg (adapted hooks: no ESLint/tsc, warn-only trailers) and .github/workflows/factory-gates.yml (integrity hard gate, Dependabot skipped) added and locked in the same commit as the wiring; ci.yml and .claude/settings.json unchanged",
-    "check-factory-integrity.mjs: .github/workflows/ joins the soft tier (drift is a warning plus a ledger event) because Dependabot github-actions bumps auto-merge and edit those files; scripts and .githooks stay hard-locked (ADR-0002)",
-    "ADR-0004: scripts/gate-status.mjs restores the hook-owned reports and trace/*.json that its release variants rewrite (scripts/generated-files.mjs, imported next to hooks-pre-commit.mjs); factory-gates.yml gains a pinned openspec validate --strict step; scripts/check-trace-scanners.test.mjs joins the lock because its name matches scripts/check-*.mjs",
-    "ADR-0005 (slice 1, gate-status-explicit): scripts/check-specs.mjs accepts scripts/*.test.mjs › \"title\" references and checks the acceptance tables of active OpenSpec slice proposals, and in a pull request of each proposal the branch adds; scripts/check-specs.test.mjs pins it",
-    "ADR-0005 (slice 2, structured-test-evidence): scripts/check-specs.mjs prSpecProblems diffs with -M and checks only archived proposals the branch adds (validateSpecs checks the active ones); scripts/check-specs.test.mjs pins it",
-    "ADR-0005 (slice 3 step A, review-provenance-local): scripts/check-review.mjs counts a verdict only on a hook-recorded reviewer line (toolu_ id, its PreToolUse line, the reviewer's hand-back or Agent call) and an APPROVE only with blocking === 0; scripts/check-review.test.mjs pins it, with the #52 replay",
-    "Housekeeping re-seal (owner-approved 2026-10-22): .github/workflows/ci.yml takes the reviewed pipefail defaults of #98 (1d59673), and .github/workflows/human-approval.yml (ADR-0005 slice 3 step B, #99) joins the lock's soft tier; no gate script or hook changed",
-    "trajectory-review-from-log (owner-approved 2026-10-22): scripts/check-trajectory.mjs counts a slice without review-findings.json as reviewed when the pull request that merged it recorded the reviewer's APPROVE (0 blocking) on its head tree, by the rule of scripts/check-review.mjs, cached per merged slice in target/; scripts/check-trajectory.test.mjs pins it and joins the lock because its name matches scripts/check-*.mjs",
-    "trajectory-review-from-log, review round 2 (owner-approved 2026-10-22): a slice whose newest Slice: commit is on the first-parent line reads missing, so no later pull request lends it an approval; cache entries count only while their merge is on that line, the cache hash covers dod-fingerprint.mjs, and git errors and a tracked cache file are not trusted",
-    "trajectory-review-from-log, review round 3 (owner-approved 2026-10-22): merges are taken from main's first-parent line (origin/main, else main, else HEAD) and must be reachable from HEAD, so a branch that merged main does not pass its own merge off as a slice's pull request; a failing tree fingerprint reads missing",
-    "trajectory-review-from-log, review round 4 (owner-approved 2026-10-22): with neither origin/main nor main, every slice without review-findings.json reads missing and nothing is cached, instead of falling back to HEAD's line; the Slice: lookup uses --topo-order",
-    "trajectory-cache-tests (owner-approved 2026-10-22): scripts/check-trajectory.test.mjs pins the error and cache paths of the agent-log review evidence (a git error and a failing tree fingerprint read missing and are not cached, a cache under other rules is discarded, a warm run reads the cache); scripts/check-trajectory.mjs is unchanged",
-    "coverage-ratchet (owner-approved 2026-10-27, ADR-0006): scripts/check-coverage-ratchet.mjs gains --summary/--baseline/--label/--require (defaults unchanged; waiver check name coverage-ratchet:<label>), scripts/gate-status.mjs folds coverageBackend and coverageFrontend into G5, and scripts/check-coverage-ratchet.test.mjs joins the lock because its name matches scripts/check-*.mjs; the baselines quality/coverage-backend-baseline.json and quality/coverage-frontend-baseline.json join the quality tier",
-    "eval-ratchet (owner-approved 2026-10-28, ADR-0007): .github/workflows/ci.yml gains an Eval ratchet step and quality/eval-baseline.json is committed; check-eval-ratchet.mjs itself is unchanged and the baseline joins the lock in this re-seal",
-    "process-ratchet (owner-approved 2026-10-28, ADR-0008): scripts/check-process-ratchet.mjs counts frontend/src and *Test.java/*Tests.java for its product-code and @trace scans, scripts/check-process-ratchet.test.mjs joins the lock, and quality/process-baseline.json is earned from a local run",
-    "improve-PD-5 (owner-approved 2026-10-28, ADR-0009): scripts/check-trajectory.mjs fails an unwaived trailer or review-evidence finding of an archived slice in every mode and honours open slice waivers (Gate: Trajectory, Slices:, Checks:, Approval:) as WAIVED for exactly the listed slices and checks, and scripts/check-trajectory.test.mjs covers it",
-    "recordings (owner-approved 2026-10-30, ADR-0010): scripts/check-traceability.mjs scans e2e/ for @trace tags and accepts docs/qa/recording-exemptions.json (a requirement no page shows, with a reason and covering tests, counts as covered for --strict-recordings), scripts/check-recordings.mjs joins the lock (the plugin reference, with a stale report now failing), and the CI e2e job's timeout in .github/workflows/ci.yml is raised, which re-hashes that file",
-    "a11y-vision (owner-approved 2026-10-30, ADR-0011): scripts/check-a11y.mjs (axe over every page in both colour schemes, verified for routes, violations and freshness) and scripts/check-vision.mjs (the vision-judge report verified for completeness, screenshot hashes and freshness) join the lock",
-    "ci-gates (owner-approved 2026-10-30, ADR-0012): .github/workflows/factory-gates.yml gains two steps, check-a11y --check and check-vision, so a stale accessibility or vision report fails the pull request; no gate script changed, and the workflow is in the soft tier, so this re-seal only records its new hash"
+    "PD-4, PD-6 and PD-7 approved gate improvements; PD-8 correction approval guard"
   ]
 }

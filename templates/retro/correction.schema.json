@@ -76,7 +76,7 @@
     },
     "disposition": {
       "type": ["object", "null"],
-      "description": "ALWAYS null at intake. Set exactly once when the correction is root-caused: this is the only permitted mutation of a correction artifact.",
+      "description": "ALWAYS null at intake. Set exactly once when the correction is root-caused. A historical disposition may later receive a verified approvalRef without changing its decision.",
       "required": ["status", "by", "ts"],
       "properties": {
         "status": {

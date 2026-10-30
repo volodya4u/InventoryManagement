@@ -17,11 +17,13 @@ This changes process gates and their tests, not product behavior. No MVP require
 
 | # | Given / When / Then | Test |
 | - | ------------------- | ---- |
-| 1 | Given G7 requires strict recordings, when the recording producer or checker is absent, then G3 existence fails and names the missing mechanism | `scripts/retro-pd4.test.mjs` |
-| 2 | Given the recorded owner ratification of requirements and plan, when gate-status runs, then G1 and G3 show PASS; when the ratification is absent, they show needs sign-off and downstream PASS is recorded as divergence | `scripts/retro-pd6.test.mjs` |
-| 3 | Given traceability warnings or failures, when the check runs, then one ledger event records exit status, scope and per-class counts | `scripts/retro-pd7.test.mjs` |
-| 4 | Given a new resolved or waived correction without verifiable owner approval, when correct --check runs, then it fails; historical dispositions warn until backfilled | `scripts/retro-pd8.test.mjs` |
+| 1 | Given G7 requires strict recordings, when the recording producer or checker is absent, then G3 existence fails and names the missing mechanism | `scripts/retro-pd4.test.mjs` › "G3 fails when strict recordings have no producer or checker" |
+| 2 | Given the recorded owner ratification of requirements and plan, when gate-status runs, then G1 and G3 show PASS | `scripts/retro-pd6.test.mjs` › "recorded owner ratification earns G1 and G3" |
+| 3 | Given no recorded ratification, when gate-status runs, then G1 and G3 need sign-off and downstream PASS is recorded as divergence | `scripts/retro-pd6.test.mjs` › "missing ratification leaves sign-off pending and records downstream divergence" |
+| 4 | Given traceability warnings or failures, when the check runs, then one ledger event records exit status, scope and per-class counts | `scripts/retro-pd7.test.mjs` › "a failing traceability run emits one event with per-class counts" |
+| 5 | Given a new resolved or waived correction without verifiable owner approval, when correct --check runs, then it fails | `scripts/retro-pd8.test.mjs` › "new waived correction without owner approval fails" |
+| 6 | Given a historical correction disposition, when correct --check runs, then its unverified approval warns until backfilled | `scripts/retro-pd8.test.mjs` › "preexisting dispositions remain warnings until backfilled" |
 
 ## Impact
 
-Gate-locked scripts require an approved `Refs: PD-n` commit under the existing integrity rule. The local process ledger and defect catalog remain gitignored. Existing correction dispositions must not be silently rewritten or treated as proven.
+Gate-locked scripts are carried by an approved `Refs: PD-n` commit and the integrity lock is re-sealed in this change. The local process ledger and defect catalog remain gitignored. Existing correction dispositions must not be silently rewritten or treated as proven.
