@@ -23,8 +23,9 @@
   - PD-4, PD-6, PD-7 and PD-8 are done: each has red/green harness tests, and the slice is merged and archived. The seven
     legacy approval references are not verified yet and wait for the owner's signed decisions — evidence:
     `scripts/retro-pd*.test.mjs`, risk R-16, `node scripts/correct.mjs --check`
-  - Until a key is enrolled, every new `resolved` or `waived` correction fails `correct --check`, and the waiver recipe in
-    `AGENTS.md` does not yet mention `approvalRef` (updating it needs the evals) — evidence: `scripts/correct.mjs`
+  - Until a key is enrolled, every new `resolved` or `waived` correction fails `correct --check`; the waiver recipe in
+    `AGENTS.md` now says such an answer needs the owner's signed `approvalRef` tag — evidence: `scripts/correct.mjs`,
+    the Waivers bullet of `AGENTS.md`
   - Risks that need an owner decision are marked **Decision** — evidence: `docs/qa/risk-register.md`
 
 This file has no phase or gate line on purpose. `scripts/gate-status.mjs` compares such a line with the computed gate
