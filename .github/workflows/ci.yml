@@ -88,7 +88,7 @@ jobs:
 
       # The executable JAR (Angular build included) that the browser tests below start.
       - name: Keep the application JAR for the browser tests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: application-jar
           path: target/inventory-0.1.0-SNAPSHOT.jar
@@ -111,11 +111,11 @@ jobs:
           java-version: 21
 
       # The runner's preinstalled Node may be older than the one this pnpm version needs.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: application-jar
           path: target
@@ -132,7 +132,7 @@ jobs:
 
       - name: Keep the Playwright report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/
