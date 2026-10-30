@@ -5,10 +5,14 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "test:e2e": "playwright test",
+    "report:e2e": "node scripts/e2e-report.mjs",
     "record:demos": "node scripts/record-demos.mjs",
-    "check:recordings": "node scripts/check-recordings.mjs"
+    "check:recordings": "node scripts/check-recordings.mjs",
+    "check:a11y": "node scripts/check-a11y.mjs",
+    "check:vision": "node scripts/check-vision.mjs"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1"
   }
 }

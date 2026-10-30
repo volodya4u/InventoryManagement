@@ -1,10 +1,10 @@
 {
-  "createdAt": "2026-10-30T12:10:40.537Z",
-  "gitHead": "8096dab1fa5d4858910f860434cf0e776a5048a6",
+  "createdAt": "2026-10-30T16:18:13.263Z",
+  "gitHead": "21232b20f6554cfbd4dd5293408d0a7059f94586",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
-    ".github/workflows/ci.yml": "d4bc5f000b29ca49263aeee675178f8f782bee6e5dc6f70fa2b9bb521916282c",
+    ".github/workflows/ci.yml": "7feefb41880f708ac4e6c03e91e6922c6a346d1f70728177e0e50b0d6e617cca",
     ".github/workflows/factory-gates.yml": "1390ac9ac5ed417e38b4256d880fb12047c9f547c2b33333ada5bb7de693f2b3",
     ".github/workflows/human-approval.yml": "9d04513cfe819672c7f5af7ca346ad03e7f55de9e3e58b5aedd8e1d8459b2a01",
     ".github/workflows/pr-description.yml": "95c40b66bfc61a724a3d774537074f48e1348de1ae4c8deca6c958350077a0a5",
@@ -13,6 +13,8 @@
     "quality/eval-baseline.json": "8a1edc28bf3e9dbf4a0e1a49c1bcee54759716fcc5b4f9b9a5028d03e4413736",
     "quality/process-baseline.json": "d27069d8e710ab00bee31672b333378fb2cfca7b31879f6a18a1168ca83ea9e2",
     "quality/telemetry.config.json": "db4b77dfac7e3a8d267359aaa94b42b2033b99e138ce6ba387f5e3d490922cb7",
+    "scripts/check-a11y.mjs": "4af88d6b1a7560868dbfdcc33293b6cb88760f668be105c79be740302221456c",
+    "scripts/check-a11y.test.mjs": "dd52ec9c0df47d845695095ec75f4cae8365323ee7d0dca2edef4de0fadaf698",
     "scripts/check-acceptance-methods.mjs": "b8fb263dea450b38c876a828b26a68edd2cc30a82f2bd152ebcf652d50e58713",
     "scripts/check-coverage-ratchet.mjs": "60138210c33f9f6b66061bc810e974f3db5248c293f69ba6d4e8bbf5032e566d",
     "scripts/check-coverage-ratchet.test.mjs": "c496fede507bfe21710592530e7402ebc7bff4a68cdf015d2a7f318b462b7594",
@@ -38,6 +40,8 @@
     "scripts/check-traceability.mjs": "7028063fd23e04211c8316e3c1176514fe37c7bb0acd7fa313ff34f681323f6e",
     "scripts/check-trajectory.mjs": "6a6d9f23e3d8f09ca86d502f61200223549a26f8ae2ff0c91298aed1028da1e7",
     "scripts/check-trajectory.test.mjs": "1a6e9aea5f5c54358e9d1b5a10e1433a382396217ac7f9d595f897e9872b87fd",
+    "scripts/check-vision.mjs": "0e1faaf04e8ddf6d28475c80d5494b0e832ced0826f54ce97ee5861d6e10b542",
+    "scripts/check-vision.test.mjs": "b9eebb5ec66917867ed5b5d10b4536f3ee538384a35e83a6919150e073aef9d9",
     "scripts/gate-status.mjs": "fb28d568605555c2181384089fc600c7f08a1ca588f3ef5a6ec7c8ea45cb22c2"
   },
   "adaptations": [
@@ -62,6 +66,7 @@
     "eval-ratchet (owner-approved 2026-10-28, ADR-0007): .github/workflows/ci.yml gains an Eval ratchet step and quality/eval-baseline.json is committed; check-eval-ratchet.mjs itself is unchanged and the baseline joins the lock in this re-seal",
     "process-ratchet (owner-approved 2026-10-28, ADR-0008): scripts/check-process-ratchet.mjs counts frontend/src and *Test.java/*Tests.java for its product-code and @trace scans, scripts/check-process-ratchet.test.mjs joins the lock, and quality/process-baseline.json is earned from a local run",
     "improve-PD-5 (owner-approved 2026-10-28, ADR-0009): scripts/check-trajectory.mjs fails an unwaived trailer or review-evidence finding of an archived slice in every mode and honours open slice waivers (Gate: Trajectory, Slices:, Checks:, Approval:) as WAIVED for exactly the listed slices and checks, and scripts/check-trajectory.test.mjs covers it",
-    "recordings (owner-approved 2026-10-30, ADR-0010): scripts/check-traceability.mjs scans e2e/ for @trace tags and accepts docs/qa/recording-exemptions.json (a requirement no page shows, with a reason and covering tests, counts as covered for --strict-recordings), scripts/check-recordings.mjs joins the lock (the plugin reference, with a stale report now failing), and the CI e2e job's timeout in .github/workflows/ci.yml is raised, which re-hashes that file"
+    "recordings (owner-approved 2026-10-30, ADR-0010): scripts/check-traceability.mjs scans e2e/ for @trace tags and accepts docs/qa/recording-exemptions.json (a requirement no page shows, with a reason and covering tests, counts as covered for --strict-recordings), scripts/check-recordings.mjs joins the lock (the plugin reference, with a stale report now failing), and the CI e2e job's timeout in .github/workflows/ci.yml is raised, which re-hashes that file",
+    "a11y-vision (owner-approved 2026-10-30, ADR-0011): scripts/check-a11y.mjs (axe over every page in both colour schemes, verified for routes, violations and freshness) and scripts/check-vision.mjs (the vision-judge report verified for completeness, screenshot hashes and freshness) join the lock"
   ]
 }
