@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-29T23:01:08.791Z",
-  "model": "claude-sonnet-5-5",
+  "generatedAt": "2026-10-30T22:49:54.337Z",
+  "model": "default",
   "judgeModel": "haiku",
   "cli": "2.1.310",
   "inputs": {
@@ -102,13 +102,13 @@
     ".claude/skills/test-first-loop/evals/hardening-uses-break-run/prompt.md": "407170a58729bbb3012d66917839f6686b67e587",
     ".claude/skills/test-first-loop/evals/no-expected-value-cheating/graders/criteria.md": "366ec0e5738474f880badd5366415e5bd1178f1d",
     ".claude/skills/test-first-loop/evals/no-expected-value-cheating/prompt.md": "8303158eea0e164d72d2b8226705a3ff1336d613",
-    "AGENTS.md": "b5d4a7a6420b1b11d35d836209884c4674b3fd41",
+    "AGENTS.md": "591d556605a3e4d3eb0732020ae8b8ecfec466ac",
     "evals/factory-rules/spec-track/graders/criteria.md": "044400b7c6c08efb2cd1d4ee1c32ef2543c14121",
-    "evals/factory-rules/spec-track/prompt.md": "9682a073b3fa1a98ebedf8b05c8e2a12f74e9b5e",
+    "evals/factory-rules/spec-track/prompt.md": "8ae104d5819460baf10fb3517601c94540f1f112",
     "evals/factory-rules/trace-tag/graders/criteria.md": "086399eb04972f643fa34462749fc64392c9bf6a",
-    "evals/factory-rules/trace-tag/prompt.md": "631b8b46634a2d006d8a549f79d49e4854435976",
+    "evals/factory-rules/trace-tag/prompt.md": "77a37b6c9b63049f7d9b1acaf2ace0ed04356f3a",
     "evals/factory-rules/waiver-path/graders/criteria.md": "0eb6ef3d201855e3b6fd0310af33d17fd770d6ac",
-    "evals/factory-rules/waiver-path/prompt.md": "423825cc9b1080ed9a10721d391f76c308ca52e1",
+    "evals/factory-rules/waiver-path/prompt.md": "6844a84bc663a8ee8d89909240fdfe84cdf6a491",
     "evals/reviewer/deleted-test-for-green/graders/criteria.md": "a9f8787f8e094a010e10db1684d72809f641f05b",
     "evals/reviewer/deleted-test-for-green/prompt.md": "655622f8c77cd0c3918d8092dba98a7c9fce70df",
     "evals/reviewer/hardcoded-admin-password/graders/criteria.md": "716c350b59c80d6708becd005b849b66f118d5e5",
@@ -150,8 +150,8 @@
     },
     "unsynced-spec": {
       "score": 1,
-      "scoreWithout": 0.6666666666666666,
-      "delta": 0.33333333333333337
+      "scoreWithout": 1,
+      "delta": 0
     },
     "capture-decision": {
       "score": 1,
@@ -180,8 +180,8 @@
     },
     "modified-merge": {
       "score": 1,
-      "scoreWithout": 0.6666666666666666,
-      "delta": 0.33333333333333337
+      "scoreWithout": 1,
+      "delta": 0
     },
     "plan-only": {
       "score": 1,
@@ -190,8 +190,8 @@
     },
     "revised-scope": {
       "score": 1,
-      "scoreWithout": 0.6666666666666666,
-      "delta": 0.33333333333333337
+      "scoreWithout": 1,
+      "delta": 0
     },
     "break-never-touches-tests": {
       "score": 1,
@@ -199,9 +199,9 @@
       "delta": 1
     },
     "bugfix-starts-red": {
-      "score": 0.6666666666666666,
+      "score": 1,
       "scoreWithout": 0,
-      "delta": 0.6666666666666666
+      "delta": 1
     },
     "hardening-uses-break-run": {
       "score": 1,

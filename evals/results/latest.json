@@ -1,7 +1,7 @@
 {
   "source": "evals/record.json",
-  "recordGeneratedAt": "2026-10-29T23:01:08.791Z",
-  "model": "claude-sonnet-5-5",
+  "recordGeneratedAt": "2026-10-30T22:49:54.337Z",
+  "model": "default",
   "judgeModel": "haiku",
   "dimensions": {
     "factory-rules": 100,
@@ -13,7 +13,7 @@
     "skill-openspec-propose": 100,
     "skill-openspec-sync-specs": 100,
     "skill-openspec-update-change": 100,
-    "skill-test-first-loop": 91.7
+    "skill-test-first-loop": 100
   },
   "cases": [
     {
@@ -34,7 +34,7 @@
     {
       "name": "bugfix-starts-red",
       "suite": "skill-test-first-loop",
-      "score": 66.7
+      "score": 100
     },
     {
       "name": "capture-decision",

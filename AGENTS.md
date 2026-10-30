@@ -81,7 +81,10 @@ docs/qa/trajectory-report.md trace`, not the whole of `docs/qa` (the waivers are
   every id written in it). It shows as WAIVED, never as passed. Then run
   `node scripts/correct.mjs --detect`, which writes the correction to `retro/corrections/`; no commit passes while its
   `disposition` is empty. Ask the user, then record their answer as `{status: resolved|waived|invalid, by, ts, note}`;
-  never invent it. Set `Status: closed` when the evidence exists (the correction stays). A correction from the user,
+  never invent it. A `resolved` or `waived` answer also needs `approvalRef`, the name of the owner's hardware-signed
+  `approve/<40-hex-commit>` tag whose annotation has the lines `Correction: COR-n` and `Decision: <status>`;
+  `correct --check` verifies it. Never create, move or push such a tag: without one the commit cannot pass, so stop and
+  ask the owner to sign. Set `Status: closed` when the evidence exists (the correction stays). A correction from the user,
   e.g. "that is wrong", is recorded with `node scripts/correct.mjs "<utterance>"`.
 - Integrity lock: `factory-lock.json` hashes the gate files (`scripts/check-*.mjs`, `scripts/gate-status.mjs`,
   `.githooks/*`). Editing one fails `check-factory-integrity.mjs` unless a commit that touches it carries a
