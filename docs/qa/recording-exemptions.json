@@ -1,0 +1,85 @@
+{
+  "description": "Requirements that no recorded browser flow shows, each with the reason and the automated tests that cover it (ADR-0010). scripts/check-traceability.mjs counts an entry as covered for --strict-recordings only while some test is tagged with its id and no manifest records it.",
+  "exemptions": [
+    {
+      "id": "FR-18",
+      "reason": "A startup failure: with no administrator and no APP_ADMIN_INITIAL_PASSWORD the application does not start, so there is no page to record.",
+      "tests": [
+        "LocalAdminInitializerTest › requiresInitialPasswordWhenAdministratorDoesNotExist"
+      ]
+    },
+    {
+      "id": "FR-19",
+      "reason": "Startup against a database that already has the administrator: nothing visible changes, so there is nothing to record.",
+      "tests": [
+        "LocalAdminInitializerTest › leavesExistingAdministratorUnchanged"
+      ]
+    },
+    {
+      "id": "FR-32",
+      "reason": "A late response overtaking a sign-out or expiry. Staging it means holding a response and releasing it at a chosen moment, which this suite does not do; the interceptor's own spec does.",
+      "tests": [
+        "session.interceptor.spec.ts › cannot restore authentication from an in-flight response after expiry"
+      ]
+    },
+    {
+      "id": "FR-45",
+      "reason": "Rounding of the opening cost to four decimals. The page shows costs to two decimals and values to the cent, and no flow here uses a quantity large enough to make the fourth decimal visible.",
+      "tests": [
+        "RawMaterialServiceTest › createsMaterialAndRecordsOpeningStock"
+      ]
+    },
+    {
+      "id": "FR-70",
+      "reason": "The server's checks of an uploaded file (extension, declared type and the file's own signature). The page applies its own checks first (FR-75, recorded); sending a file the page already refuses is an API call. The suite's requests from a page send text fields, not files.",
+      "tests": [
+        "ImageValidatorTest › acceptsPngByExtensionMimeAndSignature",
+        "ImageValidatorTest › rejectsRenamedNonImage",
+        "ImageValidatorTest › rejectsAFileWhoseExtensionIsNotJpgJpegOrPngEvenWithAMatchingMimeTypeAndSignature",
+        "ImageValidatorTest › rejectsAFileWhoseDeclaredMimeTypeIsNotJpegOrPngEvenWithAMatchingExtensionAndSignature",
+        "ImageValidatorTest › rejectsAFileWhoseSignatureDisagreesWithItsDeclaredMimeType",
+        "ImageValidatorTest › acceptsJpgJpegAndUpperCaseExtensionsAndTreatsAnEmptyFileAsNoImage"
+      ]
+    },
+    {
+      "id": "FR-71",
+      "reason": "The server's 2 MB limit. The page refuses such a file first (FR-75, recorded); the server's answer to one that gets past it is an API response. The suite's requests from a page send text fields, not files.",
+      "tests": [
+        "ImageValidatorTest › rejectsFilesLargerThanTwoMegabytes"
+      ]
+    },
+    {
+      "id": "FR-72",
+      "reason": "Spring's own 413 answer to an oversized multipart request, which needs a real HTTP exchange and a file the page would not send. The suite's requests from a page send text fields, not files.",
+      "tests": [
+        "ImageUploadLimitHttpTest › acceptsAnImageOfExactlyTwoMegabytes",
+        "ImageUploadLimitHttpTest › answers413WhenAFileIsOverTwoMegabytes",
+        "ImageUploadLimitHttpTest › refusesARequestOverThreeMegabytesAndStoresNothing"
+      ]
+    },
+    {
+      "id": "FR-147",
+      "reason": "The migration of an older database file at startup, which needs a database of the older shape and shows nothing on a page.",
+      "tests": [
+        "InventorySchemaMigrationTest › migratesAnExistingRawMaterialTableAndIsIdempotent"
+      ]
+    },
+    {
+      "id": "FR-148",
+      "reason": "The opening-balance movements the migration creates for rows that existed before; the same startup path as FR-147.",
+      "tests": [
+        "InventorySchemaMigrationTest › migratesAnExistingRawMaterialTableAndIsIdempotent"
+      ]
+    },
+    {
+      "id": "FR-149",
+      "reason": "Constraints of the database itself (non-negative values, unique SKU and numbers, restricted deletes), shown by direct SQL that bypasses the application on purpose.",
+      "tests": [
+        "InventoryFlowIntegrationTest › rejectsDuplicateSkusAndDeletingRecordsThatAreInUse",
+        "InventoryFlowIntegrationTest › refusesNegativeQuantitiesAndCostsAndValuesOutsideTheClosedSetsAtTheDatabase",
+        "InventoryFlowIntegrationTest › refusesDuplicateSaleAndReturnNumbersIgnoringCaseAtTheDatabase",
+        "InventoryFlowIntegrationTest › refusesToDeleteRowsThatOtherRowsReferenceAtTheDatabase"
+      ]
+    }
+  ]
+}

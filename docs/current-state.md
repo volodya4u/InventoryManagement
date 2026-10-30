@@ -45,10 +45,11 @@ purpose:
 The names below come from the Project Factory plugin's catalogue; ADR-0001 itself names only the Playwright and
 JavaScript-app scripts, "parity, automations, `qa-verify`".
 
-- Scripts that need Playwright or a JavaScript app: `qa-verify`, `record-demos`, `check-recordings`, `check-a11y`,
-  `check-visual-fidelity`, `check-parity-suite`, `parity-block-loop`. The owner approved Playwright on 2026-10-30
-  and it is installed (see the last bullet); these scripts are still not, and the recording column of the traceability
-  report stays empty until the recordings are made in the next pull request.
+- Scripts that need Playwright or a JavaScript app: `qa-verify`, `check-a11y`, `check-visual-fidelity`,
+  `check-parity-suite`, `parity-block-loop`. The owner approved Playwright on 2026-10-30 and it is installed (see the last
+  bullet). `record-demos` and `check-recordings` now exist (ADR-0010): the clips in `docs/qa/demo-recordings/` are the browser
+  specs recorded, and 10 requirements no page can show are listed in `docs/qa/recording-exemptions.json`. The accessibility
+  and vision checks are not built yet.
 - `automations/` (drift-watch, dep-audit, ci-triage in the plugin): opt-in and off by default; the folder does not exist
   here.
 - The factory's agents and workflows: the plugin provides them, and the repository uses its own `reviewer` agent.

@@ -40,3 +40,30 @@ export function runSettings(env = process.env, { mkdtemp = () => mkdtempSync(joi
 export function serverEnvironment(settings, base = process.env) {
   return { ...base, [bootstrapPasswordVariable]: settings.adminPassword };
 }
+
+export const browsers = ['chromium', 'firefox', 'webkit'];
+
+// One application server per browser project, each with its own port and database: the specs create data by name, and a
+// second browser would otherwise find the first one's rows. The first project keeps the base port and database of
+// runSettings; the others follow it in the order of `browsers`. E2E_BROWSERS (comma-separated) runs fewer of them.
+export function projectServers(settings, env = process.env) {
+  const wanted = (env.E2E_BROWSERS ?? browsers.join(',')).split(',').map((name) => name.trim()).filter(Boolean);
+  const unknown = wanted.filter((name) => !browsers.includes(name));
+  if (unknown.length) {
+    throw new Error(`E2E_BROWSERS names an unknown browser: ${unknown.join(', ')} (known: ${browsers.join(', ')})`);
+  }
+  return browsers.flatMap((name, index) => {
+    if (!wanted.includes(name)) return [];
+    const port = String(Number(settings.port) + index);
+    const databaseUrl = index === 0 ? settings.databaseUrl : settings.databaseUrl.replace(/[^/]*$/, `${name}.db`);
+    return [
+      {
+        name,
+        port,
+        baseURL: `http://127.0.0.1:${port}`,
+        databaseUrl,
+        command: `java -jar "${settings.jar}" --server.port=${port} --spring.datasource.url="${databaseUrl}"`,
+      },
+    ];
+  });
+}

@@ -35,7 +35,10 @@ const PATHS = {
   changesDir: "openspec/changes",
   qaDir: "docs/qa",
   // ADR-0001 adaptation: "src" holds the JUnit tests (src/test/java) and "frontend/src" the Vitest specs.
-  testDirs: ["lib", "tests", "app", "src", "frontend/src", "components", "evals"],
+  // ADR-0010 adaptation: "e2e" holds the Playwright specs (e2e/*.spec.ts).
+  testDirs: ["lib", "tests", "app", "src", "frontend/src", "components", "evals", "e2e"],
+  // ADR-0010 adaptation: requirements a browser cannot show (docs/qa/recording-exemptions.json).
+  exemptions: "docs/qa/recording-exemptions.json",
   reportOut: "docs/qa/traceability-report.md",
   jsonOut: "trace/trace.json",
 };
@@ -177,8 +180,34 @@ for (const file of walk(PATHS.qaDir, (f) => f === "manifest.json")) {
     recordingMentions.get(id).push(file.replaceAll("\\", "/"));
   }
 }
+// ADR-0010 adaptation: a requirement that no page can show (an API rule, startup, a header) is listed in
+// docs/qa/recording-exemptions.json with its reason and the automated tests that cover it, and counts as covered for
+// --strict-recordings. An entry is held to the same standard as a recording: it names a real MVP requirement, has a
+// reason and a test, some test is tagged with its id, and no manifest also records it (then the entry is stale).
+const exempt = new Set();
+const exemptionsText = read(PATHS.exemptions);
+if (exemptionsText !== null) {
+  let list = null;
+  try {
+    list = JSON.parse(exemptionsText).exemptions;
+  } catch {
+    fail("recording-exemption", `${PATHS.exemptions} is not valid JSON`);
+  }
+  if (list !== null && !Array.isArray(list)) fail("recording-exemption", `${PATHS.exemptions} has no "exemptions" list`);
+  for (const e of Array.isArray(list) ? list : []) {
+    const id = String(e?.id ?? "");
+    const problems = [];
+    if (!mvpFRs.includes(id)) problems.push("is not an MVP functional requirement of docs/requirements.md");
+    if (!String(e?.reason ?? "").trim()) problems.push("has no reason");
+    if (!Array.isArray(e?.tests) || e.tests.length === 0 || e.tests.some((t) => !String(t).trim())) problems.push("names no test that covers it");
+    if (mvpFRs.includes(id) && !testTraces.has(id)) problems.push(`has no test annotated "@trace ${id}", so no test covers it`);
+    if (recordingMentions.has(id)) problems.push("is also recorded by a manifest, so the exemption is stale: remove it");
+    if (problems.length) fail("recording-exemption", `${id || "(no id)"} in ${PATHS.exemptions}: ${problems.join("; ")}`);
+    else exempt.add(id);
+  }
+}
 for (const id of mvpFRs) {
-  if (!recordingMentions.has(id)) {
+  if (!recordingMentions.has(id) && !exempt.has(id)) {
     const report = `${id} is not referenced by any recording manifest under ${PATHS.qaDir}/`;
     if (flags.has("--strict-recordings")) fail("recording-evidence", report);
     else warn("recording-evidence", report);
@@ -209,6 +238,7 @@ const rows = mvpFRs.map((id) => ({
   planned: planText ? new Set(idsIn(planText)).has(id) : null,
   tests: testTraces.get(id) ?? [],
   recordings: recordingMentions.get(id) ?? [],
+  recordingExempt: exempt.has(id),
 }));
 
 // Generated artifacts are ASCII-only on purpose: they get parsed, diffed,
@@ -227,7 +257,7 @@ Result: ${failures.length === 0 ? "PASS" : `FAIL (${failures.length} failure${fa
 ${rows
   .map(
     (r) =>
-      `| ${r.id} | ${r.specs.length ? "yes" : "**MISSING**"} | ${r.planned === null ? "n/a" : r.planned ? "yes" : "**MISSING**"} | ${r.tests.length ? r.tests.length : "-"} | ${r.recordings.length ? "yes" : "-"} |`,
+      `| ${r.id} | ${r.specs.length ? "yes" : "**MISSING**"} | ${r.planned === null ? "n/a" : r.planned ? "yes" : "**MISSING**"} | ${r.tests.length ? r.tests.length : "-"} | ${r.recordings.length ? "yes" : r.recordingExempt ? "exempt" : "-"} |`,
   )
   .join("\n")}
 

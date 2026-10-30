@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { runSettings, serverEnvironment } from "../e2e/support/run-settings.mjs";
+import { browsers, projectServers, runSettings, serverEnvironment } from "../e2e/support/run-settings.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -57,10 +57,12 @@ test("the settings can be overridden from the environment", () => {
 test("the Playwright configuration runs the specs in Chromium, Firefox and WebKit", () => {
   const config = read("playwright.config.ts");
 
-  for (const name of ["chromium", "firefox", "webkit"]) {
-    assert.match(config, new RegExp(`name: '${name}'`));
+  assert.deepEqual(browsers, ["chromium", "firefox", "webkit"]);
+  for (const [name, device] of [["chromium", "Desktop Chrome"], ["firefox", "Desktop Firefox"], ["webkit", "Desktop Safari"]]) {
+    assert.match(config, new RegExp(`${name}: devices\\['${device}'\\]`));
   }
   assert.match(config, /runSettings\(/);
+  assert.match(config, /projectServers\(/);
 });
 
 test("the browser tests job in CI starts after the build and runs the JAR that build made", () => {
@@ -76,4 +78,27 @@ test("Dependabot auto-merge waits for the browser tests", () => {
   const ci = read(".github/workflows/ci.yml");
 
   assert.match(ci, /dependabot-auto-merge:\r?\n {4}needs: \[build-and-test, e2e\]/);
+});
+
+test("each browser project gets its own server port and database", () => {
+  const env = {};
+  const settings = runSettings(env, fixed);
+  const servers = projectServers(settings, env);
+
+  assert.deepEqual(servers.map((s) => s.name), ["chromium", "firefox", "webkit"]);
+  assert.deepEqual(servers.map((s) => Number(s.port)), [18081, 18082, 18083]);
+  assert.equal(new Set(servers.map((s) => s.databaseUrl)).size, 3);
+  assert.equal(servers[0].databaseUrl, settings.databaseUrl);
+  assert.equal(servers[1].databaseUrl, "jdbc:sqlite:/tmp/inventory-e2e-abc123/firefox.db");
+  assert.equal(servers[2].baseURL, "http://127.0.0.1:18083");
+  assert.ok(servers[2].command.includes('--server.port=18083 --spring.datasource.url="jdbc:sqlite:/tmp/inventory-e2e-abc123/webkit.db"'));
+});
+
+test("E2E_BROWSERS limits the projects and refuses a name it does not know", () => {
+  const env = { E2E_BROWSERS: "webkit, chromium" };
+  const settings = runSettings(env, fixed);
+
+  assert.deepEqual(projectServers(settings, env).map((s) => s.name), ["chromium", "webkit"]);
+  assert.deepEqual(projectServers(settings, env).map((s) => Number(s.port)), [18081, 18083]);
+  assert.throws(() => projectServers(settings, { E2E_BROWSERS: "opera" }), /opera/);
 });

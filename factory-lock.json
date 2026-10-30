@@ -1,10 +1,10 @@
 {
-  "createdAt": "2026-10-28T21:39:14.059Z",
-  "gitHead": "4e23bcf5612b1dbec1c00e6698f06f699913cf8d",
+  "createdAt": "2026-10-30T12:10:40.537Z",
+  "gitHead": "8096dab1fa5d4858910f860434cf0e776a5048a6",
   "files": {
     ".githooks/commit-msg": "e7e90fff069a99cd15c4ffd06cf705446a5ae52b266b58d4e2db8e154a3eb25d",
     ".githooks/pre-commit": "5e61ed425a7b465fa753ebc436ae4fd9e0db9523f94d0fb3348460802daac908",
-    ".github/workflows/ci.yml": "1e5817faee05856a51076b26d737dc86af6a2060fe7c914de85161522475078e",
+    ".github/workflows/ci.yml": "d4bc5f000b29ca49263aeee675178f8f782bee6e5dc6f70fa2b9bb521916282c",
     ".github/workflows/factory-gates.yml": "1390ac9ac5ed417e38b4256d880fb12047c9f547c2b33333ada5bb7de693f2b3",
     ".github/workflows/human-approval.yml": "9d04513cfe819672c7f5af7ca346ad03e7f55de9e3e58b5aedd8e1d8459b2a01",
     ".github/workflows/pr-description.yml": "95c40b66bfc61a724a3d774537074f48e1348de1ae4c8deca6c958350077a0a5",
@@ -27,12 +27,15 @@
     "scripts/check-pr-description.test.mjs": "7deacaae484e64e0109e2467852f34df0e7593c766387f74a0406020f0398acb",
     "scripts/check-process-ratchet.mjs": "39e6b54666b0212e7d69ddcb02c7091a81b14bc995edf1d2b49abd2510595404",
     "scripts/check-process-ratchet.test.mjs": "4d1cb6b16379267b4e70acfa5aaa8db037b7f5a16440e56b21bb1e15b344e8ff",
+    "scripts/check-recording-exemptions.test.mjs": "2983d0c6dabcd2eb38a4a49a769c26d9cf5fbbef342d1756ef28d9e30c6d45bd",
+    "scripts/check-recordings.mjs": "2b81784d5b97a80d1d318082fc811715941bc186248173c975ff8a45cefe459c",
+    "scripts/check-recordings.test.mjs": "96d2f0a778ca71bdf0b9f1f6ac56c602304a0bff08e7dcc748618babb8147efa",
     "scripts/check-review.mjs": "e518dbe308d82812c8c8ab9a6f34e67091f103872a5c58ef2c46caa3d7f306d8",
     "scripts/check-review.test.mjs": "cbcbabde938bab9f68e99926ec33b308f84a454edfe57b6dfd7e13d07932cfbe",
     "scripts/check-specs.mjs": "fad89135a0879dda4c1906243b9d8a6fbb4720b25e17e364f761f842bac0218b",
     "scripts/check-specs.test.mjs": "324a3a04274a57902965059335718144c532cff7d675d18bc19249694a978f09",
     "scripts/check-trace-scanners.test.mjs": "28dcd90f75e9f7962ffa966ba8ae5d7e6253a8162bdbf84da03c7b1c69cec8e9",
-    "scripts/check-traceability.mjs": "5c5203555db344c2410bca4cab07e11fc662785ed2abf19500f228cab3315775",
+    "scripts/check-traceability.mjs": "7028063fd23e04211c8316e3c1176514fe37c7bb0acd7fa313ff34f681323f6e",
     "scripts/check-trajectory.mjs": "6a6d9f23e3d8f09ca86d502f61200223549a26f8ae2ff0c91298aed1028da1e7",
     "scripts/check-trajectory.test.mjs": "1a6e9aea5f5c54358e9d1b5a10e1433a382396217ac7f9d595f897e9872b87fd",
     "scripts/gate-status.mjs": "fb28d568605555c2181384089fc600c7f08a1ca588f3ef5a6ec7c8ea45cb22c2"
@@ -58,6 +61,7 @@
     "coverage-ratchet (owner-approved 2026-10-27, ADR-0006): scripts/check-coverage-ratchet.mjs gains --summary/--baseline/--label/--require (defaults unchanged; waiver check name coverage-ratchet:<label>), scripts/gate-status.mjs folds coverageBackend and coverageFrontend into G5, and scripts/check-coverage-ratchet.test.mjs joins the lock because its name matches scripts/check-*.mjs; the baselines quality/coverage-backend-baseline.json and quality/coverage-frontend-baseline.json join the quality tier",
     "eval-ratchet (owner-approved 2026-10-28, ADR-0007): .github/workflows/ci.yml gains an Eval ratchet step and quality/eval-baseline.json is committed; check-eval-ratchet.mjs itself is unchanged and the baseline joins the lock in this re-seal",
     "process-ratchet (owner-approved 2026-10-28, ADR-0008): scripts/check-process-ratchet.mjs counts frontend/src and *Test.java/*Tests.java for its product-code and @trace scans, scripts/check-process-ratchet.test.mjs joins the lock, and quality/process-baseline.json is earned from a local run",
-    "improve-PD-5 (owner-approved 2026-10-28, ADR-0009): scripts/check-trajectory.mjs fails an unwaived trailer or review-evidence finding of an archived slice in every mode and honours open slice waivers (Gate: Trajectory, Slices:, Checks:, Approval:) as WAIVED for exactly the listed slices and checks, and scripts/check-trajectory.test.mjs covers it"
+    "improve-PD-5 (owner-approved 2026-10-28, ADR-0009): scripts/check-trajectory.mjs fails an unwaived trailer or review-evidence finding of an archived slice in every mode and honours open slice waivers (Gate: Trajectory, Slices:, Checks:, Approval:) as WAIVED for exactly the listed slices and checks, and scripts/check-trajectory.test.mjs covers it",
+    "recordings (owner-approved 2026-10-30, ADR-0010): scripts/check-traceability.mjs scans e2e/ for @trace tags and accepts docs/qa/recording-exemptions.json (a requirement no page shows, with a reason and covering tests, counts as covered for --strict-recordings), scripts/check-recordings.mjs joins the lock (the plugin reference, with a stale report now failing), and the CI e2e job's timeout in .github/workflows/ci.yml is raised, which re-hashes that file"
   ]
 }

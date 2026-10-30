@@ -1,9 +1,10 @@
 # Demo script — Flower Shop Inventory
 
 A walkthrough that shows the shop's whole stock-and-sales cycle in about fifteen minutes, one scene per capability and one
-security scene. It is written to be performed live by a person. **No recording of it exists yet:** recordings need a browser
-automation tool that this repository does not have (the Playwright decision is open, see risk R-13 in
-`docs/qa/risk-register.md`). If one is added later, each scene below is the script for one clip, and the sentence under "Show" is what the clip must make visible.
+security scene. It is written to be performed live by a person. **The clips in `docs/qa/demo-recordings/` are not this demo:** they are the
+Playwright specs in `e2e/` recorded one test at a time (`pnpm run record:demos`, ADR-0010), each proving the requirements it is
+tagged with. This script is still the live walkthrough, and each scene below can be checked against the clip whose requirements
+it names.
 
 ## Setup
 
