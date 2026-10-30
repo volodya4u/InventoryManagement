@@ -11,8 +11,8 @@
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
   accepted: no manual case has been run and the owner has not signed `docs/qa/mvp-acceptance-report.md`.
-- **Next task:** complete and review the four approved retro fixes, then ask the owner to enroll a hardware signing key
-  and sign decisions for the seven historical correction dispositions (risk R-16). The owner still needs to run
+- **Next task:** ask the owner to enroll a hardware signing key and sign decisions for the seven historical correction
+  dispositions (risk R-16). The owner still needs to run
   `docs/qa/manual-test-plan.md` and decide in section 6 of the acceptance report.
 - **Claims:**
   - The release gate is red, and the reasons are listed — evidence: `docs/qa/mvp-acceptance-report.md` (section 5) and
