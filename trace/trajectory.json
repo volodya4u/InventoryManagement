@@ -259,6 +259,34 @@
       "trailerCommits": 8,
       "libDomains": [],
       "processComplete": true
+    },
+    {
+      "slice": "2026-10-30-bind-loopback",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 4,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-30-playwright-a11y-vision",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 6,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-30-playwright-foundation",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
+    },
+    {
+      "slice": "2026-10-30-playwright-recordings",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 1,
+      "libDomains": [],
+      "processComplete": true
     }
   ],
   "overlaps": [],
