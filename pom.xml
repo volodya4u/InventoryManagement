@@ -23,7 +23,7 @@
         <node.version>v24.15.0</node.version>
         <pnpm.version>11.9.0</pnpm.version>
         <skip.frontend>false</skip.frontend>
-        <jacoco.version>0.8.15</jacoco.version>
+        <jacoco.version>0.8.16</jacoco.version>
     </properties>
 
     <dependencies>
