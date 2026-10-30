@@ -381,6 +381,16 @@ export function approvalProblem(root, correction, { base = "origin/main", keyTyp
   return null;
 }
 
+// The baseline is a parameter so a test can use a fixture repository: the real
+// baseline commit is absent from a shallow CI checkout.
+export function approvalVerdict(root, correction, baseline = APPROVAL_BASELINE) {
+  const problem = approvalProblem(root, correction);
+  if (!problem) return null;
+  const { id } = correction.data;
+  if (legacyDisposition(root, correction, baseline)) return { warning: `LEGACY-APPROVAL ${id} (${correction.file}): ${problem}; owner backfill pending` };
+  return { failure: `UNVERIFIED-APPROVAL ${id} (${correction.file}): ${problem}` };
+}
+
 function runCheck(root, schema) {
   const events = detectAutoCorrections(root);
   const corrections = readCorrections(root);
@@ -403,9 +413,9 @@ function runCheck(root, schema) {
       const short = c.data.utterance.length > 70 ? `${c.data.utterance.slice(0, 67)}...` : c.data.utterance;
       failures.push(`OPEN-CORRECTION ${c.data.id}: "${short}" (${c.file}) — undispositioned; no gate may pass over it`);
     } else if (["resolved", "waived"].includes(c.data.disposition.status)) {
-      const problem = approvalProblem(root, c);
-      if (problem && legacyDisposition(root, c)) warnings.push(`LEGACY-APPROVAL ${c.data.id} (${c.file}): ${problem}; owner backfill pending`);
-      else if (problem) failures.push(`UNVERIFIED-APPROVAL ${c.data.id} (${c.file}): ${problem}`);
+      const verdict = approvalVerdict(root, c);
+      if (verdict?.warning) warnings.push(verdict.warning);
+      else if (verdict?.failure) failures.push(verdict.failure);
     }
   }
   console.log(`Scope: ${events.length + corrections.length} correction signal(s)`);

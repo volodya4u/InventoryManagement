@@ -37,10 +37,28 @@ test('a typed but unverified approval reference does not pass', () => {
   assert.match(result.stdout + result.stderr, /approvalRef|signed approval/);
 });
 
+// The pinned baseline commit is absent from a shallow CI checkout, so the legacy cases use a fixture repository.
+function legacyRepo(name) {
+  const repo = join(root, name);
+  mkdirSync(join(repo, 'retro', 'corrections'), { recursive: true });
+  const git = (...args) => execFileSync('git', ['-C', repo, '-c', 'user.name=Owner', '-c', 'user.email=owner@example.com', ...args], { encoding: 'utf8' }).trim();
+  git('init', '-q', '-b', 'main');
+  writeFileSync(join(repo, 'retro', 'corrections', '008-human.correction.json'), JSON.stringify(correction));
+  git('add', '-A');
+  git('commit', '-qm', 'historical correction');
+  return { repo, baseline: git('rev-parse', 'HEAD') };
+}
+
 test('preexisting dispositions remain warnings until backfilled', () => {
-  const result = check(project);
-  assert.equal(result.status, 0, result.stdout + result.stderr);
-  assert.match(result.stdout + result.stderr, /LEGACY-APPROVAL/);
+  const { repo, baseline } = legacyRepo('warning-repo');
+  const old = { file: 'retro/corrections/008-human.correction.json', data: correction };
+  const legacy = correctionModule.approvalVerdict(repo, old, baseline);
+  assert.match(legacy.warning, /LEGACY-APPROVAL COR-8/);
+  assert.equal(legacy.failure, undefined);
+  const added = { file: 'retro/corrections/009-human.correction.json', data: { ...correction, id: 'COR-9' } };
+  const fresh = correctionModule.approvalVerdict(repo, added, baseline);
+  assert.match(fresh.failure, /UNVERIFIED-APPROVAL COR-9/);
+  assert.equal(fresh.warning, undefined);
 });
 
 test('a signed owner decision with matching annotation verifies a historical by value', () => {
@@ -70,15 +88,7 @@ test('a signed owner decision with matching annotation verifies a historical by 
 
 test('editing a historical disposition cannot inherit its legacy warning', () => {
   assert.equal(typeof correctionModule.legacyDisposition, 'function');
-  const repo = join(root, 'legacy-repo');
-  const correctionPath = join(repo, 'retro', 'corrections', '008-human.correction.json');
-  mkdirSync(join(repo, 'retro', 'corrections'), { recursive: true });
-  const git = (...args) => execFileSync('git', ['-C', repo, '-c', 'user.name=Owner', '-c', 'user.email=owner@example.com', ...args], { encoding: 'utf8' }).trim();
-  git('init', '-q', '-b', 'main');
-  writeFileSync(correctionPath, JSON.stringify(correction));
-  git('add', '-A');
-  git('commit', '-qm', 'historical correction');
-  const baseline = git('rev-parse', 'HEAD');
+  const { repo, baseline } = legacyRepo('legacy-repo');
   const old = { file: 'retro/corrections/008-human.correction.json', data: correction };
   assert.equal(correctionModule.legacyDisposition(repo, old, baseline), true);
   for (const field of ['by', 'ts', 'note']) {
