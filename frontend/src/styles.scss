@@ -285,6 +285,14 @@ textarea {
   white-space: nowrap;
 }
 
+// Below the desktop width a long header label ("Average Unit Cost") may wrap, so the table needs less room whatever the
+// fallback font is: the CI runner has no Inter or Segoe UI, and its wider font made the Raw Materials table 55px too wide.
+@media (max-width: 991.98px) {
+  .table thead th {
+    white-space: normal;
+  }
+}
+
 @media (max-width: 767.98px) {
   .page-heading {
     align-items: stretch;

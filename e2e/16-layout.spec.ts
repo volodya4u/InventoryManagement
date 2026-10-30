@@ -79,6 +79,9 @@ test.describe('on a tablet', () => {
     await expect(page.getByRole('heading', { name: 'Raw Materials', level: 1 })).toBeVisible();
     const frame = page.locator('.table-responsive').first();
     expect(await frame.evaluate((el) => el.scrollWidth - el.clientWidth), 'the table is wider than its frame').toBeLessThanOrEqual(0);
+    // The same with a wide fallback font, which is what a machine without Inter or Segoe UI (the CI runner) shows: 55px more.
+    await page.addStyleTag({ content: "* { font-family: Verdana, 'DejaVu Sans', sans-serif !important; }" });
+    expect(await frame.evaluate((el) => el.scrollWidth - el.clientWidth), 'the table is wider than its frame in a wide font').toBeLessThanOrEqual(0);
   });
 });
 
