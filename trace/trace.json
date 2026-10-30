@@ -197,9 +197,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-2",
@@ -208,9 +212,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-3",
@@ -219,9 +227,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-4",
@@ -230,9 +242,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/15-security.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-5",
@@ -241,9 +257,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/15-security.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-6",
@@ -252,9 +272,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/15-security.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-7",
@@ -264,9 +288,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "frontend/src/app/core/auth.service.spec.ts"
+        "frontend/src/app/core/auth.service.spec.ts",
+        "e2e/15-security.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-8",
@@ -275,9 +303,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/15-security.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-9",
@@ -288,9 +320,13 @@
       "tests": [
         "frontend/src/app/core/auth.service.spec.ts",
         "frontend/src/app/layout/shell.component.spec.ts",
-        "frontend/src/app/layout/shell.component.spec.ts"
+        "frontend/src/app/layout/shell.component.spec.ts",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-10",
@@ -299,9 +335,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/17-change-password.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-11",
@@ -311,9 +351,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "frontend/src/app/change-password/change-password.component.spec.ts"
+        "frontend/src/app/change-password/change-password.component.spec.ts",
+        "e2e/17-change-password.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-12",
@@ -322,9 +366,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/17-change-password.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-13",
@@ -333,9 +381,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/17-change-password.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-14",
@@ -344,9 +396,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/17-change-password.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-15",
@@ -356,9 +412,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/change-password/change-password.component.spec.ts",
-        "frontend/src/app/login/login.component.spec.ts"
+        "frontend/src/app/login/login.component.spec.ts",
+        "e2e/17-change-password.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-16",
@@ -367,9 +427,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/change-password/change-password.component.spec.ts"
+        "frontend/src/app/change-password/change-password.component.spec.ts",
+        "e2e/17-change-password.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-17",
@@ -378,9 +442,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/auth/LocalAdminInitializerTest.java"
+        "src/test/java/com/flowershop/inventory/auth/LocalAdminInitializerTest.java",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-18",
@@ -391,7 +459,8 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/auth/LocalAdminInitializerTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-19",
@@ -402,7 +471,8 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/auth/LocalAdminInitializerTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-20",
@@ -412,9 +482,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/login/login.component.spec.ts",
-        "frontend/src/app/login/login.component.spec.ts"
+        "frontend/src/app/login/login.component.spec.ts",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-21",
@@ -423,9 +497,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/login/login.component.spec.ts"
+        "frontend/src/app/login/login.component.spec.ts",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-22",
@@ -434,9 +512,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/login/login.component.spec.ts"
+        "frontend/src/app/login/login.component.spec.ts",
+        "e2e/01-sign-in.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-23",
@@ -445,9 +527,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/15-security.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-24",
@@ -456,9 +542,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/core/session.interceptor.spec.ts"
+        "frontend/src/app/core/session.interceptor.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-25",
@@ -468,9 +558,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/core/session.interceptor.spec.ts",
-        "frontend/src/app/core/session.interceptor.spec.ts"
+        "frontend/src/app/core/session.interceptor.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-26",
@@ -480,9 +574,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/core/session.interceptor.spec.ts",
-        "frontend/src/app/login/login.component.spec.ts"
+        "frontend/src/app/login/login.component.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-27",
@@ -493,9 +591,13 @@
       "tests": [
         "frontend/src/app/core/session-navigation.spec.ts",
         "frontend/src/app/core/session.interceptor.spec.ts",
-        "frontend/src/app/core/session.interceptor.spec.ts"
+        "frontend/src/app/core/session.interceptor.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-28",
@@ -504,9 +606,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/core/session-navigation.spec.ts"
+        "frontend/src/app/core/session-navigation.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-29",
@@ -516,9 +622,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/core/session.interceptor.spec.ts",
-        "frontend/src/app/core/session.interceptor.spec.ts"
+        "frontend/src/app/core/session.interceptor.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-30",
@@ -528,9 +638,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/core/session.interceptor.spec.ts",
-        "frontend/src/app/core/session.interceptor.spec.ts"
+        "frontend/src/app/core/session.interceptor.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-31",
@@ -540,9 +654,14 @@
       "planned": true,
       "tests": [
         "frontend/src/app/core/session.interceptor.spec.ts",
-        "frontend/src/app/core/session.interceptor.spec.ts"
+        "frontend/src/app/core/session.interceptor.spec.ts",
+        "e2e/02-session.spec.ts",
+        "e2e/02-session.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-32",
@@ -553,7 +672,8 @@
       "tests": [
         "frontend/src/app/core/session.interceptor.spec.ts"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-33",
@@ -562,9 +682,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/03-shell.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-34",
@@ -577,9 +701,13 @@
         "frontend/src/app/app.routes.spec.ts",
         "frontend/src/app/app.routes.spec.ts",
         "frontend/src/app/app.routes.spec.ts",
-        "frontend/src/app/app.routes.spec.ts"
+        "frontend/src/app/app.routes.spec.ts",
+        "e2e/03-shell.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-35",
@@ -588,9 +716,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/layout/shell.component.spec.ts"
+        "frontend/src/app/layout/shell.component.spec.ts",
+        "e2e/03-shell.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-36",
@@ -599,9 +731,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/15-security.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-37",
@@ -610,9 +746,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/12-dashboard.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-38",
@@ -621,9 +761,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/12-dashboard.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-39",
@@ -632,9 +776,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/12-dashboard.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-40",
@@ -644,9 +792,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/dashboard/dashboard.component.spec.ts",
-        "frontend/src/app/dashboard/dashboard.component.spec.ts"
+        "frontend/src/app/dashboard/dashboard.component.spec.ts",
+        "e2e/12-dashboard.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-41",
@@ -656,9 +808,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/dashboard/dashboard.component.spec.ts",
-        "frontend/src/app/dashboard/dashboard.component.spec.ts"
+        "frontend/src/app/dashboard/dashboard.component.spec.ts",
+        "e2e/12-dashboard.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-42",
@@ -667,9 +823,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-43",
@@ -678,9 +838,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-44",
@@ -689,9 +853,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/inventory/RawMaterialServiceTest.java"
+        "src/test/java/com/flowershop/inventory/inventory/RawMaterialServiceTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-45",
@@ -703,7 +871,8 @@
         "src/test/java/com/flowershop/inventory/inventory/RawMaterialServiceTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-46",
@@ -712,9 +881,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-47",
@@ -723,9 +896,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-48",
@@ -734,9 +911,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-49",
@@ -745,9 +926,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-50",
@@ -756,9 +941,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-51",
@@ -768,9 +957,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-52",
@@ -780,9 +973,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/RawMaterialServiceTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-53",
@@ -791,9 +988,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-54",
@@ -802,9 +1003,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-55",
@@ -815,9 +1020,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
-        "frontend/src/app/raw-materials/raw-materials.component.spec.ts"
+        "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-56",
@@ -826,9 +1035,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-57",
@@ -838,9 +1051,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/config/InventorySchemaMigrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/04-raw-materials.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-58",
@@ -850,9 +1067,14 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-59",
@@ -861,9 +1083,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/raw-materials/raw-materials.component.spec.ts"
+        "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-60",
@@ -872,9 +1098,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-61",
@@ -883,9 +1113,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-62",
@@ -895,9 +1129,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/RawMaterialServiceTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-63",
@@ -907,9 +1145,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/RawMaterialServiceTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-64",
@@ -918,9 +1160,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-65",
@@ -930,9 +1176,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/RawMaterialServiceTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-66",
@@ -941,9 +1191,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-67",
@@ -952,9 +1206,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-68",
@@ -966,9 +1224,13 @@
         "src/test/java/com/flowershop/inventory/common/SqliteDecimalsTest.java",
         "src/test/java/com/flowershop/inventory/common/SqliteDecimalsTest.java",
         "src/test/java/com/flowershop/inventory/common/SqliteDecimalsTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-69",
@@ -989,9 +1251,14 @@
         "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
         "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
         "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
-        "frontend/src/app/raw-materials/raw-materials.component.spec.ts"
+        "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
+        "e2e/04-raw-materials.spec.ts",
+        "e2e/05-raw-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-70",
@@ -1005,7 +1272,8 @@
         "src/test/java/com/flowershop/inventory/image/ImageValidatorTest.java",
         "src/test/java/com/flowershop/inventory/image/ImageValidatorTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-71",
@@ -1016,7 +1284,8 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/image/ImageValidatorTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-72",
@@ -1029,7 +1298,8 @@
         "src/test/java/com/flowershop/inventory/image/ImageUploadLimitHttpTest.java",
         "src/test/java/com/flowershop/inventory/image/ImageUploadLimitHttpTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-73",
@@ -1038,9 +1308,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/06-images.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-74",
@@ -1049,9 +1323,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/06-images.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-75",
@@ -1063,9 +1341,13 @@
         "frontend/src/app/core/image-file.spec.ts",
         "frontend/src/app/core/image-file.spec.ts",
         "frontend/src/app/core/image-file.spec.ts",
-        "frontend/src/app/core/image-file.spec.ts"
+        "frontend/src/app/core/image-file.spec.ts",
+        "e2e/06-images.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-76",
@@ -1074,9 +1356,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-77",
@@ -1086,9 +1372,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/ProductServiceTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-78",
@@ -1098,9 +1388,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "frontend/src/app/products/products.component.spec.ts"
+        "frontend/src/app/products/products.component.spec.ts",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-79",
@@ -1109,9 +1403,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-80",
@@ -1120,9 +1418,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-81",
@@ -1134,9 +1436,14 @@
         "src/test/java/com/flowershop/inventory/inventory/ProductServiceTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-82",
@@ -1148,9 +1455,13 @@
         "frontend/src/app/products/products.component.spec.ts",
         "frontend/src/app/products/products.component.spec.ts",
         "frontend/src/app/products/products.component.spec.ts",
-        "frontend/src/app/products/products.component.spec.ts"
+        "frontend/src/app/products/products.component.spec.ts",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-83",
@@ -1159,9 +1470,14 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-84",
@@ -1170,9 +1486,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-85",
@@ -1181,9 +1501,14 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/07-products.spec.ts",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-86",
@@ -1194,9 +1519,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/products/products.component.spec.ts",
-        "frontend/src/app/products/products.component.spec.ts"
+        "frontend/src/app/products/products.component.spec.ts",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-87",
@@ -1205,9 +1534,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/products/products.component.spec.ts"
+        "frontend/src/app/products/products.component.spec.ts",
+        "e2e/07-products.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-88",
@@ -1216,9 +1549,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-89",
@@ -1228,9 +1565,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/ProductServiceTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-90",
@@ -1239,9 +1580,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-91",
@@ -1252,9 +1597,13 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/ProductServiceTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-92",
@@ -1264,9 +1613,14 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/inventory/ProductServiceTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/08-production.spec.ts",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-93",
@@ -1275,9 +1629,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-94",
@@ -1288,9 +1646,13 @@
       "tests": [
         "frontend/src/app/products/products.component.spec.ts",
         "frontend/src/app/products/products.component.spec.ts",
-        "frontend/src/app/products/products.component.spec.ts"
+        "frontend/src/app/products/products.component.spec.ts",
+        "e2e/08-production.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-95",
@@ -1299,9 +1661,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/09-product-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-96",
@@ -1310,9 +1676,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/09-product-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-97",
@@ -1321,9 +1691,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/09-product-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-98",
@@ -1332,9 +1706,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/09-product-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-99",
@@ -1343,9 +1721,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/09-product-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-100",
@@ -1355,9 +1737,14 @@
       "planned": true,
       "tests": [
         "frontend/src/app/products/products.component.spec.ts",
-        "frontend/src/app/products/products.component.spec.ts"
+        "frontend/src/app/products/products.component.spec.ts",
+        "e2e/09-product-stock.spec.ts",
+        "e2e/09-product-stock.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-101",
@@ -1367,9 +1754,14 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java"
+        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java",
+        "e2e/10-sales.spec.ts",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-102",
@@ -1378,9 +1770,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-103",
@@ -1389,9 +1785,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-104",
@@ -1401,9 +1801,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java"
+        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-105",
@@ -1412,9 +1816,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-106",
@@ -1424,9 +1832,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java"
+        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-107",
@@ -1435,9 +1847,14 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/10-sales.spec.ts",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-108",
@@ -1446,9 +1863,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-109",
@@ -1457,9 +1878,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-110",
@@ -1468,9 +1893,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-111",
@@ -1479,9 +1908,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-112",
@@ -1493,9 +1926,14 @@
         "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",
-        "frontend/src/app/sales/sales.component.spec.ts"
+        "frontend/src/app/sales/sales.component.spec.ts",
+        "e2e/10-sales.spec.ts",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-113",
@@ -1508,9 +1946,13 @@
         "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",
-        "frontend/src/app/sales/sales.component.spec.ts"
+        "frontend/src/app/sales/sales.component.spec.ts",
+        "e2e/10-sales.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-114",
@@ -1519,9 +1961,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-115",
@@ -1530,9 +1976,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-116",
@@ -1541,9 +1991,14 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-117",
@@ -1552,9 +2007,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-118",
@@ -1563,9 +2022,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-119",
@@ -1574,9 +2037,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-120",
@@ -1587,9 +2054,13 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "frontend/src/app/sales/sales.component.spec.ts"
+        "frontend/src/app/sales/sales.component.spec.ts",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-121",
@@ -1599,9 +2070,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java"
+        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-122",
@@ -1611,9 +2086,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java"
+        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-123",
@@ -1622,9 +2101,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-124",
@@ -1633,9 +2116,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-125",
@@ -1644,9 +2131,14 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java"
+        "src/test/java/com/flowershop/inventory/sales/SaleServiceTest.java",
+        "e2e/11-returns.spec.ts",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-126",
@@ -1658,9 +2150,14 @@
         "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",
-        "frontend/src/app/sales/sales.component.spec.ts"
+        "frontend/src/app/sales/sales.component.spec.ts",
+        "e2e/11-returns.spec.ts",
+        "e2e/11-returns.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-127",
@@ -1669,9 +2166,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-128",
@@ -1680,9 +2181,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-129",
@@ -1691,9 +2196,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-130",
@@ -1706,9 +2215,13 @@
         "src/test/java/com/flowershop/inventory/stock/StockMovementServiceTest.java",
         "src/test/java/com/flowershop/inventory/stock/StockMovementServiceTest.java",
         "src/test/java/com/flowershop/inventory/stock/StockMovementServiceTest.java",
-        "src/test/java/com/flowershop/inventory/stock/StockMovementServiceTest.java"
+        "src/test/java/com/flowershop/inventory/stock/StockMovementServiceTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-131",
@@ -1717,9 +2230,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-132",
@@ -1728,9 +2245,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-133",
@@ -1740,9 +2261,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-134",
@@ -1751,9 +2276,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-135",
@@ -1768,9 +2297,13 @@
         "frontend/src/app/stock-movements/stock-movements.component.spec.ts",
         "frontend/src/app/stock-movements/stock-movements.component.spec.ts",
         "frontend/src/app/stock-movements/stock-movements.component.spec.ts",
-        "frontend/src/app/stock-movements/stock-movements.component.spec.ts"
+        "frontend/src/app/stock-movements/stock-movements.component.spec.ts",
+        "e2e/13-stock-history.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-136",
@@ -1781,9 +2314,13 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
         "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java",
-        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java"
+        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-137",
@@ -1793,9 +2330,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-138",
@@ -1805,9 +2346,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-139",
@@ -1817,9 +2362,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java"
+        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-140",
@@ -1829,9 +2378,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java"
+        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-141",
@@ -1840,9 +2393,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-142",
@@ -1852,9 +2409,13 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java"
+        "src/test/java/com/flowershop/inventory/reports/MonthlySalesReportServiceTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-143",
@@ -1863,9 +2424,13 @@
       ],
       "planned": true,
       "tests": [
-        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
+        "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-144",
@@ -1876,9 +2441,13 @@
       "tests": [
         "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
         "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
-        "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts"
+        "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-145",
@@ -1888,9 +2457,13 @@
       "planned": true,
       "tests": [
         "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
-        "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts"
+        "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-146",
@@ -1899,9 +2472,13 @@
       ],
       "planned": true,
       "tests": [
-        "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts"
+        "frontend/src/app/reports/monthly-sales/monthly-sales-report.component.spec.ts",
+        "e2e/14-monthly-report.spec.ts"
       ],
-      "recordings": []
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
+      "recordingExempt": false
     },
     {
       "id": "FR-147",
@@ -1912,7 +2489,8 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/config/InventorySchemaMigrationTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-148",
@@ -1923,7 +2501,8 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/config/InventorySchemaMigrationTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     },
     {
       "id": "FR-149",
@@ -1937,607 +2516,12 @@
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java"
       ],
-      "recordings": []
+      "recordings": [],
+      "recordingExempt": true
     }
   ],
   "failures": [],
   "warnings": [
-    {
-      "check": "recording-evidence",
-      "msg": "FR-1 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-2 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-3 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-4 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-5 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-6 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-7 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-8 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-9 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-10 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-11 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-12 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-13 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-14 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-15 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-16 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-17 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-18 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-19 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-20 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-21 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-22 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-23 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-24 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-25 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-26 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-27 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-28 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-29 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-30 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-31 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-32 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-33 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-34 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-35 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-36 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-37 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-38 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-39 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-40 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-41 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-42 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-43 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-44 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-45 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-46 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-47 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-48 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-49 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-50 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-51 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-52 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-53 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-54 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-55 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-56 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-57 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-58 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-59 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-60 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-61 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-62 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-63 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-64 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-65 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-66 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-67 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-68 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-69 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-70 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-71 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-72 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-73 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-74 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-75 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-76 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-77 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-78 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-79 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-80 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-81 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-82 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-83 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-84 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-85 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-86 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-87 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-88 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-89 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-90 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-91 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-92 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-93 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-94 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-95 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-96 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-97 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-98 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-99 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-100 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-101 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-102 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-103 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-104 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-105 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-106 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-107 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-108 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-109 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-110 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-111 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-112 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-113 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-114 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-115 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-116 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-117 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-118 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-119 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-120 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-121 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-122 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-123 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-124 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-125 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-126 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-127 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-128 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-129 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-130 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-131 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-132 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-133 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-134 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-135 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-136 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-137 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-138 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-139 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-140 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-141 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-142 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-143 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-144 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-145 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-146 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-147 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-148 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "recording-evidence",
-      "msg": "FR-149 is not referenced by any recording manifest under docs/qa/"
-    },
     {
       "check": "active-changes",
       "msg": "active change \"bind-loopback\" is not archived"
@@ -2545,6 +2529,10 @@
     {
       "check": "active-changes",
       "msg": "active change \"playwright-foundation\" is not archived"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"playwright-recordings\" is not archived"
     }
   ]
 }

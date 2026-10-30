@@ -4,7 +4,9 @@
   "description": "Browser tests (Playwright) for the Flower Shop Inventory application. The application's own frontend lives in frontend/.",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "record:demos": "node scripts/record-demos.mjs",
+    "check:recordings": "node scripts/check-recordings.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1"

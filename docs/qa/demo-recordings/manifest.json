@@ -1,0 +1,536 @@
+{
+  "kind": "demo",
+  "results": [
+    {
+      "id": "01-the-form-starts-with-the-administrator-name-trims-it-and",
+      "title": "the form starts with the administrator name, trims it, and does not send an empty password",
+      "proof": "FR-20",
+      "video": "docs/qa/demo-recordings/01-the-form-starts-with-the-administrator-name-trims-it-and.webm",
+      "screenshot": "docs/qa/demo-recordings/01-the-form-starts-with-the-administrator-name-trims-it-and.png",
+      "explainer": "docs/qa/demo-recordings/01-the-form-starts-with-the-administrator-name-trims-it-and.md",
+      "asserted": true
+    },
+    {
+      "id": "02-the-password-can-be-shown-and-hides-itself-again-after-f",
+      "title": "the password can be shown, and hides itself again after five seconds",
+      "proof": "FR-22",
+      "video": "docs/qa/demo-recordings/02-the-password-can-be-shown-and-hides-itself-again-after-f.webm",
+      "screenshot": "docs/qa/demo-recordings/02-the-password-can-be-shown-and-hides-itself-again-after-f.png",
+      "explainer": "docs/qa/demo-recordings/02-the-password-can-be-shown-and-hides-itself-again-after-f.md",
+      "asserted": true
+    },
+    {
+      "id": "03-a-wrong-password-is-refused-with-the-single-generic-mess",
+      "title": "a wrong password is refused with the single generic message and stays on the sign-in page",
+      "proof": "FR-3, FR-21",
+      "video": "docs/qa/demo-recordings/03-a-wrong-password-is-refused-with-the-single-generic-mess.webm",
+      "screenshot": "docs/qa/demo-recordings/03-a-wrong-password-is-refused-with-the-single-generic-mess.png",
+      "explainer": "docs/qa/demo-recordings/03-a-wrong-password-is-refused-with-the-single-generic-mess.md",
+      "asserted": true
+    },
+    {
+      "id": "04-the-user-name-is-matched-whatever-its-letter-case",
+      "title": "the user name is matched whatever its letter case",
+      "proof": "FR-2",
+      "video": "docs/qa/demo-recordings/04-the-user-name-is-matched-whatever-its-letter-case.webm",
+      "screenshot": "docs/qa/demo-recordings/04-the-user-name-is-matched-whatever-its-letter-case.png",
+      "explainer": "docs/qa/demo-recordings/04-the-user-name-is-matched-whatever-its-letter-case.md",
+      "asserted": true
+    },
+    {
+      "id": "05-the-administrator-signs-in-to-the-dashboard-and-signs-ou",
+      "title": "the administrator signs in to the dashboard and signs out again",
+      "proof": "FR-1, FR-9, FR-17",
+      "video": "docs/qa/demo-recordings/05-the-administrator-signs-in-to-the-dashboard-and-signs-ou.webm",
+      "screenshot": "docs/qa/demo-recordings/05-the-administrator-signs-in-to-the-dashboard-and-signs-ou.png",
+      "explainer": "docs/qa/demo-recordings/05-the-administrator-signs-in-to-the-dashboard-and-signs-ou.md",
+      "asserted": true
+    },
+    {
+      "id": "06-an-idle-page-returns-to-sign-in-when-the-server-timeout",
+      "title": "an idle page returns to sign-in when the server timeout has passed, without asking the server",
+      "proof": "FR-24",
+      "video": "docs/qa/demo-recordings/06-an-idle-page-returns-to-sign-in-when-the-server-timeout.webm",
+      "screenshot": "docs/qa/demo-recordings/06-an-idle-page-returns-to-sign-in-when-the-server-timeout.png",
+      "explainer": "docs/qa/demo-recordings/06-an-idle-page-returns-to-sign-in-when-the-server-timeout.md",
+      "asserted": true
+    },
+    {
+      "id": "07-signing-out-in-one-tab-ends-the-session-in-the-other-and",
+      "title": "signing out in one tab ends the session in the other, and activity renews the shared deadline",
+      "proof": "FR-25, FR-31",
+      "video": "docs/qa/demo-recordings/07-signing-out-in-one-tab-ends-the-session-in-the-other-and.webm",
+      "screenshot": "docs/qa/demo-recordings/07-signing-out-in-one-tab-ends-the-session-in-the-other-and.png",
+      "explainer": "docs/qa/demo-recordings/07-signing-out-in-one-tab-ends-the-session-in-the-other-and.md",
+      "asserted": true
+    },
+    {
+      "id": "08-a-tab-that-was-suspended-past-the-deadline-is-signed-out",
+      "title": "a tab that was suspended past the deadline is signed out when it comes back",
+      "proof": "FR-31",
+      "video": "docs/qa/demo-recordings/08-a-tab-that-was-suspended-past-the-deadline-is-signed-out.webm",
+      "screenshot": "docs/qa/demo-recordings/08-a-tab-that-was-suspended-past-the-deadline-is-signed-out.png",
+      "explainer": "docs/qa/demo-recordings/08-a-tab-that-was-suspended-past-the-deadline-is-signed-out.md",
+      "asserted": true
+    },
+    {
+      "id": "09-a-refused-request-ends-the-session-at-once-but-a-server",
+      "title": "a refused request ends the session at once, but a server error or a lost connection does not",
+      "proof": "FR-26, FR-30",
+      "video": "docs/qa/demo-recordings/09-a-refused-request-ends-the-session-at-once-but-a-server.webm",
+      "screenshot": "docs/qa/demo-recordings/09-a-refused-request-ends-the-session-at-once-but-a-server.png",
+      "explainer": "docs/qa/demo-recordings/09-a-refused-request-ends-the-session-at-once-but-a-server.md",
+      "asserted": true
+    },
+    {
+      "id": "10-moving-to-another-page-checks-the-session-again-and-goes",
+      "title": "moving to another page checks the session again and goes to sign-in when it is gone",
+      "proof": "FR-28",
+      "video": "docs/qa/demo-recordings/10-moving-to-another-page-checks-the-session-again-and-goes.webm",
+      "screenshot": "docs/qa/demo-recordings/10-moving-to-another-page-checks-the-session-again-and-goes.png",
+      "explainer": "docs/qa/demo-recordings/10-moving-to-another-page-checks-the-session-again-and-goes.md",
+      "asserted": true
+    },
+    {
+      "id": "11-a-write-is-held-back-and-the-person-signed-out-when-the",
+      "title": "a write is held back and the person signed out when the server no longer knows the session",
+      "proof": "FR-27",
+      "video": "docs/qa/demo-recordings/11-a-write-is-held-back-and-the-person-signed-out-when-the.webm",
+      "screenshot": "docs/qa/demo-recordings/11-a-write-is-held-back-and-the-person-signed-out-when-the.png",
+      "explainer": "docs/qa/demo-recordings/11-a-write-is-held-back-and-the-person-signed-out-when-the.md",
+      "asserted": true
+    },
+    {
+      "id": "12-a-refused-write-that-is-not-a-lost-session-keeps-the-per",
+      "title": "a refused write that is not a lost session keeps the person signed in",
+      "proof": "FR-29",
+      "video": "docs/qa/demo-recordings/12-a-refused-write-that-is-not-a-lost-session-keeps-the-per.webm",
+      "screenshot": "docs/qa/demo-recordings/12-a-refused-write-that-is-not-a-lost-session-keeps-the-per.png",
+      "explainer": "docs/qa/demo-recordings/12-a-refused-write-that-is-not-a-lost-session-keeps-the-per.md",
+      "asserted": true
+    },
+    {
+      "id": "13-every-page-can-be-reloaded-or-opened-by-its-address-and",
+      "title": "every page can be reloaded or opened by its address, and unknown addresses lead to the overview",
+      "proof": "FR-33, FR-34",
+      "video": "docs/qa/demo-recordings/13-every-page-can-be-reloaded-or-opened-by-its-address-and.webm",
+      "screenshot": "docs/qa/demo-recordings/13-every-page-can-be-reloaded-or-opened-by-its-address-and.png",
+      "explainer": "docs/qa/demo-recordings/13-every-page-can-be-reloaded-or-opened-by-its-address-and.md",
+      "asserted": true
+    },
+    {
+      "id": "14-the-menu-opens-from-its-button-and-closes-when-a-page-is",
+      "title": "the menu opens from its button and closes when a page is chosen",
+      "proof": "FR-35",
+      "video": "docs/qa/demo-recordings/14-the-menu-opens-from-its-button-and-closes-when-a-page-is.webm",
+      "screenshot": "docs/qa/demo-recordings/14-the-menu-opens-from-its-button-and-closes-when-a-page-is.png",
+      "explainer": "docs/qa/demo-recordings/14-the-menu-opens-from-its-button-and-closes-when-a-page-is.md",
+      "asserted": true
+    },
+    {
+      "id": "15-raw-materials-are-added-with-their-opening-stock-and-lis",
+      "title": "raw materials are added with their opening stock and listed by name with their stock value",
+      "proof": "FR-42, FR-43, FR-44, FR-47, FR-48, FR-57, FR-69",
+      "video": "docs/qa/demo-recordings/15-raw-materials-are-added-with-their-opening-stock-and-lis.webm",
+      "screenshot": "docs/qa/demo-recordings/15-raw-materials-are-added-with-their-opening-stock-and-lis.png",
+      "explainer": "docs/qa/demo-recordings/15-raw-materials-are-added-with-their-opening-stock-and-lis.md",
+      "asserted": true
+    },
+    {
+      "id": "16-the-unit-of-a-material-that-has-stock-is-locked-and-an-u",
+      "title": "the unit of a material that has stock is locked, and an unused one can still change",
+      "proof": "FR-49, FR-50, FR-51",
+      "video": "docs/qa/demo-recordings/16-the-unit-of-a-material-that-has-stock-is-locked-and-an-u.webm",
+      "screenshot": "docs/qa/demo-recordings/16-the-unit-of-a-material-that-has-stock-is-locked-and-an-u.png",
+      "explainer": "docs/qa/demo-recordings/16-the-unit-of-a-material-that-has-stock-is-locked-and-an-u.md",
+      "asserted": true
+    },
+    {
+      "id": "17-deleting-asks-first-removes-an-unused-material-and-names",
+      "title": "deleting asks first, removes an unused material, and names may repeat",
+      "proof": "FR-54, FR-55, FR-56",
+      "video": "docs/qa/demo-recordings/17-deleting-asks-first-removes-an-unused-material-and-names.webm",
+      "screenshot": "docs/qa/demo-recordings/17-deleting-asks-first-removes-an-unused-material-and-names.png",
+      "explainer": "docs/qa/demo-recordings/17-deleting-asks-first-removes-an-unused-material-and-names.md",
+      "asserted": true
+    },
+    {
+      "id": "18-a-receipt-shows-its-value-first-and-re-averages-the-unit",
+      "title": "a receipt shows its value first and re-averages the unit cost",
+      "proof": "FR-61, FR-62, FR-69",
+      "video": "docs/qa/demo-recordings/18-a-receipt-shows-its-value-first-and-re-averages-the-unit.webm",
+      "screenshot": "docs/qa/demo-recordings/18-a-receipt-shows-its-value-first-and-re-averages-the-unit.png",
+      "explainer": "docs/qa/demo-recordings/18-a-receipt-shows-its-value-first-and-re-averages-the-unit.md",
+      "asserted": true
+    },
+    {
+      "id": "19-a-write-off-to-the-reorder-level-raises-the-low-stock-fl",
+      "title": "a write-off to the reorder level raises the low-stock flag, and cannot take more than there is",
+      "proof": "FR-58, FR-59, FR-64, FR-65",
+      "video": "docs/qa/demo-recordings/19-a-write-off-to-the-reorder-level-raises-the-low-stock-fl.webm",
+      "screenshot": "docs/qa/demo-recordings/19-a-write-off-to-the-reorder-level-raises-the-low-stock-fl.png",
+      "explainer": "docs/qa/demo-recordings/19-a-write-off-to-the-reorder-level-raises-the-low-stock-fl.md",
+      "asserted": true
+    },
+    {
+      "id": "20-fractional-quantities-subtract-exactly",
+      "title": "fractional quantities subtract exactly",
+      "proof": "FR-68",
+      "video": "docs/qa/demo-recordings/20-fractional-quantities-subtract-exactly.webm",
+      "screenshot": "docs/qa/demo-recordings/20-fractional-quantities-subtract-exactly.png",
+      "explainer": "docs/qa/demo-recordings/20-fractional-quantities-subtract-exactly.md",
+      "asserted": true
+    },
+    {
+      "id": "21-an-adjustment-records-the-difference-to-the-counted-stoc",
+      "title": "an adjustment records the difference to the counted stock and refuses a count that changes nothing",
+      "proof": "FR-66, FR-67",
+      "video": "docs/qa/demo-recordings/21-an-adjustment-records-the-difference-to-the-counted-stoc.webm",
+      "screenshot": "docs/qa/demo-recordings/21-an-adjustment-records-the-difference-to-the-counted-stoc.png",
+      "explainer": "docs/qa/demo-recordings/21-an-adjustment-records-the-difference-to-the-counted-stoc.md",
+      "asserted": true
+    },
+    {
+      "id": "22-a-reorder-level-only-raises-the-flag-stock-cost-value-an",
+      "title": "a reorder level only raises the flag: stock, cost, value and history stay as they were",
+      "proof": "FR-58, FR-60",
+      "video": "docs/qa/demo-recordings/22-a-reorder-level-only-raises-the-flag-stock-cost-value-an.webm",
+      "screenshot": "docs/qa/demo-recordings/22-a-reorder-level-only-raises-the-flag-stock-cost-value-an.png",
+      "explainer": "docs/qa/demo-recordings/22-a-reorder-level-only-raises-the-flag-stock-cost-value-an.md",
+      "asserted": true
+    },
+    {
+      "id": "23-the-form-refuses-a-file-of-another-type-or-over-2-mb-bef",
+      "title": "the form refuses a file of another type or over 2 MB before anything is sent",
+      "proof": "FR-75",
+      "video": "docs/qa/demo-recordings/23-the-form-refuses-a-file-of-another-type-or-over-2-mb-bef.webm",
+      "screenshot": "docs/qa/demo-recordings/23-the-form-refuses-a-file-of-another-type-or-over-2-mb-bef.png",
+      "explainer": "docs/qa/demo-recordings/23-the-form-refuses-a-file-of-another-type-or-over-2-mb-bef.md",
+      "asserted": true
+    },
+    {
+      "id": "24-a-stored-image-is-shown-in-the-list-and-an-edit-without",
+      "title": "a stored image is shown in the list, and an edit without a new file keeps it",
+      "proof": "FR-73, FR-74",
+      "video": "docs/qa/demo-recordings/24-a-stored-image-is-shown-in-the-list-and-an-edit-without.webm",
+      "screenshot": "docs/qa/demo-recordings/24-a-stored-image-is-shown-in-the-list-and-an-edit-without.png",
+      "explainer": "docs/qa/demo-recordings/24-a-stored-image-is-shown-in-the-list-and-an-edit-without.md",
+      "asserted": true
+    },
+    {
+      "id": "25-a-product-is-priced-as-cost-plus-markup-with-a-live-prev",
+      "title": "a product is priced as cost plus markup, with a live preview and no field to type a price",
+      "proof": "FR-76, FR-78, FR-79, FR-80, FR-81, FR-82, FR-84, FR-87",
+      "video": "docs/qa/demo-recordings/25-a-product-is-priced-as-cost-plus-markup-with-a-live-prev.webm",
+      "screenshot": "docs/qa/demo-recordings/25-a-product-is-priced-as-cost-plus-markup-with-a-live-prev.png",
+      "explainer": "docs/qa/demo-recordings/25-a-product-is-priced-as-cost-plus-markup-with-a-live-prev.md",
+      "asserted": true
+    },
+    {
+      "id": "26-a-second-product-cannot-reuse-a-sku-whatever-its-letter",
+      "title": "a second product cannot reuse a SKU, whatever its letter case",
+      "proof": "FR-77",
+      "video": "docs/qa/demo-recordings/26-a-second-product-cannot-reuse-a-sku-whatever-its-letter.webm",
+      "screenshot": "docs/qa/demo-recordings/26-a-second-product-cannot-reuse-a-sku-whatever-its-letter.png",
+      "explainer": "docs/qa/demo-recordings/26-a-second-product-cannot-reuse-a-sku-whatever-its-letter.md",
+      "asserted": true
+    },
+    {
+      "id": "27-a-saved-selling-price-stays-as-saved-when-a-material-get",
+      "title": "a saved selling price stays as saved when a material gets dearer; editing replaces the recipe but not the stock",
+      "proof": "FR-81, FR-83",
+      "video": "docs/qa/demo-recordings/27-a-saved-selling-price-stays-as-saved-when-a-material-get.webm",
+      "screenshot": "docs/qa/demo-recordings/27-a-saved-selling-price-stays-as-saved-when-a-material-get.png",
+      "explainer": "docs/qa/demo-recordings/27-a-saved-selling-price-stays-as-saved-when-a-material-get.md",
+      "asserted": true
+    },
+    {
+      "id": "28-delete-asks-first-a-material-in-a-recipe-cannot-be-delet",
+      "title": "delete asks first; a material in a recipe cannot be deleted until the product is",
+      "proof": "FR-52, FR-85, FR-86",
+      "video": "docs/qa/demo-recordings/28-delete-asks-first-a-material-in-a-recipe-cannot-be-delet.webm",
+      "screenshot": "docs/qa/demo-recordings/28-delete-asks-first-a-material-in-a-recipe-cannot-be-delet.png",
+      "explainer": "docs/qa/demo-recordings/28-delete-asks-first-a-material-in-a-recipe-cannot-be-delet.md",
+      "asserted": true
+    },
+    {
+      "id": "29-a-product-that-has-been-sold-cannot-be-deleted",
+      "title": "a product that has been sold cannot be deleted",
+      "proof": "FR-85",
+      "video": "docs/qa/demo-recordings/29-a-product-that-has-been-sold-cannot-be-deleted.webm",
+      "screenshot": "docs/qa/demo-recordings/29-a-product-that-has-been-sold-cannot-be-deleted.png",
+      "explainer": "docs/qa/demo-recordings/29-a-product-that-has-been-sold-cannot-be-deleted.md",
+      "asserted": true
+    },
+    {
+      "id": "30-production-shows-what-it-needs-uses-the-materials-up-and",
+      "title": "production shows what it needs, uses the materials up, and is refused when a material is short",
+      "proof": "FR-88, FR-89, FR-90, FR-92, FR-94",
+      "video": "docs/qa/demo-recordings/30-production-shows-what-it-needs-uses-the-materials-up-and.webm",
+      "screenshot": "docs/qa/demo-recordings/30-production-shows-what-it-needs-uses-the-materials-up-and.png",
+      "explainer": "docs/qa/demo-recordings/30-production-shows-what-it-needs-uses-the-materials-up-and.md",
+      "asserted": true
+    },
+    {
+      "id": "31-a-second-batch-at-dearer-materials-blends-into-the-produ",
+      "title": "a second batch at dearer materials blends into the product average cost",
+      "proof": "FR-91, FR-92",
+      "video": "docs/qa/demo-recordings/31-a-second-batch-at-dearer-materials-blends-into-the-produ.webm",
+      "screenshot": "docs/qa/demo-recordings/31-a-second-batch-at-dearer-materials-blends-into-the-produ.png",
+      "explainer": "docs/qa/demo-recordings/31-a-second-batch-at-dearer-materials-blends-into-the-produ.md",
+      "asserted": true
+    },
+    {
+      "id": "32-editing-a-recipe-changes-later-batches-only-the-earlier",
+      "title": "editing a recipe changes later batches only: the earlier batch keeps what it used",
+      "proof": "FR-93",
+      "video": "docs/qa/demo-recordings/32-editing-a-recipe-changes-later-batches-only-the-earlier.webm",
+      "screenshot": "docs/qa/demo-recordings/32-editing-a-recipe-changes-later-batches-only-the-earlier.png",
+      "explainer": "docs/qa/demo-recordings/32-editing-a-recipe-changes-later-batches-only-the-earlier.md",
+      "asserted": true
+    },
+    {
+      "id": "33-a-material-that-production-has-used-cannot-be-deleted-ev",
+      "title": "a material that production has used cannot be deleted, even after it leaves the recipe",
+      "proof": "FR-53, FR-83",
+      "video": "docs/qa/demo-recordings/33-a-material-that-production-has-used-cannot-be-deleted-ev.webm",
+      "screenshot": "docs/qa/demo-recordings/33-a-material-that-production-has-used-cannot-be-deleted-ev.png",
+      "explainer": "docs/qa/demo-recordings/33-a-material-that-production-has-used-cannot-be-deleted-ev.md",
+      "asserted": true
+    },
+    {
+      "id": "34-a-write-off-takes-whole-units-out-of-stock-and-cannot-ta",
+      "title": "a write-off takes whole units out of stock and cannot take more than there is",
+      "proof": "FR-95, FR-96, FR-97, FR-100",
+      "video": "docs/qa/demo-recordings/34-a-write-off-takes-whole-units-out-of-stock-and-cannot-ta.webm",
+      "screenshot": "docs/qa/demo-recordings/34-a-write-off-takes-whole-units-out-of-stock-and-cannot-ta.png",
+      "explainer": "docs/qa/demo-recordings/34-a-write-off-takes-whole-units-out-of-stock-and-cannot-ta.md",
+      "asserted": true
+    },
+    {
+      "id": "35-an-adjustment-sets-the-stock-to-the-counted-number-and-r",
+      "title": "an adjustment sets the stock to the counted number and refuses a count that changes nothing",
+      "proof": "FR-98, FR-99, FR-100",
+      "video": "docs/qa/demo-recordings/35-an-adjustment-sets-the-stock-to-the-counted-number-and-r.webm",
+      "screenshot": "docs/qa/demo-recordings/35-an-adjustment-sets-the-stock-to-the-counted-number-and-r.png",
+      "explainer": "docs/qa/demo-recordings/35-an-adjustment-sets-the-stock-to-the-counted-number-and-r.md",
+      "asserted": true
+    },
+    {
+      "id": "36-a-sale-takes-its-price-from-the-product-gets-a-number-an",
+      "title": "a sale takes its price from the product, gets a number, and moves the stock",
+      "proof": "FR-101, FR-103, FR-105, FR-107, FR-108, FR-112",
+      "video": "docs/qa/demo-recordings/36-a-sale-takes-its-price-from-the-product-gets-a-number-an.webm",
+      "screenshot": "docs/qa/demo-recordings/36-a-sale-takes-its-price-from-the-product-gets-a-number-an.png",
+      "explainer": "docs/qa/demo-recordings/36-a-sale-takes-its-price-from-the-product-gets-a-number-an.md",
+      "asserted": true
+    },
+    {
+      "id": "37-a-sale-for-more-than-the-stock-holds-is-blocked-on-the-f",
+      "title": "a sale for more than the stock holds is blocked on the form",
+      "proof": "FR-104, FR-112",
+      "video": "docs/qa/demo-recordings/37-a-sale-for-more-than-the-stock-holds-is-blocked-on-the-f.webm",
+      "screenshot": "docs/qa/demo-recordings/37-a-sale-for-more-than-the-stock-holds-is-blocked-on-the-f.png",
+      "explainer": "docs/qa/demo-recordings/37-a-sale-for-more-than-the-stock-holds-is-blocked-on-the-f.md",
+      "asserted": true
+    },
+    {
+      "id": "38-a-sale-request-that-breaks-the-rules-of-the-sale-or-of-a",
+      "title": "a sale request that breaks the rules of the sale or of an item is refused, and records nothing",
+      "proof": "FR-101, FR-102",
+      "video": "docs/qa/demo-recordings/38-a-sale-request-that-breaks-the-rules-of-the-sale-or-of-a.webm",
+      "screenshot": "docs/qa/demo-recordings/38-a-sale-request-that-breaks-the-rules-of-the-sale-or-of-a.png",
+      "explainer": "docs/qa/demo-recordings/38-a-sale-request-that-breaks-the-rules-of-the-sale-or-of-a.md",
+      "asserted": true
+    },
+    {
+      "id": "39-the-price-charged-is-kept-beside-the-recommended-price-a",
+      "title": "the price charged is kept beside the recommended price, and profit follows it",
+      "proof": "FR-106, FR-107",
+      "video": "docs/qa/demo-recordings/39-the-price-charged-is-kept-beside-the-recommended-price-a.webm",
+      "screenshot": "docs/qa/demo-recordings/39-the-price-charged-is-kept-beside-the-recommended-price-a.png",
+      "explainer": "docs/qa/demo-recordings/39-the-price-charged-is-kept-beside-the-recommended-price-a.md",
+      "asserted": true
+    },
+    {
+      "id": "40-sales-are-listed-newest-first-can-be-opened-by-link-and",
+      "title": "sales are listed newest first, can be opened by link, and offer no way to edit or delete",
+      "proof": "FR-109, FR-110, FR-113",
+      "video": "docs/qa/demo-recordings/40-sales-are-listed-newest-first-can-be-opened-by-link-and.webm",
+      "screenshot": "docs/qa/demo-recordings/40-sales-are-listed-newest-first-can-be-opened-by-link-and.png",
+      "explainer": "docs/qa/demo-recordings/40-sales-are-listed-newest-first-can-be-opened-by-link-and.md",
+      "asserted": true
+    },
+    {
+      "id": "41-a-return-refunds-at-the-price-charged-puts-the-units-bac",
+      "title": "a return refunds at the price charged, puts the units back, and ends with the sale returned in full",
+      "proof": "FR-111, FR-114, FR-115, FR-116, FR-118, FR-119, FR-120, FR-123, FR-126",
+      "video": "docs/qa/demo-recordings/41-a-return-refunds-at-the-price-charged-puts-the-units-bac.webm",
+      "screenshot": "docs/qa/demo-recordings/41-a-return-refunds-at-the-price-charged-puts-the-units-bac.png",
+      "explainer": "docs/qa/demo-recordings/41-a-return-refunds-at-the-price-charged-puts-the-units-bac.md",
+      "asserted": true
+    },
+    {
+      "id": "42-a-returned-unit-goes-back-at-the-cost-it-was-sold-with-a",
+      "title": "a returned unit goes back at the cost it was sold with, and the product average is re-blended",
+      "proof": "FR-121",
+      "video": "docs/qa/demo-recordings/42-a-returned-unit-goes-back-at-the-cost-it-was-sold-with-a.webm",
+      "screenshot": "docs/qa/demo-recordings/42-a-returned-unit-goes-back-at-the-cost-it-was-sold-with-a.png",
+      "explainer": "docs/qa/demo-recordings/42-a-returned-unit-goes-back-at-the-cost-it-was-sold-with-a.md",
+      "asserted": true
+    },
+    {
+      "id": "43-cancelling-a-sale-refunds-all-of-it-and-restores-the-sto",
+      "title": "cancelling a sale refunds all of it and restores the stock; a cancelled sale takes no return",
+      "proof": "FR-116, FR-124, FR-125, FR-126",
+      "video": "docs/qa/demo-recordings/43-cancelling-a-sale-refunds-all-of-it-and-restores-the-sto.webm",
+      "screenshot": "docs/qa/demo-recordings/43-cancelling-a-sale-refunds-all-of-it-and-restores-the-sto.png",
+      "explainer": "docs/qa/demo-recordings/43-cancelling-a-sale-refunds-all-of-it-and-restores-the-sto.md",
+      "asserted": true
+    },
+    {
+      "id": "44-once-part-of-a-sale-has-been-returned-the-sale-can-no-lo",
+      "title": "once part of a sale has been returned, the sale can no longer be cancelled; dates before the sale are refused",
+      "proof": "FR-117, FR-125",
+      "video": "docs/qa/demo-recordings/44-once-part-of-a-sale-has-been-returned-the-sale-can-no-lo.webm",
+      "screenshot": "docs/qa/demo-recordings/44-once-part-of-a-sale-has-been-returned-the-sale-can-no-lo.png",
+      "explainer": "docs/qa/demo-recordings/44-once-part-of-a-sale-has-been-returned-the-sale-can-no-lo.md",
+      "asserted": true
+    },
+    {
+      "id": "45-the-overview-counts-materials-products-units-sales-and-l",
+      "title": "the overview counts materials, products, units, sales and low-stock materials",
+      "proof": "FR-37, FR-38, FR-39, FR-40",
+      "video": "docs/qa/demo-recordings/45-the-overview-counts-materials-products-units-sales-and-l.webm",
+      "screenshot": "docs/qa/demo-recordings/45-the-overview-counts-materials-products-units-sales-and-l.png",
+      "explainer": "docs/qa/demo-recordings/45-the-overview-counts-materials-products-units-sales-and-l.md",
+      "asserted": true
+    },
+    {
+      "id": "46-when-the-summary-cannot-be-loaded-the-overview-says-why",
+      "title": "when the summary cannot be loaded, the overview says why and can be reloaded",
+      "proof": "FR-41",
+      "video": "docs/qa/demo-recordings/46-when-the-summary-cannot-be-loaded-the-overview-says-why.webm",
+      "screenshot": "docs/qa/demo-recordings/46-when-the-summary-cannot-be-loaded-the-overview-says-why.png",
+      "explainer": "docs/qa/demo-recordings/46-when-the-summary-cannot-be-loaded-the-overview-says-why.md",
+      "asserted": true
+    },
+    {
+      "id": "47-every-movement-is-listed-with-totals-for-the-whole-filte",
+      "title": "every movement is listed with totals for the whole filter; the search finds names in any alphabet",
+      "proof": "FR-46, FR-63, FR-127, FR-128, FR-129, FR-132, FR-133",
+      "video": "docs/qa/demo-recordings/47-every-movement-is-listed-with-totals-for-the-whole-filte.webm",
+      "screenshot": "docs/qa/demo-recordings/47-every-movement-is-listed-with-totals-for-the-whole-filte.png",
+      "explainer": "docs/qa/demo-recordings/47-every-movement-is-listed-with-totals-for-the-whole-filte.md",
+      "asserted": true
+    },
+    {
+      "id": "48-a-product-movement-points-to-its-sale-and-the-number-ope",
+      "title": "a product movement points to its sale, and the number opens that sale",
+      "proof": "FR-134, FR-122",
+      "video": "docs/qa/demo-recordings/48-a-product-movement-points-to-its-sale-and-the-number-ope.webm",
+      "screenshot": "docs/qa/demo-recordings/48-a-product-movement-points-to-its-sale-and-the-number-ope.png",
+      "explainer": "docs/qa/demo-recordings/48-a-product-movement-points-to-its-sale-and-the-number-ope.md",
+      "asserted": true
+    },
+    {
+      "id": "49-a-reversed-date-range-is-explained-and-long-results-are",
+      "title": "a reversed date range is explained, and long results are paged and restart on a new filter",
+      "proof": "FR-130, FR-131, FR-135",
+      "video": "docs/qa/demo-recordings/49-a-reversed-date-range-is-explained-and-long-results-are.webm",
+      "screenshot": "docs/qa/demo-recordings/49-a-reversed-date-range-is-explained-and-long-results-are.png",
+      "explainer": "docs/qa/demo-recordings/49-a-reversed-date-range-is-explained-and-long-results-are.md",
+      "asserted": true
+    },
+    {
+      "id": "50-the-report-counts-a-month-by-the-dates-of-its-documents",
+      "title": "the report counts a month by the dates of its documents and splits it by payment method, day and product",
+      "proof": "FR-136, FR-137, FR-138, FR-139, FR-140, FR-141, FR-142, FR-143",
+      "video": "docs/qa/demo-recordings/50-the-report-counts-a-month-by-the-dates-of-its-documents.webm",
+      "screenshot": "docs/qa/demo-recordings/50-the-report-counts-a-month-by-the-dates-of-its-documents.png",
+      "explainer": "docs/qa/demo-recordings/50-the-report-counts-a-month-by-the-dates-of-its-documents.md",
+      "asserted": true
+    },
+    {
+      "id": "51-export-csv-downloads-the-month-as-a-utf-8-file-with-a-by",
+      "title": "Export CSV downloads the month as a UTF-8 file with a byte order mark",
+      "proof": "FR-145",
+      "video": "docs/qa/demo-recordings/51-export-csv-downloads-the-month-as-a-utf-8-file-with-a-by.webm",
+      "screenshot": "docs/qa/demo-recordings/51-export-csv-downloads-the-month-as-a-utf-8-file-with-a-by.png",
+      "explainer": "docs/qa/demo-recordings/51-export-csv-downloads-the-month-as-a-utf-8-file-with-a-by.md",
+      "asserted": true
+    },
+    {
+      "id": "52-a-sale-number-in-the-report-opens-that-sale",
+      "title": "a sale number in the report opens that sale",
+      "proof": "FR-146",
+      "video": "docs/qa/demo-recordings/52-a-sale-number-in-the-report-opens-that-sale.webm",
+      "screenshot": "docs/qa/demo-recordings/52-a-sale-number-in-the-report-opens-that-sale.png",
+      "explainer": "docs/qa/demo-recordings/52-a-sale-number-in-the-report-opens-that-sale.md",
+      "asserted": true
+    },
+    {
+      "id": "53-the-report-opens-on-the-current-month-ignores-a-cleared",
+      "title": "the report opens on the current month, ignores a cleared month, and shows an error instead of old numbers",
+      "proof": "FR-144",
+      "video": "docs/qa/demo-recordings/53-the-report-opens-on-the-current-month-ignores-a-cleared.webm",
+      "screenshot": "docs/qa/demo-recordings/53-the-report-opens-on-the-current-month-ignores-a-cleared.png",
+      "explainer": "docs/qa/demo-recordings/53-the-report-opens-on-the-current-month-ignores-a-cleared.md",
+      "asserted": true
+    },
+    {
+      "id": "54-signed-out-the-data-and-the-pages-are-out-of-reach-only",
+      "title": "signed out, the data and the pages are out of reach; only the health check answers",
+      "proof": "FR-4, FR-7, FR-36",
+      "video": "docs/qa/demo-recordings/54-signed-out-the-data-and-the-pages-are-out-of-reach-only.webm",
+      "screenshot": "docs/qa/demo-recordings/54-signed-out-the-data-and-the-pages-are-out-of-reach-only.png",
+      "explainer": "docs/qa/demo-recordings/54-signed-out-the-data-and-the-pages-are-out-of-reach-only.md",
+      "asserted": true
+    },
+    {
+      "id": "55-a-write-needs-the-token-the-server-issued-and-the-server",
+      "title": "a write needs the token the server issued, and the server ends the session on sign-out",
+      "proof": "FR-5, FR-6, FR-8, FR-23",
+      "video": "docs/qa/demo-recordings/55-a-write-needs-the-token-the-server-issued-and-the-server.webm",
+      "screenshot": "docs/qa/demo-recordings/55-a-write-needs-the-token-the-server-issued-and-the-server.png",
+      "explainer": "docs/qa/demo-recordings/55-a-write-needs-the-token-the-server-issued-and-the-server.md",
+      "asserted": true
+    },
+    {
+      "id": "56-every-page-fits-the-phone-width-without-scrolling-sidewa",
+      "title": "every page fits the phone width without scrolling sideways",
+      "proof": "NFR-18",
+      "video": "docs/qa/demo-recordings/56-every-page-fits-the-phone-width-without-scrolling-sidewa.webm",
+      "screenshot": "docs/qa/demo-recordings/56-every-page-fits-the-phone-width-without-scrolling-sidewa.png",
+      "explainer": "docs/qa/demo-recordings/56-every-page-fits-the-phone-width-without-scrolling-sidewa.md",
+      "asserted": true
+    },
+    {
+      "id": "57-every-page-fits-the-tablet-width-without-scrolling-sidew",
+      "title": "every page fits the tablet width without scrolling sideways",
+      "proof": "NFR-18",
+      "video": "docs/qa/demo-recordings/57-every-page-fits-the-tablet-width-without-scrolling-sidew.webm",
+      "screenshot": "docs/qa/demo-recordings/57-every-page-fits-the-tablet-width-without-scrolling-sidew.png",
+      "explainer": "docs/qa/demo-recordings/57-every-page-fits-the-tablet-width-without-scrolling-sidew.md",
+      "asserted": true
+    },
+    {
+      "id": "58-a-change-that-cannot-be-made-says-why-and-keeps-the-sess",
+      "title": "a change that cannot be made says why and keeps the session",
+      "proof": "FR-10, FR-11, FR-12, FR-13, FR-16",
+      "video": "docs/qa/demo-recordings/58-a-change-that-cannot-be-made-says-why-and-keeps-the-sess.webm",
+      "screenshot": "docs/qa/demo-recordings/58-a-change-that-cannot-be-made-says-why-and-keeps-the-sess.png",
+      "explainer": "docs/qa/demo-recordings/58-a-change-that-cannot-be-made-says-why-and-keeps-the-sess.md",
+      "asserted": true
+    },
+    {
+      "id": "59-a-new-password-ends-every-session-of-the-administrator-i",
+      "title": "a new password ends every session of the administrator, in every browser",
+      "proof": "FR-14, FR-15",
+      "video": "docs/qa/demo-recordings/59-a-new-password-ends-every-session-of-the-administrator-i.webm",
+      "screenshot": "docs/qa/demo-recordings/59-a-new-password-ends-every-session-of-the-administrator-i.png",
+      "explainer": "docs/qa/demo-recordings/59-a-new-password-ends-every-session-of-the-administrator-i.md",
+      "asserted": true
+    }
+  ]
+}

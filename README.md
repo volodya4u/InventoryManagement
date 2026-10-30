@@ -195,7 +195,12 @@ pnpm exec playwright install chromium firefox webkit
 pnpm run test:e2e
 ```
 
-`E2E_PORT` and `E2E_JAR` override the port and the JAR path. CI runs the same specs in the `e2e` job.
+Each browser gets its own server and database (ports 18081 to 18083). `E2E_PORT` and `E2E_JAR` override the base port and the
+JAR path, and `E2E_BROWSERS=chromium` runs one browser. CI runs the same specs in the `e2e` job.
+
+`pnpm run record:demos` runs the specs once in Chromium with video on and rewrites `docs/qa/demo-recordings/` (a clip,
+a still and a manifest for every test that proves requirements); `pnpm run check:recordings` checks those files. See
+ADR-0010. Commit the regenerated clips only when a spec's behaviour changed.
 
 ## Agent Harness
 
