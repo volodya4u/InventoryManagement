@@ -69,10 +69,12 @@ waiver is closed only when its evidence exists (the file says what closes each).
 
 ## 5. What stands between this and a release
 
-The release gate (G7 in `node scripts/gate-status.mjs`) was red when this draft was written (the retro of 2026-10-28); run it again before you sign. These are the reasons, in the order they would be
-closed:
+The release gate (G7 in `node scripts/gate-status.mjs`) was red when this draft was written (the retro of 2026-10-28). Since
+then the recordings (item 1) and the process findings (item 6) have been addressed, and the two process gaps (item 2) are
+waived. Items 3 to 5 are still open and need the owner. Run the gate again before you sign: its output, not this file, says
+whether G7 passes. These are the reasons, in the order they were or would be closed:
 
-1. **Recordings (done in this pull request, to be confirmed by `node scripts/gate-status.mjs`).** The release check requires
+1. **Recordings (done, ADR-0010; G7 checks it with `--strict-recordings`).** The release check requires
    every requirement to be named in a recording manifest or to be a listed exemption (ADR-0010). Clips exist for the
    requirements a browser can show; the rest are listed with the test that covers each. A clip shows what a test did; whether a
    person finds it legible is the vision check of the next pull request.
@@ -86,16 +88,18 @@ closed:
    `docs/qa/risk-register.md` marked **Decision** need an answer.
 5. **Signed approval is not configured** (no hardware-backed key in `quality/allowed-signers`); today the owner's merge is the
    approval.
-6. **Process findings PD-4, PD-6, PD-7 and PD-8.** The owner approved the fixes on 2026-10-30. The active
-   `resolve-retro-pd4-pd6-pd7-pd8` slice gives G3 a recording-mechanism check, recognizes the recorded G1/G3
-   ratification, records traceability warnings in telemetry, and rejects new correction dispositions without a verified
-   owner signature. Seven older dispositions still have only agent-typed approval claims; `correct --check` warns about
-   them until the owner signs decisions and the references are backfilled (risk R-16). The original findings are in the
-   gitignored `docs/qa/process-defects.json` (ADR-0008); the other process fixes are committed under
-   `openspec/changes/archive/*-improve-PD-*`.
+6. **Process findings PD-4, PD-6, PD-7 and PD-8 (fixed).** The owner approved the fixes on 2026-10-30, and the
+   `resolve-retro-pd4-pd6-pd7-pd8` slice is merged and archived under
+   `openspec/changes/archive/2026-10-30-resolve-retro-pd4-pd6-pd7-pd8/`. G3 now checks the recording mechanism, G1/G3
+   recognize the recorded ratification, traceability warnings reach telemetry, and a new correction disposition needs a
+   verified owner signature. What is left is the owner's: seven older dispositions still have only agent-typed approval
+   claims, and `correct --check` warns about them until the owner signs decisions and the references are backfilled
+   (risk R-16). The original findings are in the gitignored `docs/qa/process-defects.json` (ADR-0008); the other process
+   fixes are committed under `openspec/changes/archive/*-improve-PD-*`.
 
-Items 3 and 4 need only the owner. Item 1 needs an approved dependency.
-The historical approval references in item 6 need an owner signing key and signed decisions.
+Items 3 and 4 need only the owner, and so does item 5 (a hardware signing key). Item 1 needed an approved dependency: the
+owner approved Playwright on 2026-10-30 (`docs/current-state.md`). The historical approval references in item 6 need an
+owner signing key and signed decisions.
 
 ## 6. Decision
 
