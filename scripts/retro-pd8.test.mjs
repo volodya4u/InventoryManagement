@@ -67,3 +67,24 @@ test('a signed owner decision with matching annotation verifies a historical by 
   sign('resolved');
   assert.match(verify(item), /Decision: waived/);
 });
+
+test('editing a historical disposition cannot inherit its legacy warning', () => {
+  assert.equal(typeof correctionModule.legacyDisposition, 'function');
+  const repo = join(root, 'legacy-repo');
+  const correctionPath = join(repo, 'retro', 'corrections', '008-human.correction.json');
+  mkdirSync(join(repo, 'retro', 'corrections'), { recursive: true });
+  const git = (...args) => execFileSync('git', ['-C', repo, '-c', 'user.name=Owner', '-c', 'user.email=owner@example.com', ...args], { encoding: 'utf8' }).trim();
+  git('init', '-q', '-b', 'main');
+  writeFileSync(correctionPath, JSON.stringify(correction));
+  git('add', '-A');
+  git('commit', '-qm', 'historical correction');
+  const baseline = git('rev-parse', 'HEAD');
+  const old = { file: 'retro/corrections/008-human.correction.json', data: correction };
+  assert.equal(correctionModule.legacyDisposition(repo, old, baseline), true);
+  for (const field of ['by', 'ts', 'note']) {
+    const changed = { file: old.file, data: { ...correction, disposition: { ...correction.disposition, [field]: 'changed' } } };
+    assert.equal(correctionModule.legacyDisposition(repo, changed, baseline), false, field);
+  }
+  const forged = { file: old.file, data: { ...correction, disposition: { ...correction.disposition, approvalRef: 'approve/' + '0'.repeat(40) } } };
+  assert.equal(correctionModule.legacyDisposition(repo, forged, baseline), false);
+});

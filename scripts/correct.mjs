@@ -28,6 +28,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 import { signedApproval } from "./signed-approval.mjs";
 
 export const FAILURE_MODES = ["vacuous-pass", "missing-check", "skipped-convention", "check-too-weak", "wrong-claim"];
@@ -345,13 +346,13 @@ function runDetect(root, schema) {
 // PD-8: this commit is the immutable pre-change set of seven dispositions.
 // A file added afterward cannot claim the legacy warning by backdating ts.
 const APPROVAL_BASELINE = "3c91a1173bc0d992310986605667688f7929160b";
-function legacyDisposition(root, correction) {
-  const r = spawnSync("git", ["-C", root, "show", `${APPROVAL_BASELINE}:${correction.file}`], { encoding: "utf8" });
+export function legacyDisposition(root, correction, baseline = APPROVAL_BASELINE) {
+  const r = spawnSync("git", ["-C", root, "show", `${baseline}:${correction.file}`], { encoding: "utf8" });
   if (r.status !== 0) return false;
   try {
     const old = JSON.parse(r.stdout);
     return old.id === correction.data.id && old.ts === correction.data.ts && old.autoKey === correction.data.autoKey &&
-      old.disposition?.status === correction.data.disposition?.status;
+      isDeepStrictEqual(old.disposition, correction.data.disposition);
   } catch {
     return false;
   }
