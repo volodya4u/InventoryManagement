@@ -17,7 +17,7 @@
 - **Claims:**
   - The release gate is red, and the reasons are listed — evidence: `docs/qa/mvp-acceptance-report.md` (section 5) and
     `node scripts/gate-status.mjs`
-  - Five non-functional requirements are waived, not passed — evidence: `docs/qa/waivers/`
+  - Two non-functional requirements are waived, not passed (NFR-15 performance, NFR-16 availability); the waivers for NFR-17, NFR-18 and NFR-20 are closed — evidence: `docs/qa/waivers/`, ADR-0011
   - Two process gaps cannot be repaired and are waived, not fixed — evidence: `docs/qa/historical-gaps.md`, ADR-0009 and `docs/qa/waivers/2026-10-28-trajectory-*.md`
   - Risks that need an owner decision are marked **Decision** — evidence: `docs/qa/risk-register.md`
 
@@ -48,15 +48,16 @@ JavaScript-app scripts, "parity, automations, `qa-verify`".
 - Scripts that need Playwright or a JavaScript app: `qa-verify`, `check-a11y`, `check-visual-fidelity`,
   `check-parity-suite`, `parity-block-loop`. The owner approved Playwright on 2026-10-30 and it is installed (see the last
   bullet). `record-demos` and `check-recordings` now exist (ADR-0010): the clips in `docs/qa/demo-recordings/` are the browser
-  specs recorded, and 10 requirements no page can show are listed in `docs/qa/recording-exemptions.json`. The accessibility
-  and vision checks are not built yet.
+  specs recorded, and 10 requirements no page can show are listed in `docs/qa/recording-exemptions.json`. `check-a11y` and `check-vision` exist too (ADR-0011): axe over every page in both colour schemes
+  (`docs/qa/a11y-report.json`) and a vision judge over every page at 375, 768 and 1280 px (`docs/qa/vision-report.json`, an LLM's
+  judgement, not deterministic); the owner answered OQ-8 and OQ-15 and the three baseline waivers are closed.
 - `automations/` (drift-watch, dep-audit, ci-triage in the plugin): opt-in and off by default; the folder does not exist
   here.
 - The factory's agents and workflows: the plugin provides them, and the repository uses its own `reviewer` agent.
 - A lessons block in `AGENTS.md` (`BEGIN-FACTORY-LESSONS` in the plugin): ADR-0001 says any such block needs the
   owner's approval; it also changes `AGENTS.md`, so the evals must be re-run.
 - Adapters for Cursor, Copilot and Codex: none are committed.
-- A root `package.json` exists only for the browser tests (`@playwright/test`, `playwright.config.ts`, `e2e/`; the CI
+- A root `package.json` exists only for the browser tests (`@playwright/test`, `@axe-core/playwright`, `playwright.config.ts`, `e2e/`; the CI
   `e2e` job runs them). The gate scripts and the harness under `scripts/` still run with plain `node`, and `dod.mjs`
   does not run the browser tests.
 

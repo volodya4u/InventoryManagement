@@ -56,17 +56,60 @@
 
 :root {
   --pf-ink: #25332d;
-  --pf-muted: #66746e;
+  --pf-muted: #5f6d67;
   --pf-forest: #315c49;
   --pf-forest-dark: #244437;
   --pf-sage: #a9bcae;
   --pf-cream: #f7f4ed;
   --pf-paper: #fffdf9;
-  --pf-rose: #a65c63;
+  --pf-rose: #9c525a;
   --pf-rose-soft: #ead8d8;
   --pf-border: #dfe5e1;
   --pf-shadow: 0 18px 45px rgba(31, 54, 44, 0.1);
   color-scheme: light;
+}
+
+// Bootstrap's outline buttons print the border colour as text: green is 4.1:1 on the cream background and yellow 1.6:1
+// on white. The text gets a darker shade of each; the border, fill and hover state stay Bootstrap's.
+.btn-outline-success {
+  --bs-btn-color: #146c43;
+}
+
+.btn-outline-warning {
+  --bs-btn-color: #7a5900;
+}
+
+// Bootstrap's grey (#6c757d) is 4.49:1 on the off-white of a muted row, a hair under 4.5.
+.btn-outline-secondary {
+  --bs-btn-color: #5c656d;
+}
+
+// A wide table scrolls sideways inside its frame. Without a cue a clipped column looks cut off, so a shadow shows on each
+// edge that has more to scroll to: the white strips scroll with the content and cover the shadows at the ends
+// (background-attachment: local), the shadows stay at the edges. The cells are transparent so the frame's background shows.
+.table-responsive {
+  background-color: var(--bs-body-bg);
+  background-image:
+    linear-gradient(to right, var(--bs-body-bg), var(--bs-body-bg)),
+    linear-gradient(to left, var(--bs-body-bg), var(--bs-body-bg)),
+    linear-gradient(to right, rgba(31, 54, 44, 0.4), rgba(31, 54, 44, 0)),
+    linear-gradient(to left, rgba(31, 54, 44, 0.4), rgba(31, 54, 44, 0));
+  background-position:
+    left center,
+    right center,
+    left center,
+    right center;
+  background-repeat: no-repeat;
+  background-size:
+    32px 100%,
+    32px 100%,
+    18px 100%,
+    18px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.table-responsive > .table {
+  --bs-table-bg: transparent;
 }
 
 html,
@@ -216,6 +259,23 @@ textarea {
   vertical-align: middle;
 }
 
+// Below the desktop width the cells give up some side padding, so a table needs less room: Raw Materials needs 772px at
+// 768px with the full padding and fits without it.
+@media (max-width: 991.98px) {
+  .table > :not(caption) > * > * {
+    padding-right: 0.6rem;
+    padding-left: 0.6rem;
+  }
+}
+
+// The total row's label spans five columns and is right-aligned; on a phone the table scrolls, and the right end of the
+// label is off screen, so the label starts at the left edge instead.
+@media (max-width: 575.98px) {
+  .stock-value-total td:first-child {
+    text-align: left !important;
+  }
+}
+
 .table thead th {
   color: var(--pf-muted);
   font-size: 0.76rem;
@@ -223,6 +283,14 @@ textarea {
   letter-spacing: 0.055em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+// Below the desktop width a long header label ("Average Unit Cost") may wrap, so the table needs less room whatever the
+// fallback font is: the CI runner has no Inter or Segoe UI, and its wider font made the Raw Materials table 55px too wide.
+@media (max-width: 991.98px) {
+  .table thead th {
+    white-space: normal;
+  }
 }
 
 @media (max-width: 767.98px) {

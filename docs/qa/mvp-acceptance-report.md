@@ -57,10 +57,10 @@ tests were written before it.
 | NFR-12 to NFR-14 | Data integrity (transactions, concurrent writes, exact decimals) | Automated tests tagged with these ids | Has tagged tests (result: `node scripts/dod.mjs`) |
 | NFR-15 | Performance | None | **Waived** (`docs/qa/waivers/2026-10-11-baseline-NFR-15.md`): no budget declared, OQ-9 |
 | NFR-16 | Availability and backup | Health check only | **Waived** (`…-NFR-16.md`): no target declared, OQ-10 |
-| NFR-17 | Supported browsers | None | **Waived** (`…-NFR-17.md`): no end-to-end tool in the repository, OQ-8 |
-| NFR-18 | Responsive layout | MT-27 (manual) | **Waived** (`…-NFR-18.md`): no visual check tool |
+| NFR-17 | Supported browsers | `e2e/20-browsers.spec.ts` and the whole `e2e/` suite in Chromium, Firefox and WebKit (`docs/qa/e2e-report.json`) | Has a tagged test; the waiver `…-NFR-17.md` is closed. OQ-8 answered 2026-10-30 |
+| NFR-18 | Responsive layout | `e2e/16-layout.spec.ts`; `docs/qa/vision-report.json` (24 screenshots judged by a model: an LLM's judgement, not deterministic); MT-27 (manual) | Has tagged tests and a vision report; the waiver `…-NFR-18.md` is closed |
 | NFR-19 | Usability (confirmations, error display, form validation) | Automated front-end tests | Has tests (result: `node scripts/dod.mjs`) |
-| NFR-20 | Accessibility | MT-28 (manual) | **Waived** (`…-NFR-20.md`): no accessibility tool, OQ-15 |
+| NFR-20 | Accessibility | `e2e/18-accessibility.spec.ts`, `docs/qa/a11y-report.json` (axe, WCAG 2.1 AA, light and dark); MT-28 (manual) | Has a tagged test; the waiver `…-NFR-20.md` is closed. OQ-15 answered 2026-10-30. Automated rules find only part of the problems |
 | NFR-21, NFR-22 | Language and currency display | Automated tests tagged with these ids | Has tagged tests (result: `node scripts/dod.mjs`); open decision OQ-14 |
 | NFR-23 | The server listens on this machine only | `LoopbackBindingHttpTest`; MT-29 (manual) | Has tagged tests (result: `node scripts/dod.mjs`); open decisions OQ-6, OQ-13 |
 

@@ -336,7 +336,7 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "e2e/17-change-password.spec.ts"
+        "e2e/21-change-password.spec.ts"
       ],
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
@@ -352,7 +352,7 @@
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
         "frontend/src/app/change-password/change-password.component.spec.ts",
-        "e2e/17-change-password.spec.ts"
+        "e2e/21-change-password.spec.ts"
       ],
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
@@ -367,7 +367,7 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "e2e/17-change-password.spec.ts"
+        "e2e/21-change-password.spec.ts"
       ],
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
@@ -382,7 +382,7 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "e2e/17-change-password.spec.ts"
+        "e2e/21-change-password.spec.ts"
       ],
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
@@ -397,7 +397,7 @@
       "planned": true,
       "tests": [
         "src/test/java/com/flowershop/inventory/InventoryFlowIntegrationTest.java",
-        "e2e/17-change-password.spec.ts"
+        "e2e/21-change-password.spec.ts"
       ],
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
@@ -413,7 +413,7 @@
       "tests": [
         "frontend/src/app/change-password/change-password.component.spec.ts",
         "frontend/src/app/login/login.component.spec.ts",
-        "e2e/17-change-password.spec.ts"
+        "e2e/21-change-password.spec.ts"
       ],
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
@@ -428,7 +428,7 @@
       "planned": true,
       "tests": [
         "frontend/src/app/change-password/change-password.component.spec.ts",
-        "e2e/17-change-password.spec.ts"
+        "e2e/21-change-password.spec.ts"
       ],
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
@@ -2525,6 +2525,10 @@
     {
       "check": "active-changes",
       "msg": "active change \"bind-loopback\" is not archived"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"playwright-a11y-vision\" is not archived"
     },
     {
       "check": "active-changes",

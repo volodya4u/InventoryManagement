@@ -279,9 +279,10 @@ visible page.
 
 ## 10. Screens and devices (**Manual only**)
 
-These stand in for requirements that have no automated mechanism here: NFR-17 (supported browsers), NFR-18 (responsive layout
-and visual fidelity) and NFR-20 (accessibility). Their waivers are in `docs/qa/waivers/`; a passing run does not close a waiver.
-Only the owner can, once the evidence is accepted.
+These add a person's eyes and hands to requirements that now also have automated checks: NFR-17 (supported browsers), NFR-18
+(responsive layout) and NFR-20 (accessibility). Their three baseline waivers are closed (`docs/qa/waivers/`, ADR-0011) on the
+strength of the automated checks. The vision check is a model's judgement and axe finds only part of the accessibility problems, so
+these cases stay: they are how a person checks what the tools cannot.
 
 ### MT-27 Phone and tablet layout
 **Covers:** NFR-18, FR-35

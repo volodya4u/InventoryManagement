@@ -8,6 +8,7 @@ import { projectServers, runSettings, serverEnvironment } from './e2e/support/ru
 // E2E_RECORD=1 (pnpm run record:demos) is the recording run: Chromium only, video and a still for every test, no retries,
 // and e2e/support/recording-reporter.mjs writes docs/qa/demo-recordings/. E2E_BROWSERS=chromium runs one browser.
 const recording = !!process.env.E2E_RECORD;
+const report = !!process.env.E2E_REPORT;
 if (recording) process.env.E2E_BROWSERS = 'chromium';
 const settings = runSettings();
 const servers = projectServers(settings);
@@ -31,9 +32,11 @@ export default defineConfig({
   retries: process.env.CI && !recording ? 1 : 0,
   reporter: recording
     ? [['list'], ['./e2e/support/recording-reporter.mjs']]
-    : process.env.CI
-      ? [['list'], ['html', { open: 'never' }]]
-      : [['list']],
+    : report
+      ? [['list'], ['./e2e/support/e2e-report-reporter.mjs']]
+      : process.env.CI
+        ? [['list'], ['html', { open: 'never' }]]
+        : [['list']],
   use: {
     trace: recording ? 'off' : 'retain-on-failure',
     ...(recording

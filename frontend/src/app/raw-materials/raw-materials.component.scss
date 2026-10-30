@@ -8,6 +8,12 @@
   white-space: nowrap;
 }
 
+// The badge sits right after the name in the markup; without a margin it touches the last letter.
+.low-stock-badge {
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
 .name-column {
   width: 240px;
   max-width: 240px;

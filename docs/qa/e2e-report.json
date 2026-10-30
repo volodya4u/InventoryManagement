@@ -1,0 +1,22 @@
+{
+  "description": "The last whole Playwright run (pnpm run report:e2e), from e2e/support/e2e-report-reporter.mjs.",
+  "status": "passed",
+  "browsers": {
+    "chromium": {
+      "passed": 66,
+      "failed": 0,
+      "skipped": 3
+    },
+    "firefox": {
+      "passed": 66,
+      "failed": 0,
+      "skipped": 3
+    },
+    "webkit": {
+      "passed": 66,
+      "failed": 0,
+      "skipped": 3
+    }
+  },
+  "note": "Every supported browser ran the whole suite and no test failed."
+}

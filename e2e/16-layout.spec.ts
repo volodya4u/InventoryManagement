@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { Api } from './support/api';
 import { signInAsAdmin } from './support/auth';
+import { everySaleState } from './support/bouquet';
 
 const pages: [string, string][] = [
   ['/dashboard', 'Inventory Overview'],
@@ -36,3 +38,108 @@ for (const [name, viewport] of [
     });
   });
 }
+
+// A table too wide for a phone scrolls inside its frame; the frame shows a shadow on each edge with more to scroll to, so
+// the clipped column does not look cut off (the shadows come from the frame's local and fixed backgrounds).
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  // @trace NFR-18
+  test('a table wider than its frame scrolls inside it and shows a shadow where more is hidden', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Cue Rose', quantity: 10, initialUnitCost: 5 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    await expect(page.getByRole('heading', { name: 'Raw Materials', level: 1 })).toBeVisible();
+    const frame = page.locator('.table-responsive').first();
+    const { wider, attachment } = await frame.evaluate((el) => ({
+      wider: el.scrollWidth > el.clientWidth,
+      attachment: getComputedStyle(el).backgroundAttachment,
+    }));
+    expect(wider, 'the table is wider than its frame at 375px').toBe(true);
+    expect(attachment).toBe('local, local, scroll, scroll');
+    // The first column starts at the left edge, so the right edge is where the shadow shows: scrolling to the end moves it.
+    await frame.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+    expect(await frame.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  });
+});
+
+// The Raw Materials table is the widest list a tablet must show whole, with its Actions column (the vision judge found the
+// column cut off at 768px), and on a phone its total row must start at the left edge of the scrolling frame.
+test.describe('on a tablet', () => {
+  test.use({ viewport: { width: 768, height: 1024 } });
+
+  // @trace NFR-18
+  test('the raw materials table, with its actions, fits the tablet width', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Tablet Rose', quantity: 10, initialUnitCost: 5 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    await expect(page.getByRole('heading', { name: 'Raw Materials', level: 1 })).toBeVisible();
+    const frame = page.locator('.table-responsive').first();
+    expect(await frame.evaluate((el) => el.scrollWidth - el.clientWidth), 'the table is wider than its frame').toBeLessThanOrEqual(0);
+    // The same with a wide fallback font, which is what a machine without Inter or Segoe UI (the CI runner) shows: 55px more.
+    await page.addStyleTag({ content: "* { font-family: Verdana, 'DejaVu Sans', sans-serif !important; }" });
+    expect(await frame.evaluate((el) => el.scrollWidth - el.clientWidth), 'the table is wider than its frame in a wide font').toBeLessThanOrEqual(0);
+  });
+});
+
+test.describe('on a phone, the total row', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  // @trace NFR-18
+  test('starts its label at the left edge so the label is visible without scrolling', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Total Rose', quantity: 10, initialUnitCost: 5 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    const label = page.locator('.stock-value-total td').first();
+    await expect(label).toHaveText('Total Raw Materials Stock Value');
+    expect(await label.evaluate((el) => getComputedStyle(el).textAlign)).toBe('left');
+  });
+});
+
+test.describe('on a desktop', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  // @trace NFR-18
+  test('the low stock badge has room beside the material name', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Badge Rose', quantity: 1, reorderLevel: 5, initialUnitCost: 2 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    const row = page.locator('tbody tr').filter({ hasText: 'Badge Rose' });
+    const badge = row.locator('.low-stock-badge');
+    await expect(badge).toHaveText('Low stock');
+    const gap = await badge.evaluate((el) => {
+      const name = el.parentElement!.querySelector('strong')!.getBoundingClientRect();
+      return el.getBoundingClientRect().left - name.right;
+    });
+    expect(gap, 'the badge touches the name').toBeGreaterThanOrEqual(4);
+  });
+});
+
+test.describe('on a phone, the sales list', () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  // @trace NFR-18
+  test('keeps a sale date on one line instead of breaking it over three', async ({ page, baseURL }) => {
+    await everySaleState(baseURL!, 'DATE');
+    await signInAsAdmin(page);
+    await page.goto('/sales');
+    const date = page.locator('tbody tr .sale-date').first();
+    await expect(date).toBeVisible();
+    expect(await date.evaluate((el) => getComputedStyle(el).whiteSpace)).toBe('nowrap');
+    // The text itself is one line box, wherever the rest of the row is tall.
+    const lines = await date.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
+    });
+    expect(lines, 'the date wraps').toBe(1);
+  });
+});

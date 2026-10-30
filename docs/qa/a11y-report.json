@@ -1,0 +1,152 @@
+{
+  "status": "passed",
+  "standard": "WCAG 2.1 AA",
+  "tags": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa"
+  ],
+  "failOn": [
+    "serious",
+    "critical"
+  ],
+  "engine": "axe-core 4.14.0",
+  "browser": "chromium",
+  "schemes": [
+    "light",
+    "dark"
+  ],
+  "note": "The application has no dark theme (frontend/src/styles.scss sets color-scheme: light), so the dark pass emulates prefers-color-scheme: dark and shows what a visitor with that preference gets. Automated rules find only part of the accessibility problems; this report does not replace a manual check with a screen reader. The pages are checked with rows in every sale state and a material below its reorder level; dialogs and error messages are not part of what is checked.",
+  "sourceHash": "fbf4b3aa6343765f9d0d3b167d88794c8ce377366d2accee19cf4e3db386443a",
+  "pages": [
+    {
+      "route": "change-password",
+      "scheme": "dark",
+      "authenticated": true,
+      "passes": 21,
+      "incomplete": 0,
+      "violations": []
+    },
+    {
+      "route": "change-password",
+      "scheme": "light",
+      "authenticated": true,
+      "passes": 21,
+      "incomplete": 0,
+      "violations": []
+    },
+    {
+      "route": "dashboard",
+      "scheme": "dark",
+      "authenticated": true,
+      "passes": 16,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "dashboard",
+      "scheme": "light",
+      "authenticated": true,
+      "passes": 16,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "login",
+      "scheme": "dark",
+      "authenticated": false,
+      "passes": 19,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "login",
+      "scheme": "light",
+      "authenticated": false,
+      "passes": 19,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "products",
+      "scheme": "dark",
+      "authenticated": true,
+      "passes": 18,
+      "incomplete": 2,
+      "violations": []
+    },
+    {
+      "route": "products",
+      "scheme": "light",
+      "authenticated": true,
+      "passes": 18,
+      "incomplete": 2,
+      "violations": []
+    },
+    {
+      "route": "raw-materials",
+      "scheme": "dark",
+      "authenticated": true,
+      "passes": 18,
+      "incomplete": 2,
+      "violations": []
+    },
+    {
+      "route": "raw-materials",
+      "scheme": "light",
+      "authenticated": true,
+      "passes": 18,
+      "incomplete": 2,
+      "violations": []
+    },
+    {
+      "route": "reports/monthly-sales",
+      "scheme": "dark",
+      "authenticated": true,
+      "passes": 23,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "reports/monthly-sales",
+      "scheme": "light",
+      "authenticated": true,
+      "passes": 23,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "sales",
+      "scheme": "dark",
+      "authenticated": true,
+      "passes": 18,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "sales",
+      "scheme": "light",
+      "authenticated": true,
+      "passes": 18,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "stock-movements",
+      "scheme": "dark",
+      "authenticated": true,
+      "passes": 23,
+      "incomplete": 1,
+      "violations": []
+    },
+    {
+      "route": "stock-movements",
+      "scheme": "light",
+      "authenticated": true,
+      "passes": 23,
+      "incomplete": 1,
+      "violations": []
+    }
+  ]
+}
