@@ -111,7 +111,7 @@ jobs:
           java-version: 21
 
       # The runner's preinstalled Node may be older than the one this pnpm version needs.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
 
