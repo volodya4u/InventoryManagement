@@ -200,12 +200,27 @@ function worst(...statuses) {
   return w;
 }
 
+// PD-6: the owner ratified both artifacts on 2026-10-11 and confirmed that
+// this is the G1/G3 sign-off on 2026-10-30. Require the explicit owner, date
+// and ratification claim; file existence alone is not a sign-off.
+const ratified = (rel, row) => {
+  try {
+    const lines = readFileSync(join(root, rel), "utf8").split(/\r?\n/);
+    const line = lines.find((s) => row.test(s));
+    return !!line && /ratified/i.test(line) && /volodya4u/i.test(line) && /2026-10-11/.test(line);
+  } catch {
+    return false;
+  }
+};
+const requirementsRatified = ratified("docs/requirements.md", /^\|\s*BC-4\s*\|/);
+const planRatified = ratified("docs/mvp-capability-plan.md", /\bInputs:\s*.*docs\/requirements\.md/);
+
 // Gate → which deterministic checks back it (judgment criteria sit on top).
 const GATES = [
   { g: "G0", desc: "scaffold + loop installed", keys: [], fixed: () => (has("scripts/check-traceability.mjs") && has(".githooks") ? "PASS" : "FAIL") },
-  { g: "G1", desc: "requirements signed off", keys: [], fixed: () => (has("docs/requirements.md") ? "needs sign-off" : "FAIL") },
+  { g: "G1", desc: "requirements signed off", keys: [], fixed: () => (requirementsRatified ? "PASS" : has("docs/requirements.md") ? "needs sign-off" : "FAIL") },
   { g: "G2", desc: "baseline specs", keys: ["traceability"] },
-  { g: "G3", desc: "capability plan + acceptance methods exist", keys: ["acceptanceExistence"], fixed: (fold) => worst(has("docs/mvp-capability-plan.md") ? "needs sign-off" : "FAIL", fold) },
+  { g: "G3", desc: "capability plan + acceptance methods exist", keys: ["acceptanceExistence"], fixed: (fold) => worst(planRatified ? "PASS" : has("docs/mvp-capability-plan.md") ? "needs sign-off" : "FAIL", fold) },
   { g: "G4", desc: "per-slice", keys: ["traceability", "trajectory", "acceptanceArtifact", "integrity"] },
   { g: "G5", desc: "hardening (coverage)", keys: ["coverageBackend", "coverageFrontend"] },
   { g: "G6", desc: "QA proof", keys: ["recordings", "evals", "acceptanceArtifact", "visual"] },
@@ -276,13 +291,25 @@ if (productCode) {
 // header in docs/current-state.md (kept in the exact template formats
 // "Phase <N>" / "G<N>"). Freeform done-claim prose stays advisory.
 // ---------------------------------------------------------------------------
-const earnedStatus = (s) => s === "PASS" || s === "needs sign-off";
+const earnedStatus = (s) => s === "PASS";
 let frontier = -1;
 for (const row of gateRows) {
   if (earnedStatus(row.status)) frontier = row.idx;
   else break;
 }
 const frontierLabel = frontier < 0 ? "none (G0 not satisfied)" : `G${frontier}`;
+const unsignedGates = gateRows.filter((r) => r.status === "needs sign-off");
+for (const unsigned of unsignedGates) {
+  const downstreamPass = gateRows.filter((r) => r.idx > unsigned.idx && r.status === "PASS").map((r) => r.g);
+  if (!downstreamPass.length) continue;
+  emitLedger({
+    event: "claim-divergence",
+    check: "gate-status",
+    exitCode: 0,
+    scope_n: downstreamPass.length,
+    meta: { unsignedGates: [unsigned.g], downstreamPass, frontier: frontierLabel },
+  });
+}
 
 let stateText = null;
 try {
@@ -438,6 +465,7 @@ function rungFor(scriptName) {
 // Render.
 // ---------------------------------------------------------------------------
 console.log("Gate status (three-valued deterministic checks — judgment criteria sit on top, verify those by hand):\n");
+console.log(`Computed frontier: ${frontierLabel}\n`);
 for (const row of gateRows) {
   const cmds = row.keys.length ? `  [${row.keys.map(cmdLabel).join(" · ")}]` : "";
   const notes = row.notes.length ? `  (${row.notes.join("; ")})` : "";

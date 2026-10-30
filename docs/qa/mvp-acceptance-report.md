@@ -86,8 +86,13 @@ closed:
    `docs/qa/risk-register.md` marked **Decision** need an answer.
 5. **Signed approval is not configured** (no hardware-backed key in `quality/allowed-signers`); today the owner's merge is the
    approval.
-6. **Process findings PD-4, PD-6, PD-7 and PD-8** from the retro of 2026-10-28 are not addressed (see risk R-16). They are in `docs/qa/process-defects.json`, which is gitignored (ADR-0008) and so
-   not in a fresh clone; PD-1, PD-2, PD-3, PD-5 and PD-9 are recorded in `openspec/changes/archive/*-improve-PD-*`.
+6. **Process findings PD-4, PD-6, PD-7 and PD-8.** The owner approved the fixes on 2026-10-30. The active
+   `resolve-retro-pd4-pd6-pd7-pd8` slice gives G3 a recording-mechanism check, recognizes the recorded G1/G3
+   ratification, records traceability warnings in telemetry, and rejects new correction dispositions without a verified
+   owner signature. Seven older dispositions still have only agent-typed approval claims; `correct --check` warns about
+   them until the owner signs decisions and the references are backfilled (risk R-16). The original findings are in the
+   gitignored `docs/qa/process-defects.json` (ADR-0008); the other process fixes are committed under
+   `openspec/changes/archive/*-improve-PD-*`.
 
 Items 3 and 4 need only the owner. Item 1 needs an approved dependency.
 

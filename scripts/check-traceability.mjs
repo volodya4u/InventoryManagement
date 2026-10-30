@@ -25,6 +25,7 @@
 // Run in pre-commit (fast) and CI (with --check-fresh and release flags).
 import { readdirSync, readFileSync, statSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { emit } from "./ledger.mjs";
 
 const root = process.cwd();
 const flags = new Set(process.argv.slice(2));
@@ -299,5 +300,20 @@ function finish() {
     `\ntraceability: ${mvpFRs?.length ?? 0} MVP FRs checked — ${failures.length} failure(s), ${warnings.length} warning(s)`,
   );
   if (!flags.has("--check-fresh")) console.log(`wrote ${PATHS.reportOut} and ${PATHS.jsonOut}`);
+  const byClass = (items) => {
+    const counts = {};
+    for (const item of items) counts[item.check] = (counts[item.check] ?? 0) + 1;
+    return counts;
+  };
+  emit({
+    event: "check-run",
+    check: "traceability",
+    exitCode: failures.length ? 1 : 0,
+    scope_n: mvpFRs.length,
+    failures: failures.length,
+    warnings: warnings.length,
+    warningsByClass: byClass(warnings),
+    failuresByClass: byClass(failures),
+  }, { root });
   process.exit(failures.length ? 1 : 0);
 }
