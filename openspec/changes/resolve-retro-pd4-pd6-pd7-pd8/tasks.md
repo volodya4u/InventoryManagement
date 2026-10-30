@@ -4,4 +4,4 @@
 - [x] 2. Add and run the PD-6 assertion red; recognize ratification and emit claim-divergence events for unsigned downstream passes; run it green.
 - [x] 3. Add and run the PD-7 assertion red; emit per-class traceability ledger events and run it green.
 - [x] 4. Add and run the PD-8 assertion red; verify new correction approvals, warn for legacy dispositions and run it green.
-- [x] 5. Update the risk, acceptance, handoff and autonomy records; run Factory gates and Definition of done; obtain an independent review; commit evidence with PD references.
+- [ ] 5. Update the risk, acceptance, handoff and autonomy records; run Factory gates and Definition of done; obtain an independent review; commit evidence with PD references. The independent review approved the diff; its hook-recorded verdict is pending authorization for the repository's Claude reviewer run.
