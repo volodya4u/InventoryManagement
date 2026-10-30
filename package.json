@@ -1,0 +1,12 @@
+{
+  "name": "flower-shop-inventory-e2e",
+  "private": true,
+  "description": "Browser tests (Playwright) for the Flower Shop Inventory application. The application's own frontend lives in frontend/.",
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

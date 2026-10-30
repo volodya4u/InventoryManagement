@@ -23,6 +23,11 @@ updates:
     ignore:
       - dependency-name: "@angular/*"
         update-types: ["version-update:semver-major"]
+  # The browser tests (e2e/). The frontend's own packages are the entry above.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

@@ -182,6 +182,21 @@ pnpm start
 
 The development frontend will be available at `http://localhost:4200`.
 
+## Browser Tests
+
+The browser tests (Playwright, `e2e/`) drive the built application in Chromium, Firefox and WebKit. They start the
+executable JAR themselves, on port 18081 with a throwaway database and an administrator password made for the run, so
+they never touch your data or the dev servers. Build the JAR first, then from the repository root:
+
+```powershell
+mvn -B -ntp -DskipTests package
+pnpm install
+pnpm exec playwright install chromium firefox webkit
+pnpm run test:e2e
+```
+
+`E2E_PORT` and `E2E_JAR` override the port and the JAR path. CI runs the same specs in the `e2e` job.
+
 ## Agent Harness
 
 The repository carries a Claude Code harness adapted from the Agentic Engineering Crash Course day 1 demo. It needs only Node.js 20+ on `PATH`. The Node that Maven installs into `target/frontend-tooling` is not on `PATH`; `scripts/ng-mcp.mjs` starts the Angular CLI MCP server with it when it exists, because the Angular CLI refuses Node releases older than 22.22.3 or 24.15.
