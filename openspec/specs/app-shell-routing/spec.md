@@ -40,9 +40,10 @@ behind `authGuard` under the shell; `/` and any unknown path SHALL redirect to `
 ### Requirement: Navigation menu
 
 The navigation menu SHALL open from the toggle and close when a link is chosen (FR-35). The layout is responsive with a
-toggled mobile menu; no target device list is declared (NFR-18).
+toggled mobile menu, and is checked at 375, 768 and 1280 px; a wide table scrolls inside its own frame and the frame shows a
+shadow on an edge with more to scroll to (NFR-18).
 
-> GAP: CSS breakpoints at 480, 575.98, 620, 767.98, 820, 980 and 1100 px are unverified; verification tag is vision-verify with no mechanism (see docs/requirements.md Coverage gaps / OQ-8).
+> The layout is checked by `e2e/16-layout.spec.ts` and by `docs/qa/vision-report.json`, which is a model's judgement of screenshots and not deterministic (ADR-0011). No device list beyond those three widths is declared.
 
 #### Scenario: Menu toggle
 - **WHEN** the user opens the menu from the toggle and then chooses a link
@@ -76,10 +77,11 @@ details (title and detail) while filter-level 401 and 403 use a small `{"message
 
 ### Requirement: Performance and browser support are undeclared
 
-The system SHALL NOT declare a performance budget or a supported browser list (NFR-15, NFR-17). The raw material,
-product and sales lists and the report documents are returned unpaginated; only Stock History is paged.
+The system SHALL NOT declare a performance budget (NFR-15). The supported browsers are the current Chromium (Chrome and
+Edge), Firefox and WebKit, which stands in for Safari (NFR-17, OQ-8). The raw material, product and sales lists and the report
+documents are returned unpaginated; only Stock History is paged.
 
-> GAP: no load test and no browser list exist (see docs/requirements.md OQ-8 / OQ-9).
+> GAP: no load test exists (see docs/requirements.md OQ-9). The browsers are covered by `e2e/20-browsers.spec.ts` and the whole `e2e/` suite in each of the three.
 
 #### Scenario: Unpaginated lists
 - **WHEN** a client calls `GET /api/raw-materials`, `GET /api/products` or `GET /api/sales`
@@ -88,10 +90,10 @@ product and sales lists and the report documents are returned unpaginated; only 
 ### Requirement: Usability and accessibility
 
 Destructive deletes SHALL ask for confirmation, API errors SHALL be shown in the UI through `apiErrorMessage`, and write forms
-SHALL validate before sending (NFR-19). The templates carry ARIA attributes and labels but no accessibility target or
-automated gate exists (NFR-20).
+SHALL validate before sending (NFR-19). The accessibility target is WCAG 2.1 AA, checked by axe over every page in the light and the dark colour scheme
+(NFR-20, OQ-15).
 
-> The raw-materials, products and sales component specs assert invalid submissions send no request and server errors appear in their write dialogs; login and change-password specs cover their forms. Delete confirmations are asserted by FR-55 and FR-86. Accessibility remains without a target or gate (see docs/requirements.md OQ-15).
+> The raw-materials, products and sales component specs assert invalid submissions send no request and server errors appear in their write dialogs; login and change-password specs cover their forms. Delete confirmations are asserted by FR-55 and FR-86. Accessibility is held by `e2e/18-accessibility.spec.ts` and `scripts/check-a11y.mjs` (ADR-0011); automated rules find only part of the problems, so MT-28 stays. The application has no dark theme; the dark scheme is an emulated preference.
 
 #### Scenario: API error shown
 - **WHEN** an API call fails with an error message

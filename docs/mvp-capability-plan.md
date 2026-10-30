@@ -230,7 +230,7 @@ Total: **149 MVP FRs across 16 retrofit baseline slices** (no gaps, no duplicate
 | Item | Why it is not a slice |
 |---|---|
 | NFR-15 (performance), NFR-16 (availability, backup) | Budgets and targets are undeclared (OQ-9, OQ-10). A slice needs a ratified budget to assert, so ask the owner first. |
-| NFR-17 (`e2e`), NFR-18 (`vision-verify`), NFR-20 (`a11y`) | No tooling exists; waived at baseline (`docs/qa/waivers/`). Closing them needs Playwright or axe, i.e. a new dependency, which `AGENTS.md` says to ask about first. |
+| NFR-17 (`e2e`), NFR-18 (`vision-verify`), NFR-20 (`a11y`) | Waived at baseline. Playwright and axe were approved and installed on 2026-10-30, OQ-8 and OQ-15 were answered, and the three waivers are closed (ADR-0010, ADR-0011). |
 | Behavior changes suggested by the open questions (OQ-5, 6, 7, 11, 13) | The owner ratified current behavior. Each would be its own behavior slice if the owner later asks. (OQ-1 was confirmed as intended; OQ-2 became its own behavior slice, `claude/dashboard-excludes-returned-sales`, after the owner asked for it.) |
 
 ## 7. Sequencing
