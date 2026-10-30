@@ -69,6 +69,16 @@
   color-scheme: light;
 }
 
+// Bootstrap's outline buttons print the border colour as text: green is 4.1:1 on the cream background and yellow 1.6:1
+// on white. The text gets a darker shade of each; the border, fill and hover state stay Bootstrap's.
+.btn-outline-success {
+  --bs-btn-color: #146c43;
+}
+
+.btn-outline-warning {
+  --bs-btn-color: #7a5900;
+}
+
 html,
 body {
   min-height: 100%;
