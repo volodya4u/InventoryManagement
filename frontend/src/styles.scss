@@ -79,6 +79,11 @@
   --bs-btn-color: #7a5900;
 }
 
+// Bootstrap's grey (#6c757d) is 4.49:1 on the off-white of a muted row, a hair under 4.5.
+.btn-outline-secondary {
+  --bs-btn-color: #5c656d;
+}
+
 // A wide table scrolls sideways inside its frame. Without a cue a clipped column looks cut off, so a shadow shows on each
 // edge that has more to scroll to: the white strips scroll with the content and cover the shadows at the ends
 // (background-attachment: local), the shadows stay at the edges. The cells are transparent so the frame's background shows.
