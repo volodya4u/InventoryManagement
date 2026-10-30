@@ -97,3 +97,24 @@ test.describe('on a phone, the total row', () => {
     expect(await label.evaluate((el) => getComputedStyle(el).textAlign)).toBe('left');
   });
 });
+
+test.describe('on a desktop', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  // @trace NFR-18
+  test('the low stock badge has room beside the material name', async ({ page, baseURL }) => {
+    const api = await Api.signIn(baseURL!);
+    await api.rawMaterial({ name: 'Badge Rose', quantity: 1, reorderLevel: 5, initialUnitCost: 2 });
+    await api.dispose();
+    await signInAsAdmin(page);
+    await page.goto('/raw-materials');
+    const row = page.locator('tbody tr').filter({ hasText: 'Badge Rose' });
+    const badge = row.locator('.low-stock-badge');
+    await expect(badge).toHaveText('Low stock');
+    const gap = await badge.evaluate((el) => {
+      const name = el.parentElement!.querySelector('strong')!.getBoundingClientRect();
+      return el.getBoundingClientRect().left - name.right;
+    });
+    expect(gap, 'the badge touches the name').toBeGreaterThanOrEqual(4);
+  });
+});
