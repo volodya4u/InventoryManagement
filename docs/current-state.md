@@ -5,19 +5,22 @@
 
 ## Last updated
 
-- **Date:** 2026-10-30 (Europe/Kyiv)
-- **Branch when written:** `claude/archive-retro-pd4-pd6-pd7-pd8`, on top of `origin/main` at `a33d972` (pull request 151 merged)
+- **Date:** 2026-10-31 (Europe/Kyiv)
+- **Branch when written:** `codex/record-mt29-manual-check`, on top of `origin/main` at `e2e1a82`
 - **Active OpenSpec change:** none; the retro slice is archived under `openspec/changes/archive/2026-10-30-resolve-retro-pd4-pd6-pd7-pd8/`
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
-  accepted: no manual case has been run and the owner has not signed `docs/qa/mvp-acceptance-report.md`.
+  accepted: MT-29 passed on 2026-10-31, the other 28 manual cases have not been run, and the owner has not signed
+  `docs/qa/mvp-acceptance-report.md`.
 - **Next task (the owner's):** enroll a hardware signing key in `quality/allowed-signers`, sign decisions for the seven
   historical correction dispositions and backfill their `approvalRef` values (risk R-16); until then `correct --check`
-  warns about them. The owner also still needs to run `docs/qa/manual-test-plan.md` and decide in section 6 of the
-  acceptance report. No agent task is open from the retro slice.
+  warns about them. The owner can decide whether any of the other 28 manual cases are needed before the decision in
+  section 6 of the acceptance report. No agent task is open from the retro slice.
 - **Claims:**
   - The release gate is red, and the reasons are listed — evidence: `docs/qa/mvp-acceptance-report.md` (section 5) and
     `node scripts/gate-status.mjs`
+  - MT-29 passed with local browser checks and the owner's signed phone result; the other manual cases remain unrun —
+    evidence: `docs/qa/manual-test-plan.md` (run record)
   - Two non-functional requirements are waived, not passed (NFR-15 performance, NFR-16 availability); the waivers for NFR-17, NFR-18 and NFR-20 are closed — evidence: `docs/qa/waivers/`, ADR-0011
   - Two process gaps cannot be repaired and are waived, not fixed — evidence: `docs/qa/historical-gaps.md`, ADR-0009 and `docs/qa/waivers/2026-10-28-trajectory-*.md`
   - PD-4, PD-6, PD-7 and PD-8 are done: each has red/green harness tests, and the slice is merged and archived. The seven

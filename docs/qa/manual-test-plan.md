@@ -1,8 +1,8 @@
 # Manual test plan — Flower Shop Inventory
 
 A test plan that a person who is not a developer can follow in a browser. It covers the shipped behaviour in
-`docs/requirements.md`; each case names the requirements it checks. **Nothing here has been executed yet:** every result box
-is empty, and a case counts as passed only when someone has ticked it and signed the run record at the end.
+`docs/requirements.md`; each case names the requirements it checks. **Only MT-29 has been executed:** the other 28 result
+boxes are empty, and a case counts as passed only when someone has ticked it and signed the run record at the end.
 
 This plan is the manual half of the evidence. The automated half is the test suite that `node scripts/dod.mjs` runs;
 `docs/qa/traceability-report.md` (generated) maps each requirement to the tests that carry its `@trace` tag. The
@@ -312,17 +312,21 @@ Ethernet adapter). 2. On this PC open `http://127.0.0.1:8081` and `http://localh
 network (a phone on the same Wi-Fi is enough) open `http://<this PC's address>:8081`.
 **Expected:** Step 2 shows the sign-in page both times. Step 3 does not connect (the browser reports that the site cannot be
 reached, not a sign-in page). The automated test `LoopbackBindingHttpTest` checks the same thing on the machine that runs it.
-**Result:** ☐ Pass ☐ Fail — notes: ______
+**Result:** ☒ Pass ☐ Fail — notes: On 2026-10-31, Chrome on this PC showed Administrator Sign In at both
+`http://127.0.0.1:8081/login` and `http://localhost:8081/login`. The server listened on `127.0.0.1:8081`; a request to
+this PC's LAN address (`192.168.0.110:8081`) was refused from Windows and timed out from a separate Ubuntu network stack.
+The owner reported in chat that a phone on the same Wi-Fi also failed to connect to that LAN address, then explicitly
+signed this single case. No sign-in or data change was performed.
 
 ## Run record
 
 | Field | Value |
 |---|---|
-| Date of run | |
-| Tester | |
-| Application version (commit shown by `git log -1 --format=%h`) | |
-| Browser and version | |
-| Database used (new empty / copy) | |
-| Cases passed / failed / not run | |
-| Defects found (reference) | |
-| Signature | |
+| Date of run | 2026-10-31 |
+| Tester | Codex (local checks); volodya4u (phone check, reported in chat) |
+| Application version (commit shown by `git log -1 --format=%h`) | Checkout `e2e1a82`; the running JAR does not embed its source commit |
+| Browser and version | Chrome 156.0.8078.74 on Windows; phone browser/version not reported |
+| Database used (new empty / copy) | Existing local database; MT-29 was read-only and did not use application data |
+| Cases passed / failed / not run | 1 / 0 / 28 (MT-29 only) |
+| Defects found (reference) | None in MT-29 |
+| Signature | volodya4u, in chat on 2026-10-31: "Yes, sign MT-29" (this case only) |
