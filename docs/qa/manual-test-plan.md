@@ -2,7 +2,8 @@
 
 A test plan that a person who is not a developer can follow in a browser. It covers the shipped behaviour in
 `docs/requirements.md`; each case names the requirements it checks. **MT-27, MT-28 and MT-29 have been executed:**
-MT-27 and MT-29 passed, MT-28 failed, and the other 26 result boxes are empty. A case counts as passed only when
+all three now pass after the MT-28 rerun on 2026-11-01, and the other 26 result boxes are empty. The original
+MT-28 failure remains in its signed run record below. A case counts as passed only when
 someone has ticked it and signed the run record at the end.
 
 This plan is the manual half of the evidence. The automated half is the test suite that `node scripts/dod.mjs` runs;
@@ -310,7 +311,19 @@ control and Sign In button in order; Space and Enter operated the reveal control
 Material dialog failed the keyboard check: opening it with Enter left focus on the Add Raw Material button, and the
 next Tab focused the first row's Receive Stock button behind the modal instead of a dialog control. Repeating after a
 pointer click gave the same result. The dialog's fields had accessible labels in the browser accessibility tree, but
-spoken screen reader announcements were not verified. The keyboard failure is sufficient to fail this case.
+spoken screen reader announcements were not verified. The keyboard failure was sufficient to fail the original run.
+
+**Rerun result (2026-11-01):** ☒ Pass ☐ Fail — notes: Codex reran the failed form portion in Chrome against the JAR
+built from merged `main` at `33ab4b9`. A visible focus mark followed each reached control.
+Opening New Raw Material put focus on Close; Tab moved through Name, Unit of Measurement, Initial Stock, Initial Unit
+Cost, Reorder Level, Description, Image, Cancel and Save in order. Space opened the unit list and Enter selected its
+current value. Enter opened the image chooser; Tab reached its Cancel button and Enter dismissed it without a file.
+Enter on empty Save showed the required-name error and kept the dialog open. Shift+Tab from Name returned to Close and
+wrapped to Save; Tab wrapped from Save to Close. Enter on Cancel closed the dialog and returned focus to Add Raw
+Material, which Enter reopened.
+Windows Narrator's speech recap showed "New Raw Material dialog", "Name *, edit", "Unit of Measurement *, Piece, combo
+box" and "Initial Stock *, spin button". The sign-in keyboard portion passed in the original run and was not repeated.
+No form was submitted. The 2026-10-31 failed run record is preserved below; the new signed rerun record follows it.
 
 ## 11. Network access
 
@@ -352,6 +365,19 @@ signed this single case. No sign-in or data change was performed.
 | Application version | Checkout at test time `f84479b`; QA records based on merged `main` at `b8122fe`. The running JAR does not embed its source commit |
 | Browser and version | Codex in-app Chromium browser on Windows; version not exposed |
 | Database used (new empty / copy) | Existing local database; the checks only read pages and opened then canceled forms, with no data changes |
-| Cases passed / failed / not run | 2 / 1 / 26 overall (MT-27 and MT-29 passed; MT-28 failed) |
+| Cases passed / failed / not run | 2 / 1 / 26 at the time (MT-27 and MT-29 passed; MT-28 failed) |
 | Defects found (reference) | MT-28: New Raw Material modal does not move or contain keyboard focus; Tab reaches Receive Stock behind it |
 | Signature | volodya4u, in chat on 2026-10-31: "Sign and update all three" (MT-27 pass and MT-28 fail) |
+
+## Run record — MT-28 rerun after PR #158
+
+| Field | Value |
+|---|---|
+| Date of run | 2026-11-01 (Europe/Kyiv) |
+| Tester | Codex (Chrome keyboard check and Windows Narrator speech recap) |
+| Application version | JAR built from merged `main` at `33ab4b9`; the JAR does not embed its source commit |
+| Browser and version | Google Chrome on Windows; version not captured during this rerun |
+| Database used (new empty / copy) | Existing local database; the form was opened and closed without a submission |
+| Cases passed / failed / not run | 3 / 0 / 26 current overall (MT-27, MT-28 and MT-29 passed); the original MT-28 failure remains above |
+| Defects found (reference) | None in this rerun; the original focus defect was fixed by PR #158 |
+| Signature | Codex (tester), 2026-11-01; keyboard actions and Narrator speech recap observed through computer-use tools. This is not the owner's MVP acceptance signature. |
