@@ -275,3 +275,57 @@ describe('RawMaterialsComponent delete confirmation', () => {
     expect(fixture.nativeElement.textContent).toContain('Adjustment failed.');
   });
 });
+
+describe('RawMaterialsComponent modal keyboard focus', () => {
+  let requests: HttpTestingController;
+  let fixture: ComponentFixture<RawMaterialsComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    requests = TestBed.inject(HttpTestingController);
+    fixture = TestBed.createComponent(RawMaterialsComponent);
+    fixture.detectChanges();
+    requests.expectOne('/api/raw-materials').flush([]);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    requests.verify();
+    TestBed.resetTestingModule();
+  });
+
+  // @trace FR-150
+  it('keeps dialog focus inside and returns it to the opener', () => {
+    const opener = Array.from<HTMLButtonElement>(
+      fixture.nativeElement.querySelectorAll('button'),
+    ).find((button) => button.textContent?.trim() === '+ Add Raw Material')!;
+    opener.focus();
+    opener.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.contains(document.activeElement)).toBe(true);
+
+    const buttons = Array.from<HTMLButtonElement>(dialog.querySelectorAll('button:not(:disabled)'));
+    const first = buttons[0];
+    const last = buttons.at(-1)!;
+    last.focus();
+    last.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(first);
+
+    first.focus();
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(last);
+
+    const cancel = buttons.find((button) => button.textContent?.trim() === 'Cancel')!;
+    cancel.click();
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(opener);
+  });
+});

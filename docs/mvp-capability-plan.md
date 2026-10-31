@@ -1,6 +1,6 @@
 # MVP Capability Change Plan
 
-**Step 5 of the onboarding** — the plan for NEW work only. The 149 MVP functional requirements already ship; each is owned by exactly one *retrofit baseline slice* (the 16 capability specs in `openspec/specs/`, listed in `.project-factory/retrofit.json`). Nothing in this plan changes shipped behavior.
+**Step 5 of the onboarding** — the plan for NEW work only. The original 149 MVP functional requirements already shipped; each was owned by exactly one *retrofit baseline slice* (the 16 capability specs in `openspec/specs/`, listed in `.project-factory/retrofit.json`). FR-150 is the later `modal-keyboard-focus` slice. This plan records approved changes to shipped behavior.
 
 > Inputs: `docs/product-brief.md`, `docs/requirements.md` (ratified by volodya4u on 2026-10-11, defaults included), baseline specs under `openspec/specs/`, ADR-0001.
 
@@ -222,8 +222,9 @@ Every MVP FR has one baseline owner; the last column shows the hardening slice t
 | FR-147 | schema-migration | - |
 | FR-148 | schema-migration | - |
 | FR-149 | schema-migration | H5 |
+| FR-150 | app-shell-routing | modal-keyboard-focus |
 
-Total: **149 MVP FRs across 16 retrofit baseline slices** (no gaps, no duplicates); **69 of 71 coverage-gap rows** are assigned to 6 new slices (NFR gap rows are listed in section 4).
+Total: **150 MVP FRs across 16 capability specs** (149 retrofit requirements plus FR-150; no gaps or duplicates); **69 of 71 coverage-gap rows** are assigned to 6 new slices (NFR gap rows are listed in section 4).
 
 ## 6. Deferred and blocked (not in this plan)
 

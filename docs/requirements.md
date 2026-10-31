@@ -94,6 +94,7 @@ Source references are given as file paths under `src/main/java/com/flowershop/in
 | FR-34 | MVP | Shell | ASSUMPTION: The pages Dashboard, Raw Materials, Products, Sales, Stock History, Monthly Sales report and Change Password sit behind `authGuard` under the shell; `/` and any unknown path redirect to `/dashboard`. Source `frontend/src/app/app.routes.ts`. Evidence: frontend `app.routes.spec.ts` (route table, `authGuard`, redirects). | local-verifiable |
 | FR-35 | MVP | Shell | ASSUMPTION: The navigation menu opens from the toggle and closes when a link is chosen. Evidence: FE:layout/shell.component.spec.ts "opens the menu from the toggle and closes it from a link". | local-verifiable |
 | FR-36 | MVP | Health | ASSUMPTION: `GET /api/health` is public, returns `{"status":"UP"}`, and creates no session. Evidence: IT›reportsHealthWithoutSigningInOrCreatingASession. | local-verifiable |
+| FR-150 | MVP | Shell | Owner-approved on 2026-10-31: every Raw Materials, Products and Sales modal moves keyboard focus inside when opened, keeps Tab and Shift+Tab inside, and returns focus to its opener when closed. Evidence: FE:raw-materials/raw-materials.component.spec.ts "keeps dialog focus inside and returns it to the opener"; FE:products/products.component.spec.ts "focuses the product dialog and returns focus to its opener"; FE:sales/sales.component.spec.ts "focuses the new-sale dialog and returns focus to its opener". | local-verifiable |
 
 ### 2.4 Dashboard
 

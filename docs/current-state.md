@@ -6,21 +6,24 @@
 ## Last updated
 
 - **Date:** 2026-10-31 (Europe/Kyiv)
-- **Branch when written:** `codex/record-mt29-manual-check`, on top of `origin/main` at `e2e1a82`
-- **Active OpenSpec change:** none; the retro slice is archived under `openspec/changes/archive/2026-10-30-resolve-retro-pd4-pd6-pd7-pd8/`
+- **Branch when written:** `codex/record-mt27-mt28-manual-check`, on top of `origin/main` at `b8122fe`
+- **Active OpenSpec change:** `openspec/changes/modal-keyboard-focus/` adds FR-150 for keyboard focus in ten catalog and sales dialogs; the retro slice is archived under `openspec/changes/archive/2026-10-30-resolve-retro-pd4-pd6-pd7-pd8/`
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
-  accepted: MT-29 passed on 2026-10-31, the other 28 manual cases have not been run, and the owner has not signed
-  `docs/qa/mvp-acceptance-report.md`.
+  accepted: MT-27 and MT-29 passed, MT-28 failed because keyboard focus escaped the New Raw Material dialog, and the
+  other 26 manual cases have not been run. The owner has not signed `docs/qa/mvp-acceptance-report.md`.
 - **Next task (the owner's):** enroll a hardware signing key in `quality/allowed-signers`, sign decisions for the seven
   historical correction dispositions and backfill their `approvalRef` values (risk R-16); until then `correct --check`
-  warns about them. The owner can decide whether any of the other 28 manual cases are needed before the decision in
+  warns about them. The MT-28 keyboard focus defect has a proposed fix in this branch with frontend and Chromium browser regressions; their results are in the pull request's tool-generated evidence. It needs a rerun against the released app before claiming manual accessibility
+  acceptance. The owner can decide whether any of the other 26 manual cases are needed before the decision in
   section 6 of the acceptance report. No agent task is open from the retro slice.
 - **Claims:**
   - The release gate is red, and the reasons are listed — evidence: `docs/qa/mvp-acceptance-report.md` (section 5) and
     `node scripts/gate-status.mjs`
-  - MT-29 passed with local browser checks and the owner's signed phone result; the other manual cases remain unrun —
-    evidence: `docs/qa/manual-test-plan.md` (run record)
+  - MT-27 and MT-29 passed; MT-28 failed because focus moved behind the New Raw Material dialog, and spoken screen
+    reader output was not verified; the other 26 manual cases remain unrun — evidence: `docs/qa/manual-test-plan.md`
+    (signed run records)
+  - FR-150's modal focus fix is under review in this branch; the tool-generated test and browser results cover it, while the original signed MT-28 failure remains the manual record — evidence: `frontend/src/app/core/modal-focus.directive.ts`, `e2e/18-accessibility.spec.ts` and the pull request's `pr-evidence` summary
   - Two non-functional requirements are waived, not passed (NFR-15 performance, NFR-16 availability); the waivers for NFR-17, NFR-18 and NFR-20 are closed — evidence: `docs/qa/waivers/`, ADR-0011
   - Two process gaps cannot be repaired and are waived, not fixed — evidence: `docs/qa/historical-gaps.md`, ADR-0009 and `docs/qa/waivers/2026-10-28-trajectory-*.md`
   - PD-4, PD-6, PD-7 and PD-8 are done: each has red/green harness tests, and the slice is merged and archived. The seven

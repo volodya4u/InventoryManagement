@@ -9,20 +9,30 @@
     768,
     1280
   ],
-  "sourceHash": "fbf4b3aa6343765f9d0d3b167d88794c8ce377366d2accee19cf4e3db386443a",
+  "sourceHash": "382e9d782cc8e9cd88e38eae780b8fe9419d32dfa1643f7277ff0f678ab50e47",
   "shots": [
     {
       "id": "login-375",
       "route": "login",
       "width": 375,
       "file": "docs/qa/vision/login-375.png",
-      "sha256": "587740b55495acb29ffe2aae837840056e9cc16b064f5a11783b621301740395",
-      "darkIdentical": true,
+      "sha256": "0b71397b0a7f1e1bfb85c3ec220547b831269a13c79fd39112afa780b3e81aa5",
+      "darkIdentical": false,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Sign In card fits with margins; nothing cut off or overlapping; high-contrast labels, fields and button; only the small grey footer is low contrast and still legible.",
+        "notes": "At 375px wide the login card fits inside the frame with even side margins. Nothing is clipped, and there is no horizontal overflow. The header (Flower Shop / Inventory Management), the 'Administrator Sign In' heading, the Username field showing 'admin', the Password field with its 'Show' toggle, the dark green 'Sign In' button and the footer text are all legible with good contrast. The smallest text is the muted gray footer 'Flower Shop Inventory · Local profile', which is small but still readable.",
         "judge": "project-factory:vision-judge"
+      },
+      "dark": {
+        "file": "docs/qa/vision/login-375.dark.png",
+        "sha256": "587740b55495acb29ffe2aae837840056e9cc16b064f5a11783b621301740395",
+        "vision": {
+          "met": true,
+          "readable": true,
+          "notes": "At 375px wide the card and the dark green header both fit with no clipping or horizontal overflow. The heading, the Username and Password labels, the 'Show' toggle, the green 'Sign In' button and the footer text are all legible, with good contrast on the cream card. The filename says 'dark', but only the header bar is dark and the page background and card are light. If this frame is meant to prove dark mode, it fails; it does not affect the fit and legibility check.",
+          "judge": "project-factory:vision-judge"
+        }
       }
     },
     {
@@ -35,7 +45,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Card centred and fully inside the viewport; adequate contrast; footer caption and the Show link are small but legible.",
+        "notes": "The 768px-wide login page fits the screenshot. The header spans the full width and the sign-in card is centered with even margins. Nothing is clipped and there is no horizontal overflow. The text and controls are legible: the dark heading, labels, the 'admin' input, the white-on-green Sign In button and the 'Show' toggle all read clearly. The smallest text (the 'Flower Shop Inventory · Local profile' footer and the 'Inventory Management' header subtitle) is small but still has acceptable contrast.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -44,13 +54,23 @@
       "route": "login",
       "width": 1280,
       "file": "docs/qa/vision/login-1280.png",
-      "sha256": "c3faa96445a6cbda48343a52f4d5fcb21a9046950dbdac0f08c1acc167829475",
-      "darkIdentical": true,
+      "sha256": "6b1894250f2fa47540da531b8c283bac07a303e2e35e87ff83541b3a53dd9cce",
+      "darkIdentical": false,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Card centred and fully visible; good contrast; small footer text and eyebrow are readable.",
+        "notes": "At 1280px the page fits with no clipping or horizontal overflow. The dark header, the centered sign-in card, the Username and Password fields, the green Sign In button and the footer all sit fully inside the frame. All text is legible: the dark heading and labels, the white button text on dark green, the gray subtitle, the small 'Inventory Management' text under the header, and the footer text 'Flower Shop Inventory · Local profile', which is small but still readable. No fix is needed.",
         "judge": "project-factory:vision-judge"
+      },
+      "dark": {
+        "file": "docs/qa/vision/login-1280.dark.png",
+        "sha256": "c3faa96445a6cbda48343a52f4d5fcb21a9046950dbdac0f08c1acc167829475",
+        "vision": {
+          "met": true,
+          "readable": true,
+          "notes": "The 1280px page fits with no clipping or horizontal overflow. The dark header bar holds the logo, 'Flower Shop' and 'Inventory Management', and the sign-in card is centered with the title, username 'admin', a Password field with 'Show', and a green Sign In button. All text has adequate contrast. The footer 'Flower Shop Inventory · Local profile' is small but legible. The file is named 'dark', but only the header is dark and the body and card render light. That is a possible dark-mode mismatch, but it does not hurt fit or legibility.",
+          "judge": "project-factory:vision-judge"
+        }
       }
     },
     {
@@ -63,7 +83,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Header, stacked cards and the Getting Started card fit with no clipping or overlap; links underlined, buttons look like buttons.",
+        "notes": "At 375px width the page fits with no horizontal overflow or clipping. The header (Flower Shop, Menu, admin/Sign Out), the five stat cards and the Getting Started card with its two buttons all sit inside the viewport with margins on both sides. All text has good contrast on the dark header and the pastel cards. The smallest text is the 'Administrator' caption and the card link labels, which are small but still legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -77,7 +97,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Two-column card grid, the lone Low Stock card leaves an empty cell (normal wrap); good contrast.",
+        "notes": "The 768px page fits the width. The header, the two-column card grid and the Getting Started panel all sit inside the margins, with no clipping or horizontal scrollbar. Text and controls have good contrast: dark text on light cards, white on the dark header, and the white-on-green 'Add Raw Material' button. The smallest text is the 11px 'Inventory & Production' subtitle and the card links, which are small but legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -91,7 +111,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Five stat cards with the fifth wrapping to a second row, and the Getting Started panel are intact; text legible.",
+        "notes": "The 1280px page fits the width with no clipping or horizontal overflow. The nav bar, the four stat cards, the Low Stock card and the Getting Started panel all sit inside the margins. Text is dark on light backgrounds and the white nav text is clear on dark green. The small 'Inventory & Production' subtitle and the card links are small but still legible. The Low Stock card wraps to a second row and leaves empty space beside it, which is a layout choice and not a defect.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -105,7 +125,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table scrolls inside its frame with a visible grey right-edge shadow; Low stock pill legible; rows are very tall (cosmetic).",
+        "notes": "The page fits the 375px width. The header, title, and green 'Add Raw Material' button are fully visible with no page-level horizontal overflow. The table scrolls inside its card, which is allowed. A shadow on the right edge signals the scroll, and the 'AVERAGE U… C…' column is cut off there as expected. Text contrast is good: dark text on a cream background, a white 'Low stock' label on a red badge, and white text on the dark-green header. The small grey 'Inventory & Production' and 'Administrator' captions are slightly faint but still readable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -119,7 +139,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "All columns, five stacked action buttons, wrapped headers, Low stock badges and the total row visible; the yellow-outlined Adjust Stock text is the faintest; contrast judged by eye only.",
+        "notes": "The page fits the 768px width with no horizontal overflow or clipping. The header, title, 'Add Raw Material' button, table and total footer all sit inside the margins with a rounded card edge visible on both sides. All text is legible: column headers, names, 'Low stock' badges, values and the five action buttons per row. The yellow 'Adjust Stock' and green 'Receive Stock' outlines are slightly light but still readable. No fix needed.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -133,7 +153,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Full table with total row inside the frame; Low stock badges legible; amber Adjust Stock text and the placeholder initials are the lowest contrast.",
+        "notes": "The Raw Materials page renders fully. It shows the nav bar, the title, the '+ Add Raw Material' button and a table of 12 rows with Photo, Name, Unit, Stock, Average Unit Cost, Stock Value and Actions columns. 'Low stock' red badges appear on the three Low Rose rows. The totals row reads 'Total Raw Materials Stock Value ₴9,321.00'. Each row has five stacked action buttons: Receive Stock (green), Write Off (red), Adjust Stock (amber), Edit (gray) and Delete (red). Their labels are small but clear, not clipped, and fit inside their outlined buttons. The Adjust Stock label is the faintest of them (amber text on a pale background), but it can still be read. Nothing overlaps.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -147,7 +167,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table scrolls inside its frame with a right-edge shadow and a clipped header; wrapped header labels, name, recipe text and SKU chip readable; the total row is intact.",
+        "notes": "At 375px the page fits the viewport with no page-level horizontal overflow. The header, title, subtitle and full-width '+ Add Product' button are all in view. The products table is clipped at the right (the 'STO…' column), and a right-edge shadow shows it scrolls internally, which is allowed. Text is legible and has good contrast: dark text on a light background, white text on the dark green header, and the SKU chip is readable. The 'Total Products Stock Value' footer row shows no value in view. That is presumably because the value column is off-screen in the scrolling table, so it is not a clipping defect.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -161,7 +181,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table scrolls inside its frame with a grey right-edge shadow; clipped action buttons are acceptable; header labels wrap cleanly; recipe lines and SKU text about 10-11 px.",
+        "notes": "The page itself fits within 768px with no page-level horizontal overflow. The header, title and Add Product button are within the viewport. The table stays inside its card, and the right-edge shadow marks additional columns as horizontally scrollable under NFR-18. Visible headers, values, recipe text and SKU chips are legible. The actions beyond the initial scroll position remain reachable by scrolling.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -175,7 +195,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Nine-column table and totals footer render without overlap; outlined buttons look like buttons; small recipe text and SKU chips readable.",
+        "notes": "The page fits the 1280px width. The nav bar, the Finished Products table and the Add Product button are all fully visible, with no clipping and no page-level horizontal scrollbar. All columns (Photo through Actions) show completely. Text is legible: dark text on a light background, white text on the dark nav, and the small recipe lines are grey but still readable. The action buttons (Produce, Write Off, Adjust Stock, Edit, Delete) have clear outlined labels.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -184,12 +204,12 @@
       "route": "sales",
       "width": 375,
       "file": "docs/qa/vision/sales-375.png",
-      "sha256": "7f1e6ea7d91177d6d67caf97b6ec549ea7ef1c2ebc741f46428b6b09dd0631ed",
+      "sha256": "b947fbd74c3e3598f631b35780c164c4609dbe1751238cf1398caebd1604f6a4",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table scrolls inside its frame with a dark right-edge shadow; the shadow is hidden behind the grey striped rows so it looks patchy (minor); header, chips, dates and badges legible.",
+        "notes": "At 375px the page fits with no page-level horizontal overflow. The header, title, \"+ New Sale\" button and card all sit inside the viewport. The wide sales table scrolls inside its card, with a shadow on the right edge and \"Partially Retu…\" cut off, which is allowed. Text and controls are legible: the dark header has white text, and the table headers, sale numbers, dates and status pills all have adequate contrast. The empty strip at the bottom of the table card looks slightly odd but is not a failure.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -198,12 +218,12 @@
       "route": "sales",
       "width": 768,
       "file": "docs/qa/vision/sales-768.png",
-      "sha256": "39d196f27f340ebf4665f10a977c8d0d166d0e72b11f3100cb6a56a1ae004a37",
+      "sha256": "4357dfb597814a7be2d44c39477cafc17b419d1869bcaef3af855bec4cfd4e4b",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table cut off at the right inside its frame with a visible grey gradient shadow; dimmed rows and red refunded text legible with adequate contrast.",
+        "notes": "The page fits the 768px width. The header, title and \"+ New Sale\" button are fully visible with no page-level horizontal overflow. The sales table scrolls internally: the Net Cost column is cut off at the right edge, and a fade shadow marks that scroll area, which is allowed. Text is legible with good contrast, including the status badges, sale numbers and the red refunded text.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -212,12 +232,12 @@
       "route": "sales",
       "width": 1280,
       "file": "docs/qa/vision/sales-1280.png",
-      "sha256": "daeef117677ee6dbf2940fe116d84a360afa4ba1bd04a01f245b6c4fd0648584",
+      "sha256": "c215d1412b2cb87ae5a76c4ab1617349a96161b85f13903e734b14dd958863af",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Full nine-column table with Actions and the totals footer visible; dimmed Products text is lighter grey but readable.",
+        "notes": "The Sales page fits the 1280px frame. The nav, header, New Sale button, and the full 9-column table with its totals row all sit inside the viewport, with no clipping and no page-level horizontal scrollbar. Text is legible: the dark text on the light background has good contrast, and the status pills, the muted product text, and the small red '₴89.70 refunded' captions are small but readable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -226,12 +246,12 @@
       "route": "stock-movements",
       "width": 375,
       "file": "docs/qa/vision/stock-movements-375.png",
-      "sha256": "364f639a7cdf981265f69068c18aacc050e41cf0d99c531459100d1730046707",
+      "sha256": "7adf3dd0f61d03d30c193e5ceaa7d067ef784489b102270c88f5f922f72f2e09",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Filter form and cards fit; the table scrolls inside its frame with a dark right-edge shadow showing only Date, Inventory and Item; disabled Previous and Next are faint but look disabled.",
+        "notes": "The 375px page fits the width with no page-level horizontal overflow or clipping. The header, filters, summary cards (Movements 15, Stock Value In ₴4,004.00, Out ₴690.00, Net ₴3,314.00) and pagination all sit inside the viewport. The wide table scrolls internally, which is allowed: a right-edge shadow shows it is clipped, and columns after Item are not visible in this frame. Text is legible with good contrast. The 'Previous' and 'Next' buttons are faded because they are disabled, which is acceptable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -240,12 +260,12 @@
       "route": "stock-movements",
       "width": 768,
       "file": "docs/qa/vision/stock-movements-768.png",
-      "sha256": "1f6e29bfa34ad80d9c3ae90fecb76bd0dba328a9f711ebd3e9978469a63dd8ef",
+      "sha256": "3b95e854b180ce9d9a1587f81becea5417feba3fae3e58c56636a663cbb48c61",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table clipped on the right after Unit Cost with a visible shadow on its edge; text legible; small grey sublabels faint but acceptable.",
+        "notes": "The page fits the 768px width. The header, filters, summary cards and table card all sit inside the viewport, and nothing shows page-level horizontal overflow. The wide table scrolls inside its own card: the right edge is cut off with a shadow cue, and the Total Value column is only partly visible. That internal scrolling is allowed. Text and controls are legible: the headings, filter labels, badges and buttons have adequate contrast. The small gray SKU and unit sub-labels are small but still readable.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -254,12 +274,12 @@
       "route": "stock-movements",
       "width": 1280,
       "file": "docs/qa/vision/stock-movements-1280.png",
-      "sha256": "8562cfe6de6b582d5be69d36bf683b9a1f9561fff7c241056fcf881fd1323c8f",
+      "sha256": "8f44231e21be387ce72b353eb25160989438dc8623caabacbe32453b561e7e24",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Table clipped at the Notes column with a grey scroll shadow on the right edge; text legible; small sublabels and the disabled Previous button are faint.",
+        "notes": "The page fits the 1280px frame with no page-level horizontal overflow. The nav, filters, summary cards and table all sit inside the viewport. The Notes column is cut off at the table's right edge (\"Return RET-2…\", \"Production o…\"), and a shadow on that edge shows the table scrolls internally, which is allowed. Text is legible: the headings and body are dark on a light background, the movement pills and red/green values are readable, and the small gray SKU and unit sublabels are small but still legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -268,12 +288,12 @@
       "route": "reports/monthly-sales",
       "width": 375,
       "file": "docs/qa/vision/reports-monthly-sales-375.png",
-      "sha256": "bf08f6ef091585f801344a4ee6edec31ff27c5f2a02816cc25b25b61279110b7",
+      "sha256": "ade57dbe0c2e4fc49443e9faf2bbfb88d9c7aa4914d85c2f292913e70acfadb1",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Four wide tables clip inside their rounded frames with a shadow on the right edge; the judge saw the page at reduced scale and could not confirm how faint the shadow is.",
+        "notes": "At 375px the page shows no page-level horizontal overflow. The header, title, Report Month field, Export CSV button, summary cards and Payment Methods cards all fit within the width. The Products Sold, Sales by Day, Sales Documents and Returns & Cancellations tables are clipped at the right edge (the 'NET UNITS', 'PAYMENT' and 'ORIGINAL SALE' columns are cut off). That looks like internal table scrolling, which is allowed, and the shadows on the right edge of those cards suggest this. Text is dark on a light background with good contrast. The small card captions are small but still legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -282,12 +302,12 @@
       "route": "reports/monthly-sales",
       "width": 768,
       "file": "docs/qa/vision/reports-monthly-sales-768.png",
-      "sha256": "de3be0a7d89aa4b62803e943887f0e0483545c530e6416a33804b64c1b949034",
+      "sha256": "224d127c5370b85327cad68410d4885469aa2e9e02618121d05fc1a9def910c4",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Returns and Cancellations table is cut off on the right with a grey scroll shadow; the Date column wraps to three lines there and the month input shows the browser's Ukrainian locale (cosmetic).",
+        "notes": "At 768px the page fits the frame with no page-level horizontal overflow. The header, summary cards, payment cards and tables all sit within the viewport. The Returns & Cancellations table clips its last column, 'Returned Cost' (values show as '₴69.00' cut off), at the right edge. A shadow on that edge shows it scrolls inside its own container, which is allowed. Text is dark on a light background and legible, including the small captions and table headers. The 'Bank Transfer' card heading wraps awkwardly but nothing is clipped.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -296,12 +316,12 @@
       "route": "reports/monthly-sales",
       "width": 1280,
       "file": "docs/qa/vision/reports-monthly-sales-1280.png",
-      "sha256": "82ae280b84a267dca943db1e5f7f7fd26911c36674a811e63f224399c1c485eb",
+      "sha256": "78a61a9756c2524907e02cbc15260dd15fd49a944c7be267dab35a6435928109",
       "darkIdentical": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Six summary cards wrap to a second row; the three payment cards and the four tables sit fully inside their frames with no clipping; the month input shows the browser's Ukrainian locale text (does not affect layout).",
+        "notes": "The Monthly Sales page fits the 1280px width. The nav, summary cards, payment-method cards and all four tables (Products Sold, Sales by Day, Sales Documents, Returns & Cancellations) sit inside the right margin, with no clipping and no page-level horizontal overflow. Text contrast is good: dark text on a cream background, and the green and maroon accents stay legible. The small grey card captions and monospace SKU/document chips are small but still readable. The date input shows Ukrainian locale text (\"жовтень 2026 р.\"), which is a minor copy inconsistency and not a layout problem.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -315,7 +335,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Dark header and the card with three labelled password fields, Show toggles, helper text and the green button fit and are legible; only the grey helper copy is low-key and readable.",
+        "notes": "At 375px wide, the Change Password page fits with no clipping or horizontal overflow. The header, the 'Menu' and 'Sign Out' buttons, the card, all three password fields with their 'Show' toggles, and the 'Change Password' button sit fully inside the frame with even margins. Text contrast is good: dark text on a cream background, white on dark green in the header, and the grey helper text 'Use between 10 and 64 characters.' is small but legible.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -329,7 +349,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Fits with no overflow; the card spans about 80% of the width leaving empty space on the right (a stylistic choice); good contrast.",
+        "notes": "The 768px page fits the screenshot width. The header, the Sign Out button, and the card all sit inside the viewport with no clipping or horizontal scroll. The headings, labels, helper text ('Use between 10 and 64 characters.'), 'Show' toggles, and the dark green button all have good contrast and are legible. The card takes up only about 80% of the width and leaves empty space on the right, which is a layout choice and not a defect.",
         "judge": "project-factory:vision-judge"
       }
     },
@@ -343,7 +363,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "Header nav, title and the card with three password fields and the green button are intact; good contrast including the helper hint.",
+        "notes": "The 1280px page fits its width. The dark nav bar spans the full width, with the Sign Out button fully visible at the right edge. The Change Password card sits inside the viewport, with no clipping and no sign of a horizontal scrollbar. Headings, labels, the helper text ('Use between 10 and 64 characters.'), the 'Show' toggles and the white-on-green button all have adequate contrast and size. The small 'Inventory & Production' and 'Administrator' captions in the nav are small but still legible.",
         "judge": "project-factory:vision-judge"
       }
     }

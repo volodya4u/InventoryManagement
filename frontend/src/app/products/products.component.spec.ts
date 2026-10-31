@@ -328,6 +328,23 @@ describe('ProductsComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Product adjustment failed.');
   });
+
+  // @trace FR-150
+  it('focuses the product dialog and returns focus to its opener', () => {
+    setup([], [rawMaterial()]);
+    const opener = Array.from<HTMLButtonElement>(
+      fixture.nativeElement.querySelectorAll('button'),
+    ).find((button) => button.textContent?.trim() === '+ Add Product')!;
+    opener.focus();
+    opener.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    (dialog.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(opener);
+  });
 });
 
 describe('ProductsComponent amounts', () => {

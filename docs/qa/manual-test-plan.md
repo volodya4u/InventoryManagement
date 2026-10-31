@@ -1,8 +1,9 @@
 # Manual test plan — Flower Shop Inventory
 
 A test plan that a person who is not a developer can follow in a browser. It covers the shipped behaviour in
-`docs/requirements.md`; each case names the requirements it checks. **Only MT-29 has been executed:** the other 28 result
-boxes are empty, and a case counts as passed only when someone has ticked it and signed the run record at the end.
+`docs/requirements.md`; each case names the requirements it checks. **MT-27, MT-28 and MT-29 have been executed:**
+MT-27 and MT-29 passed, MT-28 failed, and the other 26 result boxes are empty. A case counts as passed only when
+someone has ticked it and signed the run record at the end.
 
 This plan is the manual half of the evidence. The automated half is the test suite that `node scripts/dod.mjs` runs;
 `docs/qa/traceability-report.md` (generated) maps each requirement to the tests that carry its `@trace` tag. The
@@ -290,7 +291,13 @@ these cases stay: they are how a person checks what the tools cannot.
 menu.
 **Expected:** No page needs sideways scrolling to read; the menu opens from its toggle and closes when a link is chosen; forms
 stay usable.
-**Result:** ☐ Pass ☐ Fail — notes: ______
+**Result:** ☒ Pass ☐ Fail — notes: On 2026-10-31, the Codex in-app Chromium browser was set to 375 px and 768 px.
+Sign-in, Dashboard, Raw Materials, Products, Sales, Stock Movement History, Monthly Sales and Change Password were
+opened at both widths. None had page-level horizontal overflow. The Raw Materials, Products, Sales and Stock History
+tables scrolled within their own frames where needed, as NFR-18 allows; at 768 px the Raw Materials table fit. The
+menu opened from its toggle and closed after choosing Raw Materials at both widths. The New Raw Material, New Product
+and New Sale dialogs and the report, stock filter and password forms fit the phone viewport and their controls were
+available without a data submission. This was browser device-mode testing, not a run on physical devices.
 
 ### MT-28 Keyboard and screen reader basics
 **Covers:** NFR-20
@@ -298,7 +305,12 @@ stay usable.
 one.
 **Expected:** Every control can be reached and used from the keyboard in a sensible order, with a visible focus mark; form
 fields are announced with their labels.
-**Result:** ☐ Pass ☐ Fail — notes: ______
+**Result:** ☐ Pass ☒ Fail — notes: On 2026-10-31, Tab and Shift+Tab reached the sign-in fields, password reveal
+control and Sign In button in order; Space and Enter operated the reveal control, and focus was visible. The New Raw
+Material dialog failed the keyboard check: opening it with Enter left focus on the Add Raw Material button, and the
+next Tab focused the first row's Receive Stock button behind the modal instead of a dialog control. Repeating after a
+pointer click gave the same result. The dialog's fields had accessible labels in the browser accessibility tree, but
+spoken screen reader announcements were not verified. The keyboard failure is sufficient to fail this case.
 
 ## 11. Network access
 
@@ -318,7 +330,7 @@ this PC's LAN address (`192.168.0.110:8081`) was refused from Windows and timed 
 The owner reported in chat that a phone on the same Wi-Fi also failed to connect to that LAN address, then explicitly
 signed this single case. No sign-in or data change was performed.
 
-## Run record
+## Run record — MT-29
 
 | Field | Value |
 |---|---|
@@ -330,3 +342,16 @@ signed this single case. No sign-in or data change was performed.
 | Cases passed / failed / not run | 1 / 0 / 28 (MT-29 only) |
 | Defects found (reference) | None in MT-29 |
 | Signature | volodya4u, in chat on 2026-10-31: "Yes, sign MT-29" (this case only) |
+
+## Run record — MT-27 and MT-28
+
+| Field | Value |
+|---|---|
+| Date of run | 2026-10-31 |
+| Tester | Codex (browser layout and keyboard checks); volodya4u (signed the results in chat) |
+| Application version | Checkout at test time `f84479b`; QA records based on merged `main` at `b8122fe`. The running JAR does not embed its source commit |
+| Browser and version | Codex in-app Chromium browser on Windows; version not exposed |
+| Database used (new empty / copy) | Existing local database; the checks only read pages and opened then canceled forms, with no data changes |
+| Cases passed / failed / not run | 2 / 1 / 26 overall (MT-27 and MT-29 passed; MT-28 failed) |
+| Defects found (reference) | MT-28: New Raw Material modal does not move or contain keyboard focus; Tab reaches Receive Stock behind it |
+| Signature | volodya4u, in chat on 2026-10-31: "Sign and update all three" (MT-27 pass and MT-28 fail) |

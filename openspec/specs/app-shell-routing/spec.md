@@ -49,6 +49,15 @@ shadow on an edge with more to scroll to (NFR-18).
 - **WHEN** the user opens the menu from the toggle and then chooses a link
 - **THEN** the menu opens, and closes after the link is chosen
 
+### Requirement: Modal keyboard focus
+
+Every modal on the Raw Materials, Products and Sales pages SHALL move keyboard focus inside when opened, keep Tab and Shift+Tab inside it, and return focus to its opener when closed (FR-150, NFR-20). This behavior was approved after MT-28 found that focus moved to a stock action behind New Raw Material.
+
+#### Scenario: Open and close a modal by keyboard
+- **GIVEN** a keyboard user focuses a modal opener
+- **WHEN** they open the modal, use Tab or Shift+Tab at its ends, then close it
+- **THEN** focus enters the modal, wraps within its controls, and returns to the opener
+
 ### Requirement: Public health endpoint
 
 `GET /api/health` SHALL be public, return `{"status":"UP"}` and create no session (FR-36). `Start OnlineStore.cmd` waits

@@ -28,6 +28,7 @@ import {
   wholeQuotient,
 } from '../core/decimal';
 import { imageFileError } from '../core/image-file';
+import { ModalFocusDirective } from '../core/modal-focus.directive';
 import { Product, RawMaterial } from '../core/models';
 
 type RecipeFormGroup = FormGroup<{
@@ -68,7 +69,7 @@ function productFormValidator(control: AbstractControl): ValidationErrors | null
 
 @Component({
   selector: 'app-products',
-  imports: [ReactiveFormsModule, CurrencyPipe],
+  imports: [ReactiveFormsModule, CurrencyPipe, ModalFocusDirective],
   templateUrl: './products.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './products.component.scss',
