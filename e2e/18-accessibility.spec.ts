@@ -57,27 +57,16 @@ test('every page passes the WCAG 2.1 AA rules in the light and the dark scheme w
         help: v.help,
         nodes: v.nodes.length,
         // Where to look: the first elements' selectors and axe's own message for each.
-        targets: v.nodes
-          .slice(0, 5)
-          .map((n) => `${n.target.join(' ')} — ${n.any[0]?.message ?? n.failureSummary ?? ''}`),
+        targets: v.nodes.slice(0, 5).map((n) => `${n.target.join(' ')} — ${n.any[0]?.message ?? n.failureSummary ?? ''}`),
       }));
       for (const v of violations.filter((v) => failingImpacts.includes(v.impact))) {
-        failures.push(
-          `${route} (${scheme}): ${v.impact} ${v.id} on ${v.nodes} element(s): ${v.help}\n    ${v.targets.join('\n    ')}`,
-        );
+        failures.push(`${route} (${scheme}): ${v.impact} ${v.id} on ${v.nodes} element(s): ${v.help}\n    ${v.targets.join('\n    ')}`);
       }
       if (resultDir) {
         mkdirSync(resultDir, { recursive: true });
         writeFileSync(
           join(resultDir, `${route.replaceAll('/', '_')}.${scheme}.json`),
-          JSON.stringify({
-            route,
-            scheme,
-            authenticated: route !== 'login',
-            passes: results.passes.length,
-            incomplete: results.incomplete.length,
-            violations,
-          }),
+          JSON.stringify({ route, scheme, authenticated: route !== 'login', passes: results.passes.length, incomplete: results.incomplete.length, violations }),
         );
       }
     }

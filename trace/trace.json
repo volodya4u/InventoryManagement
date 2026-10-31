@@ -752,6 +752,7 @@
         "frontend/src/app/core/modal-focus.directive.spec.ts",
         "frontend/src/app/core/modal-focus.directive.spec.ts",
         "frontend/src/app/core/modal-focus.directive.spec.ts",
+        "frontend/src/app/core/modal-focus.directive.spec.ts",
         "frontend/src/app/products/products.component.spec.ts",
         "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
         "frontend/src/app/sales/sales.component.spec.ts",

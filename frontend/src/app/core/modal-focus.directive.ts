@@ -8,6 +8,7 @@ export class ModalFocusDirective implements AfterViewInit, OnDestroy {
   private readonly opener =
     document.activeElement instanceof HTMLElement ? document.activeElement : null;
   private readonly parentDialog = this.opener?.closest<HTMLElement>('[role="dialog"]');
+  private readonly fallbackRegion = this.parentDialog ?? this.opener?.closest<HTMLElement>('main');
   private readonly dialog: HTMLElement;
 
   constructor(element: ElementRef<HTMLElement>) {
@@ -23,8 +24,11 @@ export class ModalFocusDirective implements AfterViewInit, OnDestroy {
     this.dialog.removeEventListener('keydown', this.onKeyDown);
     if (this.opener?.isConnected) this.opener.focus();
     queueMicrotask(() => {
-      if (this.parentDialog?.isConnected && !this.parentDialog.contains(document.activeElement)) {
-        (this.focusable(this.parentDialog)[0] ?? this.parentDialog).focus();
+      if (
+        this.fallbackRegion?.isConnected &&
+        !this.fallbackRegion.contains(document.activeElement)
+      ) {
+        (this.focusable(this.fallbackRegion)[0] ?? this.fallbackRegion).focus();
       }
     });
   }

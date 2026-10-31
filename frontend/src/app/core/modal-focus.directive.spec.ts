@@ -99,4 +99,23 @@ describe('ModalFocusDirective', () => {
     expect(document.activeElement).toBe(parentClose);
     parent.remove();
   });
+
+  // @trace FR-150
+  it('focuses a page control when a table update removes the opener', async () => {
+    const main = document.createElement('main');
+    const addButton = document.createElement('button');
+    main.append(addButton, opener);
+    document.body.append(main);
+    opener.focus();
+    dialog.append(document.createElement('button'));
+
+    directive = new ModalFocusDirective(new ElementRef(dialog));
+    directive.ngAfterViewInit();
+    directive.ngOnDestroy();
+    directive = undefined;
+    opener.remove();
+    await Promise.resolve();
+    expect(document.activeElement).toBe(addButton);
+    main.remove();
+  });
 });
