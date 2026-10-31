@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { Api } from './support/api';
 import { signInAsAdmin } from './support/auth';
 import { everySaleState } from './support/bouquet';
 
@@ -72,4 +73,40 @@ test('every page passes the WCAG 2.1 AA rules in the light and the dark scheme w
     await context.close();
   }
   expect(failures, failures.join('\n')).toEqual([]);
+});
+
+// @trace FR-150
+test('the catalog and sale dialogs keep keyboard focus inside and restore it on close', async ({ page, baseURL }) => {
+  const api = await Api.signIn(baseURL!);
+  const material = await api.rawMaterial({ name: 'Focus Rose', quantity: 3, initialUnitCost: 5 });
+  await api.product({
+    sku: 'FOCUS-ROSE',
+    name: 'Focus bouquet',
+    recipe: [{ rawMaterialId: material.id, quantityPerUnit: 1 }],
+    quantity: 1,
+    initialUnitCost: 5,
+  });
+  await api.dispose();
+  await signInAsAdmin(page);
+
+  for (const [route, openerName, dialogName] of [
+    ['/raw-materials', '+ Add Raw Material', 'New Raw Material'],
+    ['/products', '+ Add Product', 'New Product'],
+    ['/sales', '+ New Sale', 'New Sale'],
+  ]) {
+    await page.goto(route);
+    const opener = page.getByRole('button', { name: openerName });
+    await expect(opener).toBeEnabled();
+    await opener.focus();
+    await page.keyboard.press('Enter');
+    const dialog = page.getByRole('dialog', { name: dialogName });
+    await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(dialog.locator('input').first()).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Shift+Tab');
+    await expect(dialog.locator('button').last()).toBeFocused();
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(opener).toBeFocused();
+  }
 });

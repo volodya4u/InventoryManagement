@@ -37,6 +37,7 @@
     "FR-34": "MVP",
     "FR-35": "MVP",
     "FR-36": "MVP",
+    "FR-150": "MVP",
     "FR-37": "MVP",
     "FR-38": "MVP",
     "FR-39": "MVP",
@@ -737,6 +738,24 @@
       "recordings": [
         "docs/qa/demo-recordings/manifest.json"
       ],
+      "recordingExempt": false
+    },
+    {
+      "id": "FR-150",
+      "specs": [
+        "openspec/specs/app-shell-routing/spec.md",
+        "openspec/changes/modal-keyboard-focus/specs/app-shell-routing/spec.md"
+      ],
+      "planned": true,
+      "tests": [
+        "frontend/src/app/core/modal-focus.directive.spec.ts",
+        "frontend/src/app/core/modal-focus.directive.spec.ts",
+        "frontend/src/app/products/products.component.spec.ts",
+        "frontend/src/app/raw-materials/raw-materials.component.spec.ts",
+        "frontend/src/app/sales/sales.component.spec.ts",
+        "e2e/18-accessibility.spec.ts"
+      ],
+      "recordings": [],
       "recordingExempt": false
     },
     {
@@ -2521,5 +2540,14 @@
     }
   ],
   "failures": [],
-  "warnings": []
+  "warnings": [
+    {
+      "check": "recording-evidence",
+      "msg": "FR-150 is not referenced by any recording manifest under docs/qa/"
+    },
+    {
+      "check": "active-changes",
+      "msg": "active change \"modal-keyboard-focus\" is not archived"
+    }
+  ]
 }

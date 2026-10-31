@@ -5,6 +5,7 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { ActivatedRoute } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
+import { ModalFocusDirective } from '../core/modal-focus.directive';
 import { addDecimals, divideDecimals, multiplyDecimals, subtractDecimals } from '../core/decimal';
 import { PaymentMethod, Product, Sale, SaleItem, SaleStatus } from '../core/models';
 
@@ -31,7 +32,7 @@ interface ReasonOption {
 
 @Component({
   selector: 'app-sales',
-  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, ModalFocusDirective],
   templateUrl: './sales.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sales.component.scss',

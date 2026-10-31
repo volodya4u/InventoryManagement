@@ -356,6 +356,24 @@ describe('SalesComponent', () => {
     const dateInput = fixture.nativeElement.querySelector('#sale-date') as HTMLInputElement;
     expect(dateInput.value).toBe('2026-09-10');
   });
+
+  // @trace FR-150
+  it('focuses the new-sale dialog and returns focus to its opener', () => {
+    setup();
+    flushLoad([], [product()]);
+    const opener = Array.from<HTMLButtonElement>(
+      fixture.nativeElement.querySelectorAll('button'),
+    ).find((button) => button.textContent?.trim() === '+ New Sale')!;
+    opener.focus();
+    opener.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    (dialog.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(opener);
+  });
 });
 
 describe('SalesComponent amounts', () => {

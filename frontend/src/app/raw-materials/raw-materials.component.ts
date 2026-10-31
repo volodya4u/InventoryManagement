@@ -13,6 +13,7 @@ import { finalize } from 'rxjs';
 import { apiErrorMessage } from '../core/api-error';
 import { addDecimals, multiplyDecimals, subtractDecimals } from '../core/decimal';
 import { imageFileError } from '../core/image-file';
+import { ModalFocusDirective } from '../core/modal-focus.directive';
 import { RawMaterial } from '../core/models';
 
 interface UnitOption {
@@ -37,7 +38,7 @@ function initialUnitCostValidator(control: AbstractControl): ValidationErrors | 
 
 @Component({
   selector: 'app-raw-materials',
-  imports: [ReactiveFormsModule, CurrencyPipe],
+  imports: [ReactiveFormsModule, CurrencyPipe, ModalFocusDirective],
   templateUrl: './raw-materials.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './raw-materials.component.scss',

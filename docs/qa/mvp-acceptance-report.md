@@ -30,7 +30,7 @@ baseline spec for the capability. "Owner" is for your decision after reading the
 |---|---|---|---|
 | authentication | FR-1 to FR-22 | MT-01, MT-02, MT-03, MT-04 | ☐ Accept ☐ Reject |
 | session-lifetime | FR-23 to FR-32 | MT-05, MT-06, MT-07 (manual only) | ☐ Accept ☐ Reject |
-| app-shell-routing | FR-33 to FR-36 | MT-05, MT-08, MT-27 | ☐ Accept ☐ Reject |
+| app-shell-routing | FR-33 to FR-36, FR-150 | MT-05, MT-08, MT-27, MT-28 | ☐ Accept ☐ Reject |
 | dashboard | FR-37 to FR-41 | MT-12, MT-23 | ☐ Accept ☐ Reject |
 | raw-materials | FR-42 to FR-56 | MT-09, MT-10, MT-13, MT-15 | ☐ Accept ☐ Reject |
 | reorder-level | FR-57 to FR-60 | MT-12 | ☐ Accept ☐ Reject |
@@ -83,7 +83,7 @@ whether G7 passes. These are the reasons, in the order they were or would be clo
    trajectory check waive a slice with an approval, the two files `docs/qa/waivers/2026-10-28-trajectory-*.md` do so, and
    `node scripts/check-trajectory.mjs --release` passes with two WAIVED lines. This is no longer a reason for G7 to be red;
    it stays here because a waiver is an exception the owner approved, not a pass.
-3. **Manual evidence is selective and has a failure.** MT-27 and MT-29 passed on 2026-10-31; MT-28 failed because keyboard focus escaped the New Raw Material dialog. The other 26 cases in `docs/qa/manual-test-plan.md` have not been run. The MT-28 defect needs a fix and rerun before manual accessibility acceptance; the owner decides which other cases are needed for release.
+3. **Manual evidence is selective and has a failure.** MT-27 and MT-29 passed on 2026-10-31; MT-28 failed because keyboard focus escaped the New Raw Material dialog. The other 26 cases in `docs/qa/manual-test-plan.md` have not been run. A proposed FR-150 fix in `openspec/changes/modal-keyboard-focus/` passes frontend and Chromium browser regression tests, but MT-28 still needs a manual rerun against the released app, including actual screen reader speech, before accessibility acceptance. The owner decides which other cases are needed for release.
 4. **Owner decisions are open:** OQ-3 to OQ-16, except OQ-8 and OQ-15 (answered on 2026-10-30), are `open` in `docs/requirements.md`, and the risks in
    `docs/qa/risk-register.md` marked **Decision** need an answer.
 5. **Signed approval is not configured** (no hardware-backed key in `quality/allowed-signers`); today the owner's merge is the
