@@ -12,9 +12,9 @@ MT-28 found that opening New Raw Material leaves focus on its opener. Tab then r
 
 ## Acceptance criteria
 
-| # | Given / When / Then | Test |
-| - | ------------------- | ---- |
-| 1 | Given a Raw Materials, Products or Sales modal is opened from a keyboard control, when it appears, Tab or Shift+Tab reaches only controls inside the modal and wraps at its ends; when it closes, focus returns to its opener | `frontend/src/app/raw-materials/raw-materials.component.spec.ts` › "keeps dialog focus inside and returns it to the opener" |
+| # | Given / When / Then | Test | Browser coverage |
+| - | ------------------- | ---- | ---------------- |
+| 1 | Given New Raw Material is opened from its keyboard control, when it appears, Tab and Shift+Tab stay inside and wrap at the ends; when it closes, focus returns to the opener | `frontend/src/app/raw-materials/raw-materials.component.spec.ts` › "keeps dialog focus inside and returns it to the opener" | `e2e/18-accessibility.spec.ts` › "every catalog and sale dialog keeps keyboard focus inside and restores it on close" exercises every dialog path and full return and cancellation |
 
 ## Impact
 

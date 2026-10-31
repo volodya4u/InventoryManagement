@@ -7,6 +7,7 @@ const FOCUSABLE =
 export class ModalFocusDirective implements AfterViewInit, OnDestroy {
   private readonly opener =
     document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  private readonly parentDialog = this.opener?.closest<HTMLElement>('[role="dialog"]');
   private readonly dialog: HTMLElement;
 
   constructor(element: ElementRef<HTMLElement>) {
@@ -21,6 +22,11 @@ export class ModalFocusDirective implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.dialog.removeEventListener('keydown', this.onKeyDown);
     if (this.opener?.isConnected) this.opener.focus();
+    queueMicrotask(() => {
+      if (this.parentDialog?.isConnected && !this.parentDialog.contains(document.activeElement)) {
+        (this.focusable(this.parentDialog)[0] ?? this.parentDialog).focus();
+      }
+    });
   }
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
@@ -39,8 +45,8 @@ export class ModalFocusDirective implements AfterViewInit, OnDestroy {
     }
   };
 
-  private focusable(): HTMLElement[] {
-    return Array.from(this.dialog.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+  private focusable(dialog = this.dialog): HTMLElement[] {
+    return Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
       (element) =>
         !element.closest('[hidden], [inert]') && getComputedStyle(element).visibility !== 'hidden',
     );

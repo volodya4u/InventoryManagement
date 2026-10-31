@@ -44,7 +44,7 @@ Result: PASS, 2 warning(s)
 | FR-34 | yes | yes | 6 | yes |
 | FR-35 | yes | yes | 2 | yes |
 | FR-36 | yes | yes | 2 | yes |
-| FR-150 | yes | yes | 6 | - |
+| FR-150 | yes | yes | 8 | - |
 | FR-37 | yes | yes | 2 | yes |
 | FR-38 | yes | yes | 2 | yes |
 | FR-39 | yes | yes | 2 | yes |

@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 import { Api } from './support/api';
 import { signInAsAdmin } from './support/auth';
 import { everySaleState } from './support/bouquet';
@@ -57,16 +57,27 @@ test('every page passes the WCAG 2.1 AA rules in the light and the dark scheme w
         help: v.help,
         nodes: v.nodes.length,
         // Where to look: the first elements' selectors and axe's own message for each.
-        targets: v.nodes.slice(0, 5).map((n) => `${n.target.join(' ')} — ${n.any[0]?.message ?? n.failureSummary ?? ''}`),
+        targets: v.nodes
+          .slice(0, 5)
+          .map((n) => `${n.target.join(' ')} — ${n.any[0]?.message ?? n.failureSummary ?? ''}`),
       }));
       for (const v of violations.filter((v) => failingImpacts.includes(v.impact))) {
-        failures.push(`${route} (${scheme}): ${v.impact} ${v.id} on ${v.nodes} element(s): ${v.help}\n    ${v.targets.join('\n    ')}`);
+        failures.push(
+          `${route} (${scheme}): ${v.impact} ${v.id} on ${v.nodes} element(s): ${v.help}\n    ${v.targets.join('\n    ')}`,
+        );
       }
       if (resultDir) {
         mkdirSync(resultDir, { recursive: true });
         writeFileSync(
           join(resultDir, `${route.replaceAll('/', '_')}.${scheme}.json`),
-          JSON.stringify({ route, scheme, authenticated: route !== 'login', passes: results.passes.length, incomplete: results.incomplete.length, violations }),
+          JSON.stringify({
+            route,
+            scheme,
+            authenticated: route !== 'login',
+            passes: results.passes.length,
+            incomplete: results.incomplete.length,
+            violations,
+          }),
         );
       }
     }
@@ -76,37 +87,99 @@ test('every page passes the WCAG 2.1 AA rules in the light and the dark scheme w
 });
 
 // @trace FR-150
-test('the catalog and sale dialogs keep keyboard focus inside and restore it on close', async ({ page, baseURL }) => {
+test('every catalog and sale dialog keeps keyboard focus inside and restores it on close', async ({
+  page,
+  baseURL,
+}) => {
+  test.setTimeout(120_000);
   const api = await Api.signIn(baseURL!);
-  const material = await api.rawMaterial({ name: 'Focus Rose', quantity: 3, initialUnitCost: 5 });
-  await api.product({
+  const material = await api.rawMaterial({
+    name: 'Focus Rose',
+    quantity: 3,
+    initialUnitCost: 5,
+  });
+  const product = await api.product({
     sku: 'FOCUS-ROSE',
     name: 'Focus bouquet',
     recipe: [{ rawMaterialId: material.id, quantityPerUnit: 1 }],
-    quantity: 1,
+    quantity: 3,
     initialUnitCost: 5,
   });
+  const returnedSale = await api.sale([{ productId: product.id, quantity: 1, unitPrice: 15 }]);
+  const cancelledSale = await api.sale([{ productId: product.id, quantity: 1, unitPrice: 15 }]);
   await api.dispose();
   await signInAsAdmin(page);
 
-  for (const [route, openerName, dialogName] of [
-    ['/raw-materials', '+ Add Raw Material', 'New Raw Material'],
-    ['/products', '+ Add Product', 'New Product'],
-    ['/sales', '+ New Sale', 'New Sale'],
-  ]) {
-    await page.goto(route);
-    const opener = page.getByRole('button', { name: openerName });
+  const checkDialog = async (opener: Locator, dialogName: string) => {
     await expect(opener).toBeEnabled();
     await opener.focus();
     await page.keyboard.press('Enter');
     const dialog = page.getByRole('dialog', { name: dialogName });
-    await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused();
+    const first = dialog.getByRole('button', { name: 'Close' }).first();
+    const last = dialog.locator('button:not([disabled])').last();
+    await expect(first).toBeFocused();
+    await last.focus();
     await page.keyboard.press('Tab');
-    await expect(dialog.locator('input').first()).toBeFocused();
+    await expect(first).toBeFocused();
+    await first.focus();
     await page.keyboard.press('Shift+Tab');
-    await page.keyboard.press('Shift+Tab');
-    await expect(dialog.locator('button').last()).toBeFocused();
-    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(last).toBeFocused();
+    await first.click();
     await expect(opener).toBeFocused();
-  }
+  };
+
+  await page.goto('/raw-materials');
+  await checkDialog(page.getByRole('button', { name: '+ Add Raw Material' }), 'New Raw Material');
+  const rawRow = page.getByRole('row').filter({ hasText: 'Focus Rose' });
+  await checkDialog(rawRow.getByRole('button', { name: 'Receive Stock' }), 'Receive Stock');
+  await checkDialog(rawRow.getByRole('button', { name: 'Write Off' }), 'Write Off Raw Material');
+  await checkDialog(
+    rawRow.getByRole('button', { name: 'Adjust Stock' }),
+    'Adjust Raw Material Stock',
+  );
+
+  await page.goto('/products');
+  await checkDialog(page.getByRole('button', { name: '+ Add Product' }), 'New Product');
+  const productRow = page.getByRole('row').filter({ hasText: 'Focus bouquet' });
+  await checkDialog(productRow.getByRole('button', { name: 'Produce' }), 'Produce Product');
+  await checkDialog(productRow.getByRole('button', { name: 'Write Off' }), 'Write Off Product');
+  await checkDialog(
+    productRow.getByRole('button', { name: 'Adjust Stock' }),
+    'Adjust Product Stock',
+  );
+
+  await page.goto('/sales');
+  await checkDialog(page.getByRole('button', { name: '+ New Sale' }), 'New Sale');
+  const returnRow = page.getByRole('row').filter({ hasText: returnedSale.saleNumber });
+  await checkDialog(returnRow.getByRole('button', { name: 'View' }), returnedSale.saleNumber);
+  await returnRow.getByRole('button', { name: 'View' }).click();
+  const returnDetails = page.getByRole('dialog', {
+    name: returnedSale.saleNumber,
+  });
+  await checkDialog(
+    returnDetails.getByRole('button', { name: 'Return Products' }),
+    'Return Products',
+  );
+  await checkDialog(returnDetails.getByRole('button', { name: 'Cancel Sale' }), 'Cancel Sale');
+
+  await returnDetails.getByRole('button', { name: 'Return Products' }).click();
+  const returnDialog = page.getByRole('dialog', { name: 'Return Products' });
+  await returnDialog
+    .getByRole('spinbutton', { name: 'Return quantity for Focus bouquet' })
+    .fill('1');
+  await returnDialog.getByRole('button', { name: 'Complete Return' }).click();
+  await expect(returnDialog).toHaveCount(0);
+  await expect(returnDetails.getByRole('button', { name: 'Close' }).first()).toBeFocused();
+
+  await page.goto('/sales');
+  const cancelRow = page.getByRole('row').filter({ hasText: cancelledSale.saleNumber });
+  await cancelRow.getByRole('button', { name: 'View' }).click();
+  const cancelDetails = page.getByRole('dialog', {
+    name: cancelledSale.saleNumber,
+  });
+  await cancelDetails.getByRole('button', { name: 'Cancel Sale' }).click();
+  const cancellationDialog = page.getByRole('dialog', { name: 'Cancel Sale' });
+  await cancellationDialog.getByRole('button', { name: 'Confirm Cancellation' }).click();
+  await expect(cancellationDialog).toHaveCount(0);
+  await expect(cancelDetails.getByRole('button', { name: 'Close' }).first()).toBeFocused();
 });

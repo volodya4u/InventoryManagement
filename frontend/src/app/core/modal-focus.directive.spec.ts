@@ -55,4 +55,48 @@ describe('ModalFocusDirective', () => {
     );
     expect(document.activeElement).toBe(dialog);
   });
+
+  // @trace FR-150
+  it('focuses the parent dialog when a completed action removes the nested opener', async () => {
+    const parent = document.createElement('section');
+    parent.setAttribute('role', 'dialog');
+    const parentClose = document.createElement('button');
+    parent.append(parentClose, opener);
+    document.body.append(parent);
+    opener.focus();
+    const childClose = document.createElement('button');
+    dialog.append(childClose);
+
+    directive = new ModalFocusDirective(new ElementRef(dialog));
+    directive.ngAfterViewInit();
+    expect(document.activeElement).toBe(childClose);
+
+    opener.remove();
+    directive.ngOnDestroy();
+    directive = undefined;
+    await Promise.resolve();
+    expect(document.activeElement).toBe(parentClose);
+    parent.remove();
+  });
+
+  // @trace FR-150
+  it('checks the nested opener again after the parent rerenders', async () => {
+    const parent = document.createElement('section');
+    parent.setAttribute('role', 'dialog');
+    const parentClose = document.createElement('button');
+    parent.append(parentClose, opener);
+    document.body.append(parent);
+    opener.focus();
+    dialog.append(document.createElement('button'));
+
+    directive = new ModalFocusDirective(new ElementRef(dialog));
+    directive.ngAfterViewInit();
+    directive.ngOnDestroy();
+    directive = undefined;
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+    await Promise.resolve();
+    expect(document.activeElement).toBe(parentClose);
+    parent.remove();
+  });
 });
