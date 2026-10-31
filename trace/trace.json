@@ -743,8 +743,7 @@
     {
       "id": "FR-150",
       "specs": [
-        "openspec/specs/app-shell-routing/spec.md",
-        "openspec/changes/modal-keyboard-focus/specs/app-shell-routing/spec.md"
+        "openspec/specs/app-shell-routing/spec.md"
       ],
       "planned": true,
       "tests": [
@@ -2547,10 +2546,6 @@
     {
       "check": "recording-evidence",
       "msg": "FR-150 is not referenced by any recording manifest under docs/qa/"
-    },
-    {
-      "check": "active-changes",
-      "msg": "active change \"modal-keyboard-focus\" is not archived"
     }
   ]
 }

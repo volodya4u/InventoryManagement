@@ -294,6 +294,13 @@
       "trailerCommits": 8,
       "libDomains": [],
       "processComplete": true
+    },
+    {
+      "slice": "2026-11-01-modal-keyboard-focus",
+      "reviewEvidence": "approved (agent log)",
+      "trailerCommits": 3,
+      "libDomains": [],
+      "processComplete": true
     }
   ],
   "overlaps": [],
