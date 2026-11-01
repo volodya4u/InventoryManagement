@@ -531,6 +531,15 @@
       "screenshot": "docs/qa/demo-recordings/59-a-new-password-ends-every-session-of-the-administrator-i.png",
       "explainer": "docs/qa/demo-recordings/59-a-new-password-ends-every-session-of-the-administrator-i.md",
       "asserted": true
+    },
+    {
+      "id": "60-every-catalog-and-sale-dialog-keeps-keyboard-focus-insid",
+      "title": "every catalog and sale dialog keeps keyboard focus inside and restores it on close",
+      "proof": "FR-150",
+      "video": "docs/qa/demo-recordings/60-every-catalog-and-sale-dialog-keeps-keyboard-focus-insid.webm",
+      "screenshot": "docs/qa/demo-recordings/60-every-catalog-and-sale-dialog-keeps-keyboard-focus-insid.png",
+      "explainer": "docs/qa/demo-recordings/60-every-catalog-and-sale-dialog-keeps-keyboard-focus-insid.md",
+      "asserted": true
     }
   ]
 }

@@ -6,20 +6,23 @@
 ## Last updated
 
 - **Date:** 2026-11-01 (Europe/Kyiv)
-- **Branch when written:** `codex/record-mt28-rerun`, based on merged `origin/main` at `33ab4b9`
+- **Branch when written:** `codex/mvp-acceptance`, based on merged `origin/main` at `462ab04` (PR #159)
 - **Active OpenSpec change:** none. The FR-150 modal focus slice is archived under `openspec/changes/archive/2026-11-01-modal-keyboard-focus/`; the retro slice is archived under `openspec/changes/archive/2026-10-30-resolve-retro-pd4-pd6-pd7-pd8/`
 - **Progress:** the MVP behaviour is shipped and described by the 16 baseline specs under `openspec/specs/`, which the
   owner ratified on 2026-10-11 (BC-4 in `docs/requirements.md`). The QA proof pack is drafted under `docs/qa/` and is not
   accepted: MT-27 and MT-29 passed on 2026-10-31; MT-28 passed a 2026-11-01 rerun after its original failure; and the
-  other 26 manual cases have not been run. The owner has not signed `docs/qa/mvp-acceptance-report.md`.
-- **Next task (the owner's):** enroll a hardware signing key in `quality/allowed-signers`, sign decisions for the seven
-  historical correction dispositions and backfill their `approvalRef` values (risk R-16); until then `correct --check`
-  warns about them. PR #158 merged the FR-150 fix, and the MT-28 rerun on the merged app checked keyboard focus and
-  Windows Narrator speech recap. The owner can decide whether any of the other 26 manual cases are needed before the decision in
-  section 6 of the acceptance report. No agent task is open from the retro slice.
+  other 26 manual cases have not been run. The owner signed **Not accepted yet** in
+  `docs/qa/mvp-acceptance-report.md` section 6 on 2026-11-01.
+- **Next task (the owner's):** decide which of the other 26 manual cases to run or defer, resolve or explicitly accept
+  the open questions and risks, and decide how to address G6's missing visual-fidelity attestation. Enroll a hardware
+  signing key in `quality/allowed-signers`, sign decisions for the seven historical correction dispositions and backfill
+  their `approvalRef` values (risk R-16), or explicitly carry that risk; until then `correct --check` warns about them.
+  PR #158 merged the FR-150 fix, PR #159 merged the MT-28 rerun record, and this branch adds the FR-150 demo clip.
+  No agent task is open from the retro slice.
 - **Claims:**
-  - The release gate needs a fresh run before the owner signs acceptance; the remaining decisions are listed in
-    `docs/qa/mvp-acceptance-report.md` (section 5) — evidence: `node scripts/gate-status.mjs`
+  - A fresh `node scripts/gate-status.mjs` run on this branch with the FR-150 clip reports G7 PASS and overall
+    NOT-EARNED: G6's visual-fidelity check is unavailable, and the experimental process ratchet has no current
+    process-health report. The owner signed Not accepted yet — evidence: `docs/qa/mvp-acceptance-report.md` (sections 5–6)
   - MT-27, MT-28 and MT-29 now pass; MT-28's original signed failure and its new tester-signed rerun remain visible, and
     the other 26 manual cases remain unrun — evidence: `docs/qa/manual-test-plan.md` (signed run records)
   - FR-150's modal focus fix is merged in PR #158 and its OpenSpec change is archived. The keyboard rerun and Narrator
