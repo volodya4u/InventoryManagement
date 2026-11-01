@@ -1,8 +1,8 @@
 # MVP acceptance report — Flower Shop Inventory
 
-**Status: not accepted.** This is a draft for the owner to complete and sign. It records what is shown, by which evidence, and
-what is still open. It cites automated results from the tools named below and the selective manual result from the signed
-run record in `docs/qa/manual-test-plan.md`; this report does not independently certify those results.
+**Status: not accepted.** The owner recorded this decision in chat on 2026-11-01. This report records what is shown, by
+which evidence, and what is still open. It cites automated results from the tools named below and the selective manual
+result from the signed run record in `docs/qa/manual-test-plan.md`; it does not independently certify those results.
 
 ## 1. What is being accepted
 
@@ -69,13 +69,16 @@ waiver is closed only when its evidence exists (the file says what closes each).
 
 ## 5. What stands between this and a release
 
-The release gate (G7 in `node scripts/gate-status.mjs`) was red when this draft was written (the retro of 2026-10-28). Since
-then the recordings (item 1) and the process findings (item 6) have been addressed, and the two process gaps (item 2) are
-waived. Items 3 to 5 are still open and need the owner. Run the gate again before you sign: its output, not this file, says
-whether G7 passes. These are the reasons, in the order they were or would be closed:
+On 2026-11-01, `node scripts/gate-status.mjs` on merged `main` at `462ab043b8c714700897ddb135d0b1dcb5f6443d`,
+with the newly recorded FR-150 clip in this branch, reported **G7 PASS**: strict release traceability, release trajectory,
+recordings, acceptance artifacts and factory integrity passed. The dashboard's overall result was **NOT-EARNED** because
+G6's visual-fidelity check is not installed (`n/a`); its experimental process-ratchet check was also NOT-EARNED because
+there is no current `trace/process-health.json`. Automated G7 passage does not decide the owner's acceptance. Items 3 to 5
+remain open for the owner. These are the reasons, in the order they were or would be closed:
 
 1. **Recordings (done, ADR-0010; G7 checks it with `--strict-recordings`).** The release check requires
-   every requirement to be named in a recording manifest or to be a listed exemption (ADR-0010). Clips exist for the
+   every requirement to be named in a recording manifest or to be a listed exemption (ADR-0010). The new FR-150 clip
+   brings the checked set to 60 passing clips with no traceability warnings. Clips exist for the
    requirements a browser can show; the rest are listed with the test that covers each. A clip shows what a test did; whether a
    person finds it legible is the vision check of the next pull request.
 2. **Two documented process gaps** in `docs/qa/historical-gaps.md` (a missing `Slice:` trailer on a merged commit, and a slice
@@ -83,7 +86,7 @@ whether G7 passes. These are the reasons, in the order they were or would be clo
    trajectory check waive a slice with an approval, the two files `docs/qa/waivers/2026-10-28-trajectory-*.md` do so, and
    `node scripts/check-trajectory.mjs --release` passes with two WAIVED lines. This is no longer a reason for G7 to be red;
    it stays here because a waiver is an exception the owner approved, not a pass.
-3. **Manual evidence is selective.** MT-27 and MT-29 passed on 2026-10-31. MT-28 failed originally, then passed a keyboard and Narrator speech rerun on 2026-11-01 against the merged PR #158 build. The original signed failure and the new tester-signed rerun are both in `docs/qa/manual-test-plan.md`. The other 26 cases have not been run. The owner decides which of those cases are needed for release; the owner has not signed this acceptance report.
+3. **Manual evidence is selective.** MT-27 and MT-29 passed on 2026-10-31. MT-28 failed originally, then passed a keyboard and Narrator speech rerun on 2026-11-01 against the merged PR #158 build. The original signed failure and the new tester-signed rerun are both in `docs/qa/manual-test-plan.md`. The other 26 cases have not been run. The owner still needs to decide which of those cases are needed before a later acceptance decision.
 4. **Owner decisions are open:** OQ-3 to OQ-16, except OQ-8 and OQ-15 (answered on 2026-10-30), are `open` in `docs/requirements.md`, and the risks in
    `docs/qa/risk-register.md` marked **Decision** need an answer.
 5. **Signed approval is not configured** (no hardware-backed key in `quality/allowed-signers`); today the owner's merge is the
@@ -103,12 +106,17 @@ owner signing key and signed decisions.
 
 ## 6. Decision
 
+The owner selected **Not accepted yet** after reviewing the G7 result and the open items above. This chat signature
+records that decision; it is not a hardware-signed approval. A later acceptance decision requires a new review of the
+then-current commit and evidence.
+
 | Field | Value |
 |---|---|
-| Decision | ☐ Accepted ☐ Accepted with the conditions below ☐ Not accepted |
-| Conditions | |
-| Commit that was accepted (`git log -1 --format=%H`) | |
-| Manual run record | link or date: |
-| Owner (name) | |
-| Date | |
-| Signature | |
+| Decision | ☐ Accepted ☐ Accepted with the conditions below ☒ Not accepted |
+| Conditions | N/A — not accepted |
+| Reasons to reconsider | Decide which of the 26 unrun manual cases to run or defer; resolve or explicitly accept the open questions and risks marked Decision; address the G6 visual-fidelity evidence gap; verify the seven historical correction approvals (R-16) or explicitly carry that risk. G7 passed on this branch, but the overall dashboard remains NOT-EARNED. |
+| Commit that was accepted (`git log -1 --format=%H`) | N/A — no commit accepted. Candidate application commit: `462ab043b8c714700897ddb135d0b1dcb5f6443d` (merged PR #159). |
+| Manual run record | `docs/qa/manual-test-plan.md`, MT-27 and MT-29 on 2026-10-31 and MT-28 rerun on 2026-11-01 |
+| Owner (name) | volodya4u |
+| Date | 2026-11-01 (Europe/Kyiv) |
+| Signature | volodya4u, in chat on 2026-11-01: "Not accepted yet (Recommended)" — decision for this report only |

@@ -757,7 +757,9 @@
         "frontend/src/app/sales/sales.component.spec.ts",
         "e2e/18-accessibility.spec.ts"
       ],
-      "recordings": [],
+      "recordings": [
+        "docs/qa/demo-recordings/manifest.json"
+      ],
       "recordingExempt": false
     },
     {
@@ -2542,10 +2544,5 @@
     }
   ],
   "failures": [],
-  "warnings": [
-    {
-      "check": "recording-evidence",
-      "msg": "FR-150 is not referenced by any recording manifest under docs/qa/"
-    }
-  ]
+  "warnings": []
 }
